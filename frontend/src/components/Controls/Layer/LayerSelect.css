@@ -1,0 +1,24 @@
+/**
+ * @file LayerSelect.css
+ * @brief Styles for layer dropdown component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.dropdown.dropdown-layer {
+    position: absolute;
+    right: 0;
+    z-index: 100;
+    width: 120px;
+    border-top-left-radius: 6px;
+}
+
+.dropdown-layer .dropdown-item {
+    font-size: 0.9rem;
+    padding: 4px 8px !important;
+}
+
+.controls-button-layer {
+    font-size: 1.0rem;
+}
+
+/** End of file LayerSelect.css */
