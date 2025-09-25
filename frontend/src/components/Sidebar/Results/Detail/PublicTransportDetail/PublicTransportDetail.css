@@ -1,0 +1,36 @@
+/**
+ * @file PublicTransportDetail.css
+ * @brief Styles for detail section for a public transport leg
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.stop {
+    position: relative;
+}
+
+.timeline-dot.public {
+    top: 4px;
+    left: -24px;
+}
+
+.station-square {
+    width: 16px;
+    height: 10px;
+    border: 2px solid black;
+    display: inline-block;
+    position: relative;
+    top: -4px;
+}
+
+.station-square::after {
+    content: "";
+    width: 0px;
+    height: 7px;
+    position: absolute;
+    border: 1px solid black;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/** End of file PublicTransportDetail.css */

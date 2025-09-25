@@ -1,0 +1,16 @@
+/**
+ * @file InputField.css
+ * @brief Styles for the input field component for entering waypoints in the planning form
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.input-field {
+    margin-bottom: 5px !important;
+}
+
+.MuiInputBase-root {
+    font-size: 0.9rem !important;
+    height: 35px;
+}
+
+/* End of file InputField.css */

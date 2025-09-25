@@ -1,0 +1,16 @@
+/**
+ * @file TransportPreferences.css
+ * @brief Styles for cycling preferences in the settings
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.number-input {
+    flex: 0 0 120px;
+    max-width: 150px;
+}
+
+.number-input .fa-icon {
+    font-size: 0.75rem;
+}
+
+/** End of file TransportPreferences.css */

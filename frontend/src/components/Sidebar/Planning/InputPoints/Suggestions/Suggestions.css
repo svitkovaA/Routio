@@ -1,0 +1,33 @@
+/**
+ * @file Suggestions.css
+ * @brief Styles for component rendering a list of location suggestions for input fields
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.suggestions-list {
+    background: white;
+    border: 1px solid #ccc;
+    padding-left: 0;
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    top: 34px;
+}
+
+.suggestion-item {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background: #f0f0f0;
+}
+
+.suggestion-item.highlighted {
+    background-color: #eee;
+}
+
+/* End of file Suggestions.css */

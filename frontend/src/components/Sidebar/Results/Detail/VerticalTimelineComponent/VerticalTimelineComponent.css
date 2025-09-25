@@ -1,0 +1,36 @@
+/**
+ * @file VerticalTimelineComponent.css
+ * @brief Styles for the vertical timeline component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.vertical-timeline {
+    display: flex;
+    width: 23px;
+    flex-direction: column;
+    padding-top: 15px;
+}
+
+.vertical-timeline-item {
+    border: 3px;
+    width: 0;
+    position: relative;
+}
+
+.timeline-dot {
+    width: 12px;
+    height: 12px;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 50%;
+    position: absolute;
+    top: -6px;
+    left: -6px;
+}
+
+.last {
+    top: auto;
+    bottom: -6px;
+}
+
+/** End of file VerticalTimelineComponent.css */

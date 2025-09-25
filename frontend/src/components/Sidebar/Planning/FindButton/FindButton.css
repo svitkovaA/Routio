@@ -1,0 +1,20 @@
+/**
+ * @file FindButton.css
+ * @brief Styles for the find button in the planning sidebar component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.find-button {
+    padding: 10px 15px;
+    background-color: #1976d2;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.find-button:disabled {
+    opacity: 0.4;
+}
+
+/** End of file FindButton.css */

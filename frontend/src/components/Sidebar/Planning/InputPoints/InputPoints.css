@@ -1,0 +1,39 @@
+/**
+ * @file InputPoints.css
+ * @brief Styles for the input points for origin and destination in the planning sidebar component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.input-wrapper {
+    position: relative;
+}
+
+.waypoints-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.swap {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+    top: 46px;
+    cursor: pointer;
+}
+
+.input-buttons {
+    display: flex;
+    align-items: center;
+}
+
+.input-buttons.leg-preferences-open {
+    height: 50px;
+}
+
+.drag-and-drop {
+    cursor: grab;
+    margin: 0px 0px 5px -20px;
+}
+
+/** End of file InputPoints.css */

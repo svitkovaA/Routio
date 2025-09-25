@@ -1,0 +1,26 @@
+/**
+ * @file Detail.css
+ * @brief Styles for detail component with timeline and leg components
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.detail-wrapper {
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+}
+
+.detail-patterns {
+    width: 100%;
+}
+
+.waystop {
+    height: 30px;
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
+    font-size: 15px;
+    padding-left: 10px;
+    padding-top: 5px;
+}
+
+/** End of file Detail.css */

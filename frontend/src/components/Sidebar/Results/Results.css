@@ -1,0 +1,21 @@
+/**
+ * @file Results.tsx
+ * @brief Styles for displaying trip search results
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+
+.results-content {
+    margin: -20px;
+}
+
+.description {
+    margin-left: -20px;
+    padding-left: 20px;
+}
+
+.detail-header {
+    margin-left: -20px;
+}
+
+/** End of file Results.css */

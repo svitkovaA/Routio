@@ -1,0 +1,43 @@
+/**
+ * @file AddPointIcon.css
+ * @brief Styles for displays intermediate point icon, and vertical line
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.line {
+    position: relative;
+    display: inline-block;
+    margin-left: -7px;
+}
+
+.line::before,
+.line::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    background-color: transparent;
+    border-left: 2px dashed lightgray;
+}
+
+.line::before {
+    top: -6px;
+    height: 13px;
+}
+
+.leg-preferences-open .line::before {
+    top: -13px;
+    height: 20px;
+}
+
+.line::after {
+    top: 60%;
+    height: 15px;
+}
+
+.leg-preferences-open .line::after {
+    height: 22px;
+}
+
+/* End of file AddPointIcon.css */

@@ -1,0 +1,84 @@
+/**
+ * @file ResultListItem.tsx
+ * @brief Displays a single trip pattern summary in the results list
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+import { faRightLeft, faRoute, faStopwatch } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { IconButton } from "@mui/material";
+import { TripPattern } from "../../../../types/types";
+import Timeline from "../Timeline/Timeline";
+import "./ResultListItem.css"
+
+type ResultListItemProps = {
+    pattern: TripPattern;
+    selected?: boolean;
+    onClick?: () => void;
+    onClickDetail?: () => void;
+}
+
+function ResultListItem({
+    pattern,
+    selected,
+    onClick,
+    onClickDetail
+} : ResultListItemProps) {
+    return (
+        <div 
+            className={"pattern " + (selected ? "selected" : "")}
+            onClick={onClick}
+        >
+            <div className="pattern-footer">
+                <span className="time">
+                    {new Date(pattern.legs[0]?.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </span>
+                {(pattern?.tooLongBikeDistance || pattern?.tooLongWalkDistance) && (
+                    <span className="triangle-exclamation">
+                        <WarningAmberIcon />
+                    </span>
+                )}
+            </div>
+            <div className="pattern-content">
+                <Timeline 
+                    totalDuration={pattern.totalDuration}
+                    legs={pattern.legs}
+                />
+                <div className="pattern-info-wrapper">
+                    <span>
+                        <FontAwesomeIcon icon={faStopwatch} />
+                        {Math.round(pattern.totalDuration / 60)} min
+                    </span>
+                    <span>
+                        <FontAwesomeIcon icon={faRoute} />
+                        {(pattern.totalDistance / 1000).toFixed(1)} km
+                    </span>
+                    {pattern?.numOfTransfers !== undefined && (
+                        <span>
+                            <FontAwesomeIcon icon={faRightLeft} />
+                            {pattern.numOfTransfers}
+                        </span>
+                    )}
+                </div>
+            </div>
+            <div className="pattern-footer">
+                <span className="time">
+                    {new Date(pattern.aimedEndTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <span className="hidden detail-span">
+                    <IconButton 
+                        className="detail-button"
+                        onClick={onClickDetail}
+                    >
+                        Detail
+                    </IconButton>
+                </span>
+            </div>
+        </div>
+    );
+}
+
+export default ResultListItem;
+
+/** End of file ResultListItem.tsx */

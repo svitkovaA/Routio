@@ -1,0 +1,123 @@
+/**
+ * @file Select.css
+ * @brief Styles for dropdown components for selecting mode and accuracy preferences in leg preferences
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.select {
+    position: relative;
+    height: 28px;
+    top: -4px;
+}
+
+.select-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.preferences-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+    padding-right: 20px;
+}
+
+.select-wrapper svg {
+    position: relative;
+    right: 0;
+}
+
+.controls-button.mode {
+    width: 80px;
+    height: 28px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.dropdown-item .circle, .mode .circle{
+    width: 23px;
+    height: 23px;
+    font-size: 15px;
+}
+
+.dropdown-mode .circle {
+    position: relative;
+}
+
+.dropdown-item > .circle, .mode > .circle, .dropdown-accuracy .dropdown-item {
+    left: -5px;
+}
+
+.dropdown-item .bicycle, .mode .bicycle {
+    left: 18px;
+}
+
+.dropdown-item .walk, .mode .walk {
+    left: 30px;
+}
+
+.select .multimodal-icon .circle {
+    top: 14px;
+}
+
+.dropdown-item .multimodal-icon, .mode .multimodal-icon {
+    top: 0px;
+    left: -10px;
+    height: 28px;
+}
+
+.dropdown-mode .dropdown-item .multimodal-icon .circle {
+    position: absolute;
+}
+
+.dropdown-mode {
+    left: 0px;
+    width: 80px !important;
+}
+
+.mode > .circle {
+    position: relative;
+    top: 11px;
+}
+
+.dropdown-mode > .dropdown-item {
+    width: 80px;
+    height: 28px;
+}
+
+.mode .mode-arrow, .accuracy-arrow {
+    position: relative;
+    right: -5px;
+    display: inline-block;
+    font-size: 1.2rem;
+}
+
+.accuracy-arrow {
+    right: 5px;
+    top: -5px;
+}
+
+.controls-button.accuracy-select {
+    width: 50px;
+}
+
+.accuracy-select .accuracy-icon {
+    top: 1px;
+}
+
+.dropdown.dropdown-accuracy {
+    width: 50px;
+}
+
+.dropdown-accuracy .dropdown-item {
+    font-size: 1.2rem;
+}
+
+.dropdown-accuracy .accuracy-icon, .accuracy-select .accuracy-icon {
+    position: relative;
+    left: -7px;
+}
+
+/** End of file Select.css */

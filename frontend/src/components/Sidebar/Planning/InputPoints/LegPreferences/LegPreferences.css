@@ -1,0 +1,55 @@
+/**
+ * @file LegPreferences.css
+ * @brief Styles for editing trip prefferences in the leg preferences component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.leg-preferences-button{
+    color: gray;
+    position: relative;
+    top: 1px;
+    width: 45px;
+    cursor: pointer;
+}
+
+.leg-preferences-button .circle {
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    color: gray;
+    top: 5px;
+}
+
+.leg-preferences-button .bicycle {
+    left: 15px;
+}
+
+.leg-preferences-button .walk {
+    left: 25px;
+}
+
+.leg-preferences-button .multimodal-icon {
+    top: 5px;
+    left: -5px;
+    position: absolute;
+}
+
+.leg-preferences-button .accuracy {
+    position: relative;
+    left: 20px;
+    top: -5px;
+}
+
+.multimodal .accuracy {
+    left: 40px;
+}
+
+.multimodal .circle {
+    top: 0px;
+}
+
+.leg-preferences-wrapper {
+    width: 100%;
+}
+
+/** End of file LegPreferences.css */

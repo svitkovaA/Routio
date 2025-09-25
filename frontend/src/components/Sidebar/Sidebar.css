@@ -1,0 +1,125 @@
+/**
+ * @file Sidebar.css
+ * @brief Styles for the sidebar component, controls for opening and closing the panel
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+#sidebar {
+    width: 100%;
+    max-height: 65vh;
+    background-color: #fafafa;
+    position: absolute;
+    bottom: 0;
+    left: 0px;
+    z-index: 1000;
+    border-radius: 4px;
+    overflow: auto;
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    transform: translateY(calc(100% - 50px));
+    border: 1px solid black;
+}
+
+.content-wrapper {
+    margin-top: 60px;
+    overflow: auto;
+    padding: 20px;
+    max-height: calc(65vh - 60px);
+}
+
+.content-wrapper.results-open {
+    margin-top: 126px;
+    max-height: calc(65vh - 126px);
+}
+
+.content-wrapper.results-open.detail-open {
+    max-height: calc(65vh - 149px);
+    margin-top: 149px;
+}
+
+#sidebar.open {
+    transform: translateY(0);
+}
+
+#sidebar.open-info {
+    max-height: 100vh;
+    height: 100%;
+}
+
+#drag-sidebar {
+    width: 35px;
+    height: 4px;
+    background: #ccc;
+    border-radius: 3px;
+    margin: 5px auto;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+}
+
+#toggle-sidebar {
+    position: absolute;
+    right: -33px;
+    top: -1px;
+    font-size: 20pt;
+    background-color: #fafafa;
+    cursor: pointer;
+    height: 60px;
+    display: none;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px; 
+    border-top: 1px solid #000;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;  
+}
+
+.rotate {
+    transform: rotate(180deg);
+}
+
+@media screen and (min-width: 769px) {
+    #drag-sidebar {
+        display: none;
+    }
+
+    #toggle-sidebar {
+        display: block;
+    }
+
+    #sidebar {
+        width: 350px;
+        top: 20px;
+        left: -350px;
+        transition: left 0.5s ease;
+        height: fit-content;
+        transform: none;
+        overflow: visible;
+        max-height: 85vh;
+    }
+
+    #sidebar.open {
+        left: 20px;
+        transform: none;
+    }
+
+    #sidebar.open-info {
+        max-height: 85vh;
+        height: fit-content;
+    }
+
+    .content-wrapper {
+        max-height: calc(85vh - 60px);
+    }
+
+    .content-wrapper.results-open {
+        max-height: calc(85vh - 128px);
+    }
+
+    .content-wrapper.results-open.detail-open {
+        max-height: calc(85vh - 151px);
+    }
+}
+
+/** End of file Sidebar.css */

@@ -1,0 +1,23 @@
+/**
+ * @file TimeDate.css
+ * @brief Styles for the time and date components in the planning sidebar
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.grid-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px !important;
+}
+
+.time-date {
+    margin-top: 15px;
+}
+
+.MuiPickersInputBase-root {
+    font-size: 0.9rem !important;
+    height: 35px;
+}
+
+/** End of file TimeDate.css */

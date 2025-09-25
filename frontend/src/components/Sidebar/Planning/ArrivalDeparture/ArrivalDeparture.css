@@ -1,0 +1,22 @@
+/**
+ * @file ArrivalDeparture.css
+ * @brief Styles for radio buttons for selecting departure or arrival mode in the planning sidebar
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.mode-switch {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.MuiFormControl-root.css-1iw3t7y-MuiFormControl-root {
+    width: 100%;
+    margin-top: -10px;
+}
+
+.css-19opgx6-MuiFormControlLabel-root .MuiFormControlLabel-label {
+    font-size: 11pt;
+}
+
+/** End of file ArrivalDeparture.css */

@@ -1,0 +1,40 @@
+/**
+ * @file DetailSwitch.css
+ * @brief Styles for component providing navigation between trip pattern details
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.detail-switch {
+    position: absolute;
+    display: flex;
+    top: 100px;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.detail-switch-arrow {
+    font-size: 20px;
+}
+
+.dots {
+    position: relative;
+    display: inline-block;
+    padding-top: 20px;
+}
+
+.css-53g0n7-MuiButtonBase-root-MuiIconButton-root {
+    padding: 2px !important;
+}
+
+.dot {
+    font-size: 12px !important;
+}
+
+.detail-header .pattern {
+    height: 90px;
+    border-top: 1px solid black;
+    border-bottom: none;
+}
+
+/** End of file DetailSwitch.css */

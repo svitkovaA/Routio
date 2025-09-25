@@ -1,0 +1,111 @@
+{
+  "map": {
+    "cycleMap": "Cyklistická mapa",
+    "standartMap": "Standardní mapa",
+    "satelliteMap": "Satelitní mapa",
+    "attribution": "&copy; Přispěvatelé OpenStreetMap",
+    "attributionCycle": "<a href=\"https://www.cyclosm.org/\">CyclOSM</a> & Přispěvatelé OpenStreetMap",
+    "attributionSatellite": "Mapové podklady &copy; Esri &mdash; Zdroj: Esri, Maxar, Earthstar Geographics",
+    "markers": {
+      "start": "ŠTART",
+      "end": "CÍL"
+    }
+  },
+  "planning": {
+    "origin": "Výchozí bod",
+    "destination": "Cíl",
+    "intermediatePoint": "Mezibod {{index}}",
+    "setOrigin": "Zadejte výchozí bod",
+    "setDestination": "Zadejte cíl",
+    "setIntermediatePoint": "Zadejte mezibod",
+    "mode": "Způsob",
+    "modes": {
+      "multimodal": "Multimodalní",
+      "transit": "Veřejná doprava",
+      "bicycle": "Cyklistika",
+      "walk": "Chůze"
+    },
+    "accuracy": "Přesnost",
+    "accuracies": {
+      "exact": "Přesně",
+      "approximate": "Přibližně"
+    },
+    "time": "Čas",
+    "date": "Dátum",
+    "departureArrival": {
+      "departure": "Odjezd",
+      "arrival": "Příjezd"
+    },
+    "routePreferences": "Preference trasy",
+    "routePreference": {
+      "fastestRoute": "Nejrýchlejší trasa",
+      "shortestRoute": "Nejkratší trasa",
+      "minimizeTransfers": "Minimalizovať přestupy"
+    },
+    "bikeOptions": "Možnosti kola",
+    "bikeOption": {
+      "ownBike": "Použít vlastní kolo",
+      "sharedBike": "Použít sdílené kolo"
+    },
+    "find": "Najít"
+  },
+  "settings": "Nastavení",
+  "settingsTab": {
+    "generalSettings": "Obecné nastavení",
+    "generalSettingsTab": {
+        "theme": "Motiv",
+        "lightMode": "Světlý režim",
+        "darkMode": "Tmavý režim",
+        "timeFormat": "Formát času",
+        "twentyfourHour": "24hodinový",
+        "twelveHour": "12hodinový",
+        "measurementSystem": "Měřicí systém",
+        "metric": "Metrický",
+        "imperial": "Imperiální"
+    },
+    "transportPreferences": "Preference dopravy",
+    "transportPreferencesTab": {
+      "maxTransfers": "Maximální počet přestupů",
+      "transportModes": "Druhy dopravy",
+      "bus": "Autobus",
+      "tram": "Tramvaj",
+      "train": "Vlak",
+      "trolleybus": "Trolejbus",
+      "subway": "Metro",
+      "boat": "Loď",
+      "travelWithBike": "Cestovat s kolem"
+    },
+    "cyclingPreferences": "Preference cyklistiky",
+    "cyclingPreferencesTab": {
+      "maxCyclingDistance": "Maximální vzdálenost na kole",
+      "averageCyclingSpeed": "Průměrná rychlost jízdy na kole"
+    },
+    "walkingPreferences": "Preference chůdze",
+    "walkingPreferencesTab": {
+      "maxWalkingDistance": "Maximální vzdálenost chůze",
+      "averageWalkingSpeed": "Průměrná rychlost chůze"
+    },
+    "weatherPreferences": "Preference počasí",
+    "weatherPreferencesTab": {
+      "conditions": "Podmínky pro jízdu na kole",
+      "rain": "Déšť",
+      "snow": "Sníh",
+      "tooLowTemperature": "Příliš nízká teplota",
+      "tooHighTemperature": "Příliš vysoká teplota",
+      "strongWind": "Silný vítr",
+      "dark": "Tma"
+    }
+  },
+  "information": "Začněte svou cestu s GreenGo",
+  "informationTab": {
+    "about": "O aplikaci",
+    "gettingStarted": "Začínáme"
+  },
+  "results": "Výsledky",
+  "modeDescriptions": {
+    "multimodalTransport": "Multimodální doprava",
+    "publicTransport": "Veřejná doprava",
+    "bicycle": "Kolo",
+    "walk": "Chůze"
+  }
+}

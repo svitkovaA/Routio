@@ -1,0 +1,28 @@
+/**
+ * @file Logo.css
+ * @brief Styles for the logo in the planning sidebar component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+ 
+.logo {
+    display: flex;
+    align-items: left;
+    gap: 5px;
+    flex-direction: row;
+    height: 58px;
+    padding-top: 15px;
+}
+
+.logo img {
+    position: relative;
+    height: 35px;
+    width: auto;
+    bottom: 2px;
+}
+
+.logo img:first-child {
+    bottom: 8px;
+    height: 45px;
+}
+
+/** End of file Logo.css */

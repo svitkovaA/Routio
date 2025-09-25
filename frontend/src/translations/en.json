@@ -1,0 +1,111 @@
+{
+  "map": {
+    "cycleMap": "Cycle map",
+    "standartMap": "Standard map",
+    "satelliteMap": "Satellite map",
+    "attribution": "&copy; OpenStreetMap contributors",
+    "attributionCycle": "<a href=\"https://www.cyclosm.org/\">CyclOSM</a> & OpenStreetMap contributors",
+    "attributionSatellite": "Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics",
+    "markers": {
+      "start": "START",
+      "end": "END"
+    }
+  },
+  "planning": {
+    "origin": "Origin",
+    "destination": "Destination",
+    "intermediatePoint": "Intermediate point {{index}}",
+    "setOrigin": "Set the origin",
+    "setDestination": "Set the destination",
+    "setIntermediatePoint": "Set intermediate point",
+    "mode": "Mode",
+    "modes": {
+      "multimodal": "Multimodal",
+      "transit": "Public transport",
+      "bicycle": "Bicycle",
+      "walk": "Walk"
+    },
+    "accuracy": "Accuracy",
+    "accuracies": {
+      "exact": "Exact",
+      "approximate": "Approximate"
+    },
+    "time": "Time",
+    "date": "Date",
+    "departureArrival": {
+      "departure": "Departure",
+      "arrival": "Arrival"
+    },
+    "routePreferences": "Route preferences",
+    "routePreference": {
+      "fastestRoute": "Fastest route",
+      "shortestRoute": "Shortest route",
+      "minimizeTransfers": "Minimize transfers"
+    },
+    "bikeOptions": "Bike options",
+    "bikeOption": {
+      "ownBike": "Use own bike",
+      "sharedBike": "Use shared bike"
+    },
+    "find": "Find"
+  },
+  "settings": "Settings",
+  "settingsTab": {
+    "generalSettings": "General settings",
+    "generalSettingsTab": {
+        "theme": "Theme",
+        "lightMode": "Light mode",
+        "darkMode": "Dark mode",
+        "timeFormat": "Time format",
+        "twentyfourHour": "24-hour",
+        "twelveHour": "12-hour",
+        "measurementSystem": "Measurement system",
+        "metric": "Metric",
+        "imperial": "Imperial"
+    },
+    "transportPreferences": "Transport preferences",
+    "transportPreferencesTab": {
+      "maxTransfers": "Max transfers",
+      "transportModes": "Transport modes",
+      "bus": "Bus",
+      "tram": "Tram",
+      "train": "Train",
+      "trolleybus": "Trolleybus",
+      "subway": "Subway",
+      "boat": "Boat",
+      "travelWithBike": "Travel with bike"
+    },
+    "cyclingPreferences": "Cycling preferences",
+    "cyclingPreferencesTab": {
+      "maxCyclingDistance": "Max cycling distance",
+      "averageCyclingSpeed": "Average cycling speed"
+    },
+    "walkingPreferences": "Walking preferences",
+    "walkingPreferencesTab": {
+      "maxWalkingDistance": "Max walking distance",
+      "averageWalkingSpeed": "Average walking speed"
+    },
+    "weatherPreferences": "Weather preferences",
+    "weatherPreferencesTab": {
+      "conditions": "Conditions for bike use",
+      "rain": "Rain",
+      "snow": "Snow",
+      "tooLowTemperature": "Too low temerature",
+      "tooHighTemperature": "Too high temperature",
+      "strongWind": "Strong wind",
+      "dark": "Dark"
+    }
+  },
+  "information": "Start your journey with GreenGo",
+  "informationTab": {
+    "about": "About the app",
+    "gettingStarted": "Getting started"
+  },
+  "results": "Results",
+  "modeDescriptions": {
+    "multimodalTransport": "All means of transport",
+    "publicTransport": "Public transport",
+    "bicycle": "Bicycle",
+    "walk": "Walk"
+  }
+}

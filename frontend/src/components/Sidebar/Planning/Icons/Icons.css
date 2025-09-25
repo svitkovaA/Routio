@@ -1,0 +1,50 @@
+/**
+ * @file Icons.css
+ * @brief Styles for transport mode icons, multimodal display, and accuracy indicators
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.multimodal-icon {
+    position: relative;
+    width: 80px;
+    margin: auto;
+    top: 24px;
+}
+
+.circle {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-size: 20px;
+    border: 1px solid black;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.public-transport {
+    left: 5px;
+    top: 0;
+    z-index: 3;
+}
+.bicycle {
+    left: 23px;
+    top: 0;
+    z-index: 2;
+}
+.walk {
+    left: 40px;
+    top: 0;
+    z-index: 1;
+}
+
+.accuracy-icon {
+    display: inline;
+}
+
+/** End of file Icons.css */

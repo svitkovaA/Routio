@@ -1,0 +1,16 @@
+/**
+ * @file InfoSettings.css
+ * @brief Styles for the buttons for settings and information in the sidebar component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.grid-wrapper > button {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    font-size: 13pt;
+}
+
+/** End of file InfoSettings.css */

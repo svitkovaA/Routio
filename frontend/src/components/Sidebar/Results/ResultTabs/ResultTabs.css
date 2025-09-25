@@ -1,0 +1,36 @@
+/**
+ * @file ResultTabs.css
+ * @brief Styles for mode selection tabs for viewing different trip results
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.result-tabs {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-left: -20px;
+    height: 50px;
+}
+
+.result-mode {
+    flex: 1;
+    border: 1px solid black;
+    border-left: none;
+    position: relative;
+}
+
+.result-mode:last-child {
+    border-right: none;
+}
+
+.result-mode:not(:first-child) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.result-mode.selected {
+    border-bottom: none;
+}
+
+/** End of file ResultTabs.css */

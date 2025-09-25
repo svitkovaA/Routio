@@ -1,0 +1,112 @@
+/**
+ * @file ResultListItem.css
+ * @brief Styles for result item component showing single trip pattern summary
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.pattern {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 55px auto 55px;
+    gap: 5px;
+    height: 80px;
+    border-bottom: 1px solid black;
+    padding: 10px 20px;
+}
+
+.pattern:last-child {
+    border: none;
+}
+
+.time {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.pattern-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 8px;
+}
+
+.trip-pattern {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pattern-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pattern-info-wrapper {
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.85rem;
+}
+
+.selected .detail-span {
+    display: inline;
+}
+
+.detail-span .detail-button {
+    font-size: 15px;
+    color: black;
+}
+
+.trip-pattern.selected {
+    border-color: #1976d2;
+    background: #e3f2fd;
+}
+
+.pattern-header {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.legs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.leg {
+    padding: 8px;
+    border-left: 3px solid #1976d2;
+    background: #fafafa;
+    border-radius: 4px;
+}
+
+.leg-times {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.leg-info {
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.leg-places {
+    font-size: 0.9rem;
+    margin: 2px 0;
+}
+
+.leg-extra {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.triangle-exclamation {
+    display: flex;
+    justify-content: center;
+    color: red;
+}
+
+/** End of file ResultListItem.css */

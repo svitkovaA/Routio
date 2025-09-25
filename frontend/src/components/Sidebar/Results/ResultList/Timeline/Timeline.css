@@ -1,0 +1,32 @@
+/**
+ * @file Timeline.css
+ * @brief Styles for a horizontal timeline
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.timeline {
+    position: relative;
+    border-bottom: 3px solid transparent;
+    height: 5px;
+    width: calc(100% - 20px);
+    margin-left: 16px;
+}
+
+.timeline-leg {
+    position: absolute;
+    border-width: 3px;
+}
+
+.timeline-icon {
+    position: absolute;
+    width: 23px;
+    height: 23px;
+    border-radius: 50%;
+    background: white;
+    color: black;
+    border: 1px solid black;
+    top: -10px;
+    left: -15px;
+}
+
+/** End of file Timeline.css */
