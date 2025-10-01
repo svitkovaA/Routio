@@ -24,5 +24,6 @@ yarn-error.log*
 *__pycache__
 backend/venv/
 /backend/.env
+/backend/datasets
 
 .vscode/

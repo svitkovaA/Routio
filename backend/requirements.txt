@@ -1,0 +1,11 @@
+requests
+pandas
+uvicorn
+fastapi
+gql
+aiohttp
+scipy
+httpx
+polyline
+python-dotenv
+overpy
