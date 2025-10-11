@@ -85,6 +85,7 @@ async def route(waypoint_groups, time_to_depart: str, session, multimodal: bool,
     print("function: route")
     max_bike_distance = data.max_bike_distance if data.use_own_bike else data.max_bikesharing_distance
     bike_average_speed = data.bike_average_speed if data.use_own_bike else data.bikesharing_average_speed
+    bike_lock_time = data.bike_lock_time if data.use_own_bike else data.bikesharing_lock_time
     tasks = []
     task_group_map = []
     for i, group in enumerate(waypoint_groups):
@@ -100,7 +101,7 @@ async def route(waypoint_groups, time_to_depart: str, session, multimodal: bool,
                 tasks.append(task)
                 task_group_map.append((group, task))
             elif mode == "bicycle_walk_transit":
-                task = bicycle_public_route(waypoint_group, time_to_depart, data.arrive_by, data.bikesharing_lock_time, data.max_transfers, data.selected_modes, max_bike_distance, bike_average_speed, data.use_own_bike, session)
+                task = bicycle_public_route(waypoint_group, time_to_depart, data.arrive_by, bike_lock_time, data.max_transfers, data.selected_modes, max_bike_distance, bike_average_speed, data.use_own_bike, session)
                 tasks.append(task)
                 task_group_map.append((group, task))
             elif mode == "walk_transit_bicycle":
@@ -112,7 +113,7 @@ async def route(waypoint_groups, time_to_depart: str, session, multimodal: bool,
             tasks.append(task)
             task_group_map.append((group, task))
         elif mode in ["bicycle", "foot"]:
-            task = group_walk_bicycle_route(waypoint_group, time_to_depart, mode, session)
+            task = group_walk_bicycle_route(waypoint_group, time_to_depart, mode, session, bike_lock_time=data.bike_lock_time)
             tasks.append(task)
             task_group_map.append((group, task))
         first_leg = False
@@ -132,6 +133,7 @@ async def recursive_planner(waypoint_groups, time_to_depart: str, data: RouteDat
     print("function: recursive_planner")
     max_bike_distance = data.max_bike_distance if data.use_own_bike else data.max_bikesharing_distance
     bike_average_speed = data.bike_average_speed if data.use_own_bike else data.bikesharing_average_speed
+    bike_lock_time = data.bike_lock_time if data.use_own_bike else data.bikesharing_lock_time
     trip_patterns = []
     leg_index = 0 if data.arrive_by else -1
     leg_time = "aimedStartTime" if data.arrive_by else "aimedEndTime"
@@ -185,12 +187,12 @@ async def recursive_planner(waypoint_groups, time_to_depart: str, data: RouteDat
                     bicycle_public_route(
                         group["group"],
                         pattern["legs"][leg_index][leg_time],
-                        data.arrive_by, data.bikesharing_lock_time, data.max_transfers, data.selected_modes, max_bike_distance, bike_average_speed, data.use_own_bike, session
+                        data.arrive_by, bike_lock_time, data.max_transfers, data.selected_modes, max_bike_distance, bike_average_speed, data.use_own_bike, session
                     )
                     for pattern in trip_patterns
                 ]
                 if len(tasks) == 0:
-                    tasks.append(bicycle_public_route(group["group"], time_to_depart, data.arrive_by, data.bikesharing_lock_time, data.max_transfers, data.selected_modes, max_bike_distance, bike_average_speed, data.use_own_bike, session))
+                    tasks.append(bicycle_public_route(group["group"], time_to_depart, data.arrive_by, bike_lock_time, data.max_transfers, data.selected_modes, max_bike_distance, bike_average_speed, data.use_own_bike, session))
             elif mode == "walk_transit_bicycle":
                 tasks = [
                     public_bicycle_route(

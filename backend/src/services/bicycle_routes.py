@@ -3,10 +3,10 @@ from copy import deepcopy
 from services.bicycle_service.rack_service import optimal_bike_rack_choice
 from services.otp_service import walk_bicycle_route
 
-async def group_walk_bicycle_route(waypoint_group, time_to_depart: str, mode: str, session, bicycle_public: bool = False, use_bike_rack: bool = True):
+async def group_walk_bicycle_route(waypoint_group, time_to_depart: str, mode: str, session, bicycle_public: bool = False, use_bike_rack: bool = True, bike_lock_time: int=2):
     print("function: group_walk_bicycle_route")
     if mode == "bicycle" and use_bike_rack:
-        return await bicycle_route(waypoint_group, time_to_depart, session, bicycle_public)
+        return await bicycle_route(waypoint_group, time_to_depart, session, bicycle_public, bike_lock_time * 60)
     trip_patterns = []
     tasks = [
         walk_bicycle_route(waypoint_group[k], waypoint_group[k + 1], time_to_depart, mode, session)
@@ -22,7 +22,7 @@ async def group_walk_bicycle_route(waypoint_group, time_to_depart: str, mode: st
                 pattern["legs"].extend(res[0]["legs"])
     return trip_patterns
 
-async def bicycle_route(waypoint_group, time_to_depart: str, session, bicycle_public: bool):
+async def bicycle_route(waypoint_group, time_to_depart: str, session, bicycle_public: bool, bike_lock_time: int):
     print("function: bicycle_route")
     sorted_racks = await optimal_bike_rack_choice(bicycle_public, *waypoint_group[-2:])
     if len(sorted_racks) == 0:
@@ -51,7 +51,7 @@ async def bicycle_route(waypoint_group, time_to_depart: str, session, bicycle_pu
             "mode": "wait",
             "color": "black",
             "distance": 0,
-            "duration": 120,
+            "duration": bike_lock_time,
             "pointsOnLink": {
                 "points": []
             },

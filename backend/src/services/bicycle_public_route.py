@@ -33,7 +33,7 @@ async def bicycle_public_route(waypoints: List[str], time_to_depart: str, arrive
             if extra_distace <= 1:
                 print("extra distance")
                 if use_own_bike:
-                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", session, bicycle_public=True)
+                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", session, bicycle_public=True, bike_lock_time=bike_lock_time)
                 else:
                     result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, session, bicycle_public=True, use_semicircle=True)
                 for pattern in result:
@@ -49,7 +49,7 @@ async def bicycle_public_route(waypoints: List[str], time_to_depart: str, arrive
                 bike_group.append(f"{lat}, {lon}")
                 leg_index = -2
                 if use_own_bike:
-                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", session, bicycle_public=True)
+                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", session, bicycle_public=True, bike_lock_time=bike_lock_time)
                 else:
                     result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, session, bicycle_public=True, use_semicircle=True)
                 for pattern in result:
@@ -85,7 +85,7 @@ async def bicycle_public_route(waypoints: List[str], time_to_depart: str, arrive
                 new_waypoint = f"{lat}, {lon}"
                 leg_index = -2
                 if use_own_bike:
-                    result = await group_walk_bicycle_route(bike_group + [new_waypoint], time_to_depart, "bicycle", session, bicycle_public=True)
+                    result = await group_walk_bicycle_route(bike_group + [new_waypoint], time_to_depart, "bicycle", session, bicycle_public=True, bike_lock_time=bike_lock_time)
                     if arrive_by and len(result) > 0:
                         justify_time(result[0], time_to_depart, True)
                 else:
