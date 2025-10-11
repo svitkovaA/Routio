@@ -174,10 +174,14 @@ async def change_bike_station(data: BikeStationData):
                 new_legs.append(deepcopy(legs[leg_index]))
                 justify_time({"legs": new_legs, "aimedEndTime": ""}, time_to_depart, False)
                 waypoint_group = route_data.waypoints[-waypoint_count:]
-                waypoint_groups, _ = create_waypoint_groups(waypoint_group, [LegPreferences(mode=mode, exact=True) for mode in data.modes[-waypoint_count+1:]])
+                routing_modes = data.modes[-waypoint_count+1:] if waypoint_count > 1 else []
+                waypoint_groups, _ = create_waypoint_groups(waypoint_group, [LegPreferences(mode=mode, exact=True) for mode in routing_modes])
+                # waypoint_groups, _ = create_waypoint_groups(waypoint_group, [LegPreferences(mode=mode, exact=True) for mode in data.modes[-waypoint_count+1:]])
                 route_pattern = await route(waypoint_groups, new_legs[-1]["aimedEndTime"], session, True, route_data, True)
                 
-                new_pattern["modes"] = data.modes[:-waypoint_count+1]
+                print(waypoint_count, data.modes[:-waypoint_count+1], data.modes, data.modes[-waypoint_count+1:])
+                # new_pattern["modes"] = data.modes[:-waypoint_count+1]
+                new_pattern["modes"] = data.modes[:len(data.modes) - len(routing_modes)]
                 if len(route_pattern) > 0:
                     new_legs.extend(route_pattern[0]["legs"])
                     new_pattern["modes"] += route_pattern[0].get("modes", [])

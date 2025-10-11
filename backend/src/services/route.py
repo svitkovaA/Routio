@@ -63,8 +63,8 @@ async def multimodal_route(waypoints, time_to_depart: str, data: RouteData, bike
             continue
 
         print(combination)
-        if combination != ('bicycle_walk_transit', 'walk_transit'):
-            continue
+        # if combination != ('bicycle_walk_transit', 'walk_transit'):
+        #     continue
         tasks.append(route(waypoint_groups, time_to_depart, session, True, data, bike_segment_found))
 
     results = await asyncio.gather(*tasks)

@@ -180,8 +180,8 @@ station_information_urls = {
 # Maps station_id to capacity
 bike_station_capacities = defaultdict(lambda: None)
 
-def get_capacity_information():
-    print("function: get_capacity_information")
+def load_gbfs_data():
+    print("function: load_gbfs_data")
     global station_information_urls, bike_station_capacities
 
     # Get station information

@@ -1,5 +1,7 @@
 from copy import deepcopy
 from datetime import datetime, timedelta
+from models.types import Leg, ServiceJourney, TripPattern
+from typing import Optional, List
 
 COLORS = {
     "foot": "blue",
@@ -10,15 +12,15 @@ COLORS = {
     "rail": "orange",
 }
 
-def justify_time(pattern, time_to_depart: str, arrive_by: bool):
+def justify_time(pattern: TripPattern, time_to_depart: str, arrive_by: bool) -> None:
     print("function: justify_time")
     legs = pattern["legs"]
-    time_to_depart = datetime.fromisoformat(time_to_depart)
+    time_to_depart_dt = datetime.fromisoformat(time_to_depart)
     if arrive_by:
         indecies = list(reversed(range(len(legs))))
         second = "aimedStartTime"
         first = "aimedEndTime"
-        pattern["aimedEndTime"] = time_to_depart.isoformat()
+        pattern["aimedEndTime"] = time_to_depart_dt.isoformat()
     else:
         indecies = list(range(len(legs)))
         first = "aimedStartTime"
@@ -27,46 +29,75 @@ def justify_time(pattern, time_to_depart: str, arrive_by: bool):
     while i < len(indecies):
         index = indecies[i]
         
-        legs[index][first] = time_to_depart.isoformat()
+        legs[index][first] = time_to_depart_dt.isoformat()
         if arrive_by:
-            time_to_depart -= timedelta(seconds=legs[index]["duration"])
+            time_to_depart_dt -= timedelta(seconds=legs[index]["duration"])
         else:
-            time_to_depart += timedelta(seconds=legs[index]["duration"])
-        legs[index][second] = time_to_depart.isoformat()
+            time_to_depart_dt += timedelta(seconds=legs[index]["duration"])
+        legs[index][second] = time_to_depart_dt.isoformat()
         i += 1
     if not arrive_by:
-        pattern["aimedEndTime"] = time_to_depart.isoformat()
+        pattern["aimedEndTime"] = time_to_depart_dt.isoformat()
 
-def merge_legs(leg1: dict, leg2: dict) -> dict:
+def merge_legs(leg1: Leg, leg2: Leg) -> Leg:
     print("function: merge_legs")
-    merged = {
+    merged_service_journey: Optional[ServiceJourney] = None
+    service_journey_1 = leg1.get("serviceJourney")
+    service_journey_2 = leg2.get("serviceJourney")
+    if service_journey_1 and service_journey_2:
+        merged_service_journey = {
+            "quays": (
+                service_journey_1["quays"]
+                + [{"id": "", "name": service_journey_1["direction"]}]
+                + service_journey_2["quays"]
+            ),
+            "direction": service_journey_1["direction"],
+        }
+    points_1 = leg1["pointsOnLink"]["points"]
+    points_2 = leg2["pointsOnLink"]["points"]
+
+    merged_points: List[str] = []
+
+    if isinstance(points_1, str):
+        merged_points.append(points_1)
+    else:
+        merged_points.extend(points_1)
+
+    if isinstance(points_2, str):
+        merged_points.append(points_2)
+    else:
+        merged_points.extend(points_2)
+    merged: Leg = {
         "mode": leg1["mode"],
         "aimedStartTime": leg1["aimedStartTime"],
         "aimedEndTime": leg2["aimedEndTime"],
         "distance": leg1["distance"] + leg2["distance"],
         "duration": leg1["duration"] + leg2["duration"],
-        "fromPlace": leg1["fromPlace"],
-        "toPlace": leg2["toPlace"],
-        "line": leg1["line"],
-        "serviceJourney": {
-            "quays": leg1["serviceJourney"]["quays"] + [{"name": leg1["serviceJourney"]["direction"]}] + leg2["serviceJourney"]["quays"],
-            "direction": leg1["serviceJourney"]["direction"]
-        },
         "pointsOnLink": {
-            "points": [leg1["pointsOnLink"]["points"], leg2["pointsOnLink"]["points"]]
+            "points": merged_points
         },
-        "color": leg1["color"],
-        "otherOptions": leg1["otherOptions"]
     }
+    if "fromPace" in leg1:
+        merged["fromPlace"] = leg1["fromPlace"]
+    if "toPlace" in leg2:
+        merged["toPlace"] = leg2["toPlace"]
+    if "color" in leg1:
+        merged["color"] = leg1["color"]
+    if "line" in leg1:
+        merged["line"] = leg1["line"]
+    if merged_service_journey:
+        merged["serviceJourney"] = merged_service_journey
+    if "otherOptions" in leg1:
+        merged["otherOptions"] = leg1["otherOptions"]
     return merged
 
-def process_legs(pattern):
+def process_legs(pattern: TripPattern) -> None:
     print("function: process_legs")
     if not pattern or not pattern.get("legs"):
         return
     
     legs = pattern["legs"]
-    mergedLegs = []
+    mergedLegs: List[Leg] = []
     duration = 0
     distance = 0
     num_of_transfers = None
@@ -74,7 +105,7 @@ def process_legs(pattern):
     mode_index = 0
     mode = ""
     public_code = ""
-    new_legs = []
+    new_legs: List[Leg] = []
     prev_leg = None
     for leg in legs:
         if not leg.get("color"):
@@ -82,7 +113,8 @@ def process_legs(pattern):
         if mode == leg["mode"] and mode in ["foot", "bicycle"]:
             mode_index += 1
         if leg["mode"] == "foot":
-            leg["walkMode"] = pattern["modes"][mode_index] == "foot"
+            modes = pattern.get("modes") or []
+            leg["walkMode"] = mode_index < len(modes) and modes[mode_index] == "foot"
         leg_public_code = (leg.get("line") or {}).get("publicCode")
 
         if prev_leg and leg["mode"] == mode and leg_public_code == public_code and leg_public_code:
@@ -107,8 +139,10 @@ def process_legs(pattern):
         leg = original_legs[i]
 
         if leg["mode"] not in ["foot", "bicycle", "wait"] and mode not in ["foot", "bicycle", "wait"]:
-            new_leg = {
+            new_leg: Leg = {
                 "mode": "transfer",
+                "aimedStartTime": "",
+                "aimedEndTime": "",
                 "color": "gray",
                 "distance": 0,
                 "duration": 0,
@@ -136,11 +170,17 @@ def process_legs(pattern):
             currentLeg["duration"] += leg["duration"]
             currentLeg["distance"] += leg["distance"]
             currentLeg["aimedEndTime"] = leg["aimedEndTime"]
-            currentLeg["toPlace"] = leg["toPlace"]
+            if "toPlace" in leg:
+                currentLeg["toPlace"] = leg["toPlace"]
             if isinstance(currentLeg["pointsOnLink"]["points"], str):
                 currentLeg["pointsOnLink"]["points"] = [currentLeg["pointsOnLink"]["points"]]
 
-            currentLeg["pointsOnLink"]["points"].append(leg["pointsOnLink"]["points"])
+            if "pointsOnLink" in leg:
+                points = leg["pointsOnLink"]["points"]
+                if isinstance(points, str):
+                    currentLeg["pointsOnLink"]["points"].append(points)
+                else:
+                    currentLeg["pointsOnLink"]["points"].extend(points)
 
         else:
             if currentLeg["mode"] not in ["foot", "bicycle", "wait"]:
