@@ -1,4 +1,5 @@
 from copy import deepcopy
+from utils.geo import haversine_distance
 from models.types import TripPattern, WaypointGroup
 from models.route_data import LegPreferences, RouteData
 from utils.legs_processing import justify_time
@@ -46,7 +47,7 @@ def create_waypoint_groups(waypoints: List[str], pref: List[LegPreferences], mul
     i = 0
     while i < len(waypoints) - 1:
         group = [waypoints[i], waypoints[i + 1]]
-        mode = pref[i].mode if i < len(pref) else None
+        mode = pref[i].mode if i < len(pref) else ""
         j = i
         if mode == "bicycle":
             bike_segment_found = True
@@ -86,3 +87,14 @@ def filter_sort_trip_patterns(trip_patterns: List[TripPattern], data: RouteData)
             sorted_patterns = sorted(new_patterns, key=lambda tp: tp["aimedEndTime"])
     
     return sorted_patterns[:10]
+
+def contains_sublist(list: List[WaypointGroup], sublist: List[str]) -> bool:
+    for i in range(len(list) - len(sublist) + 1):
+        if [group["mode"] for group in list[i:i+len(sublist)]] == sublist:
+            return True
+    return False
+
+def at_waypoint(lat: float, lon: float, waypoint: str) -> bool:
+    waypoint_lat, waypoint_lon = map(float, waypoint.split(','))
+    distance_m = haversine_distance(lat, lon, waypoint_lat, waypoint_lon) * 1000
+    return distance_m < 50

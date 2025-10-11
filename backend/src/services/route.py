@@ -9,7 +9,7 @@ from services.bicycle_routes import group_walk_bicycle_route
 from services.public_bicycle_route import public_bicycle_route
 from services.public_transport_service.public_transport_route import process_public_route
 from utils.geo import get_borderline_distance, haversine_distance
-from utils.planner_utils import combine_pt, create_waypoint_groups
+from utils.planner_utils import combine_pt, contains_sublist, create_waypoint_groups
 
 async def multimodal_route(waypoints, time_to_depart: str, data: RouteData, bike_segment_found: bool, session, first_leg: bool = False):
     print("function: multimodal_route")
@@ -46,13 +46,9 @@ async def multimodal_route(waypoints, time_to_depart: str, data: RouteData, bike
                     
         i += 1
     possible_mode_combinations = list(product(*possible_modes))
-    filtered_combinations = [
-        combination for combination in possible_mode_combinations
-        if sum(mode == "bicycle" for mode in combination) < 2
-    ]
 
     tasks = []
-    for combination in filtered_combinations:
+    for combination in possible_mode_combinations:
         preferences = []
         for mode in combination:
             preferences.append(LegPreferences(mode=mode, exact=True))
@@ -61,9 +57,12 @@ async def multimodal_route(waypoints, time_to_depart: str, data: RouteData, bike
         bike_count = sum(group["mode"] in ["bicycle", "bicycle_walk_transit", "walk_transit_bicycle"] for group in waypoint_groups)
         if bike_count >= 2:
             continue
+    
+        if contains_sublist(waypoint_groups, ["bicycle_walk_transit", "walk_transit"]) or contains_sublist(waypoint_groups, ["walk_transit", "walk_transit_bicycle"]):
+            continue
 
         print(combination)
-        # if combination != ('bicycle_walk_transit', 'walk_transit'):
+        # if combination != ('walk_transit_bicycle', 'walk_transit'):
         #     continue
         tasks.append(route(waypoint_groups, time_to_depart, session, True, data, bike_segment_found))
 
@@ -234,7 +233,7 @@ async def recursive_planner(waypoint_groups, time_to_depart: str, data: RouteDat
             validity = [len(waypoint_groups[i + 1:]) < 1]
             if len(results) > 0:
                 results, validity = zip(*results)
-            return combine_pt(trip_patterns, results, data.arrive_by, validity=validity), any(validity)
+            return combine_pt(trip_patterns, results, data.arrive_by, validity=validity), any(validity) and len(trip_patterns) > 0
         
         elif trip_patterns == []:
             if not group.get("tripPatterns"):
