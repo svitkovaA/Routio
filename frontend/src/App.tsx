@@ -211,7 +211,7 @@ function App() {
                 setPreference={setPreference}
                 findButtonDisabled={findButtonDisabled}
                 disableFindButton={() => setFindButtonDisabled(true)}
-            />  
+            />
         </div>
     );
 }

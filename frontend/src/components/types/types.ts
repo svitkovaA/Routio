@@ -97,6 +97,9 @@ export type Leg = {
             direction: string;
         }[];
     };
+    delays?: {[date: string]: number};
+    nonContinuousDepartures?: boolean;
+    arrivalAfterDeparture?: boolean;
 }
 
 export type RoutePreference = "shortest" | "fastest" | "transfers";

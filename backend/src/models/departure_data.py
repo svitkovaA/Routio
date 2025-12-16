@@ -1,8 +1,8 @@
 from pydantic import BaseModel
-from models.types import TripPattern
+from typing import Dict, Any
 
 class DepartureData(BaseModel):
-    trip_pattern: TripPattern
+    trip_pattern: Dict[str, Any]
     public_leg_index: int
     selected_index: int
 

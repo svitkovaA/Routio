@@ -5,7 +5,7 @@ from typing import List
 from gql import gql
 import polyline
 from services.gtfs_gbfs_service import get_color, get_departures_via
-from services.public_transport_service.lissy import get_shape, get_shapes_cached
+from services.public_transport_service.lissy import get_delays, get_shape, get_shapes_cached, get_trip_id_by_time
 from utils.planner_utils import combine_pt
 
 def public_transfer_max_number(count: int):
@@ -131,6 +131,11 @@ async def public_transport_route(waypoints: List[str], time_to_depart: str, arri
                                 id
                                 name
                             }
+                            passingTimes {
+                                departure {
+                                    time
+                                }
+                            }
                         }
                         pointsOnLink {
                             points
@@ -216,13 +221,14 @@ async def public_transport_route(waypoints: List[str], time_to_depart: str, arri
                 else:
                     best = min(item, key=lambda p: p["aimedEndTime"])
                 new_trip_patterns.append(best)
-            for pattern in new_trip_patterns:
+            truncated_trip_patterns = new_trip_patterns[:public_transfer_max_number(num_of_waypoints)]
+            for pattern in truncated_trip_patterns:
                 for leg in pattern["legs"]:
                     if leg["mode"] == "foot":
                         continue
                     departures = get_departures_via(leg["fromPlace"]["quay"]["id"].split(":", 1)[1], leg["toPlace"]["quay"]["id"].split(":", 1)[1], leg["line"]["publicCode"], leg["aimedStartTime"])
                     leg["otherOptions"] = departures
-            new_results.append(new_trip_patterns[:public_transfer_max_number(num_of_waypoints)])
+            new_results.append(truncated_trip_patterns)
         
         if trip_patterns == [] and first_iteration:
             trip_patterns = new_results[0]
@@ -265,6 +271,12 @@ async def public_transport_route(waypoints: List[str], time_to_depart: str, arri
                 stop_index = quay_index_map.get(leg["toPlace"]["name"], -1)
                 if start_index != -1 and stop_index != -1 and start_index <= stop_index:
                     leg["serviceJourney"]["quays"] = leg["serviceJourney"]["quays"][start_index + 1:stop_index]
+                    # Search trip id in cache (if delays available)
+                    trip_id = get_trip_id_by_time(name, stops, leg["serviceJourney"]["passingTimes"][0]["departure"]["time"])
+                    if trip_id:
+                        delays = await get_delays(trip_id, start_index)
+                        if delays:
+                            leg["delays"] = delays
 
                 if shape is None:
                     color = get_color(name)
@@ -292,6 +304,7 @@ async def public_transport_route(waypoints: List[str], time_to_depart: str, arri
                     coords.extend(shape_by_ID["coords"][i])
 
                 leg["pointsOnLink"]["points"] = polyline.encode(coords)
+
     return trip_patterns
 
 async def nearest_bike_stations(lat: float, lon: float, session, maximum_distance: int):

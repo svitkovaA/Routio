@@ -33,4 +33,8 @@
     transform: translateX(-50%);
 }
 
+.exclamation {
+    color: red;
+}
+
 /** End of file PublicTransportDetail.css */

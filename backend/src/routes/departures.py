@@ -23,8 +23,13 @@ async def other_departures(data: DepartureData):
 
     start_dt = datetime.fromisoformat(legs[index]["aimedStartTime"])
     legs[index]["aimedEndTime"] = (start_dt + timedelta(seconds=legs[index]["duration"])).isoformat()
+
+    legs[index]["arrivalAfterDeparture"] = False
     if without_public_transport:
         justify_time({"legs": legs[:index]}, legs[index]["aimedStartTime"], True)
+    else:
+        if legs[index - 1]["aimedEndTime"] > legs[index]["aimedStartTime"]:
+            legs[index]["arrivalAfterDeparture"] = True
     index += 1
 
     while index < len(legs):
@@ -45,11 +50,14 @@ async def other_departures(data: DepartureData):
                     legs[index]["serviceJourney"]["direction"] = departure["direction"]
                     break
 
+            legs[index]["arrivalAfterDeparture"] = False
+            legs[index]["nonContinuousDepartures"] = False
             if picked_i is None and deps:
                 last = deps[-1]
                 legs[index]["aimedStartTime"] = last["departureTime"]
                 legs[index]["otherOptions"]["currentIndex"] = len(deps) - 1
                 legs[index]["serviceJourney"]["direction"] = last["direction"]
+                legs[index]["nonContinuousDepartures"] = True
 
         start_dt = datetime.fromisoformat(legs[index]["aimedStartTime"])
         legs[index]["aimedEndTime"] = (start_dt + timedelta(seconds=legs[index]["duration"])).isoformat()

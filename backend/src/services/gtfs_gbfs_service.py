@@ -102,6 +102,8 @@ def get_departures_via(from_stop_id: str, to_stop_id: str, route_short_name: str
     ref_dt = datetime.fromisoformat(aimed_start_time)
     ref_dt_local = ref_dt.astimezone(time_zone) if ref_dt.tzinfo else ref_dt.replace(tzinfo=time_zone)
     ref_date = ref_dt.date()
+    previous_date = ref_date - pd.Timedelta(days=1)
+    next_date = ref_date + pd.Timedelta(days=1)
 
     # Get route_id from route_short_name
     route_id = routes_dict.get(route_short_name)
@@ -109,65 +111,102 @@ def get_departures_via(from_stop_id: str, to_stop_id: str, route_short_name: str
         return {"departures": [], "currentIndex": None}
 
     # Get valid services for the given date
-    valid_services = valid_services_for_date(ref_date)
+    valid_services_previous = valid_services_for_date(previous_date)
+    valid_services_today = valid_services_for_date(ref_date)
+    valid_services_next = valid_services_for_date(next_date)
 
     # Trips containing destination stop
     trips_with_dest = {tid for tid, _ in stop_to_trips_dict.get(to_stop_id, [])}
 
-    # Valid trips containing origin stop
-    departures = []
-    for trip_id, departure_time in stop_to_trips_dict.get(from_stop_id, []):
-        trip_info = trips_dict.get(trip_id)
-        if not trip_info:
-            continue
-        # Correct route
-        if trip_info["route_id"] != route_id:
-            continue
-        # Service active on the given date
-        if trip_info["service_id"] not in valid_services:
-            continue
-        # Service reaches destination stop
-        if trip_id not in trips_with_dest:
-            continue
-        departures.append({
-            "trip_id": trip_id,
-            "departure_time": departure_time,
-            "direction": trip_info["headsign"]
-        })
+    # Collect departures for given valid_service
+    def collect_departures_for_date(valid_service: set) -> list[dict]:
+        departures = []
+        for trip_id, departure_time in stop_to_trips_dict.get(from_stop_id, []):
+            trip_info = trips_dict.get(trip_id)
+            if not trip_info:
+                continue
+            # Correct route
+            if trip_info["route_id"] != route_id:
+                continue
+            # Service active on the given date
+            if trip_info["service_id"] not in valid_service:
+                continue
+            # Service reaches destination stop
+            if trip_id not in trips_with_dest:
+                continue
+            departures.append({
+                "trip_id": trip_id,
+                "departure_time": departure_time,
+                "direction": trip_info["headsign"],
+            })
+        return departures
 
-    # No departures found
-    if not departures:
-        return {"departures": [], "currentIndex": None}
-
-    # Converts GTFS time HH:MM:SS to YYYY-MM-DDTHH:MM:SStime_zone
-    for departure in departures:
-        time_delta = pd.to_timedelta(departure["departure_time"])
-        date_time = datetime.combine(ref_date, datetime.min.time(), tzinfo=time_zone) + time_delta
-        departure["departure_dt"] = date_time
-        departure["departure_time"] = date_time.isoformat()
+    # Collect departures for previous, current and next day
+    all_departures = []
+    for date, services in [(previous_date, valid_services_previous), (ref_date, valid_services_today), (next_date, valid_services_next)]:
+        departures = collect_departures_for_date(services)
+        for departure in departures:
+            # Converts GTFS time HH:MM:SS to YYYY-MM-DDTHH:MM:SStime_zone
+            td = pd.to_timedelta(departure["departure_time"])
+            dt = datetime.combine(date, datetime.min.time(), tzinfo=time_zone) + td
+            departure["departure_dt"] = dt
+            departure["departure_time"] = dt.isoformat()
+        all_departures.extend(departures)
 
     # Sort departures by datetime
-    departures.sort(key=lambda x: x["departure_dt"])
+    all_departures.sort(key=lambda x: x["departure_dt"])
 
     # Find the first departure at or after reference time
-    index = next((i for i, departure in enumerate(departures) if departure["departure_dt"] >= ref_dt_local), None)
+    index = next((i for i, dep in enumerate(all_departures) if dep["departure_dt"] >= ref_dt_local), 0)
 
-    # No further departures found, return just n-previous
-    if index is None:
-        final_departures = departures[-n_prev:]
-        current_index = None
-    # Return n-previous and n-further departures
-    else:
-        previous = departures[max(0, index-n_prev):index]
-        nexts = departures[index:index+n_next]
-        final_departures = previous + nexts
-        current_index = next((i for i, departure in enumerate(final_departures)
-                            if departure["departure_dt"] == departures[index]["departure_dt"]), None)
+    MAX_GAP = pd.Timedelta(hours=2)
+
+    # Collect previous departures
+    previous = []
+    for i in list(reversed(range(index))):
+        current = all_departures[i]
+        # Insert first
+        if not previous:
+            previous.append(current)
+            continue
+        gap = previous[-1]["departure_dt"] - current["departure_dt"]
+        # Time gap is bigger than maximal allowed, rest is truncated
+        if gap > MAX_GAP:
+            break
+        previous.append(current)
+        # Enough previous results found
+        if len(previous) >= n_prev:
+            break
+    previous.reverse()
+
+    # Collect future departures
+    nexts = []
+    for i in range(index, len(all_departures)):
+        current = all_departures[i]
+        # Insert first
+        if not nexts:
+            nexts.append(current)
+            continue
+        gap = current["departure_dt"] - nexts[-1]["departure_dt"]
+        # Time gap is bigger than maximal allowed, rest is truncated
+        if gap > MAX_GAP:
+            break
+        nexts.append(current)
+        # Enough next results found
+        if len(nexts) >= n_next:
+            break
+
+    # Combine previous and next departures
+    final_departures = previous + nexts
+    current_index = len(previous) if nexts else len(previous) - 1
 
     # Return departures with additional information
     return {
-        "departures": [{"departureTime": departure["departure_time"], "direction": departure["direction"]} for departure in final_departures],
-        "currentIndex": current_index
+        "departures": [
+            {"departureTime": dep["departure_time"], "direction": dep["direction"]}
+            for dep in final_departures
+        ],
+        "currentIndex": current_index,
     }
 
 # GBFS URLs for Brno, Hodonin, Kahan
@@ -189,6 +228,7 @@ def load_gbfs_data():
         response = httpx.get(url, timeout=10)
         response_data = response.json()
         stations = response_data.get("data", {}).get("stations", [])
+        
         # Map station_id to capacity if provided
         for station in stations:
             capacity = station.get("capacity")

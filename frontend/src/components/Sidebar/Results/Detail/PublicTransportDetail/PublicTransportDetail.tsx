@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faRoute, faStopwatch } from "@fortawesome/free-solid-svg-icons";
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import DepartureBoardIcon from '@mui/icons-material/DepartureBoard';
 import { Leg, VerticalTimeline } from "../../../../types/types";
 import "./PublicTransportDetail.css";
@@ -29,6 +30,18 @@ function PublicTransportDetail({
     const [stopsOpen, setStopsOpen] = useState<boolean>(false);
     const [departuresOpen, setDeparturesOpen] = useState<boolean>(false);
     const publicTransportDetailRef = useRef<HTMLDivElement>(null);
+
+    const averageDelay = () => {
+        if (!leg.delays) return null;
+
+        const values = Object.values(leg.delays);
+        if (values.length === 0) return null;
+
+        const total = values.reduce((sum, v) => sum + v, 0);
+        return Math.round(total / values.length);
+    }
+
+    const averageDelayValue = averageDelay();
     
     useEffect(() => {
         if (!publicTransportDetailRef.current) return;
@@ -62,6 +75,27 @@ function PublicTransportDetail({
             </div>
             {leg.mode + " " + leg.line?.publicCode + " -> " + leg.serviceJourney?.direction}
             <div>
+                {leg.nonContinuousDepartures ? (
+                    <div className="non-continuous-departures">
+                        <span className="exclamation">
+                            <PriorityHighIcon />
+                        </span>
+                        No more available times for this {leg.mode}. Rerout trip with later time.
+                    </div>
+                ) : leg.arrivalAfterDeparture ? (
+                    <div className="arrival-after-departure">
+                        <span className="exclamation">
+                            <PriorityHighIcon />
+                        </span>
+                        {leg.mode} departure is before planned arrival
+                    </div>
+                ) : (<></>)
+                }
+                {averageDelayValue !== null && (
+                    <div>
+                        +{averageDelayValue} min
+                    </div>
+                )}
                 <div 
                     onClick={() => setDeparturesOpen(!departuresOpen)}
                 >

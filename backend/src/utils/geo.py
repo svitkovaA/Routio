@@ -16,7 +16,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     # Earths radius
     R = 6371
 
-    # Convert points differencies info radians
+    # Convert points differences info radians
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
 
@@ -26,29 +26,50 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     return R * c
 
 def interpolate_point(lat1: float, lon1: float, lat2: float, lon2: float, distance_from_start: float) -> tuple[float, float]:
+    """
+    Computes an interpolated point on the great-circle path between two coordinates
+
+    Args:
+        lat1, lon1: First point latitude and longitude
+        lat2, lon2: Second point latitude and longitude
+        distance_from_start: The distance from the first point
+
+    Returns:
+        tuple [float, float]: Latitude and longitude of the new point in the
+        exact distance from point 1 on the shortest path from point 1 to point 2
+    """
     print("function: interpolate_point")
+    # Distance between to coordinates
     total_distance = haversine_distance(lat1, lon1, lat2, lon2)
 
+    # Convert coordinates from degrees to radians
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
 
+    # Fraction of the total distance at which is need to interpolate
     f = distance_from_start / total_distance
 
+    # Convert points to 3D 
     x1, y1, z1 = (cos(lat1) * cos(lon1), cos(lat1) * sin(lon1), sin(lat1))
     x2, y2, z2 = (cos(lat2) * cos(lon2), cos(lat2) * sin(lon2), sin(lat2))
 
+    # Compute the angle between two points on the sphere
     omega = acos(x1 * x2 + y1 * y2 + z1 * z2)
 
+    # Compute interpolation coefficients using spherical linear interpolation
     sin_omega = sin(omega)
     A = sin((1 - f) * omega) / sin_omega
     B = sin(f * omega) / sin_omega
 
+    # Interpolate Cartesian coordinates 
     x = A * x1 + B * x2
     y = A * y1 + B * y2
     z = A * z1 + B * z2
 
+    # Convert from Cartesian to lat and lon in degrees
     lat = degrees(atan2(z, sqrt(x * x + y * y)))
     lon = degrees(atan2(y, x))
 
+    # Return latitude and longitude of the new point in degrees
     return lat, lon
 
 def merge_close_results(results: List[Suggestion], max_distance: float=20) -> List[Suggestion]:
@@ -57,7 +78,7 @@ def merge_close_results(results: List[Suggestion], max_distance: float=20) -> Li
 
     Args:
         results: List of search results containing location information
-        max_distance: Maximal distence in meters for merging close results
+        max_distance: Maximal distance in meters for merging close results
 
     Returns:
         New list of merged results

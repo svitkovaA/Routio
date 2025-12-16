@@ -13,8 +13,25 @@ COLORS = {
 }
 
 def justify_time(pattern: TripPattern, time_to_depart: str, arrive_by: bool) -> None:
+    """
+    Justify the start and end times of all legs in a trip pattern
+    based on a target departure or arrival time
+
+    Args:
+        pattern: The trip pattern containing legs and aimed times
+        time_to_depart: Datetime representing the target departure time 
+        (if arrive_by=False) or arrival time (if arrive_by=True)
+        arrive_by: If True, the provided time time_to_depart is treated as the
+        arrival time, if false, the provided time is treated as the departure time
+
+    Returns:
+        None: The function mutates the input trip pattern in place, updating all
+        aimedStartTime and aimedEndTime values.
+    """
     print("function: justify_time")
     legs = pattern["legs"]
+
+    # COnvert date in ISO format to datetime
     time_to_depart_dt = datetime.fromisoformat(time_to_depart)
     if arrive_by:
         indecies = list(reversed(range(len(legs))))
@@ -25,10 +42,13 @@ def justify_time(pattern: TripPattern, time_to_depart: str, arrive_by: bool) -> 
         indecies = list(range(len(legs)))
         first = "aimedStartTime"
         second = "aimedEndTime"
+
+    # Process each leg and update times
     i = 0
     while i < len(indecies):
         index = indecies[i]
         
+        # Assign the current known time as either start or end
         legs[index][first] = time_to_depart_dt.isoformat()
         if arrive_by:
             time_to_depart_dt -= timedelta(seconds=legs[index]["duration"])

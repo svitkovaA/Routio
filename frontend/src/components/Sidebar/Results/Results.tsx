@@ -89,6 +89,7 @@ function Results({
             prev.map((originalResult, index) => 
                 index === resultActiveIndex ? newResult : originalResult
         ));
+        setPublicLegIndex(-1);
     }
 
     return (
