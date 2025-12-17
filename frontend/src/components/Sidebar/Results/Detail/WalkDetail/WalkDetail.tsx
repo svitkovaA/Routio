@@ -4,10 +4,11 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRoute, faStopwatch } from "@fortawesome/free-solid-svg-icons";
 import { Leg, VerticalTimeline } from "../../../../types/types";
+import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
 
 type WalkDetailProps = {
     leg: Leg;
@@ -21,27 +22,14 @@ function WalkDetail({
     index
 } : WalkDetailProps) {
     const walkDetailRef = useRef<HTMLDivElement>(null);
-    
-    useEffect(() => {
-        if (!walkDetailRef.current) return;
 
-        const observer = new ResizeObserver((entries) => {
-            for (let entry of entries) {
-                const newLength = entry.contentRect.height + 30;
-
-                setVerticalTimeline(prev => {
-                    const copy = [...prev];
-                    if (copy[index]) {
-                        copy[index] = { ...copy[index], length: newLength };
-                    }
-                    return copy;
-                });
-            }
-        });
-
-        observer.observe(walkDetailRef.current);
-        return () => observer.disconnect();
-    }, [leg, index]);
+    useVerticalTimeLineHandle(
+        walkDetailRef,
+        leg,
+        setVerticalTimeline,
+        index,
+        27
+    );
 
     return (
         <div

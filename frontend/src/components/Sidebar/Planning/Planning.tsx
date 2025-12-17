@@ -12,15 +12,13 @@ import ArrivalDeparture from "./ArrivalDeparture/ArrivalDeparture";
 import InfoSettings from "./InfoSettings/InfoSettings";
 import Options from "./Options/Options";
 import FindButton from "./FindButton/FindButton";
+import { useResult } from "../../ResultContext";
 
 type PlanningProps = {
     showSettings: () => void;
     showInfo: () => void;
     closeSidebar: () => void;
     selectMultimodalResult: () => void;
-    findButtonDisabled: boolean;
-    disableFindButton: () => void;
-    style?: React.CSSProperties;
 };
 
 function Planning({ 
@@ -28,10 +26,8 @@ function Planning({
         showInfo, 
         closeSidebar, 
         selectMultimodalResult,
-        findButtonDisabled,
-        disableFindButton,
-        style 
-    }: PlanningProps) {
+}: PlanningProps) {
+    const { setLoading } = useResult();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         if (!event.currentTarget.checkValidity()) {
@@ -39,11 +35,11 @@ function Planning({
         }
         event.preventDefault();
         selectMultimodalResult();
-        disableFindButton();
+        setLoading(true);
     }
     
     return (
-        <form className="planning" style={style} onSubmit={handleSubmit}>
+        <form className="planning" onSubmit={handleSubmit}>
             <div className="sidebar-header">
                 <Logo />
             </div>
@@ -58,9 +54,7 @@ function Planning({
                     showInfo={showInfo}
                 />
                 <Options />
-                <FindButton 
-                    disabled={findButtonDisabled}
-                />
+                <FindButton />
             </div>
         </form>
     );

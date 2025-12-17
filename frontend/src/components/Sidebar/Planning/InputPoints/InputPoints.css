@@ -36,4 +36,10 @@
     margin: 0px 0px 5px -20px;
 }
 
+.sortable-item {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
 /** End of file InputPoints.css */

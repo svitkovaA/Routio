@@ -18,7 +18,9 @@ function ResultList() {
     } = useResult();
     const { mode } = useInput();
 
-    if (!mode) return null;
+    if (!mode) 
+        return null;
+    
     if (mode === "transit,bicycle,walk" || mode === "walk_transit" || (mode === "bicycle" && result.tripPatterns.length > 1)) {
         return (
             <>

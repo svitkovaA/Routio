@@ -4,7 +4,6 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from "react-i18next";
@@ -14,9 +13,9 @@ import ResultListItem from "./ResultList/ResultListItem/ResultListItem";
 import DetailSwitch from "./DetailSwitch/DetailSwitch";
 import Detail from "./Detail/Detail";
 import MoreDepartures from "./MoreDepartures/MoreDepartures";
-import { API_BASE_URL } from "../../config/config";
 import { useResult } from "../../ResultContext";
 import "./Results.css";
+import { useRecalculatePattern } from "../../Routing/RecalculatePattern";
 
 type ResultsProps = {
     closeResults: () => void;
@@ -26,20 +25,19 @@ function Results({ closeResults } : ResultsProps) {
     const {
         showDetail, setShowDetail,
         result,
-        selectedTripPatternIndex, 
-        setResults,
         resultActiveIndex,
         pattern
     } = useResult();
 
     const { t } = useTranslation();
-    const [publicLegIndex, setPublicLegIndex] = useState<number>(-1)
+    const { recalculatePattern, publicLegIndex, setPublicLegIndex } = useRecalculatePattern();
     const descriptions: String[] = [
         t("modeDescriptions.multimodalTransport") as String,
         t("modeDescriptions.publicTransport") as String,
         t("modeDescriptions.bicycle") as String,
         t("modeDescriptions.walk") as String
     ]
+
     const handleBackButtonClick = () => {
         if (showDetail) {
             setShowDetail(false);
@@ -49,31 +47,6 @@ function Results({ closeResults } : ResultsProps) {
             closeResults();
         }
     };
-
-    const recalculatePattern = async (selectedIndex: number, legIndex: number = publicLegIndex) => {
-        const apiResult = await fetch(`${API_BASE_URL}/otherDepartures`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                trip_pattern: result.tripPatterns[selectedTripPatternIndex],
-                selected_index: selectedIndex,
-                public_leg_index: legIndex
-            })
-        });
-
-        const newTripPattern = await apiResult.json();
-        const newResult = JSON.parse(JSON.stringify(result))
-        newResult.tripPatterns[selectedTripPatternIndex] = newTripPattern;
-
-
-        setResults(prev => 
-            prev.map((originalResult, index) => 
-                index === resultActiveIndex ? newResult : originalResult
-        ));
-        setPublicLegIndex(-1);
-    }
 
     return (
         <div className="results">
@@ -120,8 +93,7 @@ function Results({ closeResults } : ResultsProps) {
                         setPublicLegIndex={setPublicLegIndex}
                         recalculatePattern={recalculatePattern}
                     />
-                )
-                }
+                )}
             </div>
         </div>
     );

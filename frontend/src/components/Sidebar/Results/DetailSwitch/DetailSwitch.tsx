@@ -28,23 +28,28 @@ function DetailSwitch({
             <IconButton
                 className="detail-switch-arrow"
                 onClick={() => {
-                setSelectedTripPatternIndex((prev) =>
-                    prev > 0 ? prev - 1 : numOfPatterns - 1
-                );
-                setPublicLegIndex(-1);
-                }
-                }
+                    setSelectedTripPatternIndex((prev) =>
+                        prev > 0 ? prev - 1 : numOfPatterns - 1
+                    );
+                    setPublicLegIndex(-1);
+                }}
             >
                 <FontAwesomeIcon icon={faAngleLeft} />
             </IconButton>
 
             <div className="dots">
                 {Array.from({ length: numOfPatterns }, (_, i) => (
-                <IconButton key={i} onClick={() => {setSelectedTripPatternIndex(i); setPublicLegIndex(-1);}}>
+                <IconButton 
+                    key={i} 
+                    onClick={() => {
+                        setSelectedTripPatternIndex(i); 
+                        setPublicLegIndex(-1);
+                    }}
+                >
                     {i === selectedTripPatternIndex ? (
-                    <RadioButtonCheckedIcon className="dot"/>
+                        <RadioButtonCheckedIcon className="dot"/>
                     ) : (
-                    <RadioButtonUncheckedIcon className="dot"/>
+                        <RadioButtonUncheckedIcon className="dot"/>
                     )}
                 </IconButton>
                 ))}
@@ -53,12 +58,11 @@ function DetailSwitch({
             <IconButton
                 className="detail-switch-arrow"
                 onClick={() => {
-                setSelectedTripPatternIndex((prev) =>
-                    prev < numOfPatterns - 1 ? prev + 1 : 0
-                );
-                setPublicLegIndex(-1);
-                }
-                }
+                    setSelectedTripPatternIndex((prev) =>
+                        prev < numOfPatterns - 1 ? prev + 1 : 0
+                    );
+                    setPublicLegIndex(-1);
+                }}
             >
                 <FontAwesomeIcon icon={faAngleRight} />
             </IconButton>

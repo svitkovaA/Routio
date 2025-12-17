@@ -24,7 +24,7 @@ function TransportPreferences() {
         setMaxTransfers,
         selectedModes,
         setSelectedModes
-        } = useSettings();
+    } = useSettings();
 
     const handleModeSelection = (mode: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {

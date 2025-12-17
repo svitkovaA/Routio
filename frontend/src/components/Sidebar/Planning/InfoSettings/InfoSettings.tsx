@@ -15,14 +15,22 @@ type InfoSettingsProps = {
 
 function InfoSettings({ showSettings, showInfo }: InfoSettingsProps) {
     return (
-    <div className="grid-wrapper">
-        <button className="input-wrapper" onClick={showSettings} type="button">
-            <FontAwesomeIcon icon={faGear} />
-        </button>
-        <button className="input-wrapper" onClick={showInfo} type="button">
-            <FontAwesomeIcon icon={faCircleInfo} />
-        </button>
-    </div>
+        <div className="grid-wrapper">
+            <button 
+                className="input-wrapper" 
+                onClick={showSettings} 
+                type="button"
+            >
+                <FontAwesomeIcon icon={faGear} />
+            </button>
+            <button 
+                className="input-wrapper" 
+                onClick={showInfo} 
+                type="button"
+            >
+                <FontAwesomeIcon icon={faCircleInfo} />
+            </button>
+        </div>
     );
 }
 

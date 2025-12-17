@@ -18,7 +18,8 @@ function ClearInputField({
     clearWaypoint,
     render
 } : ClearInputFieldProps) {
-    if (!render) return null;
+    if (!render) 
+        return null;
     
     return (
         <InputAdornment position="end">

@@ -18,7 +18,8 @@ function AddPointIcon({
     onClick,
     render
 } : AddPointIconProps) {
-    if (!render) return null;
+    if (!render) 
+        return null;
 
     return (
         <div className="line">

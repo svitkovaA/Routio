@@ -7,7 +7,7 @@
 import InputAdornment from "@mui/material/InputAdornment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
-import { IconButton, SxProps } from "@mui/material";
+import { IconButton } from "@mui/material";
 
 type LocationDotProps = {
     onClick: () => void;

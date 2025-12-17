@@ -25,9 +25,9 @@ function Timeline({
         if (!timelineRef.current) return;
 
         const observer = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-            setWidth(entry.contentRect.width);
-        }
+            for (let entry of entries) {
+                setWidth(entry.contentRect.width);
+            }
         });
 
         observer.observe(timelineRef.current);

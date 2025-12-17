@@ -23,11 +23,7 @@ function LegPreferences({
     render,
     index
 }: LegPreferencesProps) {
-    const {
-        legPreferences,
-        setLegPreferences
-        } = useInput();
-
+    const { legPreferences, setLegPreferences } = useInput();
     const setLegPreference = (value: boolean) => {
         setLegPreferences((prev) => {
             const newLegPreferences = [...prev];
@@ -64,17 +60,17 @@ function LegPreferences({
                         }, 100);
                     }}
                 >
-                <div className="preferences-wrapper">
-                    <div className="select-wrapper">
-                        <ModeSelect
-                            index={index}
-                        />
-                        <AccuracySelect
-                            index={index}
-                        />
+                    <div className="preferences-wrapper">
+                        <div className="select-wrapper">
+                            <ModeSelect
+                                index={index}
+                            />
+                            <AccuracySelect
+                                index={index}
+                            />
+                        </div>
+                        <FontAwesomeIcon icon={faAngleLeft} onClick={() => setLegPreference(false)}/>
                     </div>
-                    <FontAwesomeIcon icon={faAngleLeft} onClick={() => setLegPreference(false)}/>
-                </div>
                 </ClickAwayListener>
             )}
         </div>

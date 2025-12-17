@@ -36,6 +36,7 @@ function Options() {
                 <MenuItem value={"shortest"}>{t("planning.routePreference.shortestRoute")}</MenuItem>
                 <MenuItem value={"transfers"}>{t("planning.routePreference.minimizeTransfers")}</MenuItem>
             </TextField>
+            
             <TextField
                 select
                 label={t("planning.bikeOptions")}

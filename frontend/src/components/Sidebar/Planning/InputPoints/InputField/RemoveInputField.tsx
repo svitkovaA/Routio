@@ -18,7 +18,8 @@ function RemoveInputField({
     onClick,
     render
 } : RemoveInputFieldProps) {
-    if (!render) return null;
+    if (!render) 
+        return null;
     
     return (
         <InputAdornment position="end">

@@ -20,6 +20,9 @@ type ResultContextType = {
     setShowResults: (value: boolean) => void;
     showDetail: boolean;
     setShowDetail: (value: boolean) => void;
+    loading: boolean;
+    setLoading: (value: boolean) => void;
+    clearResults: () => void;
 };
 
 const ResultContext = createContext<ResultContextType | undefined>(undefined);
@@ -31,6 +34,15 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     const [selectedTripPatternIndex, setSelectedTripPatternIndex] = useState<number>(0);
     const [showResults, setShowResults] = useState(false);
     const [showDetail, setShowDetail] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const clearResults = () => {
+        setShowResults(false);
+        setResults(prev => prev.map(result => ({...result, active: false, tripPatterns: [], originBikeStations: [], destinationBikeStations: []})));
+        setShowDetail(false);
+        setSelectedTripPatternIndex(0);
+        setLoading(false);
+    };
 
     const value = useMemo(() => ({
         pattern: results[resultActiveIndex]?.tripPatterns[selectedTripPatternIndex],
@@ -39,13 +51,16 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         resultActiveIndex, setResultActiveIndex,
         selectedTripPatternIndex, setSelectedTripPatternIndex,
         showResults, setShowResults,
-        showDetail, setShowDetail
+        showDetail, setShowDetail,
+        loading, setLoading,
+        clearResults
     }), [
         results,
         resultActiveIndex,
         selectedTripPatternIndex,
         showResults,
-        showDetail
+        showDetail,
+        loading
     ]);
     
     return <ResultContext.Provider value={value}>{children}</ResultContext.Provider>;

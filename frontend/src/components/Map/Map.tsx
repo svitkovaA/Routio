@@ -4,12 +4,12 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { MapContainer, TileLayer, ZoomControl, useMapEvent, Marker, Popup, ScaleControl } from 'react-leaflet'
-import { useEffect, useRef, useState } from 'react';
+import { MapContainer, TileLayer, ZoomControl, Marker, Popup, ScaleControl } from 'react-leaflet'
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { API_BASE_URL } from '../config/config';
 import { useTranslation } from 'react-i18next';
-import { InputText, Waypoint } from '../types/types';
+import { InputText } from '../types/types';
 import { useLayers } from '../Controls/Layer/Layers';
 import ShowRoute from './ShowRoute/ShowRoute';
 import FitBound from './FitBound/FitBound';
@@ -17,9 +17,10 @@ import BikeStations from './BikeStations/BikeStations';
 import { useInput } from '../InputContext';
 import { useSettings } from '../SettingsContext';
 import 'leaflet/dist/leaflet.css';
-import './Map.css';
 import { useResult } from '../ResultContext';
-
+import './Map.css';
+import MapInfoPopup from './MapInfoPopup/MapInfoPopup';
+import { createPinIcon, SetViewOnClick } from './MapComponents';
 
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -27,104 +28,19 @@ L.Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-type mapProps = {
+type MapProps = {
     sidebarOpen: boolean;
     openSidebar: () => void;
     handleMarkerRemove: (index: number) => void;
     closeResults: () => void;
 };
 
-function createPinIcon(label: string, translatedLabel?: string) {
-    const startEndMarker = label === "START" || label === "END";
-    const className = "marker " + (startEndMarker ? "start-end-marker" : "");
-    let anchor: [number, number] = [14, 39];
-    let popupAnchor: [number, number] = [0, -45];
-    label = startEndMarker && translatedLabel ? translatedLabel : label
-    if (startEndMarker) {
-        anchor = [20,53];
-        popupAnchor = [0, -55];
-    }
-    return L.divIcon({
-        html: `
-        <div class="${className}">
-            <div class="marker-inner">${label}</div>
-        </div>
-        `,
-        className: "",
-        iconAnchor: anchor,
-        popupAnchor: popupAnchor
-    });
-}
-
-function SetViewOnClick({ onMapClick }: { onMapClick: (lat: number, lng: number) => boolean }) {
-    const map = useMapEvent('click', (e) => {
-        if (!onMapClick(e.latlng.lat, e.latlng.lng)) {
-            map.setView(e.latlng, map.getZoom(), {
-                animate: true,
-                duration: 0.3
-            });
-        }
-    });
-    return null;
-}
-
-type MapInfoPopupProps = {
-    waypoints: Waypoint[];
-    handleMapSelection: (lat: number, lon: number, index?: number) => boolean;
-}
-
-function MapInfoPopup({
-    waypoints,
-    handleMapSelection
-} : MapInfoPopupProps) {
-    const [position, setPosition] = useState<[number, number] | null>(null);
-
-    useMapEvent('contextmenu', (e) => {
-        setPosition([e.latlng.lat, e.latlng.lng]);
-    });
-
-  const handleSetWaypoint = (index: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!position) return;
-    e.stopPropagation();
-        handleMapSelection(position[0], position[1], index);
-        setPosition(null);
-  };
-
-  return position ? (
-    <Popup
-      position={position}
-      eventHandlers={{ remove: () => setPosition(null) }}
-      closeButton={true}
-    >
-      <div className="map-popup">
-        {waypoints.map((_, i) => (
-          <button
-            className="map-popup-button"
-            key={i}
-            onClick={(e) => handleSetWaypoint(i, e)}
-          >
-            {i === 0 ? "Set as origin" : i === waypoints.length - 1 ? "Set as destination" : `Set waypoint ${i}`}
-          </button>
-        ))}
-      </div>
-    </Popup>
-  ) : null;
-}
-
-const center: L.LatLngTuple = [49.1951, 16.6068];
-const defaultZoom = 13;
-
 function Map({ 
     sidebarOpen,
-    openSidebar, 
-    // results,
-    // setResults,
-    // resultActiveIndex,
-    // showResults,
-    // selectedTripPatternIndex,
+    openSidebar,
     handleMarkerRemove,
     closeResults
-}: mapProps) {
+}: MapProps) {
     const { showResults } = useResult();
     const { selectedLayerIndex } = useSettings();
     const { baseLayers, satelliteOverlay } = useLayers();
@@ -136,34 +52,39 @@ function Map({
         setMapSelectionIndex,
     } = useInput();
 
+    const center: L.LatLngTuple = [49.1951, 16.6068];
+    const defaultZoom = 13;
+
     const startMarker = createPinIcon("START", t("map.markers.start") as string);
     const endMarker = createPinIcon("END", t("map.markers.end") as string);
     const popupRefs = useRef<(L.Popup | null)[]>([]);
 
     const handleMapSelection = (lat: number, lon: number, index?: number): boolean => {
         const targetIndex = index !== undefined ? index : mapSelectionIndex;
-        if (targetIndex === -1) return false;
+        if (targetIndex === -1) 
+            return false;
         fetch(`${API_BASE_URL}/geocode/latLon?lat=${lat}&lon=${lon}`)
-        .then((res) => {
-            if (!res.ok) throw new Error("Network response was not ok");
-            return res.json();
-        })
-        .then((data: InputText) => {
-            const displayName = [data.street, data.city].filter(Boolean).join(", ");
+            .then((res) => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+            })
+            .then((data: InputText) => {
+                const displayName = [data.street, data.city].filter(Boolean).join(", ");
 
-            const newWaypoints = [...waypoints];
-            newWaypoints[targetIndex] = {
-            ...newWaypoints[targetIndex], lat, lon, displayName, isActive: true
-            };
-            setWaypoints(newWaypoints);
+                const newWaypoints = [...waypoints];
+                newWaypoints[targetIndex] = {
+                ...newWaypoints[targetIndex], lat, lon, displayName, isActive: true
+                };
+                setWaypoints(newWaypoints);
 
-            if (window.innerWidth < 769) openSidebar();
-            setMapSelectionIndex(-1);
-        })
-        .catch(console.error);
+                if (window.innerWidth < 769) 
+                    openSidebar();
+                setMapSelectionIndex(-1);
+            })
+            .catch(console.error);
         closeResults();
-    return true;
-  };
+        return true;
+    };
 
     useEffect(() => {
         let cursor = "";
@@ -236,7 +157,6 @@ function Map({
                     </Marker>
                 )
             )}
-
             <ShowRoute />
             <BikeStations />
         </MapContainer>

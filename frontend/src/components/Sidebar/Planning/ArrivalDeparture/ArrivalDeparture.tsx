@@ -15,9 +15,7 @@ import { useInput } from '../../../InputContext';
 function ArrivalDeparture() {
     const { t } = useTranslation();
 
-    const {
-        arriveBy, setArriveBy
-    } = useInput();
+    const { arriveBy, setArriveBy } = useInput();
     return (
         <FormControl>
             <RadioGroup 
@@ -26,8 +24,16 @@ function ArrivalDeparture() {
                 onChange={(e) => setArriveBy(e.target.value === "true")}
                 className="mode-switch"
             >
-                <FormControlLabel value="false" control={<Radio />} label={t("planning.departureArrival.departure")} />
-                <FormControlLabel value="true" control={<Radio />} label={t("planning.departureArrival.arrival")} />
+                <FormControlLabel 
+                    value="false" 
+                    control={<Radio />} 
+                    label={t("planning.departureArrival.departure")} 
+                />
+                <FormControlLabel 
+                    value="true" 
+                    control={<Radio />} 
+                    label={t("planning.departureArrival.arrival")} 
+                />
             </RadioGroup>
         </FormControl>
     );

@@ -4,8 +4,9 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Leg, VerticalTimeline } from "../../../../types/types";
+import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
 
 type BicycleDetailProps = {
     leg: Leg;
@@ -20,27 +21,12 @@ function BicycleDetail({
 } : BicycleDetailProps) {
     const bicycleRef = useRef<HTMLDivElement>(null);
     
-    useEffect(() => {
-        if (!bicycleRef.current) return;
-
-        const observer = new ResizeObserver((entries) => {
-            for (let entry of entries) {
-                const newLength = entry.contentRect.height;
-
-                setVerticalTimeline(prev => {
-                    const copy = [...prev];
-                    if (copy[index]) {
-                        copy[index] = { ...copy[index], length: newLength };
-                    }
-                    return copy;
-                });
-            }
-        });
-
-        observer.observe(bicycleRef.current);
-
-        return () => observer.disconnect();
-    }, [leg, index]);
+    useVerticalTimeLineHandle(
+        bicycleRef,
+        leg,
+        setVerticalTimeline,
+        index
+    );
 
     return (
         <div

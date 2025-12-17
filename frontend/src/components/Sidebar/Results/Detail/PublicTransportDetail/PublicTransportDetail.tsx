@@ -4,13 +4,14 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faRoute, faStopwatch } from "@fortawesome/free-solid-svg-icons";
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import DepartureBoardIcon from '@mui/icons-material/DepartureBoard';
 import { Leg, VerticalTimeline } from "../../../../types/types";
 import "./PublicTransportDetail.css";
+import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
 
 type PublicTransportDetailProps = {
     leg: Leg;
@@ -42,28 +43,14 @@ function PublicTransportDetail({
     }
 
     const averageDelayValue = averageDelay();
-    
-    useEffect(() => {
-        if (!publicTransportDetailRef.current) return;
 
-        const observer = new ResizeObserver((entries) => {
-            for (let entry of entries) {
-                const newLength = entry.contentRect.height - 30;
-
-                setVerticalTimeline(prev => {
-                    const copy = [...prev];
-                    if (copy[index]) {
-                        copy[index] = { ...copy[index], length: newLength };
-                    }
-                    return copy;
-                });
-            }
-        });
-
-        observer.observe(publicTransportDetailRef.current);
-
-        return () => observer.disconnect();
-    }, [leg, index]);
+    useVerticalTimeLineHandle(
+        publicTransportDetailRef,
+        leg,
+        setVerticalTimeline,
+        index,
+        -33
+    );
 
 
     return (
@@ -80,7 +67,7 @@ function PublicTransportDetail({
                         <span className="exclamation">
                             <PriorityHighIcon />
                         </span>
-                        No more available times for this {leg.mode}. Rerout trip with later time.
+                        No more available times for this {leg.mode}. Reroute trip with later time.
                     </div>
                 ) : leg.arrivalAfterDeparture ? (
                     <div className="arrival-after-departure">

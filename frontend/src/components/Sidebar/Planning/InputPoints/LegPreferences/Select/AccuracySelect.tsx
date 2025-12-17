@@ -14,14 +14,8 @@ type AccuracySelectProps = {
     index: number;
 }
 
-function AccuracySelect({ 
-    index 
-}: AccuracySelectProps) {
-    const {
-        legPreferences, 
-        setLegPreferences, 
-        } = useInput();
-            
+function AccuracySelect({ index }: AccuracySelectProps) {
+    const { legPreferences, setLegPreferences } = useInput();
     const [open, setOpen] = useState<boolean>(false);
     
     const handleSelect = (value: boolean) => {

@@ -73,37 +73,38 @@ function InputField({
             onChange={(e) => handleWaypointChange(index, e.target.value)}
             onFocus={() => setActiveField(index)}
             onBlur={() => {
-              setActiveField(null);
-              setSuggestions([]);
+                setActiveField(null);
+                setSuggestions([]);
             }}
             onKeyDown={(e) => handleKeyDown(e, index)}
             fullWidth
             className="input-field"
             autoComplete="off"
             slotProps={{
-              inputLabel: { shrink: true },
-              input: {
-                endAdornment: (
-                  <>
-                    <ClearInputField 
-                        clearWaypoint={() => clearWaypoint(index, true)}
-                        render={index === activeField && waypoint.displayName.length > 0}
-                    />
-                    
-                    <LocationDot 
-                        onClick={() => {
-                            setMapSelectionIndex(index);
-                            if (window.innerWidth < 769) closeSidebar();
-                        }}
-                    />
+                inputLabel: { shrink: true },
+                input: {
+                    endAdornment: (
+                    <>
+                        <ClearInputField 
+                            clearWaypoint={() => clearWaypoint(index, true)}
+                            render={index === activeField && waypoint.displayName.length > 0}
+                        />
+                        
+                        <LocationDot 
+                            onClick={() => {
+                                setMapSelectionIndex(index);
+                                if (window.innerWidth < 769) 
+                                    closeSidebar();
+                            }}
+                        />
 
-                    <RemoveInputField 
-                        onClick={() => removeWaypoint(index)}
-                        render={waypointsLength > 2}
-                    />
-                  </>
-                )
-              },
+                        <RemoveInputField 
+                            onClick={() => removeWaypoint(index)}
+                            render={waypointsLength > 2}
+                        />
+                    </>
+                    )
+                },
             }}
         />
     );

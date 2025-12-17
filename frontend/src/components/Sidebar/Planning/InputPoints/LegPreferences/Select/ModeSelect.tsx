@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
-import { LegPreference, Mode } from "../../../../../types/types";
+import { Mode } from "../../../../../types/types";
 import { modeIcons } from "../../../Icons/Icons";
 import "./Select.css";
 import { useInput } from "../../../../../InputContext";
@@ -16,14 +16,8 @@ type ModeSelectProps = {
     index: number;
 }
 
-function ModeSelect({ 
-    index 
-}: ModeSelectProps) {
-    const {
-        legPreferences, 
-        setLegPreferences, 
-        } = useInput();
-
+function ModeSelect({ index }: ModeSelectProps) {
+    const { legPreferences, setLegPreferences } = useInput();
     const [open, setOpen] = useState<boolean>(false);
 
     const handleSelect = (value: Mode) => {

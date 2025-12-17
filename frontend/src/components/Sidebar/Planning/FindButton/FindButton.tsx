@@ -6,20 +6,16 @@
 
 import { useTranslation } from "react-i18next";
 import "./FindButton.css";
+import { useResult } from "../../../ResultContext";
 
-type FindButtonProps = {
-    disabled: boolean;
-}
-
-function FindButton({
-    disabled
-} : FindButtonProps) {
+function FindButton() {
+    const { loading } = useResult();
     const { t } = useTranslation();
 
     return (
         <button 
             className="find-button"
-            disabled={disabled}
+            disabled={loading}
         >
             {t("planning.find")}
         </button>

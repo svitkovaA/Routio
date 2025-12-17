@@ -13,12 +13,7 @@ import { useResult } from './components/ResultContext';
 import './App.css';
 
 function App() {
-    const {
-        setResults,
-        setShowDetail,
-        setShowResults,
-        setSelectedTripPatternIndex
-    } = useResult();
+    const { clearResults } = useResult();
 
     const {
         setMode,
@@ -29,16 +24,11 @@ function App() {
 
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
     const [showInfo, setShowInfo] = useState(false);   
-    const [findButtonDisabled, setFindButtonDisabled] = useState<boolean>(false);
 
     const closeResults = () => {
-        setShowResults(false);
-        setResults(prev => prev.map(result => ({...result, active: false, tripPatterns: [], originBikeStations: [], destinationBikeStations: []})));
+        clearResults();
         setMode(undefined);
-        setShowDetail(false);
-        setSelectedTripPatternIndex(0);
-        setFindButtonDisabled(false);
-    }
+    };
 
     const handleMarkerRemove = (index: number) => {
         if (waypoints.length === 2) {
@@ -48,7 +38,7 @@ function App() {
             removeWaypoint(index);
         }
         closeResults();
-    }
+    };
 
     return (
         <div className="app">
@@ -68,8 +58,6 @@ function App() {
                 closeResults={closeResults}
                 showInfo={showInfo}
                 setShowInfo={setShowInfo}
-                findButtonDisabled={findButtonDisabled}
-                disableFindButton={() => setFindButtonDisabled(true)}
             />
         </div>
     );
