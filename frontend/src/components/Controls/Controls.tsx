@@ -11,21 +11,15 @@ import './Controls.css'
 type ControlsProps = {
     showInfo: boolean;
     closeInfo: () => void;
-    selectedLayerIndex: number;
-    setSelectedLayerIndex: (layer: number) => void;
 }
 
 function Controls({
     showInfo,
-    closeInfo,
-    selectedLayerIndex,
-    setSelectedLayerIndex
+    closeInfo
 } : ControlsProps) {
     return (
         <div className="controls">
-            <LayerSelect 
-                selectedLayerIndex={selectedLayerIndex}
-                setSelectedLayerIndex={setSelectedLayerIndex}
+            <LayerSelect
                 showInfo={showInfo}
                 closeInfo={closeInfo}
             />

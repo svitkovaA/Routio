@@ -7,33 +7,27 @@
 import { useEffect, useState } from "react";
 import { Polyline } from "react-leaflet";
 import polyline from '@mapbox/polyline';
-import { ResultsType } from "../../types/types";
+import { useResult } from "../../ResultContext";
 
-type ShowRouteProps = {
-    results: ResultsType[];
-    setResults: (value: ResultsType[]) => void;
-    showResults: boolean;
-    resultActiveIndex: number;
-    selectedTripPatternIndex: number;
-};
+function ShowRoute() {
+    const {
+        resultActiveIndex, 
+        results,
+        selectedTripPatternIndex,
+        showResults, setResults,
+        result,
+        pattern
+    } = useResult();
 
-function ShowRoute({
-    results,
-    setResults,
-    showResults,
-    resultActiveIndex,
-    selectedTripPatternIndex
-} : ShowRouteProps) {  
     const [forceUpdate, setForceUpdate] = useState(0);
     
     useEffect(() => {
-        if (resultActiveIndex === -1 || !results[resultActiveIndex]?.active || !results[resultActiveIndex].tripPatterns[selectedTripPatternIndex]?.legs) {
+        if (resultActiveIndex === -1 || !result?.active || !pattern?.legs) {
             return;
         }
         
-        const currentTripPattern = results[resultActiveIndex].tripPatterns[selectedTripPatternIndex];
-        const legs = currentTripPattern.legs;
-        if (currentTripPattern.polyInfo.length !== 0) {
+        const legs = pattern.legs;
+        if (pattern.polyInfo.length !== 0) {
             return;
         }
             
@@ -57,12 +51,12 @@ function ShowRoute({
     
     if (!showResults || 
         resultActiveIndex === -1 || 
-        !results[resultActiveIndex]?.active || 
-        !results[resultActiveIndex].tripPatterns[selectedTripPatternIndex]?.legs) {
+        !result?.active || 
+        !pattern?.legs) {
         return null;
     }
     
-    const polyInfo = results[resultActiveIndex].tripPatterns[selectedTripPatternIndex].polyInfo || [];
+    const polyInfo = pattern.polyInfo || [];
     
     if (polyInfo.length === 0) {
         return null;

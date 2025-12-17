@@ -75,10 +75,17 @@
       "boat": "Boat",
       "travelWithBike": "Travel with bike"
     },
+    "bikesharingPreferences": "Bikesharing preferences",
+    "bikesharingPreferencesTab": {
+      "maxBikesharingDistance": "Max bikesharing distance",
+      "averageBikesharingSpeed": "Average bikesharing speed",
+      "bikesharingLockTime": "Time to lock bike"
+    },
     "cyclingPreferences": "Cycling preferences",
     "cyclingPreferencesTab": {
       "maxCyclingDistance": "Max cycling distance",
-      "averageCyclingSpeed": "Average cycling speed"
+      "averageCyclingSpeed": "Average cycling speed",
+      "cyclingLockTime": "Time to lock bike"
     },
     "walkingPreferences": "Walking preferences",
     "walkingPreferencesTab": {
@@ -90,7 +97,7 @@
       "conditions": "Conditions for bike use",
       "rain": "Rain",
       "snow": "Snow",
-      "tooLowTemperature": "Too low temerature",
+      "tooLowTemperature": "Too low temperature",
       "tooHighTemperature": "Too high temperature",
       "strongWind": "Strong wind",
       "dark": "Dark"

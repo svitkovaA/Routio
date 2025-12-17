@@ -13,20 +13,21 @@ import WaitDetail from "./WaitDetail/WaitDetail";
 import VerticalTimelineComponent from "./VerticalTimelineComponent/VerticalTimelineComponent";
 import Transfer from "./Transfer/Transfer";
 import "./Detail.css"
+import { useInput } from "../../../InputContext";
 
 type DetailProps = {
     tripPattern: TripPattern;
-    waypoints: Waypoint[];
     setPublicLegIndex: (value: number) => void;
     recalculatePattern: (selectedIndex: number, legIndex: number) => void;
 }
 
 function Detail({ 
     tripPattern, 
-    waypoints,
     setPublicLegIndex,
     recalculatePattern
 } : DetailProps) {
+    const { waypoints } = useInput();
+
     let waypointCount = 0;
 
     const [verticalTimeline, setVerticalTimeline] = useState<VerticalTimeline[]>(

@@ -8,26 +8,18 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import dayjs from "dayjs";
 import "dayjs/locale/cs"; 
 import { useTranslation } from "react-i18next";
 import "./TimeDate.css";
+import { useInput } from '../../../InputContext';
 
-
-type TimeDateProps = {
-    time: dayjs.Dayjs;
-    date: dayjs.Dayjs;
-    setTime: (value: dayjs.Dayjs) => void;
-    setDate: (value: dayjs.Dayjs) => void;
-}
-
-function TimeDate({
-    time,
-    date,
-    setTime,
-    setDate
-} : TimeDateProps){
+function TimeDate(){
     const { t } = useTranslation();
+
+    const {
+        date, setDate,
+        time, setTime
+    } = useInput();
     
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={"cs"}>

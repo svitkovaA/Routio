@@ -12,20 +12,22 @@ import { accuracyIcons, modeIcons } from "../../Icons/Icons";
 import AccuracySelect from "./Select/AccuracySelect";
 import ModeSelect from "./Select/ModeSelect";
 import "./LegPreferences.css";
+import { useInput } from "../../../../InputContext";
 
 type LegPreferencesProps = {
     render: boolean;
-    legPreferences: LegPreference[];
-    setLegPreferences: (modes: LegPreference[] | ((prev: LegPreference[]) => LegPreference[])) => void;
     index: number;
 }
 
 function LegPreferences({
     render,
-    legPreferences,
-    setLegPreferences,
     index
 }: LegPreferencesProps) {
+    const {
+        legPreferences,
+        setLegPreferences
+        } = useInput();
+
     const setLegPreference = (value: boolean) => {
         setLegPreferences((prev) => {
             const newLegPreferences = [...prev];
@@ -65,13 +67,9 @@ function LegPreferences({
                 <div className="preferences-wrapper">
                     <div className="select-wrapper">
                         <ModeSelect
-                            legPreferences={legPreferences}
-                            setLegPreferences={setLegPreferences}
                             index={index}
                         />
                         <AccuracySelect
-                            legPreferences={legPreferences}
-                            setLegPreferences={setLegPreferences}
                             index={index}
                         />
                     </div>

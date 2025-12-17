@@ -61,12 +61,12 @@ function LanguageSelect({
                 onBlur={() => setOpen(false)}
                 className={"controls-button " + (open ? "open" : "")}
                 onClick={() => {
-                if (showInfo) {
-                    closeInfo();
-                }
-                else {
-                    setOpen(!open);
-                }
+                    if (showInfo) {
+                        closeInfo();
+                    }
+                    else {
+                        setOpen(!open);
+                    }
                 }}
             >
                 {selectedLang.flagCode}
@@ -75,15 +75,14 @@ function LanguageSelect({
 
             {open && (
                 <div className="dropdown">
-                {languages
-                    .map((lang) => (
-                    <div
-                        key={lang.code}
-                        className={"dropdown-item " + (lang.code === selectedLang.code ? "selected" : "")}
-                        onMouseDown={() => handleSelect(lang)}
-                    >
-                    {lang.flagCode}
-                    </div>
+                    {languages.map((lang) => (
+                        <div
+                            key={lang.code}
+                            className={"dropdown-item " + (lang.code === selectedLang.code ? "selected" : "")}
+                            onMouseDown={() => handleSelect(lang)}
+                        >
+                            {lang.flagCode}
+                        </div>
                     ))}
                 </div>
             )}

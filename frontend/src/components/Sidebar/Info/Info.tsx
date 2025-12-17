@@ -13,19 +13,18 @@ import "./Info.css";
 
 type InfoProps = {
     closeInfo: () => void,
-    style?: React.CSSProperties,
 };
 
 const keepOpen = (e: React.MouseEvent) => {
     e.stopPropagation();
 }
 
-function Info({ closeInfo, style }: InfoProps) {
+function Info({ closeInfo }: InfoProps) {
     const [showAbout, setShowAbout] = useState(true);
     const { t } = useTranslation();
 
     return (
-    <div style={style} className="info-wrapper" onClick={closeInfo}>
+    <div className="info-wrapper" onClick={closeInfo}>
         <div className="info" onClick={keepOpen}>
             <button className="close-button" onClick={closeInfo}>
                 <FontAwesomeIcon icon={faXmark} />

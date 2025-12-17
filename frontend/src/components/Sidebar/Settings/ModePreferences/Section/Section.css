@@ -1,0 +1,22 @@
+.section {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.section-label {
+    flex: 0 0 auto;
+    font-weight: 500;
+    min-width: 100px;
+    max-width: 120px;
+    margin-top: 12px;
+}
+
+.number-input {
+    flex: 0 0 120px;
+    max-width: 150px;
+}
+
+.number-input .fa-icon {
+    font-size: 0.75rem;
+}

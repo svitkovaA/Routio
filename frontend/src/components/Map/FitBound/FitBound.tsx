@@ -7,34 +7,33 @@
 import { useEffect, useMemo } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
-import { ResultsType } from "../../types/types";
+import { useResult } from "../../ResultContext";
 
 type FitBoundProps = {
     sidebarOpen: boolean;
-    results: ResultsType[];
-    resultActiveIndex: number;
-    selectedTripPatternIndex: number;
 }
 
-function FitBound({ 
-    sidebarOpen,
-    results,
-    resultActiveIndex,
-    selectedTripPatternIndex
-}: FitBoundProps) {
+function FitBound({ sidebarOpen }: FitBoundProps) {
+    const {
+        resultActiveIndex,
+        selectedTripPatternIndex,
+        results,
+        result,
+        pattern
+    } = useResult();
+
     const map = useMap();
 
     const bounds = useMemo(() => {
-        if (resultActiveIndex === -1 || !results[resultActiveIndex].active || !results[resultActiveIndex].tripPatterns[selectedTripPatternIndex]?.legs) {
+        if (resultActiveIndex === -1 || !result.active || !pattern?.legs) {
             return null;
         }
-        const tripPattern = results[resultActiveIndex].tripPatterns[selectedTripPatternIndex]
 
-        if (tripPattern?.southWest && tripPattern?.northWest) {
-            return L.latLngBounds(tripPattern.southWest, tripPattern.northWest);
+        if (pattern?.southWest && pattern?.northWest) {
+            return L.latLngBounds(pattern.southWest, pattern.northWest);
         }
 
-        const polyInfo = tripPattern.polyInfo;
+        const polyInfo = pattern.polyInfo;
 
         if (polyInfo.length === 0) {
             return null;

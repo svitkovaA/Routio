@@ -7,20 +7,21 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
-import { LegPreference } from "../../../../../types/types";
 import { accuracyIcons } from "../../../Icons/Icons";
+import { useInput } from "../../../../../InputContext";
 
 type AccuracySelectProps = {
-    legPreferences: LegPreference[];
-    setLegPreferences: (modes: LegPreference[] | ((prev: LegPreference[]) => LegPreference[])) => void;
     index: number;
 }
 
 function AccuracySelect({ 
-    legPreferences, 
-    setLegPreferences, 
     index 
 }: AccuracySelectProps) {
+    const {
+        legPreferences, 
+        setLegPreferences, 
+        } = useInput();
+            
     const [open, setOpen] = useState<boolean>(false);
     
     const handleSelect = (value: boolean) => {

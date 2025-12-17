@@ -7,57 +7,43 @@
 import { useEffect, useState } from "react";
 import { CircleMarker, Popup, useMapEvent } from "react-leaflet";
 import { API_BASE_URL } from "../../config/config";
-import { ResultsType, RoutePreference, Waypoint } from "../../types/types";
+import { useSettings } from "../../SettingsContext";
+import { useInput } from "../../InputContext";
+import { useResult } from "../../ResultContext";
 
-type BikeStationsProps = {
-    results: ResultsType[];
-    setResults: (value: ResultsType[]) => void;
-    showResults: boolean;
-    resultActiveIndex: number;
-    selectedTripPatternIndex: number;
-    waypoints: Waypoint[];
-    arriveBy: boolean;
-    useOwnBike: boolean;
-    maxTransfers: number;
-    selectedModes: string[];
-    maxBikeDistance: number;
-    bikeAverageSpeed: number;
-    maxBikesharingDistance: number;
-    bikesharingAverageSpeed: number;
-    maxWalkDistance: number;
-    walkAverageSpeed: number;
-    bikesharingLockTime: number;
-    bikeLockTime: number;
-    preference: RoutePreference;
-    setPreference: (value: RoutePreference) => void;
-}
+function BikeStations() {
+    const {
+        waypoints,
+        arriveBy,
+        useOwnBike,
+        preference,
+    } = useInput();
 
-function BikeStations({
-    results,
-    setResults,
-    showResults,
-    resultActiveIndex,
-    selectedTripPatternIndex,
-    waypoints,
-    arriveBy,
-    useOwnBike,
-    maxTransfers,
-    selectedModes,
-    maxBikeDistance,
-    bikeAverageSpeed,
-    maxBikesharingDistance,
-    bikesharingAverageSpeed,
-    maxWalkDistance,
-    walkAverageSpeed,
-    bikesharingLockTime,
-    bikeLockTime,
-    preference,
-    setPreference
-} : BikeStationsProps) {
+    const {
+        maxTransfers,
+        selectedModes,
+        maxBikeDistance,
+        bikeAverageSpeed,
+        maxBikesharingDistance,
+        bikesharingAverageSpeed,
+        maxWalkDistance,
+        walkAverageSpeed,
+        bikesharingLockTime,
+        bikeLockTime
+    } = useSettings();
+
+    const {
+        results, setResults,
+        showResults,
+        resultActiveIndex,
+        selectedTripPatternIndex,
+        pattern
+    } = useResult();
+
     const changeBikeStation = async (originBikeStation: boolean, bikeStationIndex: number, bikeStations: any[], legIndex: number) => {
-        const legs = results[resultActiveIndex].tripPatterns[selectedTripPatternIndex].legs;
-        const originalLegs = results[resultActiveIndex].tripPatterns[selectedTripPatternIndex].originalLegs;
-        const modes = results[resultActiveIndex].tripPatterns[selectedTripPatternIndex].modes;
+        const legs = pattern.legs;
+        const originalLegs = pattern.originalLegs;
+        const modes = pattern.modes;
         
         let waypointsArray: string[] = [];
         for (let i = 0; i < waypoints.length; i++) {

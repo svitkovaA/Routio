@@ -10,18 +10,14 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import { useTranslation } from "react-i18next";
 import "./ArrivalDeparture.css";
+import { useInput } from '../../../InputContext';
 
-
-type ModeSwitchProps = {
-    arriveBy: boolean;
-    setArriveBy: (value: boolean) => void;
-}
-
-function ArrivalDeparture({
-    arriveBy,
-    setArriveBy
-} : ModeSwitchProps) {
+function ArrivalDeparture() {
     const { t } = useTranslation();
+
+    const {
+        arriveBy, setArriveBy
+    } = useInput();
     return (
         <FormControl>
             <RadioGroup 

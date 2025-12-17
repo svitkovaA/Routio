@@ -20,7 +20,7 @@
     "setIntermediatePoint": "Zadejte mezibod",
     "mode": "Způsob",
     "modes": {
-      "multimodal": "Multimodalní",
+      "multimodal": "Multimodálni",
       "transit": "Veřejná doprava",
       "bicycle": "Cyklistika",
       "walk": "Chůze"
@@ -38,7 +38,7 @@
     },
     "routePreferences": "Preference trasy",
     "routePreference": {
-      "fastestRoute": "Nejrýchlejší trasa",
+      "fastestRoute": "Nejrychlejší trasa",
       "shortestRoute": "Nejkratší trasa",
       "minimizeTransfers": "Minimalizovať přestupy"
     },
@@ -78,9 +78,16 @@
     "cyclingPreferences": "Preference cyklistiky",
     "cyclingPreferencesTab": {
       "maxCyclingDistance": "Maximální vzdálenost na kole",
-      "averageCyclingSpeed": "Průměrná rychlost jízdy na kole"
+      "averageCyclingSpeed": "Průměrná rychlost jízdy na kole",
+      "cyclingLockTime": "Čas na uzamknutí kola"
     },
-    "walkingPreferences": "Preference chůdze",
+    "bikesharingPreferences": "Preference sdílené cyklistiky",
+    "bikesharingPreferencesTab": {
+      "maxBikesharingDistance": "Maximální vzdálenost na sdíleném kole",
+      "averageBikesharingSpeed": "Průměrná rychlost jízdy na sdíleném kole",
+      "bikesharingLockTime": "Čas na uzamknutí kola"
+    },
+    "walkingPreferences": "Preference chůze",
     "walkingPreferencesTab": {
       "maxWalkingDistance": "Maximální vzdálenost chůze",
       "averageWalkingSpeed": "Průměrná rychlost chůze"
@@ -103,7 +110,7 @@
   },
   "results": "Výsledky",
   "modeDescriptions": {
-    "multimodalTransport": "Multimodální doprava",
+    "multimodalTransport": "Multimodálni doprava",
     "publicTransport": "Veřejná doprava",
     "bicycle": "Kolo",
     "walk": "Chůze"

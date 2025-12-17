@@ -6,23 +6,19 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBusSimple, faBicycle, faPersonWalking } from "@fortawesome/free-solid-svg-icons";
-import { Mode } from "../../../types/types";
 import { MultimodalIcon } from "../../Planning/Icons/Icons";
 import "./ResultTabs.css";
+import { useInput } from "../../../InputContext";
+import { useResult } from "../../../ResultContext";
 
-type ResultTabsProps = {
-    resultActiveIndex: number;
-    setResultActiveIndex: (index: number) => void;
-    setMode: (value: Mode) => void;
-    setSelectedTripPatternIndex: (index: number) => void;
-}
+function ResultTabs() {  
+    const {
+        setSelectedTripPatternIndex,
+        resultActiveIndex ,setResultActiveIndex
+    } = useResult();
 
-function ResultTabs({
-    resultActiveIndex,
-    setResultActiveIndex,
-    setMode,
-    setSelectedTripPatternIndex
-}: ResultTabsProps) {    
+    const { setMode } = useInput();
+
     return (
         <div className="result-tabs" onClick={() => setSelectedTripPatternIndex(0)}>
             <div 

@@ -9,27 +9,26 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faLayerGroup } from "@fortawesome/free-solid-svg-icons";
 import { useLayers } from "./Layers";
 import "./LayerSelect.css";
+import { useSettings } from "../../SettingsContext";
 
 
 type LayerSelectProps = {
-    selectedLayerIndex: number;
-    setSelectedLayerIndex: (layer: number) => void;
     showInfo: boolean;
     closeInfo: () => void;
 };
 
 function LayerSelect({ 
-    selectedLayerIndex,
-    setSelectedLayerIndex,
     showInfo,
     closeInfo
 }: LayerSelectProps) {
+    const { selectedLayerIndex, setSelectedLayerIndex } = useSettings();
+
     const [open, setOpen] = useState<boolean>(false);
     const { baseLayers } = useLayers();
 
     const handleSelect = (index: number) => {
-    setSelectedLayerIndex(index);
-    setOpen(false);
+        setSelectedLayerIndex(index);
+        setOpen(false);
     };
 
     const [_, setCloseDropdown] = useState<boolean>(true);

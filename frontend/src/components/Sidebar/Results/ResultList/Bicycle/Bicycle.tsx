@@ -6,21 +6,16 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRoute, faStopwatch } from "@fortawesome/free-solid-svg-icons";
-import { ResultsType } from "../../../../types/types";
 import Timeline from "../Timeline/Timeline";
 import '../ResultListItem/ResultListItem.css';
+import { useResult } from "../../../../ResultContext";
 
-type BicycleProps = {
-    result: ResultsType;
-    selectedTripPatternIndex: number;
-    setSelectedTripPatternIndex: (index: number) => void;
-}
+function Bicycle() {
+    const {
+        result,
+        selectedTripPatternIndex, setSelectedTripPatternIndex
+    } = useResult();
 
-function Bicycle({
-    result,
-    selectedTripPatternIndex,
-    setSelectedTripPatternIndex
-} : BicycleProps) {
     return (
         <>
             {result.tripPatterns.map((pattern, index) => (

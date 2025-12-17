@@ -12,6 +12,7 @@ import LocationDot from "./LocationDot";
 import ClearInputField from "./ClearInputField";
 import RemoveInputField from "./RemoveInputField";
 import "./InputField.css";
+import { useInput } from "../../../../InputContext";
 
 type InputFieldProps = {
     index: number;
@@ -19,13 +20,8 @@ type InputFieldProps = {
     waypoint: Waypoint;
     waypointsLength: number;
     handleWaypointChange: (index: number, value: string) => void;
-    activeField: number | null;
-    setActiveField: (index: number | null) => void;
     handleKeyDown: (e: React.KeyboardEvent<HTMLDivElement>, index: number) => void;
     setSuggestions: (value: InputText[]) => void;
-    clearWaypoint: (index: number, clearDisplayName: boolean) => void;
-    removeWaypoint: (index: number) => void;
-    setMapSelectionIndex: (value: number) => void;
     closeSidebar: () => void;
 }
 
@@ -35,16 +31,19 @@ function InputField({
     waypoint,
     waypointsLength,
     handleWaypointChange,
-    activeField,
-    setActiveField,
     handleKeyDown,
     setSuggestions,
-    clearWaypoint,
-    removeWaypoint,
-    setMapSelectionIndex,
-    closeSidebar,
+    closeSidebar
 } : InputFieldProps) {
     const { t } = useTranslation();
+
+    const {
+        activeField, setActiveField,
+        clearWaypoint,
+        removeWaypoint,
+        setMapSelectionIndex
+    } = useInput();
+
     const label = () => {
         if (index === 0) {
             return t("planning.origin");

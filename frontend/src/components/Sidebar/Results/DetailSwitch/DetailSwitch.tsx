@@ -10,61 +10,60 @@ import { IconButton } from "@mui/material";
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import "./DetailSwitch.css"
+import { useResult } from "../../../ResultContext";
 
 type DetailSwitchProps = {
-  numOfPatterns: number;
-  selectedTripPatternIndex: number;
-  setSelectedTripPatternIndex: (value: number | ((prev: number) => number)) => void;
-  setPublicLegIndex: (value: number) => void;
+    numOfPatterns: number;
+    setPublicLegIndex: (value: number) => void;
 };
 
 function DetailSwitch({
-  numOfPatterns,
-  selectedTripPatternIndex,
-  setSelectedTripPatternIndex,
-  setPublicLegIndex
+    numOfPatterns,
+    setPublicLegIndex
 }: DetailSwitchProps) {
-  return (
-    <div className="detail-switch">
-      <IconButton
-        className="detail-switch-arrow"
-        onClick={() => {
-          setSelectedTripPatternIndex((prev) =>
-            prev > 0 ? prev - 1 : numOfPatterns - 1
-          );
-          setPublicLegIndex(-1);
-        }
-        }
-      >
-        <FontAwesomeIcon icon={faAngleLeft} />
-      </IconButton>
+    const { selectedTripPatternIndex, setSelectedTripPatternIndex } = useResult();
 
-      <div className="dots">
-        {Array.from({ length: numOfPatterns }, (_, i) => (
-          <IconButton key={i} onClick={() => {setSelectedTripPatternIndex(i); setPublicLegIndex(-1);}}>
-            {i === selectedTripPatternIndex ? (
-              <RadioButtonCheckedIcon className="dot"/>
-            ) : (
-              <RadioButtonUncheckedIcon className="dot"/>
-            )}
-          </IconButton>
-        ))}
-      </div>
+    return (
+        <div className="detail-switch">
+            <IconButton
+                className="detail-switch-arrow"
+                onClick={() => {
+                setSelectedTripPatternIndex((prev) =>
+                    prev > 0 ? prev - 1 : numOfPatterns - 1
+                );
+                setPublicLegIndex(-1);
+                }
+                }
+            >
+                <FontAwesomeIcon icon={faAngleLeft} />
+            </IconButton>
 
-      <IconButton
-        className="detail-switch-arrow"
-        onClick={() => {
-          setSelectedTripPatternIndex((prev) =>
-            prev < numOfPatterns - 1 ? prev + 1 : 0
-          );
-          setPublicLegIndex(-1);
-          }
-        }
-      >
-        <FontAwesomeIcon icon={faAngleRight} />
-      </IconButton>
-    </div>
-  );
+            <div className="dots">
+                {Array.from({ length: numOfPatterns }, (_, i) => (
+                <IconButton key={i} onClick={() => {setSelectedTripPatternIndex(i); setPublicLegIndex(-1);}}>
+                    {i === selectedTripPatternIndex ? (
+                    <RadioButtonCheckedIcon className="dot"/>
+                    ) : (
+                    <RadioButtonUncheckedIcon className="dot"/>
+                    )}
+                </IconButton>
+                ))}
+            </div>
+
+            <IconButton
+                className="detail-switch-arrow"
+                onClick={() => {
+                setSelectedTripPatternIndex((prev) =>
+                    prev < numOfPatterns - 1 ? prev + 1 : 0
+                );
+                setPublicLegIndex(-1);
+                }
+                }
+            >
+                <FontAwesomeIcon icon={faAngleRight} />
+            </IconButton>
+        </div>
+    );
 }
 
 export default DetailSwitch;

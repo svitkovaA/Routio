@@ -9,13 +9,16 @@ import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { API_BASE_URL } from '../config/config';
 import { useTranslation } from 'react-i18next';
-import { InputText, ResultsType, RoutePreference, Waypoint } from '../types/types';
+import { InputText, Waypoint } from '../types/types';
 import { useLayers } from '../Controls/Layer/Layers';
 import ShowRoute from './ShowRoute/ShowRoute';
 import FitBound from './FitBound/FitBound';
 import BikeStations from './BikeStations/BikeStations';
+import { useInput } from '../InputContext';
+import { useSettings } from '../SettingsContext';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
+import { useResult } from '../ResultContext';
 
 
 L.Icon.Default.mergeOptions({
@@ -27,31 +30,7 @@ L.Icon.Default.mergeOptions({
 type mapProps = {
     sidebarOpen: boolean;
     openSidebar: () => void;
-    waypoints: Waypoint[];
-    setWaypoints: (value: Waypoint[]) => void;
-    mapSelectionIndex: number;
-    setMapSelectionIndex: (value: number) => void;
-    results: ResultsType[];
-    setResults: (value: ResultsType[] | ((prev: ResultsType[]) => ResultsType[])) => void;
-    resultActiveIndex: number;
-    showResults: boolean;
-    selectedLayerIndex: number;
-    selectedTripPatternIndex: number;
     handleMarkerRemove: (index: number) => void;
-    arriveBy: boolean;
-    useOwnBike: boolean;
-    maxTransfers: number;
-    selectedModes: string[];
-    maxBikeDistance: number;
-    bikeAverageSpeed: number;
-    maxBikesharingDistance: number;
-    bikesharingAverageSpeed: number;
-    maxWalkDistance: number;
-    walkAverageSpeed: number;
-    bikesharingLockTime: number;
-    bikeLockTime: number;
-    preference: RoutePreference;
-    setPreference: (value: RoutePreference) => void;
     closeResults: () => void;
 };
 
@@ -138,35 +117,24 @@ const defaultZoom = 13;
 function Map({ 
     sidebarOpen,
     openSidebar, 
-    waypoints, 
-    setWaypoints, 
-    mapSelectionIndex, 
-    setMapSelectionIndex,
-    results,
-    setResults,
-    resultActiveIndex,
-    showResults,
-    selectedLayerIndex,
-    selectedTripPatternIndex,
+    // results,
+    // setResults,
+    // resultActiveIndex,
+    // showResults,
+    // selectedTripPatternIndex,
     handleMarkerRemove,
-    arriveBy,
-    useOwnBike,
-    maxTransfers,
-    selectedModes,
-    maxBikeDistance,
-    bikeAverageSpeed,
-    maxBikesharingDistance,
-    bikesharingAverageSpeed,
-    maxWalkDistance,
-    walkAverageSpeed,
-    bikesharingLockTime,
-    bikeLockTime,
-    preference,
-    setPreference,
     closeResults
 }: mapProps) {
+    const { showResults } = useResult();
+    const { selectedLayerIndex } = useSettings();
     const { baseLayers, satelliteOverlay } = useLayers();
     const { t } = useTranslation();
+    const {
+        waypoints, 
+        setWaypoints, 
+        mapSelectionIndex, 
+        setMapSelectionIndex,
+    } = useInput();
 
     const startMarker = createPinIcon("START", t("map.markers.start") as string);
     const endMarker = createPinIcon("END", t("map.markers.end") as string);
@@ -233,9 +201,6 @@ function Map({
             {showResults && waypoints.length > 1 && (
                 <FitBound 
                     sidebarOpen={sidebarOpen}
-                    results={results}
-                    resultActiveIndex={resultActiveIndex}
-                    selectedTripPatternIndex={selectedTripPatternIndex}
                 />
             )}
 
@@ -250,57 +215,30 @@ function Map({
                         position={[w.lat, w.lon]}
                         icon={i === 0 ? startMarker : i !== waypoints.length - 1 ? createPinIcon(i.toString()) : endMarker}
                     >
-                    <Popup
-                        ref={el => {
-                            popupRefs.current[i] = el 
-                        }}
-                    >
-                        {w.displayName} <br/>
-                        Lat: {w.lat.toFixed(5)} <br/>
-                        Lon: {w.lon.toFixed(5)} <br/>
-                        <button 
-                            className="popup-button"
-                            onClick={() => {
-                                handleMarkerRemove(i);
-                                popupRefs.current[i]?.remove();
-                            }}                          
+                        <Popup
+                            ref={el => {
+                                popupRefs.current[i] = el 
+                            }}
                         >
-                            {waypoints.length === 2 ? "Clear waypoint" : "Remove waypoint"}
-                        </button>
-                    </Popup>
+                            {w.displayName} <br/>
+                            Lat: {w.lat.toFixed(5)} <br/>
+                            Lon: {w.lon.toFixed(5)} <br/>
+                            <button 
+                                className="popup-button"
+                                onClick={() => {
+                                    handleMarkerRemove(i);
+                                    popupRefs.current[i]?.remove();
+                                }}                          
+                            >
+                                {waypoints.length === 2 ? "Clear waypoint" : "Remove waypoint"}
+                            </button>
+                        </Popup>
                     </Marker>
                 )
             )}
 
-            <ShowRoute 
-                results={results}
-                setResults={setResults}
-                showResults={showResults}
-                resultActiveIndex={resultActiveIndex}
-                selectedTripPatternIndex={selectedTripPatternIndex}
-            />
-            <BikeStations 
-                results={results}
-                setResults={setResults}
-                showResults={showResults}
-                resultActiveIndex={resultActiveIndex}
-                selectedTripPatternIndex={selectedTripPatternIndex}
-                waypoints={waypoints}
-                arriveBy={arriveBy}
-                useOwnBike={useOwnBike}
-                maxTransfers={maxTransfers}
-                selectedModes={selectedModes}
-                maxBikeDistance={maxBikeDistance}
-                bikeAverageSpeed={bikeAverageSpeed}
-                maxBikesharingDistance={maxBikesharingDistance}
-                bikesharingAverageSpeed={bikesharingAverageSpeed}
-                maxWalkDistance={maxWalkDistance}
-                walkAverageSpeed={walkAverageSpeed}
-                bikesharingLockTime={bikesharingLockTime}
-                bikeLockTime={bikeLockTime}
-                preference={preference}
-                setPreference={setPreference}
-            />
+            <ShowRoute />
+            <BikeStations />
         </MapContainer>
     )
 }

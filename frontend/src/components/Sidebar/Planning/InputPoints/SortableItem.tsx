@@ -10,35 +10,26 @@ import { faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { useSortable } from "@dnd-kit/sortable";
 import {CSS} from '@dnd-kit/utilities';
 import { API_BASE_URL } from "../../../config/config";
-import { InputText, LegPreference, Waypoint } from "../../../types/types";
+import { InputText } from "../../../types/types";
 import InputField from "./InputField/InputField";
 import Suggestions from "./Suggestions/Suggestions";
+import { useInput } from "../../../InputContext";
 
 type SortableItemProps = {
-    waypoints: Waypoint[];
-    setWaypoints: (value: Waypoint[] | ((prev: Waypoint[]) => Waypoint[])) => void;
     index: number;
-    setMapSelectionIndex: (value: number) => void;
     closeSidebar: () => void;
-    activeField: number | null;
-    setActiveField: (index: number | null) => void;
-    setLegPreferences: (value: LegPreference[] | ((prev: LegPreference[]) => LegPreference[])) => void;
-    clearWaypoint: (index: number, clearDisplayName: boolean) => void;
-    removeWaypoint: (currentIndex: number) => void;
 };
 
 function SortableItem({
-    waypoints,
-    setWaypoints,
     index,
-    setMapSelectionIndex,
-    closeSidebar,
-    activeField,
-    setActiveField,
-    setLegPreferences,
-    clearWaypoint,
-    removeWaypoint
+    closeSidebar
 }: SortableItemProps) {
+    const {
+        waypoints, setWaypoints,
+        activeField,
+        clearWaypoint
+    } = useInput();
+
     const waypoint = waypoints[index];
     const [suggestions, setSuggestions] = useState<InputText[]>([]);
     const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -152,13 +143,8 @@ function SortableItem({
                 waypointsLength={waypoints.length}
                 waypoint={waypoint}
                 handleWaypointChange={handleWaypointChange}
-                activeField={activeField}
-                setActiveField={setActiveField}
                 handleKeyDown={handleKeyDown}
                 setSuggestions={setSuggestions}
-                clearWaypoint={clearWaypoint}
-                removeWaypoint={removeWaypoint}
-                setMapSelectionIndex={setMapSelectionIndex}
                 closeSidebar={closeSidebar}
             />
 

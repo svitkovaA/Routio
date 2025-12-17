@@ -8,47 +8,30 @@ import { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from "react-i18next";
-import { Mode, ResultsType, Waypoint } from "../../types/types";
 import ResultTabs from "./ResultTabs/ResultTabs";
 import ResultList from "./ResultList/ResultList";
 import ResultListItem from "./ResultList/ResultListItem/ResultListItem";
 import DetailSwitch from "./DetailSwitch/DetailSwitch";
 import Detail from "./Detail/Detail";
 import MoreDepartures from "./MoreDepartures/MoreDepartures";
-import "./Results.css";
 import { API_BASE_URL } from "../../config/config";
+import { useResult } from "../../ResultContext";
+import "./Results.css";
 
 type ResultsProps = {
     closeResults: () => void;
-    mode: Mode | undefined;
-    setMode: (value: Mode| undefined) => void;
-    result: ResultsType;
-    setResults: (value: ResultsType[] | ((prev: ResultsType[]) => ResultsType[])) => void;
-    resultActiveIndex: number;
-    setResultActiveIndex: (value: number) => void;
-    selectedTripPatternIndex: number;
-    setSelectedTripPatternIndex: (value: number | ((prev: number) => number)) => void;
-    showDetail: boolean;
-    setShowDetail: (value: boolean) => void;
-    waypoints: Waypoint[];
-    style?: React.CSSProperties;
 };
 
-function Results({ 
-    closeResults,
-    mode,
-    setMode,
-    result,
-    setResults,
-    resultActiveIndex,
-    setResultActiveIndex,
-    selectedTripPatternIndex,
-    setSelectedTripPatternIndex,
-    showDetail,
-    setShowDetail,
-    waypoints,
-    style 
-} : ResultsProps) {
+function Results({ closeResults } : ResultsProps) {
+    const {
+        showDetail, setShowDetail,
+        result,
+        selectedTripPatternIndex, 
+        setResults,
+        resultActiveIndex,
+        pattern
+    } = useResult();
+
     const { t } = useTranslation();
     const [publicLegIndex, setPublicLegIndex] = useState<number>(-1)
     const descriptions: String[] = [
@@ -93,20 +76,15 @@ function Results({
     }
 
     return (
-        <div className="results" style={style}>
+        <div className="results">
             <div className="sidebar-header">
                 <button className="back-button" onClick={handleBackButtonClick}>
                     <FontAwesomeIcon icon={faAngleLeft} />
                 </button>
                 <span onClick={handleBackButtonClick}>{showDetail ? "Details" : t("results")}</span>
-                {/* <Refresh /> */}
                 {!showDetail ? (
                     <>
                         <ResultTabs 
-                            resultActiveIndex={resultActiveIndex}
-                            setResultActiveIndex={setResultActiveIndex}
-                            setMode={setMode}
-                            setSelectedTripPatternIndex={setSelectedTripPatternIndex}
                         />
                         <div className="description selected">
                             {descriptions[resultActiveIndex]}
@@ -115,12 +93,10 @@ function Results({
                 ) : (
                     <div className="detail-header">
                         <ResultListItem
-                            pattern={result.tripPatterns[selectedTripPatternIndex]}
+                            pattern={pattern}
                         />
                         <DetailSwitch
                             numOfPatterns={result.tripPatterns.length}
-                            selectedTripPatternIndex={selectedTripPatternIndex}
-                            setSelectedTripPatternIndex={setSelectedTripPatternIndex}
                             setPublicLegIndex={setPublicLegIndex}
                         />
                     </div>
@@ -132,26 +108,19 @@ function Results({
                     <>No results found</>
                 ) : !showDetail ? (
                     <ResultList
-                        result={result}
-                        mode={mode}
-                        selectedTripPatternIndex={selectedTripPatternIndex}
-                        setSelectedTripPatternIndex={setSelectedTripPatternIndex}
-                        showDetail={showDetail}
-                        setShowDetail={setShowDetail}
                     />
                 ) : publicLegIndex !== -1 ? (
                     <MoreDepartures
-                        leg={result.tripPatterns[selectedTripPatternIndex].originalLegs[publicLegIndex]}  
+                        leg={pattern.originalLegs[publicLegIndex]}  
                         recalculatePattern={recalculatePattern}               
                     />
                 ) : (
                     <Detail
-                        tripPattern={result.tripPatterns[selectedTripPatternIndex]}
-                        waypoints={waypoints}
+                        tripPattern={pattern}
                         setPublicLegIndex={setPublicLegIndex}
                         recalculatePattern={recalculatePattern}
                     />
-                    )
+                )
                 }
             </div>
         </div>

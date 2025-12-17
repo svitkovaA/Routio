@@ -4,135 +4,85 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation } from "react-i18next";
 import TransportPreferences from "./TransportPreferences/TransportPreferences";
-import CyclingPreferences from "./CyclingPreferences/CyclingPreferences";
-import BikesharingPreferences from "./BikesharingPreferences.tsx/BikesharingPreferences";
-import WalkingPreferences from "./WalkingPreferences/WalkingPreferences";
+import ModePreferences from "./ModePreferences/ModePreferences";
+import { useSettings } from "../../SettingsContext";
 import "./Settings.css";
 
 type SettingsProps = {
     closeSettings: () => void;
-    maxTransfers: number;
-    setMaxTransfers: (value: number | ((prev: number) => number)) => void;
-    selectedModes: string[];
-    setSelectedModes: (modes:string[]) => void;
-    maxBikeDistance: number;
-    setMaxBikeDistance: (value: number | ((prev: number) => number)) => void;
-    bikeAverageSpeed: number;
-    setBikeAverageSpeed: (value: number | ((prev: number) => number)) => void;
-    maxBikesharingDistance: number;
-    setMaxBikesharingDistance: (value: number | ((prev: number) => number)) => void;
-    bikesharingAverageSpeed: number;
-    setBikesharingAverageSpeed: (value: number | ((prev: number) => number)) => void;
-    maxWalkDistance: number;
-    setMaxWalkDistance: (value: number | ((prev: number) => number)) => void;
-    walkAverageSpeed: number;
-    setWalkAverageSpeed: (value: number | ((prev: number) => number)) => void;
-    bikesharingLockTime: number;
-    setBikesharingLockTime: (value: number | ((prev: number) => number)) => void;
-    bikeLockTime: number;
-    setBikeLockTime: (value: number | ((prev: number) => number)) => void;
-    style?: React.CSSProperties;
 };
 
-function Settings({ 
-    closeSettings, 
-    maxTransfers,
-    setMaxTransfers,
-    selectedModes,
-    setSelectedModes,
-    maxBikeDistance,
-    setMaxBikeDistance,
-    bikeAverageSpeed,
-    setBikeAverageSpeed,
-    maxBikesharingDistance,
-    setMaxBikesharingDistance,
-    bikesharingAverageSpeed,
-    setBikesharingAverageSpeed,
-    maxWalkDistance,
-    setMaxWalkDistance,
-    walkAverageSpeed,
-    setWalkAverageSpeed,
-    bikesharingLockTime,
-    setBikesharingLockTime,
-    bikeLockTime,
-    setBikeLockTime,
-    style 
-}: SettingsProps) {
-    const [isGeneralOpen, setIsGeneralOpen] = useState(false);
-    const [isTransferOpen, setIsTransferOpen] = useState(false);
-    const [isCycleOpen, setIsCycleOpen] = useState(false);
-    const [isBikesharingOpen, setIsBikesharingOpen] = useState(false);
-    const [isWalkingOpen, setIsWalkingOpen] = useState(false);
-    const [isWeatherOpen, setIsWeatherOpen] = useState(false);
-
+function Settings({ closeSettings } : SettingsProps) {
     const { t } = useTranslation();
-    const handleCloseSettings = () => {
-        setIsGeneralOpen(false);
-        setIsTransferOpen(false);
-        setIsCycleOpen(false);
-        setIsBikesharingOpen(false);
-        setIsWalkingOpen(false);
-        setIsWeatherOpen(false);
-        closeSettings();
-    };
+    const { 
+        maxBikeDistance, setMaxBikeDistance,
+        bikeAverageSpeed, setBikeAverageSpeed,
+        bikeLockTime, setBikeLockTime,
+        maxBikesharingDistance, setMaxBikesharingDistance,
+        bikesharingAverageSpeed, setBikesharingAverageSpeed,
+        bikesharingLockTime, setBikesharingLockTime,
+        maxWalkDistance, setMaxWalkDistance,
+        walkAverageSpeed, setWalkAverageSpeed
+    } = useSettings();
 
     return (
-    <div style={style} className="settings">
+    <div className="settings">
         <div className="sidebar-header">
-            <button className="back-button" onClick={handleCloseSettings}  >
+            <button className="back-button" onClick={closeSettings}  >
                 <FontAwesomeIcon icon={faAngleLeft} />
             </button>
-            <span onClick={handleCloseSettings}>{t("settings")}</span>
+            <span onClick={closeSettings}>{t("settings")}</span>
         </div>
 
         <div className="sidebar-content">
-            <TransportPreferences 
-                isTransportOpen={isTransferOpen}
-                setIsTransportOpen={setIsTransferOpen}
-                maxTransfers={maxTransfers}
-                setMaxTransfers={setMaxTransfers}
-                selectedModes={selectedModes}
-                setSelectedModes={setSelectedModes}
-                className={isTransferOpen ? "opened" : ""}
+            <TransportPreferences />
+
+            <ModePreferences 
+                title={t("settingsTab.cyclingPreferences")}
+                speedLabel={t("settingsTab.cyclingPreferencesTab.averageCyclingSpeed")}
+                speed={bikeAverageSpeed}
+                setSpeed={setBikeAverageSpeed}
+                speedBounds={{ min: 5, max: 40 }}
+                distanceLabel={t("settingsTab.cyclingPreferencesTab.maxCyclingDistance")}
+                distance={maxBikeDistance}
+                setDistance={setMaxBikeDistance}
+                distanceBounds={{ min: 0, max: 100}}
+                lockLabel={t("settingsTab.cyclingPreferencesTab.cyclingLockTime")}
+                lockTime={bikeLockTime}
+                setLockTime={setBikeLockTime}
+                lockBounds={{ min: 0, max: 10 }}
             />
 
-            <CyclingPreferences 
-                isCyclingOpen={isCycleOpen}
-                setIsCyclingOpen={setIsCycleOpen}
-                maxBikeDistance={maxBikeDistance}
-                setMaxBikeDistance={setMaxBikeDistance}
-                bikeAverageSpeed={bikeAverageSpeed}
-                setBikeAverageSpeed={setBikeAverageSpeed}
-                bikeLockTime={bikeLockTime}
-                setBikeLockTime={setBikeLockTime}
-                className={isCycleOpen ? "opened" : ""}
+            <ModePreferences 
+                title={t("settingsTab.bikesharingPreferences")}
+                speedLabel={t("settingsTab.bikesharingPreferencesTab.averageBikesharingSpeed")}
+                speed={bikesharingAverageSpeed}
+                setSpeed={setBikesharingAverageSpeed}
+                speedBounds={{ min: 5, max: 30 }}
+                distanceLabel={t("settingsTab.bikesharingPreferencesTab.maxBikesharingDistance")}
+                distance={maxBikesharingDistance}
+                setDistance={setMaxBikesharingDistance}
+                distanceBounds={{ min: 0, max: 30}}
+                lockLabel={t("settingsTab.bikesharingPreferencesTab.bikesharingLockTime")}
+                lockTime={bikesharingLockTime}
+                setLockTime={setBikesharingLockTime}
+                lockBounds={{ min: 0, max: 15 }}
             />
 
-            <BikesharingPreferences
-                isBikesharingOpen={isBikesharingOpen}
-                setIsBikesharingOpen={setIsBikesharingOpen}
-                maxBikesharingDistance={maxBikesharingDistance}
-                setMaxBikesharingDistance={setMaxBikesharingDistance}
-                bikesharingAverageSpeed={bikesharingAverageSpeed}
-                setBikesharingAverageSpeed={setBikesharingAverageSpeed}
-                bikesharingLockTime={bikesharingLockTime}
-                setBikesharingLockTime={setBikesharingLockTime}
-                className={isBikesharingOpen ? "opened" : ""}
-            />
-
-            <WalkingPreferences 
-                isWalkingOpen={isWalkingOpen}
-                setIsWalkingOpen={setIsWalkingOpen}
-                maxWalkDistance={maxWalkDistance}
-                setMaxWalkDistance={setMaxWalkDistance}
-                walkAverageSpeed={walkAverageSpeed}
-                setWalkAverageSpeed={setWalkAverageSpeed}
-                className={isWalkingOpen ? "opened" : ""}
+            <ModePreferences 
+                title={t("settingsTab.walkingPreferences")}
+                speedLabel={t("settingsTab.walkingPreferencesTab.averageWalkingSpeed")}
+                speed={walkAverageSpeed}
+                setSpeed={setWalkAverageSpeed}
+                speedBounds={{ min: 2, max: 15 }}
+                distanceLabel={t("settingsTab.walkingPreferencesTab.maxWalkingDistance")}
+                distance={maxWalkDistance}
+                setDistance={setMaxWalkDistance}
+                distanceBounds={{ min: 0, max: 15}}
             />
         </div>
     </div>

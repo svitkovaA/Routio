@@ -10,18 +10,20 @@ import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { LegPreference, Mode } from "../../../../../types/types";
 import { modeIcons } from "../../../Icons/Icons";
 import "./Select.css";
+import { useInput } from "../../../../../InputContext";
 
 type ModeSelectProps = {
-    legPreferences: LegPreference[];
-    setLegPreferences: (modes: LegPreference[] | ((prev: LegPreference[]) => LegPreference[])) => void;
     index: number;
 }
 
 function ModeSelect({ 
-    legPreferences, 
-    setLegPreferences, 
     index 
 }: ModeSelectProps) {
+    const {
+        legPreferences, 
+        setLegPreferences, 
+        } = useInput();
+
     const [open, setOpen] = useState<boolean>(false);
 
     const handleSelect = (value: Mode) => {

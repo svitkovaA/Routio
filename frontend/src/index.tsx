@@ -6,16 +6,25 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
+import { SettingsProvider } from './components/SettingsContext';
+import { InputProvider } from './components/InputContext';
 import "./i18n";
+import './index.css';
+import { ResultProvider } from './components/ResultContext';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
 root.render(
     <React.StrictMode>
-        <App />
+        <ResultProvider>
+            <InputProvider>
+                <SettingsProvider>
+                    <App />
+                </SettingsProvider>
+            </InputProvider>
+        </ResultProvider>
     </React.StrictMode>
 );
 

@@ -78,11 +78,18 @@
     "cyclingPreferences": "Preferencie cyklistiky",
     "cyclingPreferencesTab": {
       "maxCyclingDistance": "Maximálna vzdialenosť jazdy",
-      "averageCyclingSpeed": "Priemerná rýchlosť jazdy"
+      "averageCyclingSpeed": "Priemerná rýchlosť jazdy",
+      "cyclingLockTime": "Čas na uzamknutie bicykla"
+    },
+    "bikesharingPreferences": "Preferencie zdieľaných bicyklov",
+    "bikesharingPreferencesTab": {
+      "maxBikesharingDistance": "Maximálna vzdialenosť jazdy",
+      "averageBikesharingSpeed": "Priemerná rýchlosť jazdy",
+      "bikesharingLockTime": "Čas na uzamknutie bicykla"
     },
     "walkingPreferences": "Preferencie chôdze",
     "walkingPreferencesTab": {
-      "maxWalkingDistance": "Maximálnavzdialenosť chôdze",
+      "maxWalkingDistance": "Maximálna vzdialenosť chôdze",
       "averageWalkingSpeed": "Priemerná rýchlosť chôdze"
     },
     "weatherPreferences": "Preferencie počasia",

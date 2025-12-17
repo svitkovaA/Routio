@@ -8,21 +8,15 @@ import MenuItem from '@mui/material/MenuItem';
 import { TextField } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { RoutePreference } from "../../../types/types";
+import { useInput } from '../../../InputContext';
 
-type OptionsProps = {
-    useOwnBike: boolean;
-    setUseOwnBike: (value: boolean) => void;
-    preference: RoutePreference;
-    setPreference: (value: RoutePreference) => void;
-}
-
-function Options({
-    useOwnBike,
-    setUseOwnBike,
-    preference,
-    setPreference
-} : OptionsProps) {
+function Options() {
     const { t } = useTranslation();
+
+    const {
+        preference, setPreference,
+        useOwnBike, setUseOwnBike
+    } = useInput();
 
     return (
         <div className="grid-wrapper">
