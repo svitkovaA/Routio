@@ -4,8 +4,8 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRoute, faStopwatch } from "@fortawesome/free-solid-svg-icons";
+import RouteIcon from '@mui/icons-material/Route';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Timeline from "../Timeline/Timeline";
 import '../ResultListItem/ResultListItem.css';
 import { useResult } from "../../../../ResultContext";
@@ -33,11 +33,11 @@ function Foot() {
                         />
                         <div className="grid-wrapper">
                             <span>
-                                <FontAwesomeIcon icon={faStopwatch} />
+                                <AccessTimeIcon />
                                 {Math.round(pattern.totalDuration / 60)} min
                             </span>
                             <span>
-                                <FontAwesomeIcon icon={faRoute} />
+                                <RouteIcon />
                                 {(pattern.totalDistance / 1000).toFixed(1)} km
                             </span>
                         </div>

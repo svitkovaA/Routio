@@ -4,8 +4,8 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import SettingsIcon from '@mui/icons-material/Settings';
+import InfoIcon from '@mui/icons-material/Info';
 import "./InfoSettings.css";
 
 type InfoSettingsProps = {
@@ -21,14 +21,14 @@ function InfoSettings({ showSettings, showInfo }: InfoSettingsProps) {
                 onClick={showSettings} 
                 type="button"
             >
-                <FontAwesomeIcon icon={faGear} />
+                <SettingsIcon />
             </button>
             <button 
                 className="input-wrapper" 
                 onClick={showInfo} 
                 type="button"
             >
-                <FontAwesomeIcon icon={faCircleInfo} />
+                <InfoIcon />
             </button>
         </div>
     );

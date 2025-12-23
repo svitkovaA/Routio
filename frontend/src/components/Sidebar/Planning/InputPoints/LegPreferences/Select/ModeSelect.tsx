@@ -5,8 +5,7 @@
  */
 
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { Mode } from "../../../../../types/types";
 import { modeIcons } from "../../../Icons/Icons";
 import "./Select.css";
@@ -41,7 +40,7 @@ function ModeSelect({ index }: ModeSelectProps) {
                     mode.value === legPreferences[index].mode ? mode.html : null
                 )}
                 <span className="mode-arrow">
-                    <FontAwesomeIcon icon={faAngleDown} className={open ? "rotate" : ""} />
+                    <KeyboardArrowDownIcon className={open ? "rotate" : ""} />
                 </span>
             </button>
 

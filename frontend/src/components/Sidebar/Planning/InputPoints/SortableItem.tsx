@@ -4,9 +4,8 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { useRef } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import { useSortable } from "@dnd-kit/sortable";
 import {CSS} from '@dnd-kit/utilities';
 import InputField from "./InputField/InputField";
@@ -81,7 +80,8 @@ function SortableItem({
                 className="drag-and-drop"
                 tabIndex={-1}
             >
-                <FontAwesomeIcon icon={faGripVertical} color="lightgray"/>
+                {/* TODO color:lightgray */}
+                <DragIndicatorIcon />
             </div>
 
             <InputField

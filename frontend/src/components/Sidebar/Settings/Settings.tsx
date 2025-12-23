@@ -4,8 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { useTranslation } from "react-i18next";
 import TransportPreferences from "./TransportPreferences/TransportPreferences";
 import ModePreferences from "./ModePreferences/ModePreferences";
@@ -33,7 +32,7 @@ function Settings({ closeSettings } : SettingsProps) {
     <div className="settings">
         <div className="sidebar-header">
             <button className="back-button" onClick={closeSettings}  >
-                <FontAwesomeIcon icon={faAngleLeft} />
+                <KeyboardArrowLeftIcon fontSize="large" />
             </button>
             <span onClick={closeSettings}>{t("settings")}</span>
         </div>

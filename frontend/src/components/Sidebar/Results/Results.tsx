@@ -4,8 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { useTranslation } from "react-i18next";
 import ResultTabs from "./ResultTabs/ResultTabs";
 import ResultList from "./ResultList/ResultList";
@@ -52,7 +51,7 @@ function Results({ closeResults } : ResultsProps) {
         <div className="results">
             <div className="sidebar-header">
                 <button className="back-button" onClick={handleBackButtonClick}>
-                    <FontAwesomeIcon icon={faAngleLeft} />
+                    <KeyboardArrowLeftIcon fontSize="large" />
                 </button>
                 <span onClick={handleBackButtonClick}>{showDetail ? "Details" : t("results")}</span>
                 {!showDetail ? (

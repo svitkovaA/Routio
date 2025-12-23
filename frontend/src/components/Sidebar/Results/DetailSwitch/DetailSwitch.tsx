@@ -4,8 +4,8 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { IconButton } from "@mui/material";
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
@@ -34,7 +34,7 @@ function DetailSwitch({
                     setPublicLegIndex(-1);
                 }}
             >
-                <FontAwesomeIcon icon={faAngleLeft} />
+                <KeyboardArrowLeftIcon />
             </IconButton>
 
             <div className="dots">
@@ -64,7 +64,7 @@ function DetailSwitch({
                     setPublicLegIndex(-1);
                 }}
             >
-                <FontAwesomeIcon icon={faAngleRight} />
+                <KeyboardArrowRightIcon />
             </IconButton>
         </div>
     );

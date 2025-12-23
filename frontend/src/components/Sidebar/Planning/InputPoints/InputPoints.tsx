@@ -5,8 +5,7 @@
  */
 
 import React from "react";
-import { faRightLeft } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import SwapVertIcon from '@mui/icons-material/SwapVert';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, TouchSensor } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis, restrictToParentElement} from '@dnd-kit/modifiers';
@@ -65,7 +64,8 @@ function InputPoints({
                 </SortableContext>
             </DndContext>
             {waypoints.length === 2 && (
-                <FontAwesomeIcon icon={faRightLeft} className="swap" onClick={swapWaypoints} color="gray"/>
+                // TODO color gray
+                <SwapVertIcon className="swap" onClick={swapWaypoints}/>
             )}
         </div>
     );

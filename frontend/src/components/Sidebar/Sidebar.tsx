@@ -5,8 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import Planning from './Planning/Planning';
 import Settings from './Settings/Settings';
 import Info from './Info/Info';
@@ -76,7 +75,7 @@ function Sidebar({
             </div>
 
             <button id="toggle-sidebar" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                <FontAwesomeIcon icon={faAngleLeft} className={sidebarOpen ? "" : "rotate"} />
+                <KeyboardArrowLeftIcon fontSize="large" className={sidebarOpen ? "" : "rotate"} />
             </button>
             <div id="drag-sidebar" onClick={() => setSidebarOpen(!sidebarOpen)}/>
         </div>

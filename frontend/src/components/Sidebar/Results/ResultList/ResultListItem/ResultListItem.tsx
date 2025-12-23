@@ -4,8 +4,9 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { faRightLeft, faRoute, faStopwatch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import RouteIcon from '@mui/icons-material/Route';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { IconButton } from "@mui/material";
 import { TripPattern } from "../../../../types/types";
@@ -47,16 +48,16 @@ function ResultListItem({
                 />
                 <div className="pattern-info-wrapper">
                     <span>
-                        <FontAwesomeIcon icon={faStopwatch} />
+                        <AccessTimeIcon />
                         {Math.round(pattern.totalDuration / 60)} min
                     </span>
                     <span>
-                        <FontAwesomeIcon icon={faRoute} />
+                        <RouteIcon />
                         {(pattern.totalDistance / 1000).toFixed(1)} km
                     </span>
                     {pattern?.numOfTransfers !== undefined && (
                         <span>
-                            <FontAwesomeIcon icon={faRightLeft} />
+                            <SwapHorizIcon />
                             {pattern.numOfTransfers}
                         </span>
                     )}

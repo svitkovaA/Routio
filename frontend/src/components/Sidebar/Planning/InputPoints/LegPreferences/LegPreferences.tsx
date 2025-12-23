@@ -1,13 +1,11 @@
 /**
  * @file LegPreferences.tsx
- * @brief Displays component for editing trip prefferences, handles user interactions for opening and closing preferences with click-away behaviour
+ * @brief Displays component for editing trip preferences, handles user interactions for opening and closing preferences with click-away behaviour
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import ClickAwayListener from "@mui/material/ClickAwayListener";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
-import { LegPreference } from "../../../../types/types";
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { accuracyIcons, modeIcons } from "../../Icons/Icons";
 import AccuracySelect from "./Select/AccuracySelect";
 import ModeSelect from "./Select/ModeSelect";
@@ -69,7 +67,7 @@ function LegPreferences({
                                 index={index}
                             />
                         </div>
-                        <FontAwesomeIcon icon={faAngleLeft} onClick={() => setLegPreference(false)}/>
+                        <KeyboardArrowLeftIcon onClick={() => setLegPreference(false)}/>
                     </div>
                 </ClickAwayListener>
             )}

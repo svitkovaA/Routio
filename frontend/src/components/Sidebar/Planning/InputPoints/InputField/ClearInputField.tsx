@@ -5,9 +5,8 @@
  */
 
 import InputAdornment from "@mui/material/InputAdornment";
+import ClearIcon from '@mui/icons-material/Clear';
 import { IconButton } from "@mui/material";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark } from '@fortawesome/free-solid-svg-icons';
 
 type ClearInputFieldProps = {
     clearWaypoint: () => void;
@@ -32,7 +31,7 @@ function ClearInputField({
                 sx={{ mr: -1 }}
                 tabIndex={-1}
             >
-                <FontAwesomeIcon icon={faXmark} />
+                <ClearIcon />
             </IconButton>
         </InputAdornment>
     );

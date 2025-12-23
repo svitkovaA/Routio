@@ -4,9 +4,9 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import RouteIcon from '@mui/icons-material/Route';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useRef } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRoute, faStopwatch } from "@fortawesome/free-solid-svg-icons";
 import { Leg, VerticalTimeline } from "../../../../types/types";
 import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
 
@@ -36,9 +36,9 @@ function WalkDetail({
             ref={walkDetailRef}
         >
          <div>
-            <FontAwesomeIcon icon={faStopwatch} />
+            <AccessTimeIcon />
             {(leg.duration / 60).toFixed(0)} min
-            <FontAwesomeIcon icon={faRoute} />
+            <RouteIcon />
             {(leg.distance / 1000).toFixed(1)} km
         </div>
         </div>

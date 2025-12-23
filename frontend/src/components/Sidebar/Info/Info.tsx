@@ -5,8 +5,7 @@
  */
 
 import { useState } from "react";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark } from '@fortawesome/free-solid-svg-icons';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from "react-i18next";
 import "./Info.css";
 
@@ -26,7 +25,7 @@ function Info({ closeInfo }: InfoProps) {
         <div className="info-wrapper" onClick={closeInfo}>
             <div className="info" onClick={keepOpen}>
                 <button className="close-button" onClick={closeInfo}>
-                    <FontAwesomeIcon icon={faXmark} />
+                    <CloseIcon />
                 </button>
                 <h2>{t("information")}</h2>
                 <div className="grid-wrapper">

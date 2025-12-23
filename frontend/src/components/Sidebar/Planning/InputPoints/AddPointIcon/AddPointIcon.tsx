@@ -5,8 +5,7 @@
  */
 
 import { IconButton } from "@mui/material";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSquarePlus } from '@fortawesome/free-solid-svg-icons';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 import './AddPointIcon.css'
 
 type AddPointIconProps = {
@@ -30,7 +29,7 @@ function AddPointIcon({
                 sx={{ marginBottom: 1 }}
                 tabIndex={-1}
             >
-                <FontAwesomeIcon icon={faSquarePlus}/>
+                <AddBoxIcon/>
             </IconButton>
         </div>
     );

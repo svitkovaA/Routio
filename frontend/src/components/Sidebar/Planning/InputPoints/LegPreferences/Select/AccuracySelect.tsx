@@ -5,8 +5,7 @@
  */
 
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { accuracyIcons } from "../../../Icons/Icons";
 import { useInput } from "../../../../../InputContext";
 
@@ -39,7 +38,7 @@ function AccuracySelect({ index }: AccuracySelectProps) {
                     accuracy.exact === legPreferences[index].exact ? accuracy.html : null
                 )}
                 <span className="accuracy-arrow">
-                    <FontAwesomeIcon icon={faAngleDown} className={open ? "rotate" : ""} />
+                    <KeyboardArrowDownIcon className={open ? "rotate" : ""} />
                 </span>
             </button>
 

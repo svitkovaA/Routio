@@ -4,9 +4,10 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import RouteIcon from '@mui/icons-material/Route';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useRef, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown, faRoute, faStopwatch } from "@fortawesome/free-solid-svg-icons";
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import DepartureBoardIcon from '@mui/icons-material/DepartureBoard';
 import { Leg, VerticalTimeline } from "../../../../types/types";
@@ -86,7 +87,7 @@ function PublicTransportDetail({
                 <div 
                     onClick={() => setDeparturesOpen(!departuresOpen)}
                 >
-                    <FontAwesomeIcon icon={faAngleDown} className={departuresOpen ? "" : "rotate90"}/>
+                    <KeyboardArrowDownIcon className={departuresOpen ? "" : "rotate90"}/>
                     <DepartureBoardIcon 
                         className="departure-icon" 
                     />
@@ -116,7 +117,7 @@ function PublicTransportDetail({
                 <div 
                     onClick={() => setStopsOpen(!stopsOpen)}
                 >
-                    <FontAwesomeIcon icon={faAngleDown} className={stopsOpen ? "" : "rotate90"}/>
+                    <KeyboardArrowDownIcon className={stopsOpen ? "" : "rotate90"}/>
                     <span className="station-icon">
                         <div className="station-square">
                         </div>
@@ -133,9 +134,9 @@ function PublicTransportDetail({
                 </div>
             </div>
             <div>
-                <FontAwesomeIcon icon={faStopwatch} />
+                <AccessTimeIcon />
                 {(leg.duration / 60).toFixed(0)} min
-                <FontAwesomeIcon icon={faRoute} />
+                <RouteIcon />
                 {(leg.distance / 1000).toFixed(1)} km
             </div>
             <div className="waystop">

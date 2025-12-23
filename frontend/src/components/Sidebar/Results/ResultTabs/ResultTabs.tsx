@@ -4,8 +4,9 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBusSimple, faBicycle, faPersonWalking } from "@fortawesome/free-solid-svg-icons";
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import PedalBikeIcon from '@mui/icons-material/PedalBike';
+import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import { MultimodalIcon } from "../../Planning/Icons/Icons";
 import "./ResultTabs.css";
 import { useInput } from "../../../InputContext";
@@ -38,7 +39,7 @@ function ResultTabs() {
                 }}
             >
                 <div className="circle">
-                    <FontAwesomeIcon icon={faBusSimple} />
+                    <DirectionsBusIcon />
                 </div>
             </div>
             <div 
@@ -49,7 +50,7 @@ function ResultTabs() {
                 }}
             >
                 <div className="circle">
-                    <FontAwesomeIcon icon={faBicycle} />
+                    <PedalBikeIcon />
                 </div>
             </div>
             <div 
@@ -60,7 +61,7 @@ function ResultTabs() {
                 }}
             >
                 <div className="circle">
-                    <FontAwesomeIcon icon={faPersonWalking} />
+                    <DirectionsWalkIcon />
                 </div>
             </div>
         </div>

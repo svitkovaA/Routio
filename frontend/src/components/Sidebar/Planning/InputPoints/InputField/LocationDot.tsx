@@ -5,8 +5,7 @@
  */
 
 import InputAdornment from "@mui/material/InputAdornment";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { IconButton } from "@mui/material";
 
 type LocationDotProps = {
@@ -26,7 +25,7 @@ function LocationDot({
                 sx={{mr: -1}}
                 tabIndex={-1}
             >
-                <FontAwesomeIcon icon={faLocationDot} />
+                <LocationOnIcon />
             </IconButton>
         </InputAdornment>
     );

@@ -17,7 +17,6 @@
 .swap {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%) rotate(90deg);
     top: 46px;
     cursor: pointer;
 }

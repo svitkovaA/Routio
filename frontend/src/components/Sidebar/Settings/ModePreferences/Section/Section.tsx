@@ -1,5 +1,5 @@
-import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
@@ -45,14 +45,14 @@ function Section({
                                     onClick={() => setValue(prev => Math.max(0, prev - 1))}
                                     size="small"
                                 >
-                                    <FontAwesomeIcon className="fa-icon" icon={faMinus} />
+                                    <RemoveIcon fontSize="small" />
                                 </IconButton>
 
                                 <IconButton
                                     onClick={() => setValue(prev => Math.min(10, prev + 1))}
                                     size="small"
                                 >
-                                    <FontAwesomeIcon className="fa-icon" icon={faPlus} />
+                                    <AddIcon fontSize="small" />
                                 </IconButton>
                             </InputAdornment>
                         ),

@@ -4,8 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { useTranslation } from "react-i18next";
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -41,7 +40,7 @@ function TransportPreferences() {
         <div className={"settings-section " + (isOpen ? "opened" : "")}>
             <div className="toggle-settings" onClick={() => setIsOpen(!isOpen)}>
                 <span>{t("settingsTab.transportPreferences")}</span>
-                <FontAwesomeIcon icon={faAngleLeft} className={isOpen ? "rotate90" : ""}/>
+                <KeyboardArrowLeftIcon fontSize="large" className={isOpen ? "rotate90" : ""}/>
             </div>
             <div className={isOpen ? "settings-content" : "settings-content hidden"}>
 

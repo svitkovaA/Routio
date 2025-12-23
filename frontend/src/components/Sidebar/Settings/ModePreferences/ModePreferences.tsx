@@ -4,8 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import Section from './Section/Section';
 import "./ModePreferences.css";
 import { useState } from 'react';
@@ -47,7 +46,7 @@ function ModePreferences({
         <div className={"settings-section " + (isOpen ? "opened" : "")}>
             <div className="toggle-settings" onClick={() => setIsOpen(!isOpen)}>
                 <span>{title}</span>
-                <FontAwesomeIcon icon={faAngleLeft} className={isOpen ? "rotate90" : ""}/>
+                <KeyboardArrowLeftIcon fontSize="large" className={isOpen ? "rotate90" : ""} />
             </div>
             <div className={isOpen ? "settings-content" : "settings-content hidden"}>
                 <div className="preferences">

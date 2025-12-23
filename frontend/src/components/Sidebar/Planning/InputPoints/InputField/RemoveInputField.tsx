@@ -6,8 +6,7 @@
 
 import { IconButton } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 type RemoveInputFieldProps = {
     onClick: () => void;
@@ -30,7 +29,7 @@ function RemoveInputField({
                 edge="end"
                 tabIndex={-1}
             >
-                <FontAwesomeIcon icon={faTrash} />
+                <DeleteIcon />
             </IconButton>
         </InputAdornment>
     );

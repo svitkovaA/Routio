@@ -4,9 +4,15 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import GpsFixedIcon from '@mui/icons-material/GpsFixed';
+import CircleIcon from '@mui/icons-material/Circle';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import PedalBikeIcon from '@mui/icons-material/PedalBike';
+import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
+import TrainIcon from '@mui/icons-material/Train';
+import TramIcon from '@mui/icons-material/Tram';
+import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
 import { JSX } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBusSimple, faBicycle, faPersonWalking, faCrosshairs, faCircle, faTrain, faTrainTram, faShip } from "@fortawesome/free-solid-svg-icons";
 import { Mode } from "../../../types/types";
 import "./Icons.css";
 
@@ -14,13 +20,13 @@ export function MultimodalIcon() {
     return (
         <div className="multimodal-icon">
             <div className="circle public-transport">
-                <FontAwesomeIcon icon={faBusSimple} />
+                <DirectionsBusIcon fontSize="small" />
             </div>
             <div className="circle bicycle">
-                <FontAwesomeIcon icon={faBicycle} />
+                <PedalBikeIcon fontSize="small" />
             </div>
             <div className="circle walk">
-                <FontAwesomeIcon icon={faPersonWalking} />
+                <DirectionsWalkIcon fontSize="small" />
             </div>
         </div>
     );
@@ -32,19 +38,19 @@ export const modeIcons: {html: JSX.Element, value: Mode}[] = [{
     }, {
         html: 
             <div className="circle">
-                <FontAwesomeIcon icon={faBusSimple}/>
+                <DirectionsBusIcon />
             </div>, 
         value: "walk_transit"
     }, {
         html: 
             <div className="circle">
-                <FontAwesomeIcon icon={faBicycle}/>
+                <PedalBikeIcon />
             </div>, 
         value: "bicycle"
     }, {
         html: 
             <div className="circle">
-                <FontAwesomeIcon icon={faPersonWalking}/>
+                <DirectionsWalkIcon />
             </div>, 
         value: "foot"
     }
@@ -53,13 +59,13 @@ export const modeIcons: {html: JSX.Element, value: Mode}[] = [{
 export const accuracyIcons: {html: JSX.Element, exact: boolean}[] = [{
         html: 
             <div className="accuracy-icon">
-                <FontAwesomeIcon icon={faCrosshairs} className="accuracy" />
+                <GpsFixedIcon className="accuracy" />
             </div>, 
         exact: true
     }, {
         html: 
             <div className="accuracy-icon">
-                <FontAwesomeIcon icon={faCircle} className="accuracy" />
+                <CircleIcon className="accuracy" />
             </div>, 
         exact: false
     }
@@ -68,31 +74,31 @@ export const accuracyIcons: {html: JSX.Element, exact: boolean}[] = [{
 export const timelineIcons: {[mode: string]: JSX.Element} = {
     foot:
         <div className="timeline-icon">
-            <FontAwesomeIcon icon={faPersonWalking} />
+            <DirectionsWalkIcon />
         </div>,
     bicycle:
         <div className="timeline-icon">
-            <FontAwesomeIcon icon={faBicycle} />
+            <PedalBikeIcon />
         </div>,
     rail: 
         <div className="timeline-icon">
-            <FontAwesomeIcon icon={faTrain} />
+            <TrainIcon />
         </div>,
     bus:
         <div className="timeline-icon">
-            <FontAwesomeIcon icon={faBusSimple} />
+            <DirectionsBusIcon />
         </div>,
     tram:
         <div className="timeline-icon">
-            <FontAwesomeIcon icon={faTrainTram} />
+            <TramIcon />
         </div>,
     trolleybus:
         <div className="timeline-icon">
-            <FontAwesomeIcon icon={faBusSimple} />
+            <DirectionsBusIcon />
         </div>,
     boat:
         <div className="timeline-icon">
-            <FontAwesomeIcon icon={faShip} />
+            <DirectionsBoatIcon />
         </div>
 }
 

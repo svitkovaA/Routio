@@ -5,8 +5,9 @@
  */
 
 import { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown, faLayerGroup } from "@fortawesome/free-solid-svg-icons";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import LayersIcon from '@mui/icons-material/Layers';
+
 import { useLayers } from "./Layers";
 import "./LayerSelect.css";
 import { useSettings } from "../../SettingsContext";
@@ -55,8 +56,8 @@ function LayerSelect({
                 }
             }}
         >
-            <FontAwesomeIcon icon={faLayerGroup} />
-            <FontAwesomeIcon icon={faAngleDown} className={open ? "rotate" : ""} />
+            <LayersIcon fontSize="small"/>
+            <ExpandMoreIcon fontSize="small" className={open ? "rotate" : ""} />
         </button>
 
         {open && (

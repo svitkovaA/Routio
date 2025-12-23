@@ -5,9 +5,8 @@
  */
 
 import { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { useTranslation } from "react-i18next";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 type Language = {
     code: string;
@@ -70,7 +69,7 @@ function LanguageSelect({
                 }}
             >
                 {selectedLang.flagCode}
-                <FontAwesomeIcon icon={faAngleDown} className={open ? "rotate" : ""} />
+                <ExpandMoreIcon fontSize="small" className={open ? "rotate" : ""} />
             </button>
 
             {open && (
