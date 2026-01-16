@@ -1,6 +1,6 @@
 /**
  * @file Sidebar.tsx
- * @brief Displays the sidebar component, handles routing requests, and switches between different sidebar views
+ * @brief Sidebar component that handles routing requests, and switches between different sidebar views
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -16,11 +16,11 @@ import { useRoute } from '../Routing/Route';
 import './Sidebar.css';
 
 type sidebarProps = {
-    sidebarOpen: boolean;
-    setSidebarOpen: (value: boolean) => void;
-    closeResults: () => void;
-    showInfo: boolean;
-    setShowInfo: (value: boolean) => void;
+    sidebarOpen: boolean;                       // State indicating whether the sidebar is open
+    setSidebarOpen: (value: boolean) => void;   // Setter controlling sidebar visibility
+    closeResults: () => void;                   // Closes routing results
+    showInfo: boolean;                          // State indicating whether the information view is active
+    setShowInfo: (value: boolean) => void;      // Setter controlling information panel visibility
 };
 
 function Sidebar({ 
@@ -30,16 +30,26 @@ function Sidebar({
     showInfo,
     setShowInfo
 }: sidebarProps) {
+    // State controlling settings view
     const [showSettings, setShowSettings] = useState(false);
+
+    // User input context
     const { mode, setMode } = useInput();
+
+    //Results context
     const {
         resultActiveIndex, setResultActiveIndex,
         showResults,
         showDetail,
     } = useResult();
 
+    // Route context
     const route = useRoute();
 
+    /**
+     * Automatically triggers route computation when a routing mode and active
+     * result index are set
+     */
     useEffect(() => {
         if (mode && resultActiveIndex !== -1) {
             route();
@@ -49,6 +59,7 @@ function Sidebar({
     return (
         <div id="sidebar" className={sidebarOpen ? (showInfo ? "open open-info" : "open") : ""}>
             <div className={"content-wrapper " + (showResults ? "results-open " : "") + (showDetail ? "detail-open" : "")}>
+                {/* Planning view */}
                 {!showSettings && !showResults && (
                     <Planning 
                         showSettings={() => setShowSettings(true)}
@@ -61,23 +72,38 @@ function Sidebar({
                     />
                 )}
 
+                {/* Settings view */}
                 {showSettings && (
                     <Settings closeSettings={() => setShowSettings(false)} />
                 )}
 
+                {/* Info view */}
                 {showInfo && (
                     <Info closeInfo={() => setShowInfo(false)} />
                 )}
 
+                {/* Results view */}
                 {showResults && (
                     <Results closeResults={closeResults} />
                 )}
             </div>
 
-            <button id="toggle-sidebar" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                <KeyboardArrowLeftIcon fontSize="large" className={sidebarOpen ? "" : "rotate"} />
+            {/* Sidebar toggle button */}
+            <button 
+                id="toggle-sidebar" 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+                <KeyboardArrowLeftIcon 
+                    fontSize="large" 
+                    className={sidebarOpen ? "" : "rotate"} 
+                />
             </button>
-            <div id="drag-sidebar" onClick={() => setSidebarOpen(!sidebarOpen)}/>
+
+            {/* Clickable area for toggling sidebar */}
+            <div 
+                id="drag-sidebar" 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+            />
         </div>
     );
 }

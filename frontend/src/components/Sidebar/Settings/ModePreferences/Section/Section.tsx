@@ -1,3 +1,9 @@
+/**
+ * @file Section.tsx
+ * @brief Reusable component for settings configuration
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import IconButton from "@mui/material/IconButton";
@@ -6,10 +12,10 @@ import TextField from "@mui/material/TextField";
 import "./Section.css";
 
 type SectionProps = {
-    label: string;
-    value: number;
-    setValue: (value: number | ((prev: number) => number)) => void;
-    bounds: { min: number, max: number };
+    label: string;                                                  // Label for the input field
+    value: number;                                                  // Current value
+    setValue: (value: number | ((prev: number) => number)) => void; // Setter for updating the value
+    bounds: { min: number, max: number };                           // Minimum and maximum allowed value
 }
 
 function Section({
@@ -19,6 +25,11 @@ function Section({
     bounds
 } : SectionProps) {
 
+    /**
+     * Handles manual input value change
+     * 
+     * @param e Change event from the input filed
+     */
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setValue(Number(e.target.value));
     };
@@ -41,6 +52,8 @@ function Section({
                     input: {
                         endAdornment: (
                             <InputAdornment position="end" style={{ display: 'flex', gap: '4px' }}>
+
+                                {/* Decrease value button */}
                                 <IconButton
                                     onClick={() => setValue(prev => Math.max(0, prev - 1))}
                                     size="small"
@@ -48,6 +61,7 @@ function Section({
                                     <RemoveIcon fontSize="small" />
                                 </IconButton>
 
+                                {/* Increase value button */}
                                 <IconButton
                                     onClick={() => setValue(prev => Math.min(10, prev + 1))}
                                     size="small"
@@ -64,3 +78,5 @@ function Section({
 }
 
 export default Section;
+
+/** End of file Section.tsx */

@@ -1,6 +1,6 @@
 /**
  * @file Settings.tsx
- * @brief Display settings sidebar component
+ * @brief Component for configuring routing and transport preferences
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -12,11 +12,13 @@ import { useSettings } from "../../SettingsContext";
 import "./Settings.css";
 
 type SettingsProps = {
-    closeSettings: () => void;
+    closeSettings: () => void;  // Callback used to close the settings view
 };
 
 function Settings({ closeSettings } : SettingsProps) {
     const { t } = useTranslation();
+
+    // Settings context 
     const { 
         maxBikeDistance, setMaxBikeDistance,
         bikeAverageSpeed, setBikeAverageSpeed,
@@ -30,6 +32,7 @@ function Settings({ closeSettings } : SettingsProps) {
 
     return (
     <div className="settings">
+        {/* Sidebar header with back navigation */}
         <div className="sidebar-header">
             <button className="back-button" onClick={closeSettings}  >
                 <KeyboardArrowLeftIcon fontSize="large" />
@@ -37,9 +40,13 @@ function Settings({ closeSettings } : SettingsProps) {
             <span onClick={closeSettings}>{t("settings")}</span>
         </div>
 
+        {/* Settings content */}
         <div className="sidebar-content">
+
+            {/* Transport mode selection */}
             <TransportPreferences />
 
+            {/* Cycling preferences */}
             <ModePreferences 
                 title={t("settingsTab.cyclingPreferences")}
                 speedLabel={t("settingsTab.cyclingPreferencesTab.averageCyclingSpeed")}
@@ -56,6 +63,7 @@ function Settings({ closeSettings } : SettingsProps) {
                 lockBounds={{ min: 0, max: 10 }}
             />
 
+            {/* Bikesharing preferences */}
             <ModePreferences 
                 title={t("settingsTab.bikesharingPreferences")}
                 speedLabel={t("settingsTab.bikesharingPreferencesTab.averageBikesharingSpeed")}
@@ -72,6 +80,7 @@ function Settings({ closeSettings } : SettingsProps) {
                 lockBounds={{ min: 0, max: 15 }}
             />
 
+            {/* Walking preferences */}
             <ModePreferences 
                 title={t("settingsTab.walkingPreferences")}
                 speedLabel={t("settingsTab.walkingPreferencesTab.averageWalkingSpeed")}

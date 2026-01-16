@@ -1,23 +1,25 @@
 /**
  * @file TransportPreferences.tsx
- * @brief Display transport preferences in the settings sidebar
+ * @brief Components for configuring public transport preferences
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { useState } from 'react';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import { useTranslation } from "react-i18next";
-import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
+import { useTranslation } from "react-i18next";
 import { useSettings } from '../../../SettingsContext';
 import Section from '../ModePreferences/Section/Section';
-import { useState } from 'react';
 
 function TransportPreferences() {
     const { t } = useTranslation();
 
+    // State controlling section expansion
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
+    // Settings context
     const { 
         maxTransfers,
         setMaxTransfers,
@@ -25,6 +27,10 @@ function TransportPreferences() {
         setSelectedModes
     } = useSettings();
 
+    /**
+     * Handles selection and deselection of transport modes
+     * @param mode Transport mode identifier
+     */
     const handleModeSelection = (mode: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.checked) {
             if (!selectedModes.includes(mode)) {
@@ -38,12 +44,14 @@ function TransportPreferences() {
 
     return (
         <div className={"settings-section " + (isOpen ? "opened" : "")}>
+            {/* Section toggle */}
             <div className="toggle-settings" onClick={() => setIsOpen(!isOpen)}>
                 <span>{t("settingsTab.transportPreferences")}</span>
                 <KeyboardArrowLeftIcon fontSize="large" className={isOpen ? "rotate90" : ""}/>
             </div>
             <div className={isOpen ? "settings-content" : "settings-content hidden"}>
 
+                {/* Maximum transfers preference */}
                 <Section
                     label={t("settingsTab.transportPreferencesTab.maxTransfers")}
                     value={maxTransfers}
@@ -51,6 +59,7 @@ function TransportPreferences() {
                     bounds={{ min:0, max: 10 }}
                 />
                 
+                {/* Transport mode selection */}
                 <div className="section">
                     <span className="section-label">{t("settingsTab.transportPreferencesTab.transportModes")}</span>
                     <FormGroup className="options">
@@ -99,6 +108,7 @@ function TransportPreferences() {
                     </FormGroup>
                 </div>
 
+                {/* Bike transport option */}
                 <div className="section">
                     <span className="section-label">{t("settingsTab.transportPreferencesTab.travelWithBike")}</span>
                         <Checkbox 
