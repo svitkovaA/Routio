@@ -1,6 +1,6 @@
 /**
  * @file ShowRoute.tsx
- * @brief Renders map routes based on trip results
+ * @brief Renders map routes polylines on the map based on trip results
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -10,6 +10,7 @@ import polyline from '@mapbox/polyline';
 import { useResult } from "../../ResultContext";
 
 function ShowRoute() {
+    // Result context
     const {
         resultActiveIndex, 
         results,
@@ -19,18 +20,25 @@ function ShowRoute() {
         pattern
     } = useResult();
 
+    // State for force rerender after polyline computation
     const [forceUpdate, setForceUpdate] = useState(0);
     
+    /**
+     * Computes and stores decoded polyline data for the active trip pattern
+     */
     useEffect(() => {
+        // Validate required state
         if (resultActiveIndex === -1 || !result?.active || !pattern?.legs) {
             return;
         }
         
+        // Do not recompute if polyline data already exists
         const legs = pattern.legs;
         if (pattern.polyInfo.length !== 0) {
             return;
         }
-            
+        
+        // Decode polyline coordinates for each leg
         const polyInfoTemp = legs.map(leg => {
             const coords = Array.isArray(leg.pointsOnLink.points) ? leg.pointsOnLink.points.flatMap(p => polyline.decode(p)) : polyline.decode(leg.pointsOnLink.points);
             
@@ -42,13 +50,16 @@ function ShowRoute() {
             };
         });
         
+        // Store computed polyline information in results context
         const newResults = [...results];
         newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex].polyInfo = polyInfoTemp;
         setResults(newResults);
         
+        // Force rerender to update displayed polylines
         setForceUpdate(prev => prev + 1);
     }, [results, resultActiveIndex, selectedTripPatternIndex]);
     
+    // Do not render if results are not available
     if (!showResults || 
         resultActiveIndex === -1 || 
         !result?.active || 

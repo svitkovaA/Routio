@@ -1,13 +1,34 @@
+/**
+ * @file MapComponents.tsx
+ * @brief Helper functions for map interaction
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import L from "leaflet";
 import { useMapEvent } from "react-leaflet";
 
-
+/**
+ * Creates a custom pin icon with a text label
+ * 
+ * @param label Marker label
+ * @param translatedLabel Translated label for STAR/END mark
+ * @returns Leaflet DivIcon instance
+ */
 export function createPinIcon(label: string, translatedLabel?: string) {
+    // Determine whether the marker represents start or end point
     const startEndMarker = label === "START" || label === "END";
+    
+    // CSS class applied to the marker 
     const className = "marker " + (startEndMarker ? "start-end-marker" : "");
+
+    // Default anchor positions
     let anchor: [number, number] = [14, 39];
     let popupAnchor: [number, number] = [0, -45];
-    label = startEndMarker && translatedLabel ? translatedLabel : label
+
+    // Replace label with translated version for START/END markers
+    label = startEndMarker && translatedLabel ? translatedLabel : label;
+
+    // Adjusts anchor positions for START/END markers
     if (startEndMarker) {
         anchor = [20,53];
         popupAnchor = [0, -55];
@@ -24,8 +45,13 @@ export function createPinIcon(label: string, translatedLabel?: string) {
     });
 }
 
+/**
+ * If the callback returns false the map is moved animated to the clicked position
+ * @param onMapClick Callback handling map click event
+ */
 export function SetViewOnClick({ onMapClick }: { onMapClick: (lat: number, lng: number) => boolean }) {
     const map = useMapEvent('click', (e) => {
+        // Move map
         if (!onMapClick(e.latlng.lat, e.latlng.lng)) {
             map.setView(e.latlng, map.getZoom(), {
                 animate: true,
@@ -35,3 +61,5 @@ export function SetViewOnClick({ onMapClick }: { onMapClick: (lat: number, lng: 
     });
     return null;
 }
+
+/** End of file MapComponents.tsx */

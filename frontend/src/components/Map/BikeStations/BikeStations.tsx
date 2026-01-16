@@ -1,6 +1,6 @@
 /**
  * @file BikeStations.tsx
- * @brief Displays bike stations on the map, allows changing origin and destination stations
+ * @brief Displays bike stations on the map and allows changing origin and destination stations
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -10,6 +10,7 @@ import { useResult } from "../../ResultContext";
 import { useChangeBikeStation } from "../../Routing/ChangeBikeStation";
 
 function BikeStations() {
+    // Result context
     const {
         results,
         showResults,
@@ -18,15 +19,23 @@ function BikeStations() {
         pattern
     } = useResult();
 
+    // State handling map zoom level
     const [zoom, setZoom] = useState<number>(0);
+
+    // State handling visibility flags for alternative bike stations
     const [showBikeStations, setShowBikeStations] = useState<boolean[]>([]);
 
+    // Handler for changing selected bike station
     const changeBikeStation = useChangeBikeStation();
 
+    // Updates zoom state when map zoom level changes
     useMapEvent("zoomend", (e) => {
         setZoom(e.target.getZoom());
     });
     
+    /**
+     * Initializes bike station visibility flags when route changes
+     */
     useEffect(() => {
         const currentLegs = pattern?.legs ?? [];
         if (currentLegs.length > 0) {
@@ -34,10 +43,16 @@ function BikeStations() {
         }
     }, [results, resultActiveIndex, selectedTripPatternIndex]);
 
+    // Do not render if no routing results are displayed
     if (!showResults) {
         return null;
     }
 
+    /**
+     * Toggles visibility of alternative bike stations for a given leg
+     *
+     * @param index Index of the route leg
+     */
     const invertBikeStationAtIndex = (index: number) => {
         setShowBikeStations(prev => prev.map((v, i) => (i === index ? !v : v)));
     };
@@ -55,6 +70,7 @@ function BikeStations() {
                 const rack = leg.bikeStationInfo.rack;
                 return (
                     <>
+                        {/* Currently selected bike station */}
                         <CircleMarker
                             center={[leg.bikeStationInfo.latitude, leg.bikeStationInfo.longitude]}
                             radius={8}
@@ -67,8 +83,9 @@ function BikeStations() {
                                     {showBikeStations[index] ? "Hide bike stations" : "Show bike stations"}
                                 </button>
                             </Popup>
-
                         </CircleMarker>
+
+                        {/* Alternative bike stations */}
                         {showBikeStations[index] && leg?.bikeStationInfo.bikeStations.map((station, bikeStationIndex) => 
                             bikeStationIndex !== selectedIndex && zoom > 12 &&(
                                 <CircleMarker

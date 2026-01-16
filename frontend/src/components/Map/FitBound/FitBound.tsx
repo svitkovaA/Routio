@@ -1,6 +1,6 @@
 /**
  * @file FitBound.tsx
- * @brief Adjusts map view to fit the bounds of the selected trip pattern
+ * @brief Adjusts the map view to fit the bounds of the selected trip pattern
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -10,10 +10,11 @@ import L from "leaflet";
 import { useResult } from "../../ResultContext";
 
 type FitBoundProps = {
-    sidebarOpen: boolean;
+    sidebarOpen: boolean;   // State indicating whether the sidebar is currently open
 }
 
 function FitBound({ sidebarOpen }: FitBoundProps) {
+    // Result context
     const {
         resultActiveIndex,
         selectedTripPatternIndex,
@@ -22,13 +23,16 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
         pattern
     } = useResult();
 
+    // Leaflet map instance
     const map = useMap();
 
+    // Computes map bounds for the active trip pattern
     const bounds = useMemo(() => {
         if (resultActiveIndex === -1 || !result.active || !pattern?.legs) {
             return null;
         }
 
+        // Use precomputed bounds if available
         if (pattern?.southWest && pattern?.northWest) {
             return L.latLngBounds(pattern.southWest, pattern.northWest);
         }
@@ -39,6 +43,7 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
             return null;
         }
         
+        // Initialize bounds using first available coordinate
         const firstCoords = polyInfo.find(p => p.coords.length > 0)?.coords;
         if (!firstCoords) {
             return null;
@@ -49,6 +54,7 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
         let minLon = firstCoords[0][1];
         let maxLon = firstCoords[0][1];
     
+        // Compute bounding box from all polyline coordinates
         for (let i = 0; i < polyInfo.length; i++) {
             for (let j = 0; j < polyInfo[i].coords.length; j++) {
 
@@ -69,9 +75,13 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
         return L.latLngBounds(L.latLng(minLat, minLon), L.latLng(maxLat, maxLon));
     }, [results, resultActiveIndex, selectedTripPatternIndex]);
 
+    /**
+     * Updates the map view whenever computed bounds or sidebar state changes.
+     */
     useEffect(() => {
         if (!bounds) return;
 
+        // Adjust padding to account for sidebar on larger screens
         if (sidebarOpen && window.innerWidth > 768) {
             map.fitBounds(bounds, {
                 paddingTopLeft: [370, 50],

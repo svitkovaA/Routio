@@ -1,22 +1,36 @@
+/**
+ * @file MapInfoPopup.tsx
+ * @brief Menu popup for assigning waypoints via map interaction
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+import { Popup, useMapEvent } from "react-leaflet";
 import { useState } from "react";
 import { Waypoint } from "../../types/types";
-import { Popup, useMapEvent } from "react-leaflet";
 
 type MapInfoPopupProps = {
-    waypoints: Waypoint[];
-    handleMapSelection: (lat: number, lon: number, index?: number) => boolean;
+    waypoints: Waypoint[];                                                      // List of currently defined waypoints
+    handleMapSelection: (lat: number, lon: number, index?: number) => boolean;  // Callback handling map based waypoint selection
 }
 
 function MapInfoPopup({
     waypoints,
     handleMapSelection
 } : MapInfoPopupProps) {
+    // Position state of the menu popup
     const [position, setPosition] = useState<[number, number] | null>(null);
 
+    // Displays popup on right mouse click
     useMapEvent('contextmenu', (e) => {
         setPosition([e.latlng.lat, e.latlng.lng]);
     });
 
+    /**
+     * Assigns the selected map position to a waypoint
+     * 
+     * @param index Index of the waypoint to be updated
+     * @param e Mouse click event
+     */
     const handleSetWaypoint = (index: number, e: React.MouseEvent<HTMLButtonElement>) => {
         if (!position) {
             return;
@@ -48,3 +62,5 @@ function MapInfoPopup({
 }
 
 export default MapInfoPopup;
+
+/** End of file MapInfoPopup.tsx */
