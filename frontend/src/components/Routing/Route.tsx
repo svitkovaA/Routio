@@ -1,9 +1,21 @@
+/**
+ * @file Route.tsx
+ * @brief Hook responsible for route computation and request handling
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import { API_BASE_URL } from "../config/config";
 import { useInput } from "../InputContext";
 import { useResult } from "../ResultContext";
 import { useSettings } from "../SettingsContext";
 
+/**
+ * Hook for computing a route based on current application state
+ * 
+ * @returns Async function triggering route computation
+ */
 export function useRoute() {
+    // Input context
     const {
         waypoints,
         mode, setMode,
@@ -15,6 +27,7 @@ export function useRoute() {
         time,
     } = useInput();
 
+    // Settings context
     const { 
         maxTransfers,
         selectedModes,
@@ -28,23 +41,28 @@ export function useRoute() {
         bikeLockTime
     } = useSettings();
 
+    // Results context
     const {
         resultActiveIndex, setResultActiveIndex,
         results, setResults,
         setShowResults,
     } = useResult();
 
+    /**
+     * Sends a routing request to the backend and updates application state
+     */
     const route = async () => {
-        console.log(results)
-        console.log("resultIndex: " + resultActiveIndex);
         if (!results[resultActiveIndex].active) {
             let resultIndex = resultActiveIndex;
             let newMode = mode;
+
+            // Convert waypoints to to compatible format
             let waypointsArray: string[] = [];
             for (let i = 0; i < waypoints.length; i++) {
                 waypointsArray.push(waypoints[i].lat + ', ' + waypoints[i].lon);
             }
 
+            // Prepare leg preference configuration
             let legPreferencesArray = [];
             const firstPref = legPreferences[0].mode;
             let equalPrefs = firstPref !== "transit,bicycle,walk";
@@ -58,6 +76,7 @@ export function useRoute() {
                 });
             }
 
+            // Adjust preferences for repeated routing
             const firstRouting = !results.some(result => result.active);
             if (!firstRouting && equalPrefs) {
                 legPreferencesArray = Array.from(
@@ -67,6 +86,7 @@ export function useRoute() {
                 equalPrefs = false;
             }
 
+            // Determine routing mode and target result index
             if (equalPrefs) {
                 newMode = firstPref;
                 if (firstPref === "foot") {
@@ -80,6 +100,7 @@ export function useRoute() {
                 }
             }
 
+            // Send routing request to backend
             const result = await fetch(`${API_BASE_URL}/route`, {
                 method: 'POST',
                 headers: {
@@ -108,6 +129,8 @@ export function useRoute() {
             });
 
             const newResult = await result.json();
+
+            // Store routing result
             setResults(prev => 
                 prev.map((originalResult, index) => 
                     index === resultIndex ? newResult : originalResult
@@ -120,3 +143,5 @@ export function useRoute() {
     };
     return route;
 }
+
+/** End of file Route.tsx */

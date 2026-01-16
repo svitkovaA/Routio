@@ -1,9 +1,16 @@
+/**
+ * @file ChangeBikeStation.tsx
+ * @brief Hook for changing the selected bikesharing station within a route
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import { API_BASE_URL } from "../config/config";
 import { useInput } from "../InputContext";
 import { useResult } from "../ResultContext";
 import { useSettings } from "../SettingsContext";
 
 export function useChangeBikeStation() {
+    // User input context
     const {
         waypoints,
         arriveBy,
@@ -11,6 +18,7 @@ export function useChangeBikeStation() {
         preference,
     } = useInput();
 
+    // Settings context
     const {
         maxTransfers,
         selectedModes,
@@ -24,6 +32,7 @@ export function useChangeBikeStation() {
         bikeLockTime
     } = useSettings();
 
+    // Result context
     const { 
         pattern,
         results, setResults,
@@ -31,16 +40,27 @@ export function useChangeBikeStation() {
         selectedTripPatternIndex
     } = useResult();
 
+    /**
+     * Requests a route recalculation with a different bikesharing station
+     * 
+     * @param originBikeStation True if the station is the origin, false otherwise
+     * @param bikeStationIndex Index of the newly selected bike station
+     * @param bikeStations List of available bike stations
+     * @param legIndex Index of the route leg being modified
+     */
     const changeBikeStation = async (originBikeStation: boolean, bikeStationIndex: number, bikeStations: any[], legIndex: number) => {
+        // Extract current route structure
         const legs = pattern.legs;
         const originalLegs = pattern.originalLegs;
         const modes = pattern.modes;
         
+        // Convert waypoints to compatible format
         let waypointsArray: string[] = [];
         for (let i = 0; i < waypoints.length; i++) {
             waypointsArray.push(waypoints[i].lat + ', ' + waypoints[i].lon);
         }
 
+        // Routing data
         const routeData = {
             waypoints: waypointsArray,
             time: "00:00:00",
@@ -62,6 +82,7 @@ export function useChangeBikeStation() {
             route_preference: preference
         }
 
+        // Send request to backend for route recalculation
         const result = await fetch(`${API_BASE_URL}/changeBikeStation`, {
             method: 'POST',
             headers: {
@@ -82,6 +103,7 @@ export function useChangeBikeStation() {
 
         const response = await result.json();
 
+        // Update the active trip pattern in results
         const temporaryResults = [...results]
         temporaryResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex] = response;
 
@@ -89,3 +111,5 @@ export function useChangeBikeStation() {
     };
     return changeBikeStation;
 }
+
+/** ChangeBikeStation.tsx */
