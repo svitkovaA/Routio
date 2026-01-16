@@ -5,7 +5,7 @@
  */
 
 .back-button {
-    background-color: #fafafa;
+    background-color: var(--color-background);
     height: 58px;
     font-size: 20pt;
 }
@@ -18,7 +18,7 @@
     position: absolute;
     width: 100%;
     top: 20px;
-    background-color: #fafafa;
+    background-color: var(--color-background);
     z-index: 10000;
     border-top-left-radius: 6px;
 }

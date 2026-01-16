@@ -1,6 +1,6 @@
 /**
  * @file Controls.tsx
- * @brief Displays rendered map controls
+ * @brief Renders control elements for map interaction
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -9,8 +9,8 @@ import LayerSelect from "./Layer/LayerSelect";
 import './Controls.css'
 
 type ControlsProps = {
-    showInfo: boolean;
-    closeInfo: () => void;
+    showInfo: boolean;      // State whether the information is currently visible
+    closeInfo: () => void;  // Callback function used to close the information panel
 }
 
 function Controls({

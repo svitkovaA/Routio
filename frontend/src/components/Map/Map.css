@@ -69,7 +69,7 @@
     justify-content: center;
     font-size: 12px;
     font-weight: bold;
-    color: black;
+    color: var(--color-text-primary);
     transform: translate(-50%, -50%);
     z-index: 20;
 }

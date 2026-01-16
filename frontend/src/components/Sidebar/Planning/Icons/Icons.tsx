@@ -74,31 +74,31 @@ export const accuracyIcons: {html: JSX.Element, exact: boolean}[] = [{
 export const timelineIcons: {[mode: string]: JSX.Element} = {
     foot:
         <div className="timeline-icon">
-            <DirectionsWalkIcon />
+            <DirectionsWalkIcon fontSize="small" />
         </div>,
     bicycle:
         <div className="timeline-icon">
-            <PedalBikeIcon />
+            <PedalBikeIcon fontSize="small" />
         </div>,
     rail: 
         <div className="timeline-icon">
-            <TrainIcon />
+            <TrainIcon fontSize="small" />
         </div>,
     bus:
         <div className="timeline-icon">
-            <DirectionsBusIcon />
+            <DirectionsBusIcon fontSize="small" />
         </div>,
     tram:
         <div className="timeline-icon">
-            <TramIcon />
+            <TramIcon fontSize="small" />
         </div>,
     trolleybus:
         <div className="timeline-icon">
-            <DirectionsBusIcon />
+            <DirectionsBusIcon fontSize="small" />
         </div>,
     boat:
         <div className="timeline-icon">
-            <DirectionsBoatIcon />
+            <DirectionsBoatIcon fontSize="small" />
         </div>
 }
 

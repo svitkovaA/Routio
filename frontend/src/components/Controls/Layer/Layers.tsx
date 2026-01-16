@@ -1,14 +1,19 @@
 /**
  * @file Layers.tsx
- * @brief Provides map layers and satellite overlay data
+ * @brief Provides map layers and satellite overlay
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import { useTranslation } from "react-i18next";
 
+/**
+ * The hook provides base layer and satellite overlay 
+ * @returns Object containing base layers and satellite overlay
+ */
 export const useLayers = () => {
     const { t } = useTranslation();
 
+    // Available base map layers
     const baseLayers = [
         {
             name: t("map.standartMap"),
@@ -27,6 +32,7 @@ export const useLayers = () => {
         }
     ]
 
+    // Satellite overlay layer
     const satelliteOverlay =
         { 
             name: t("map.satelliteOverlay"),

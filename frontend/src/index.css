@@ -10,6 +10,14 @@ body {
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    --color-text-primary: black;
+    --color-text-secondary: grey;
+    --color-background: #fafafa;
+
+    --font-size-title: 40px;
+    --font-size-text: 20px;
+    --font-size-notes: 10px;
 }
 
 code {
