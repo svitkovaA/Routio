@@ -1,14 +1,14 @@
 /**
  * @file MoreDepartures.tsx
- * @brief Displays a list of upcoming departures for the given public transport line from the given station
+ * @brief Displays alternative departures for a public transport leg
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import { Leg } from "../../../types/types";
 
 type MoreDeparturesProps = {
-    leg: Leg;
-    recalculatePattern: (selectedIndex: number) => void;
+    leg: Leg;                                               // Public transport leg for which alternative departures are displayed
+    recalculatePattern: (selectedIndex: number) => void;    // Callback triggering route recalculation for a selected departure
 }
 
 function MoreDepartures({

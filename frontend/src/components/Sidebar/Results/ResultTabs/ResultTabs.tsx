@@ -1,6 +1,6 @@
 /**
  * @file ResultTabs.tsx
- * @brief Displays mode selection tabs for viewing different trip results
+ * @brief Displays mode selection tabs for switching between trip results
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -8,20 +8,24 @@ import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import PedalBikeIcon from '@mui/icons-material/PedalBike';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import { MultimodalIcon } from "../../Planning/Icons/Icons";
-import "./ResultTabs.css";
 import { useInput } from "../../../InputContext";
 import { useResult } from "../../../ResultContext";
+import "./ResultTabs.css";
 
-function ResultTabs() {  
+function ResultTabs() { 
+    // Result context 
     const {
         setSelectedTripPatternIndex,
         resultActiveIndex ,setResultActiveIndex
     } = useResult();
 
+    // User input context
     const { setMode } = useInput();
 
     return (
         <div className="result-tabs" onClick={() => setSelectedTripPatternIndex(0)}>
+
+            {/* Multimodal transport tab */}
             <div 
                 className={"result-mode " + (resultActiveIndex === 0 ? "selected" : "")}
                 onClick={() => {
@@ -31,6 +35,8 @@ function ResultTabs() {
             >
                 <MultimodalIcon />
             </div>
+
+            {/* Public transport tab */}
             <div 
                 className={"result-mode " + (resultActiveIndex === 1 ? "selected" : "")} 
                 onClick={() => {
@@ -42,6 +48,8 @@ function ResultTabs() {
                     <DirectionsBusIcon />
                 </div>
             </div>
+
+            {/* Bicycle transport tab */}
             <div 
                 className={"result-mode " + (resultActiveIndex === 2 ? "selected" : "")}
                 onClick={() => {
@@ -53,6 +61,8 @@ function ResultTabs() {
                     <PedalBikeIcon />
                 </div>
             </div>
+
+            {/* Walking transport tab */}
             <div 
                 className={"result-mode " + (resultActiveIndex === 3 ? "selected" : "")}
                 onClick={() => {

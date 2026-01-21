@@ -1,30 +1,33 @@
 /**
  * @file DetailSwitch.tsx
- * @brief Provides navigation between trip pattern details
+ * @brief Navigation for switching between trip pattern details
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { IconButton } from "@mui/material";
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
-import "./DetailSwitch.css"
+import { IconButton } from "@mui/material";
 import { useResult } from "../../../ResultContext";
+import "./DetailSwitch.css"
 
 type DetailSwitchProps = {
-    numOfPatterns: number;
-    setPublicLegIndex: (value: number) => void;
+    numOfPatterns: number;                          // Total number of available trip patterns
+    setPublicLegIndex: (value: number) => void;     // Setter used to reset selected leg
 };
 
 function DetailSwitch({
     numOfPatterns,
     setPublicLegIndex
 }: DetailSwitchProps) {
+    // Result context
     const { selectedTripPatternIndex, setSelectedTripPatternIndex } = useResult();
 
     return (
         <div className="detail-switch">
+
+            {/* Navigation to the previous trip pattern */}
             <IconButton
                 className="detail-switch-arrow"
                 onClick={() => {
@@ -37,6 +40,7 @@ function DetailSwitch({
                 <KeyboardArrowLeftIcon />
             </IconButton>
 
+            {/* Dots for direct pattern selection */}
             <div className="dots">
                 {Array.from({ length: numOfPatterns }, (_, i) => (
                 <IconButton 
@@ -55,6 +59,7 @@ function DetailSwitch({
                 ))}
             </div>
 
+            {/* Navigation to the next trip pattern */}
             <IconButton
                 className="detail-switch-arrow"
                 onClick={() => {
