@@ -14,17 +14,23 @@ import { JSX } from "react";
 import { Mode } from "../../../types/types";
 import "./Icons.css";
 
-export function MultimodalIcon() {
+type MultimodalIconProps = {
+    iconSize?: number;
+};
+
+export function MultimodalIcon({
+    iconSize = 16
+} : MultimodalIconProps) {
     return (
         <div className="multimodal-icon">
             <div className="circle public-transport">
-                <DirectionsBusIcon sx={{ fontSize: 16 }} />
+                <DirectionsBusIcon sx={{ fontSize: iconSize }} />
             </div>
             <div className="circle bicycle">
-                <PedalBikeIcon sx={{ fontSize: 16 }} />
+                <PedalBikeIcon sx={{ fontSize: iconSize }} />
             </div>
             <div className="circle walk">
-                <DirectionsWalkIcon sx={{ fontSize: 16 }} />
+                <DirectionsWalkIcon sx={{ fontSize: iconSize }} />
             </div>
         </div>
     );
@@ -57,31 +63,31 @@ export const modeIcons: {html: JSX.Element, value: Mode}[] = [{
 export const timelineIcons: {[mode: string]: JSX.Element} = {
     foot:
         <div className="timeline-icon">
-            <DirectionsWalkIcon fontSize="small" />
+            <DirectionsWalkIcon sx={{ fontSize: 19 }} />
         </div>,
     bicycle:
         <div className="timeline-icon">
-            <PedalBikeIcon fontSize="small" />
+            <PedalBikeIcon sx={{ fontSize: 19 }} />
         </div>,
     rail: 
         <div className="timeline-icon">
-            <TrainIcon fontSize="small" />
+            <TrainIcon sx={{ fontSize: 19 }} />
         </div>,
     bus:
         <div className="timeline-icon">
-            <DirectionsBusIcon fontSize="small" />
+            <DirectionsBusIcon sx={{ fontSize: 19 }} />
         </div>,
     tram:
         <div className="timeline-icon">
-            <TramIcon fontSize="small" />
+            <TramIcon sx={{ fontSize: 19 }} />
         </div>,
     trolleybus:
         <div className="timeline-icon">
-            <DirectionsBusIcon fontSize="small" />
+            <DirectionsBusIcon sx={{ fontSize: 19 }} />
         </div>,
     boat:
         <div className="timeline-icon">
-            <DirectionsBoatIcon fontSize="small" />
+            <DirectionsBoatIcon sx={{ fontSize: 19 }} />
         </div>
 }
 

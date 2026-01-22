@@ -9,6 +9,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useRef } from "react";
 import { Leg, VerticalTimeline } from "../../../../types/types";
 import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
+import { timelineIcons } from '../../../Planning/Icons/Icons';
 
 type WalkDetailProps = {
     leg: Leg;
@@ -35,12 +36,17 @@ function WalkDetail({
         <div
             ref={walkDetailRef}
         >
-         <div>
-            <AccessTimeIcon />
-            {(leg.duration / 60).toFixed(0)} min
-            <RouteIcon />
-            {(leg.distance / 1000).toFixed(1)} km
-        </div>
+            <div className="detail-time-distance">
+                {timelineIcons["foot"]}
+                <div className="detail-time">
+                    <AccessTimeIcon />
+                    {(leg.duration / 60).toFixed(0)} min
+                </div>
+                <div className="detail-distance">
+                    <RouteIcon />
+                    {(leg.distance / 1000).toFixed(1)} km
+                </div>
+            </div>
         </div>
     );
 }

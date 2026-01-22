@@ -12,6 +12,7 @@
 .description {
     margin-left: -20px;
     padding-left: 20px;
+    font-size: var(--font-size-text);
 }
 
 .detail-header {

@@ -12,6 +12,7 @@
 
 .detail-patterns {
     width: 100%;
+    padding-left: 40px;
 }
 
 .waystop {
@@ -21,6 +22,34 @@
     font-size: 15px;
     padding-left: 10px;
     padding-top: 5px;
+    font-size: var(--font-size-detail);
+}
+
+.waystop-detail {
+    display: grid;
+    grid-template-columns: 40px calc(100% - 50px);
+    margin-left: -55px;
+    gap: 10px;
+    height: 30px;
+}
+
+.detail-time-distance {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+
+.detail-time, .detail-distance {
+    display: flex;
+    align-items: center;
+    padding: 5px 0;
+    font-size: var(--font-size-detail);
+}
+
+.detail-time-distance .timeline-icon {
+    top: 5px;
+    left: -40px;
 }
 
 /** End of file Detail.css */

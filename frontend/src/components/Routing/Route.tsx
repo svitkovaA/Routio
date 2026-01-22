@@ -8,6 +8,7 @@ import { API_BASE_URL } from "../config/config";
 import { useInput } from "../InputContext";
 import { useResult } from "../ResultContext";
 import { useSettings } from "../SettingsContext";
+import dayjs from "dayjs";
 
 /**
  * Hook for computing a route based on current application state
@@ -72,7 +73,7 @@ export function useRoute() {
                 }
                 legPreferencesArray.push({
                     mode: legPreferences[i].mode,
-                    wait: legPreferences[i].wait
+                    wait: legPreferences[i].wait.hour()*3600 + legPreferences[i].wait.minute()*60 + legPreferences[i].wait.second()
                 });
             }
 
@@ -81,7 +82,7 @@ export function useRoute() {
             if (!firstRouting && equalPrefs) {
                 legPreferencesArray = Array.from(
                     { length: legPreferences.length },
-                    () => ({ mode: "transit,bicycle,walk", exact: true })
+                    () => ({ mode: "transit,bicycle,walk", wait: 0 })
                 );
                 equalPrefs = false;
             }

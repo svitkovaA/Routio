@@ -4,13 +4,18 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+.public-transport-detail {
+    font-size: var(--font-size-detail);
+    position: relative;
+} 
+
 .stop {
     position: relative;
 }
 
 .timeline-dot.public {
     top: 4px;
-    left: -24px;
+    left: -64px;
 }
 
 .station-square {
@@ -35,6 +40,11 @@
 
 .exclamation {
     color: red;
+}
+
+.public-transport-detail .timeline-icon {
+    top: 27px;
+    left: -40px;
 }
 
 /** End of file PublicTransportDetail.css */

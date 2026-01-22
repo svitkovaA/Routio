@@ -7,12 +7,14 @@
 import RouteIcon from '@mui/icons-material/Route';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import DepartureBoardIcon from '@mui/icons-material/DepartureBoard';
 import { Leg, VerticalTimeline } from "../../../../types/types";
 import "./PublicTransportDetail.css";
 import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
+import { timelineIcons } from '../../../Planning/Icons/Icons';
+import Waystop from '../Waystop/Waystop';
 
 type PublicTransportDetailProps = {
     leg: Leg;
@@ -53,14 +55,17 @@ function PublicTransportDetail({
         -33
     );
 
+    useEffect(() => setStopsOpen(false), [leg]);
 
     return (
         <div
             ref={publicTransportDetailRef} className="public-transport-detail"
         >
-            <div className="waystop">
-                {new Date(leg.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} {leg.fromPlace?.name}
-            </div>
+            <Waystop
+                time={new Date(leg.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                name={leg.fromPlace?.name}
+            />
+            {timelineIcons[leg.mode]}
             {leg.mode + " " + leg.line?.publicCode + " -> " + leg.serviceJourney?.direction}
             <div>
                 {leg.nonContinuousDepartures ? (
@@ -133,15 +138,20 @@ function PublicTransportDetail({
                     ))}
                 </div>
             </div>
-            <div>
-                <AccessTimeIcon />
-                {(leg.duration / 60).toFixed(0)} min
-                <RouteIcon />
-                {(leg.distance / 1000).toFixed(1)} km
+            <div className="detail-time-distance">
+                <div className="detail-time">
+                    <AccessTimeIcon />
+                    {(leg.duration / 60).toFixed(0)} min
+                </div>
+                <div className="detail-distance">
+                    <RouteIcon />
+                    {(leg.distance / 1000).toFixed(1)} km
+                </div>
             </div>
-            <div className="waystop">
-                {new Date(leg.aimedEndTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} {leg.toPlace?.name}
-            </div>
+            <Waystop
+                time={new Date(leg.aimedEndTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                name={leg.toPlace?.name}
+            />
         </div>
     );
 }

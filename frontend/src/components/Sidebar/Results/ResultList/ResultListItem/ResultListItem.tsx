@@ -48,16 +48,16 @@ function ResultListItem({
                 />
                 <div className="pattern-info-wrapper">
                     <span>
-                        <AccessTimeIcon />
+                        <AccessTimeIcon sx={{ color: 'var(--color-icons-darker)' }} />
                         {Math.round(pattern.totalDuration / 60)} min
                     </span>
                     <span>
-                        <RouteIcon />
+                        <RouteIcon sx={{ color: 'var(--color-icons-darker)' }} />
                         {(pattern.totalDistance / 1000).toFixed(1)} km
                     </span>
                     {pattern?.numOfTransfers !== undefined && (
                         <span>
-                            <SwapHorizIcon />
+                            <SwapHorizIcon sx={{ color: 'var(--color-icons-darker)' }} />
                             {pattern.numOfTransfers}
                         </span>
                     )}

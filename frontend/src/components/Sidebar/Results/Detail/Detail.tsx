@@ -14,6 +14,7 @@ import VerticalTimelineComponent from "./VerticalTimelineComponent/VerticalTimel
 import Transfer from "./Transfer/Transfer";
 import "./Detail.css"
 import { useInput } from "../../../InputContext";
+import Waystop from "./Waystop/Waystop";
 
 type DetailProps = {
     tripPattern: TripPattern;
@@ -65,14 +66,16 @@ function Detail({
                     return (
                         <>
                             {index === 0 && (
-                                <div className="waystop">
-                                    {time} {waypoints[waypointCount].displayName}
-                                </div>
+                                <Waystop
+                                    time={time}
+                                    name={waypoints[waypointCount].displayName}
+                                />
                             )}
                             {displayWaypoint && (
-                                <div className="waystop">
-                                    {time} {waypoints[waypointCount].displayName}
-                                </div>
+                                <Waystop
+                                    time={time}
+                                    name={waypoints[waypointCount].displayName}
+                                />
                             )}
 
                             {leg.mode === "foot" ? (
@@ -110,9 +113,10 @@ function Detail({
                             )}
 
                             {index === tripPattern.originalLegs.length - 1 && (
-                                <div className="waystop">
-                                    {endTime} {waypoints[waypointCount + 1].displayName}
-                                </div>
+                                <Waystop
+                                    time={endTime}
+                                    name={waypoints[waypointCount + 1].displayName}
+                                />
                             )}
                         </>
                     );

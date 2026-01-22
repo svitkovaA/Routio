@@ -1,0 +1,17 @@
+.waystop {
+    height: 30px;
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
+    font-size: 15px;
+    padding-left: 10px;
+    padding-top: 5px;
+    font-size: var(--font-size-detail);
+}
+
+.waystop-detail {
+    display: grid;
+    grid-template-columns: 40px calc(100% - 50px);
+    margin-left: -55px;
+    gap: 10px;
+    height: 30px;
+}

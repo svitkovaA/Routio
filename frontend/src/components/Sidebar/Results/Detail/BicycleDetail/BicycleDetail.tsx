@@ -7,6 +7,7 @@
 import { useRef } from "react";
 import { Leg, VerticalTimeline } from "../../../../types/types";
 import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
+import { timelineIcons } from "../../../Planning/Icons/Icons";
 
 type BicycleDetailProps = {
     leg: Leg;
@@ -32,6 +33,7 @@ function BicycleDetail({
         <div
             ref={bicycleRef}
         >
+            {timelineIcons["bicycle"]}
             bike
         </div>
     );

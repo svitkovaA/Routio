@@ -33,7 +33,7 @@ function ResultTabs() {
                     setMode("transit,bicycle,walk"); 
                 }}
             >
-                <MultimodalIcon />
+                <MultimodalIcon iconSize={24}/>
             </div>
 
             {/* Public transport tab */}

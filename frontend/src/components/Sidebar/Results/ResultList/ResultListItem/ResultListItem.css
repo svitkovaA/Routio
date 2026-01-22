@@ -46,17 +46,26 @@
 }
 
 .pattern-info-wrapper {
+    font-size: var(--font-size-detail);
+    display: grid;
+    grid-template-columns: 1.9fr 1.9fr 1fr;
+    align-items: center;
+    padding-left: 2px;
+}
+
+.pattern-info-wrapper > span {
     display: flex;
-    justify-content: space-around;
-    font-size: 0.85rem;
+    align-items: center;
 }
 
 .selected .detail-span {
     display: inline;
+    margin: 0 auto;
+    margin-top: 2px;
 }
 
 .detail-span .detail-button {
-    font-size: 15px;
+    font-size: var(--font-size-detail);
     color: black;
 }
 
