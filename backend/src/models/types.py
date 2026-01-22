@@ -53,6 +53,7 @@ class Leg(LegBase, total=False):
     serviceJourney: ServiceJourney
     accumulatedDuration: int
     delays: Dict[str, int]
+    bikeStationInfo: Any
 
 class TripPatternBase(TypedDict):
     legs: List[Leg]
@@ -69,6 +70,7 @@ class TripPattern(TripPatternBase, total=False):
     originalLegs: List[Leg]
     tooLongWalkDistance: bool
     tooLongBikeDistance: bool
+    bikeSegmentFound: bool
 
 class Suggestion(TypedDict):
     name: str
@@ -134,3 +136,28 @@ class TripResponse(TypedDict):
 
 class OTPPublicQueryResponse(TypedDict):
     trip: TripResponse
+
+class BikeRentalPlace(PlaceBase):
+    id: str
+    name: str
+    bikesAvailable: int
+    spacesAvailable: int
+    allowDropoff: bool
+
+class BikeStationNodeBase(TypedDict):
+    distance: float
+    score: float
+
+class BikeStationNode(BikeStationNodeBase):
+    place: BikeRentalPlace
+
+class BikeRackPlace(PlaceBase):
+    name: str
+    capacity: int
+
+class BikeRackNode(BikeStationNodeBase):
+    place: BikeRackPlace
+    tags: Any
+
+class BikeStationNodeWrapper(TypedDict):
+    node: BikeStationNode

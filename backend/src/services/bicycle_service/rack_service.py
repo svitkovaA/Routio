@@ -1,9 +1,11 @@
+from typing import List
 import numpy as np
-import overpy
+import overpy   # type: ignore[import-untyped]
 from scipy.spatial.distance import cosine
+from models.types import BikeRackNode
 from utils.geo import haversine_distance
 
-async def find_bike_rack(lat: float, lon: float, radius: int = 1000):
+async def find_bike_rack(lat: float, lon: float, radius: int = 1000) -> List[BikeRackNode]:
     print("function: find_bike_rack")
 
     api = overpy.Overpass()
@@ -19,7 +21,7 @@ async def find_bike_rack(lat: float, lon: float, radius: int = 1000):
     except Exception:
         return []
 
-    racks = []
+    racks: List[BikeRackNode] = []
 
     for node in result.nodes:
         racks.append({
@@ -30,17 +32,18 @@ async def find_bike_rack(lat: float, lon: float, radius: int = 1000):
                 "name": "Bike rack",
                 "capacity": node.tags.get("capacity", 5),
             },
-            "tags": node.tags
+            "tags": node.tags,
+            "score": 0
         })
 
     return racks
 
-async def optimal_bike_rack_choice(combination: bool, origin: str, destination: str, max_distance: float = 1000):
+async def optimal_bike_rack_choice(combination: bool, origin: str, destination: str, max_distance: float = 1000) -> List[BikeRackNode]:
     print("function: optimal_bike_rack_choice")
-    origin = list(map(float, origin.split(',')))
-    destination = list(map(float, destination.split(',')))
-    racks = await find_bike_rack(*destination)
-    vectorDestinationOrigin = np.array(origin) - np.array(destination)
+    origin_list = list(map(float, origin.split(',')))
+    destination_list = list(map(float, destination.split(',')))
+    racks = await find_bike_rack(*destination_list, radius=1000)
+    vectorDestinationOrigin = np.asarray(origin_list) - np.asarray(destination_list)
 
     if combination:
         angleW = 0.6
@@ -49,10 +52,10 @@ async def optimal_bike_rack_choice(combination: bool, origin: str, destination: 
         angleW = 0.4
         distanceW = 0.6
 
-    scored_racks = []
+    scored_racks: List[BikeRackNode] = []
 
     for rack in racks:    
-        vectorDestinationStation = np.array([float(rack["place"]["latitude"]), float(rack["place"]["longitude"])]) - np.array(destination)
+        vectorDestinationStation = np.asarray([float(rack["place"]["latitude"]), float(rack["place"]["longitude"])]) - np.asarray(destination_list)
         
         if combination and np.dot(vectorDestinationOrigin, vectorDestinationStation) <= 0:
             continue

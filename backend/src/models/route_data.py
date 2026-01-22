@@ -2,7 +2,6 @@ from typing import List
 from pydantic import BaseModel
 from datetime import time, date
 
-
 class LegPreferences(BaseModel):
     mode: str
     wait: int

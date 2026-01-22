@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Set, Tuple, cast
 from gql import gql
 from gql.client import AsyncClientSession
 import polyline # type: ignore[import-untyped]
-from models.types import LissyShape, LissyShapes, OTPPublicQueryResponse, TripPattern
+from models.types import BikeStationNodeWrapper, LissyShape, LissyShapes, OTPPublicQueryResponse, TripPattern
 from services.gtfs_gbfs_service import get_color, get_departures_via
 from services.public_transport_service.lissy import get_delays, get_shape, get_shapes_cached, get_trip_id_by_time
 from utils.planner_utils import combine_pt
@@ -333,7 +333,7 @@ async def public_transport_route(
 
     return trip_patterns
 
-async def nearest_bike_stations(lat: float, lon: float, session: AsyncClientSession, maximum_distance: int):
+async def nearest_bike_stations(lat: float, lon: float, session: AsyncClientSession, maximum_distance: int) -> List[BikeStationNodeWrapper]:
     print("function: nearest_bike_stations")
     query = gql("""
         query nearestStations($latitude: Float!, $longitude: Float!, $maximum_distance: Float!) {

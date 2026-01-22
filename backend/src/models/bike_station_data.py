@@ -2,7 +2,6 @@ from typing import Any, List
 from pydantic import BaseModel
 from models.route_data import RouteData
 
-
 class BikeStationData(BaseModel):
     origin_bike_station: bool
     new_index: int

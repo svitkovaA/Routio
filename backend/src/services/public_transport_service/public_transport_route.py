@@ -1,10 +1,19 @@
 import asyncio
 from typing import List
+from models.types import TripPattern
 from services.otp_service import public_transport_route
 from utils.geo import haversine_distance
 from utils.planner_utils import combine_pt
+from gql.client import AsyncClientSession
 
-async def process_public_route(waypoints: List[str], time_to_depart: str, arrive_by: bool, max_transfers: int, modes: List[str], session):
+async def process_public_route(
+    waypoints: List[str], 
+    time_to_depart: str, 
+    arrive_by: bool, 
+    max_transfers: int, 
+    modes: List[str], 
+    session: AsyncClientSession
+) -> List[TripPattern]:
     print("function: process_public_route")
     i = 0
     trip_patterns = []
@@ -12,7 +21,7 @@ async def process_public_route(waypoints: List[str], time_to_depart: str, arrive
     if arrive_by:
         i = len(waypoints) - 1
         while i > 0:
-            group = []
+            group: List[str] = []
             distance = 10
             while distance >= 1 and i > 0:
                 group.insert(0, waypoints[i])
