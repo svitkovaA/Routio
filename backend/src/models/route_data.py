@@ -5,7 +5,7 @@ from datetime import time, date
 
 class LegPreferences(BaseModel):
     mode: str
-    exact: bool
+    wait: int
 
 class RouteData(BaseModel):
     waypoints: List[str]

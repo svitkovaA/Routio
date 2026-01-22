@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Any
+from typing import Dict, TypedDict, List, Any
 from datetime import datetime
 
 class Quay(TypedDict):
@@ -87,3 +87,35 @@ class OtherDeparture(TypedDict):
 class Departures(TypedDict):
     departures: List[Departure]
     currentIndex: None | int
+
+class LissyTrips(TypedDict):
+    id: int | None
+    dep_time: str | None
+
+class LissyDelayTrips(TypedDict):
+    shape_id: str
+    stops: str
+    stopOrder: List[str]
+    trips: List[LissyTrips]
+
+class LissyAvailableRoute(TypedDict):
+    route_short_name: str
+    id: str
+
+class RouteData(TypedDict):
+    shape_id: str
+    stopOrder: List[str]
+    trips_by_time: Dict[str, int]
+
+class LissyShape(TypedDict):
+    coords: List[List[int]]
+    stops: Any
+
+class LissyShapeTrips(TypedDict):
+    shape_id: int
+    stops: str
+
+class LissyShapes(TypedDict):
+    route_short_name: str
+    route_color: str
+    trips: List[LissyShapeTrips]

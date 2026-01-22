@@ -51,7 +51,7 @@ async def multimodal_route(waypoints, time_to_depart: str, data: RouteData, bike
     for combination in possible_mode_combinations:
         preferences = []
         for mode in combination:
-            preferences.append(LegPreferences(mode=mode, exact=True))
+            preferences.append(LegPreferences(mode=mode, wait=0))
         waypoint_groups, _ = create_waypoint_groups(waypoints, preferences)
 
         bike_count = sum(group["mode"] in ["bicycle", "bicycle_walk_transit", "walk_transit_bicycle"] for group in waypoint_groups)
