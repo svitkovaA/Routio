@@ -162,3 +162,7 @@ class BikeRackNode(BikeStationNodeBase):
 
 class BikeStationNodeWrapper(TypedDict):
     node: BikeStationNode
+
+class Results(TypedDict):
+    tripPatterns: List[TripPattern]
+    active: bool

@@ -1,7 +1,8 @@
 from copy import deepcopy
-from datetime import datetime, time
+from datetime import datetime
+from typing import List
 from gql import Client
-from utils.geo import haversine_distance
+from models.types import Leg, Results, TripPattern
 from models.route_data import LegPreferences, RouteData
 from services.route import route
 from utils.planner_utils import at_waypoint, create_waypoint_groups, filter_sort_trip_patterns
@@ -23,8 +24,8 @@ async def change_bike_station(data: BikeStationData):
     time_to_depart = compressed_legs[-1]["aimedEndTime"] if route_data.arrive_by else compressed_legs[0]["aimedStartTime"]
     legs = data.original_legs
     lock_time = route_data.bike_lock_time * 60 if route_data.use_own_bike else route_data.bikesharing_lock_time * 60
-    new_pattern = {"legs": []}
-    new_legs = []
+    new_pattern: TripPattern = {"legs": [], "aimedEndTime": ""}
+    new_legs: List[Leg] = []
     transport = AIOHTTPTransport(url=OTP_URL)
     async with Client(transport=transport) as session:
         if route_data.arrive_by:
@@ -49,6 +50,8 @@ async def change_bike_station(data: BikeStationData):
                     "color": "black",
                     "distance": 0,
                     "duration": lock_time,
+                    "aimedEndTime": "",
+                    "aimedStartTime": "",
                     "pointsOnLink": {
                         "points": []
                     },
@@ -105,6 +108,8 @@ async def change_bike_station(data: BikeStationData):
                     "color": "black",
                     "distance": 0,
                     "duration": lock_time,
+                    "aimedEndTime": "",
+                    "aimedStartTime": "",
                     "pointsOnLink": {
                         "points": []
                     },
@@ -118,36 +123,37 @@ async def change_bike_station(data: BikeStationData):
                     }
                 })
                 leg_index = i - 2
-                bike_pattern = await walk_bicycle_route(f"{legs[leg_index]["fromPlace"]["latitude"]}, {legs[leg_index]["fromPlace"]["longitude"]}", f"{new_legs[0]["bikeStationInfo"]["latitude"]}, {new_legs[0]["bikeStationInfo"]["longitude"]}", time_to_depart, "bicycle", session)
-                new_legs[:0] = bike_pattern[0]["legs"]
-                leg_index -= 1
-                while leg_index > 0 and legs[leg_index]["mode"] != "foot":
-                    if legs[leg_index]["mode"] == "bicycle":
-                        waypoint_count -= 1
-                    new_legs.insert(0, deepcopy(legs[leg_index]))
+                if "bikeStationInfo" in new_legs[0]:
+                    bike_pattern = await walk_bicycle_route(f"{legs[leg_index]["fromPlace"]["latitude"]}, {legs[leg_index]["fromPlace"]["longitude"]}", f"{new_legs[0]["bikeStationInfo"]["latitude"]}, {new_legs[0]["bikeStationInfo"]["longitude"]}", time_to_depart, "bicycle", session)
+                    new_legs[:0] = bike_pattern[0]["legs"]
                     leg_index -= 1
+                    while leg_index > 0 and legs[leg_index]["mode"] != "foot":
+                        if legs[leg_index]["mode"] == "bicycle":
+                            waypoint_count -= 1
+                        new_legs.insert(0, deepcopy(legs[leg_index]))
+                        leg_index -= 1
 
-                found_waypoint = True
-                waypoint_group = route_data.waypoints[:waypoint_count]
-                if leg_index > 0:
-                    found_waypoint = at_waypoint(legs[leg_index]["fromPlace"]["latitude"], legs[leg_index]["fromPlace"]["longitude"], waypoint_group[-1])
-                if found_waypoint:
-                    new_legs.insert(0, deepcopy(legs[leg_index]))
-                justify_time({"legs": new_legs, "aimedEndTime": ""}, time_to_depart, True)
-                routing_modes = data.modes[:waypoint_count-1]
-                if not found_waypoint:
-                    waypoint_group.append(f"{legs[leg_index]["toPlace"]["latitude"]}, {legs[leg_index]["toPlace"]["longitude"]}")
-                    routing_modes.append("walk_transit")
-                routing_modes = [mode if mode != "walk_transit_bicycle" else "walk_transit" for mode in routing_modes]
-                waypoint_groups, _ = create_waypoint_groups(waypoint_group, [LegPreferences(mode=mode, wait=0) for mode in routing_modes])
-                route_pattern = await route(waypoint_groups, new_legs[0]["aimedStartTime"], session, True, route_data, True)
-                new_pattern["modes"] = data.modes
-                if len(route_pattern) > 0:
-                    new_legs[:0] = route_pattern[0]["legs"]
-                    new_pattern["modes"][:0] = route_pattern[0].get("modes", [])
-                new_pattern["aimedEndTime"] = base_legs[-1]["aimedEndTime"] if len(base_legs) > 0 else new_legs[-1]["aimedEndTime"]
-                new_pattern["legs"] = new_legs + base_legs
-                process_legs(new_pattern)
+                    found_waypoint = True
+                    waypoint_group = route_data.waypoints[:waypoint_count]
+                    if leg_index > 0:
+                        found_waypoint = at_waypoint(legs[leg_index]["fromPlace"]["latitude"], legs[leg_index]["fromPlace"]["longitude"], waypoint_group[-1])
+                    if found_waypoint:
+                        new_legs.insert(0, deepcopy(legs[leg_index]))
+                    justify_time({"legs": new_legs, "aimedEndTime": ""}, time_to_depart, True)
+                    routing_modes = data.modes[:waypoint_count-1]
+                    if not found_waypoint:
+                        waypoint_group.append(f"{legs[leg_index]["toPlace"]["latitude"]}, {legs[leg_index]["toPlace"]["longitude"]}")
+                        routing_modes.append("walk_transit")
+                    routing_modes = [mode if mode != "walk_transit_bicycle" else "walk_transit" for mode in routing_modes]
+                    waypoint_groups, _ = create_waypoint_groups(waypoint_group, [LegPreferences(mode=mode, wait=0) for mode in routing_modes])
+                    route_pattern = await route(waypoint_groups, new_legs[0]["aimedStartTime"], session, True, route_data, True)
+                    new_pattern["modes"] = data.modes
+                    if len(route_pattern) > 0:
+                        new_legs[:0] = route_pattern[0]["legs"]
+                        new_pattern["modes"][:0] = route_pattern[0].get("modes", [])
+                    new_pattern["aimedEndTime"] = base_legs[-1]["aimedEndTime"] if len(base_legs) > 0 else new_legs[-1]["aimedEndTime"]
+                    new_pattern["legs"] = new_legs + base_legs
+                    process_legs(new_pattern)
         else:
             if data.origin_bike_station:
                 i = len(legs) - 1
@@ -171,6 +177,8 @@ async def change_bike_station(data: BikeStationData):
                     "color": "black",
                     "distance": 0,
                     "duration": lock_time,
+                    "aimedEndTime": "",
+                    "aimedStartTime": "",
                     "pointsOnLink": {
                         "points": []
                     },
@@ -184,36 +192,37 @@ async def change_bike_station(data: BikeStationData):
                     }
                 })
                 leg_index = i + 2
-                bike_pattern = await walk_bicycle_route(f"{new_legs[-1]["bikeStationInfo"]["latitude"]}, {new_legs[-1]["bikeStationInfo"]["longitude"]}", f"{legs[leg_index]["toPlace"]["latitude"]}, {legs[leg_index]["toPlace"]["longitude"]}", time_to_depart, "bicycle", session)
-                new_legs.extend(bike_pattern[0]["legs"])
-                leg_index += 1
-                while leg_index < len(legs) and legs[leg_index]["mode"] != "foot":
-                    if legs[leg_index]["mode"] == "bicycle":
-                        waypoint_count -= 1
-                    new_legs.append(deepcopy(legs[leg_index]))
+                if "bikeStationInfo" in new_legs[-1]:
+                    bike_pattern = await walk_bicycle_route(f"{new_legs[-1]["bikeStationInfo"]["latitude"]}, {new_legs[-1]["bikeStationInfo"]["longitude"]}", f"{legs[leg_index]["toPlace"]["latitude"]}, {legs[leg_index]["toPlace"]["longitude"]}", time_to_depart, "bicycle", session)
+                    new_legs.extend(bike_pattern[0]["legs"])
                     leg_index += 1
-                
-                found_waypoint = True
-                if leg_index < len(legs):
-                    found_waypoint = at_waypoint(legs[leg_index]["toPlace"]["latitude"], legs[leg_index]["toPlace"]["longitude"], data.route_data.waypoints[waypoint_count-1])
-                if found_waypoint:
-                    new_legs.append(deepcopy(legs[leg_index]))
-                justify_time({"legs": new_legs, "aimedEndTime": ""}, time_to_depart, False)
-                waypoint_group = route_data.waypoints[-waypoint_count:]
-                routing_modes = data.modes[-waypoint_count+1:] if waypoint_count > 1 else []
-                if not found_waypoint:
-                    waypoint_group.insert(0, f"{legs[leg_index]['fromPlace']['latitude']}, {legs[leg_index]['fromPlace']['longitude']}")
-                    routing_modes.insert(0, "walk_transit")
-                routing_modes = [mode if mode != "bicycle_walk_transit" else "walk_transit" for mode in routing_modes]
-                waypoint_groups, _ = create_waypoint_groups(waypoint_group, [LegPreferences(mode=mode, wait=0) for mode in routing_modes])
-                route_pattern = await route(waypoint_groups, new_legs[-1]["aimedEndTime"], session, True, route_data, True)
-                
-                new_pattern["modes"] = data.modes
-                if len(route_pattern) > 0:
-                    new_legs.extend(route_pattern[0]["legs"])
-                    new_pattern["aimedEndTime"] = route_pattern[0]["aimedEndTime"]
-                new_pattern["legs"] = base_legs + new_legs
-                process_legs(new_pattern)
+                    while leg_index < len(legs) and legs[leg_index]["mode"] != "foot":
+                        if legs[leg_index]["mode"] == "bicycle":
+                            waypoint_count -= 1
+                        new_legs.append(deepcopy(legs[leg_index]))
+                        leg_index += 1
+                    
+                    found_waypoint = True
+                    if leg_index < len(legs):
+                        found_waypoint = at_waypoint(legs[leg_index]["toPlace"]["latitude"], legs[leg_index]["toPlace"]["longitude"], data.route_data.waypoints[waypoint_count-1])
+                    if found_waypoint:
+                        new_legs.append(deepcopy(legs[leg_index]))
+                    justify_time({"legs": new_legs, "aimedEndTime": ""}, time_to_depart, False)
+                    waypoint_group = route_data.waypoints[-waypoint_count:]
+                    routing_modes = data.modes[-waypoint_count+1:] if waypoint_count > 1 else []
+                    if not found_waypoint:
+                        waypoint_group.insert(0, f"{legs[leg_index]['fromPlace']['latitude']}, {legs[leg_index]['fromPlace']['longitude']}")
+                        routing_modes.insert(0, "walk_transit")
+                    routing_modes = [mode if mode != "bicycle_walk_transit" else "walk_transit" for mode in routing_modes]
+                    waypoint_groups, _ = create_waypoint_groups(waypoint_group, [LegPreferences(mode=mode, wait=0) for mode in routing_modes])
+                    route_pattern = await route(waypoint_groups, new_legs[-1]["aimedEndTime"], session, True, route_data, True)
+                    
+                    new_pattern["modes"] = data.modes
+                    if len(route_pattern) > 0:
+                        new_legs.extend(route_pattern[0]["legs"])
+                        new_pattern["aimedEndTime"] = route_pattern[0]["aimedEndTime"]
+                    new_pattern["legs"] = base_legs + new_legs
+                    process_legs(new_pattern)
             else:
                 i = len(legs) - 1
                 compressed_index = len(compressed_legs) - 1
@@ -237,6 +246,8 @@ async def change_bike_station(data: BikeStationData):
                     "color": "black",
                     "distance": 0,
                     "duration": lock_time,
+                    "aimedEndTime": "",
+                    "aimedStartTime": "",
                     "pointsOnLink": {
                         "points": []
                     },
@@ -255,12 +266,13 @@ async def change_bike_station(data: BikeStationData):
                     waypoint_found = at_waypoint(legs[leg_index]["toPlace"]["latitude"], legs[leg_index]["toPlace"]["longitude"], waypoint_group[0])
                 routing_modes = data.modes[-waypoint_count+1:] if waypoint_count > 1 else []
 
-                if waypoint_found:
-                    walk_pattern = await walk_bicycle_route(f"{new_legs[-1]["bikeStationInfo"]["latitude"]}, {new_legs[-1]["bikeStationInfo"]["longitude"]}", f"{legs[leg_index]["toPlace"]["latitude"]}, {legs[leg_index]["toPlace"]["longitude"]}", time_to_depart, "foot", session)
-                    new_legs.extend(walk_pattern[0]["legs"])
-                else:
-                    waypoint_group.insert(0, f"{new_legs[-1]["bikeStationInfo"]["latitude"]}, {new_legs[-1]["bikeStationInfo"]["longitude"]}")
-                    routing_modes.insert(0, "walk_transit")
+                if "bikeStationInfo" in new_legs[-1]:
+                    if waypoint_found:
+                        walk_pattern = await walk_bicycle_route(f"{new_legs[-1]["bikeStationInfo"]["latitude"]}, {new_legs[-1]["bikeStationInfo"]["longitude"]}", f"{legs[leg_index]["toPlace"]["latitude"]}, {legs[leg_index]["toPlace"]["longitude"]}", time_to_depart, "foot", session)
+                        new_legs.extend(walk_pattern[0]["legs"])
+                    else:
+                        waypoint_group.insert(0, f"{new_legs[-1]["bikeStationInfo"]["latitude"]}, {new_legs[-1]["bikeStationInfo"]["longitude"]}")
+                        routing_modes.insert(0, "walk_transit")
                 routing_modes = [mode if mode != "bicycle_walk_transit" else "walk_transit" for mode in routing_modes]
                 justify_time({"legs": new_legs, "aimedEndTime": ""}, time_to_depart, False)
                 waypoint_groups, _ = create_waypoint_groups(waypoint_group, [LegPreferences(mode=mode, wait=0) for mode in routing_modes])
@@ -280,7 +292,7 @@ async def change_bike_station(data: BikeStationData):
 async def get_route(data: RouteData):
     print("endpoint: get_route")
     start = t.perf_counter()
-    results = {
+    results: Results = {
         "tripPatterns": [],
         "active": True
     }

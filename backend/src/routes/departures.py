@@ -1,4 +1,3 @@
-import json
 from fastapi import APIRouter
 from utils.legs_processing import justify_time
 from models.departure_data import DepartureData
@@ -26,7 +25,7 @@ async def other_departures(data: DepartureData):
 
     legs[index]["arrivalAfterDeparture"] = False
     if without_public_transport:
-        justify_time({"legs": legs[:index]}, legs[index]["aimedStartTime"], True)
+        justify_time({"legs": legs[:index], "aimedEndTime": ""}, legs[index]["aimedStartTime"], True)
     else:
         if legs[index - 1]["aimedEndTime"] > legs[index]["aimedStartTime"]:
             legs[index]["arrivalAfterDeparture"] = True

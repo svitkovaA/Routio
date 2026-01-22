@@ -72,6 +72,7 @@ def merge_legs(leg1: Leg, leg2: Leg) -> Leg:
                 + service_journey_2["quays"]
             ),
             "direction": service_journey_1["direction"],
+            "passingTimes": []
         }
     points_1 = leg1["pointsOnLink"]["points"]
     points_2 = leg2["pointsOnLink"]["points"]

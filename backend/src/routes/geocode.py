@@ -1,5 +1,7 @@
+from typing import Any, Dict, List
 from fastapi import Query, APIRouter
 import httpx
+from models.types import Suggestion
 from utils.geo import merge_close_results
 from config import NOMINATIM_URL, PHOTON_URL
 
@@ -31,7 +33,7 @@ async def geocode_name(q: str = Query(..., description="Partial address or place
         except Exception as e:
             return {"error": f"Unexpected error: {str(e)}"}
         
-    suggestions = []
+    suggestions: List[Suggestion] = []
     for feature in data.get("features", []):
         coords = feature["geometry"]["coordinates"]
         lon, lat = coords[0], coords[1]
@@ -52,9 +54,9 @@ async def geocode_name(q: str = Query(..., description="Partial address or place
     return filtered_suggestions
 
 @router.get("/latLon")
-async def geocode_lat_lon(lat: float = Query(..., description="Latitude"), lon: float = Query(..., description="Longitude")):
+async def geocode_lat_lon(lat: float = Query(..., description="Latitude"), lon: float = Query(..., description="Longitude")) -> Dict[str, Any]:
     print("endpoint: geocode_lat_lon")
-    params = {
+    params: Dict[str, Any] = {
         "format": "json",
         "lat": lat,
         "lon": lon,
