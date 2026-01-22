@@ -5,12 +5,13 @@
  */
 
 .grid-wrapper > button {
-    padding: 6px;
+    padding: 4px;
     border-radius: 4px;
     border: 1px solid #ccc;
     background-color: var(--color-background);
     cursor: pointer;
     font-size: 13pt;
+    height: 35px;
 }
 
 /** End of file InfoSettings.css */

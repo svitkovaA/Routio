@@ -40,7 +40,10 @@ function ModeSelect({ index }: ModeSelectProps) {
                     mode.value === legPreferences[index].mode ? mode.html : null
                 )}
                 <span className="mode-arrow">
-                    <KeyboardArrowDownIcon className={open ? "rotate" : ""} />
+                    <KeyboardArrowDownIcon 
+                        className={open ? "rotate" : ""}
+                        sx={{ color: 'var(--color-icons)' }}
+                    />
                 </span>
             </button>
 

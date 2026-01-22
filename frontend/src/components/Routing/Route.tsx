@@ -72,7 +72,7 @@ export function useRoute() {
                 }
                 legPreferencesArray.push({
                     mode: legPreferences[i].mode,
-                    exact: legPreferences[i].exact
+                    wait: legPreferences[i].wait
                 });
             }
 

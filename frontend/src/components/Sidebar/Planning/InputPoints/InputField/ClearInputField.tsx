@@ -28,7 +28,7 @@ function ClearInputField({
                 size="small"
                 edge="end"
                 onMouseDown={(e) => e.preventDefault()}
-                sx={{ mr: -1 }}
+                sx={{ mr: -1, color: 'var(--color-icons)' }}
                 tabIndex={-1}
             >
                 <ClearIcon />

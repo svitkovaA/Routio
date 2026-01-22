@@ -21,14 +21,14 @@ function InfoSettings({ showSettings, showInfo }: InfoSettingsProps) {
                 onClick={showSettings} 
                 type="button"
             >
-                <SettingsIcon />
+                <SettingsIcon sx={{ color: 'var(--color-icons)' }} />
             </button>
             <button 
                 className="input-wrapper" 
                 onClick={showInfo} 
                 type="button"
             >
-                <InfoIcon />
+                <InfoIcon sx={{ color: 'var(--color-icons)' }} />
             </button>
         </div>
     );

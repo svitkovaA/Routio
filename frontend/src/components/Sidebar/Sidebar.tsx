@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import Planning from './Planning/Planning';
 import Settings from './Settings/Settings';
@@ -14,6 +14,7 @@ import { useInput } from '../InputContext';
 import { useResult } from '../ResultContext';
 import { useRoute } from '../Routing/Route';
 import './Sidebar.css';
+import L from 'leaflet';
 
 type sidebarProps = {
     sidebarOpen: boolean;                       // State indicating whether the sidebar is open
@@ -57,7 +58,10 @@ function Sidebar({
     }, [mode, resultActiveIndex]);
 
     return (
-        <div id="sidebar" className={sidebarOpen ? (showInfo ? "open open-info" : "open") : ""}>
+        <div 
+            id="sidebar" 
+            className={sidebarOpen ? (showInfo ? "open open-info" : "open") : ""}
+        >
             <div className={"content-wrapper " + (showResults ? "results-open " : "") + (showDetail ? "detail-open" : "")}>
                 {/* Planning view */}
                 {!showSettings && !showResults && (
@@ -95,7 +99,8 @@ function Sidebar({
             >
                 <KeyboardArrowLeftIcon 
                     fontSize="large" 
-                    className={sidebarOpen ? "" : "rotate"} 
+                    className={sidebarOpen ? "" : "rotate"}
+                    sx={{ color: 'var(--color-icons)' }}
                 />
             </button>
 

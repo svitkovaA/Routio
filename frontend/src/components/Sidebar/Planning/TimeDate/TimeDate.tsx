@@ -28,6 +28,11 @@ function TimeDate(){
                     label={t("planning.date")}
                     value={date}
                     onChange={(newValue) => {if (newValue !== null) setDate(newValue)}}
+                    sx={{ 
+                        '& .MuiSvgIcon-root': {
+                            color: 'var(--color-icons)',
+                        }
+                    }}
                     slotProps={{
                         textField: {
                             InputLabelProps: { shrink: true }
@@ -41,6 +46,11 @@ function TimeDate(){
                     onChange={(newValue) => {if (newValue !== null) setTime(newValue)}}
                     slotProps={{
                         actionBar: { actions: ['accept'] }
+                    }}
+                    sx={{ 
+                        '& .MuiSvgIcon-root': {
+                            color: 'var(--color-icons)',
+                        }
                     }}
                 />
             </div>

@@ -22,7 +22,7 @@ function LocationDot({
                 onClick={onClick}
                 size="small"
                 edge="end"
-                sx={{mr: -1}}
+                sx={{mr: -1, color: 'var(--color-icons)'}}
                 tabIndex={-1}
             >
                 <LocationOnIcon />

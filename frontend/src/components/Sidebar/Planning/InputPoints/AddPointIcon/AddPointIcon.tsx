@@ -26,7 +26,7 @@ function AddPointIcon({
                 aria-label="Add intermediate waypoint"
                 onClick={onClick}
                 size="small"
-                sx={{ marginBottom: 1 }}
+                sx={{ marginBottom: 1, color: 'var(--color-icons)' }}
                 tabIndex={-1}
             >
                 <AddBoxIcon/>

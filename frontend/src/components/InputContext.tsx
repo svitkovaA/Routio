@@ -65,7 +65,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
 
     const [legPreferences, setLegPreferences] = useState<LegPreference[]>([{
         mode: "transit,bicycle,walk",
-        exact: true,
+        wait: dayjs().startOf("day"),
         open: false
     }]);
 
@@ -100,7 +100,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             if (newPrefs.length === 1) {
                 return [{
                     mode: "transit,bicycle,walk",
-                    exact: true,
+                    wait: dayjs().startOf("day"),
                     open: false
                 }];
             }
@@ -122,7 +122,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         const newLegPreferences = [...legPreferences];
         newLegPreferences.splice(index + 1, 0, {
             mode: "transit,bicycle,walk",
-            exact: true,
+            wait: dayjs().startOf("day"),
             open: false
         });
         setLegPreferences(newLegPreferences);

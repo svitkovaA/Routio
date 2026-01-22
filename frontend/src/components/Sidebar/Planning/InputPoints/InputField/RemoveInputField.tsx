@@ -27,6 +27,7 @@ function RemoveInputField({
                 onClick={onClick}
                 size="small"
                 edge="end"
+                sx={{ color: 'var(--color-icons)' }}
                 tabIndex={-1}
             >
                 <DeleteIcon />

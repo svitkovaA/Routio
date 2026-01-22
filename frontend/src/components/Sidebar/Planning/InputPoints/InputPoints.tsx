@@ -64,8 +64,11 @@ function InputPoints({
                 </SortableContext>
             </DndContext>
             {waypoints.length === 2 && (
-                // TODO color gray
-                <SwapVertIcon className="swap" onClick={swapWaypoints}/>
+                <SwapVertIcon 
+                    className="swap" 
+                    onClick={swapWaypoints}
+                    sx={{ color: 'var(--color-icons)' }}
+                />
             )}
         </div>
     );

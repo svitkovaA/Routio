@@ -10,30 +10,12 @@
     top: -4px;
 }
 
-.select-wrapper {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-}
-
-.preferences-wrapper {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 20px;
-    padding-right: 20px;
-}
-
-.select-wrapper svg {
-    position: relative;
-    right: 0;
-}
-
 .controls-button.mode {
     width: 80px;
     height: 28px;
     display: flex;
     justify-content: space-between;
+    background-color: var(--color-item-hover);
 }
 
 .dropdown-item .circle, .mode .circle{
@@ -46,7 +28,7 @@
     position: relative;
 }
 
-.dropdown-item > .circle, .mode > .circle, .dropdown-accuracy .dropdown-item {
+.dropdown-item > .circle, .mode > .circle {
     left: -5px;
 }
 
@@ -87,37 +69,16 @@
     height: 28px;
 }
 
-.mode .mode-arrow, .accuracy-arrow {
+.mode .mode-arrow {
     position: relative;
-    right: -5px;
+    right: -7px;
     display: inline-block;
     font-size: 1.2rem;
+    top: 2px;
 }
 
-.accuracy-arrow {
-    right: 5px;
-    top: -5px;
-}
-
-.controls-button.accuracy-select {
-    width: 50px;
-}
-
-.accuracy-select .accuracy-icon {
-    top: 1px;
-}
-
-.dropdown.dropdown-accuracy {
-    width: 50px;
-}
-
-.dropdown-accuracy .dropdown-item {
-    font-size: 1.2rem;
-}
-
-.dropdown-accuracy .accuracy-icon, .accuracy-select .accuracy-icon {
-    position: relative;
-    left: -7px;
+.wait-select {
+    width: 100px;
 }
 
 /** End of file Select.css */

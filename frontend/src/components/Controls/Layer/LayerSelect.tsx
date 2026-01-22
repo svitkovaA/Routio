@@ -70,10 +70,16 @@ function LayerSelect({
                 }
             }}
         >
-            <LayersIcon fontSize="small"/>
+            <LayersIcon 
+                fontSize="small"
+                sx={{ color: 'var(--color-icons)' }}
+                />
             <ExpandMoreIcon 
                 fontSize="small" 
-                className={open ? "rotate" : ""} 
+                className={open ? "rotate" : ""}
+                sx={{ 
+                    color: 'var(--color-icons)'
+                }}
             />
         </button>
 

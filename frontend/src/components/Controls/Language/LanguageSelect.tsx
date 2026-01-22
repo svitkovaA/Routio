@@ -89,7 +89,11 @@ function LanguageSelect({
                 }}
             >
                 {selectedLang.flagCode}
-                <ExpandMoreIcon fontSize="small" className={open ? "rotate" : ""} />
+                <ExpandMoreIcon 
+                    fontSize="small" 
+                    className={open ? "rotate" : ""}
+                    sx={{ color: 'var(--color-icons)' }}
+                />
             </button>
 
             {/* Dropdown menu with available languages */}

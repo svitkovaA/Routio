@@ -6,8 +6,8 @@
 
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import { accuracyIcons, modeIcons } from "../../Icons/Icons";
-import AccuracySelect from "./Select/AccuracySelect";
+import { modeIcons } from "../../Icons/Icons";
+import AccuracySelect from "./Select/WaitSelect";
 import ModeSelect from "./Select/ModeSelect";
 import "./LegPreferences.css";
 import { useInput } from "../../../../InputContext";
@@ -44,9 +44,9 @@ function LegPreferences({
                     {modeIcons.map((mode) => 
                         mode.value === legPreferences[index].mode ? mode.html : null
                     )}
-                    {accuracyIcons.map((accuracy) => 
-                        accuracy.exact === legPreferences[index].exact ? accuracy.html : null
-                    )}
+                    <div className={"leg-preferences-time " + (legPreferences[index].mode !== "transit,bicycle,walk" ? "short" : "")}>
+                        {legPreferences[index].wait.hour()*60+legPreferences[index].wait.minute()} min
+                    </div>
                 </div>
             ) : (
                 <ClickAwayListener
@@ -58,7 +58,7 @@ function LegPreferences({
                         }, 100);
                     }}
                 >
-                    <div className="preferences-wrapper">
+                    <div className="leg-preferences-select-wrapper">
                         <div className="select-wrapper">
                             <ModeSelect
                                 index={index}
@@ -67,7 +67,10 @@ function LegPreferences({
                                 index={index}
                             />
                         </div>
-                        <KeyboardArrowLeftIcon onClick={() => setLegPreference(false)}/>
+                        <KeyboardArrowLeftIcon 
+                            onClick={() => setLegPreference(false)}
+                            sx={{ color: 'var(--color-icons)' }}
+                        />
                     </div>
                 </ClickAwayListener>
             )}

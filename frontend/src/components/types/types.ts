@@ -4,6 +4,8 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import dayjs from "dayjs";
+
 export type InputText = {
     name: string;
     city: string;
@@ -24,7 +26,7 @@ export type Mode = "foot" | "bicycle" | "walk_transit" | "transit,bicycle,walk";
 
 export type LegPreference = {
     mode: Mode;
-    exact: boolean;
+    wait: dayjs.Dayjs;
     open: boolean;
 };
 

@@ -80,8 +80,7 @@ function SortableItem({
                 className="drag-and-drop"
                 tabIndex={-1}
             >
-                {/* TODO color:lightgray */}
-                <DragIndicatorIcon />
+                <DragIndicatorIcon sx={{ color: 'var(--color-icons)' }}/>
             </div>
 
             <InputField

@@ -4,8 +4,6 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import GpsFixedIcon from '@mui/icons-material/GpsFixed';
-import CircleIcon from '@mui/icons-material/Circle';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import PedalBikeIcon from '@mui/icons-material/PedalBike';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
@@ -20,13 +18,13 @@ export function MultimodalIcon() {
     return (
         <div className="multimodal-icon">
             <div className="circle public-transport">
-                <DirectionsBusIcon fontSize="small" />
+                <DirectionsBusIcon sx={{ fontSize: 16 }} />
             </div>
             <div className="circle bicycle">
-                <PedalBikeIcon fontSize="small" />
+                <PedalBikeIcon sx={{ fontSize: 16 }} />
             </div>
             <div className="circle walk">
-                <DirectionsWalkIcon fontSize="small" />
+                <DirectionsWalkIcon sx={{ fontSize: 16 }} />
             </div>
         </div>
     );
@@ -38,36 +36,21 @@ export const modeIcons: {html: JSX.Element, value: Mode}[] = [{
     }, {
         html: 
             <div className="circle">
-                <DirectionsBusIcon />
+                <DirectionsBusIcon sx={{ fontSize: 16 }} />
             </div>, 
         value: "walk_transit"
     }, {
         html: 
             <div className="circle">
-                <PedalBikeIcon />
+                <PedalBikeIcon sx={{ fontSize: 16 }} />
             </div>, 
         value: "bicycle"
     }, {
         html: 
             <div className="circle">
-                <DirectionsWalkIcon />
+                <DirectionsWalkIcon sx={{ fontSize: 16 }} />
             </div>, 
         value: "foot"
-    }
-]
-
-export const accuracyIcons: {html: JSX.Element, exact: boolean}[] = [{
-        html: 
-            <div className="accuracy-icon">
-                <GpsFixedIcon className="accuracy" />
-            </div>, 
-        exact: true
-    }, {
-        html: 
-            <div className="accuracy-icon">
-                <CircleIcon className="accuracy" />
-            </div>, 
-        exact: false
     }
 ]
 
