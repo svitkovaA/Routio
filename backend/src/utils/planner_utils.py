@@ -40,7 +40,7 @@ def combine_pt(base_patterns: List[TripPattern], results: List[List[TripPattern]
 def create_waypoint_groups(waypoints: List[str], pref: List[LegPreferences], multimodal: bool = True, mode: str = "") -> tuple[List[WaypointGroup], bool]:
     print("function: create_waypoint_groups")
     if not multimodal:
-        return [{"group": waypoints, "mode": mode}], False
+        return [{"group": waypoints, "mode": mode, "tripPatterns": []}], False
 
     groups: List[WaypointGroup] = []
     bike_segment_found = False

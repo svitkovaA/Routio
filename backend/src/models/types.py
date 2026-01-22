@@ -84,6 +84,7 @@ class Suggestion(TypedDict):
 class WaypointGroup(TypedDict):
     group: List[str]
     mode: str
+    tripPatterns: List[TripPattern]
 
 class OtherDeparture(TypedDict):
     trip_id: str

@@ -1,6 +1,9 @@
 import asyncio
 from copy import deepcopy
 from itertools import product
+from types import CoroutineType
+from typing import Any, List, Tuple
+from models.types import TripPattern, WaypointGroup
 from utils.legs_processing import justify_time
 from models.route_data import LegPreferences, RouteData
 from services.bicycle_public_route import bicycle_public_route
@@ -10,11 +13,19 @@ from services.public_bicycle_route import public_bicycle_route
 from services.public_transport_service.public_transport_route import process_public_route
 from utils.geo import get_borderline_distance, haversine_distance
 from utils.planner_utils import combine_pt, contains_sublist, create_waypoint_groups
+from gql.client import AsyncClientSession
 
-async def multimodal_route(waypoints, time_to_depart: str, data: RouteData, bike_segment_found: bool, session, first_leg: bool = False):
+async def multimodal_route(
+    waypoints: List[str], 
+    time_to_depart: str, 
+    data: RouteData, 
+    bike_segment_found: bool, 
+    session: AsyncClientSession, 
+    first_leg: bool = False
+) -> List[TripPattern]:
     print("function: multimodal_route")
     max_bike_distance = data.max_bike_distance if data.use_own_bike else data.max_bikesharing_distance
-    possible_modes = []
+    possible_modes: List[List[str]] = []
     total_distance = 0
     if data.use_own_bike:
         borderline_distance = get_borderline_distance(data.bike_average_speed, data.walk_average_speed, data.bike_lock_time, 0.25)
@@ -47,9 +58,9 @@ async def multimodal_route(waypoints, time_to_depart: str, data: RouteData, bike
         i += 1
     possible_mode_combinations = list(product(*possible_modes))
 
-    tasks = []
+    tasks: List[CoroutineType[Any, Any, List[TripPattern]]] = []
     for combination in possible_mode_combinations:
-        preferences = []
+        preferences: List[LegPreferences] = []
         for mode in combination:
             preferences.append(LegPreferences(mode=mode, wait=0))
         waypoint_groups, _ = create_waypoint_groups(waypoints, preferences)
@@ -68,7 +79,7 @@ async def multimodal_route(waypoints, time_to_depart: str, data: RouteData, bike
 
     results = await asyncio.gather(*tasks)
 
-    trip_patterns = []
+    trip_patterns: List[TripPattern] = []
     for patterns in results:
         for pattern in patterns:
             bike_distance = 0
@@ -81,13 +92,21 @@ async def multimodal_route(waypoints, time_to_depart: str, data: RouteData, bike
                 trip_patterns.append(pattern)
     return trip_patterns
 
-async def route(waypoint_groups, time_to_depart: str, session, multimodal: bool, data: RouteData, bike_segment_found: bool, first_leg: bool = False):
+async def route(
+    waypoint_groups: List[WaypointGroup], 
+    time_to_depart: str, 
+    session: AsyncClientSession, 
+    multimodal: bool, 
+    data: RouteData, 
+    bike_segment_found: bool, 
+    first_leg: bool = False
+) -> List[TripPattern]:
     print("function: route")
     max_bike_distance = data.max_bike_distance if data.use_own_bike else data.max_bikesharing_distance
     bike_average_speed = data.bike_average_speed if data.use_own_bike else data.bikesharing_average_speed
     bike_lock_time = data.bike_lock_time if data.use_own_bike else data.bikesharing_lock_time
-    tasks = []
-    task_group_map = []
+    tasks: List[CoroutineType[Any, Any, List[TripPattern]]] = []
+    task_group_map: List[Tuple[WaypointGroup, CoroutineType[Any, Any, List[TripPattern]]]] = []
     for i, group in enumerate(waypoint_groups):
         mode = group["mode"]
         waypoint_group = group["group"]
@@ -129,7 +148,14 @@ async def route(waypoint_groups, time_to_depart: str, session, multimodal: bool,
     results, _ = await recursive_planner(waypoint_groups, time_to_depart, data, True, bike_segment_found, session)
     return results
 
-async def recursive_planner(waypoint_groups, time_to_depart: str, data: RouteData, first_pt: bool, bike_segment_found: bool, session):
+async def recursive_planner(
+    waypoint_groups: List[WaypointGroup], 
+    time_to_depart: str, 
+    data: RouteData, 
+    first_pt: bool, 
+    bike_segment_found: bool, 
+    session: AsyncClientSession
+) -> Tuple[List[TripPattern], bool]:
     print("function: recursive_planner")
     max_bike_distance = data.max_bike_distance if data.use_own_bike else data.max_bikesharing_distance
     bike_average_speed = data.bike_average_speed if data.use_own_bike else data.bikesharing_average_speed
@@ -167,7 +193,9 @@ async def recursive_planner(waypoint_groups, time_to_depart: str, data: RouteDat
                 for pattern in base_patterns
             ]
             results = await asyncio.gather(*tasks)
-            results, validity = zip(*results)
+            results_t, validity_t = zip(*results)
+            results = list(results_t)
+            validity = list(validity_t)
             return combine_pt(base_patterns, results, data.arrive_by, validity=validity), any(validity)
 
         elif mode in ["walk_transit", "transit,bicycle,walk", "bicycle_walk_transit", "walk_transit_bicycle"]:
@@ -231,10 +259,14 @@ async def recursive_planner(waypoint_groups, time_to_depart: str, data: RouteDat
                 )
                 for pattern in trip_patterns
             ]
-            results = await asyncio.gather(*tasks)
-            validity = [len(waypoint_groups[i + 1:]) < 1]
+            results_raw = await asyncio.gather(*tasks)
+            validity: List[bool] = [len(waypoint_groups[i + 1:]) < 1]
+            patterns: List[List[TripPattern]] = []
             if len(results) > 0:
-                results, validity = zip(*results)
+                validity = []
+                for pat, valid in results_raw:
+                    patterns.append(pat)
+                    validity.append(valid)
             return combine_pt(trip_patterns, results, data.arrive_by, validity=validity), any(validity) and len(trip_patterns) > 0
         
         elif trip_patterns == []:
