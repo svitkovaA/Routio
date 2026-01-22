@@ -1,4 +1,5 @@
 from typing import TypedDict, List, Any
+from datetime import datetime
 
 class Quay(TypedDict):
     id: str
@@ -76,3 +77,13 @@ class Suggestion(TypedDict):
 class WaypointGroup(TypedDict):
     group: List[str]
     mode: str
+
+class OtherDeparture(TypedDict):
+    trip_id: str
+    departure_time: str
+    direction: str
+    departure_dt: datetime
+
+class Departures(TypedDict):
+    departures: List[Departure]
+    currentIndex: None | int

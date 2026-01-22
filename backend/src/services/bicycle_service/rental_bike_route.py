@@ -1,6 +1,5 @@
 import asyncio
 from copy import deepcopy
-import json
 from typing import List
 from services.otp_service import walk_bicycle_route
 from utils.legs_processing import justify_time

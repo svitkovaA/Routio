@@ -11,7 +11,10 @@ async def geocode_name(q: str = Query(..., description="Partial address or place
     bbox = "15.7,48.8,16.7,49.3"
 
     timeout = httpx.Timeout(10.0)
-    async with httpx.AsyncClient(timeout=timeout) as client:
+    headers = {
+        "User-Agent": "GreenGo/1.0 (academic project)"
+    }
+    async with httpx.AsyncClient(timeout=timeout, headers=headers) as client:
         try:
             r = await client.get(PHOTON_URL, params={
                 "q": q,

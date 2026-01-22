@@ -1,27 +1,29 @@
 from collections import defaultdict
 from datetime import date, datetime
+from typing import Dict, List, Set, Tuple
 import httpx
 import pandas as pd
 from zoneinfo import ZoneInfo
+from models.types import OtherDeparture, Departures
 
-calendar = None
-calendar_dates = None
-routes_dict = {}         # Maps route_short_name to route_id
-trips_dict = {}          # Maps trip_id to {route_id, service_id, headsign}
-stop_to_trips_dict = {}  # Maps stop_id to list of (trip_id, departure_time)
-colors_dict = {}         # Maps route_id to route_color, used in case lissy is unavailable
-services_cache = {}      # Maps ref_date to set(service_id)
+calendar: pd.DataFrame
+calendar_dates: pd.DataFrame
+routes_dict = {}                                                # Maps route_short_name to route_id
+trips_dict = {}                                                 # Maps trip_id to {route_id, service_id, headsign}
+stop_to_trips_dict: defaultdict[str, List[Tuple[str, str]]] = defaultdict(list)    # Maps stop_id to list of (trip_id, departure_time)
+colors_dict: Dict[str, str | None] = {}                         # Maps route_id to route_color, used in case lissy is unavailable
+services_cache: Dict[date, Set[str]] = {}                       # Maps ref_date to set(service_id)
 
 def load_gtfs_data(gtfs_path: str = "../datasets/gtfs"):
     print("function: load_gtfs_data")
     global calendar, calendar_dates, routes_dict, trips_dict, stop_to_trips_dict, colors_dict
 
     # Load GTFS CSV files
-    calendar = pd.read_csv(f"{gtfs_path}/calendar.txt")
-    calendar_dates = pd.read_csv(f"{gtfs_path}/calendar_dates.txt")
-    stop_times = pd.read_csv(f"{gtfs_path}/stop_times.txt")
-    trips = pd.read_csv(f"{gtfs_path}/trips.txt")
-    routes = pd.read_csv(f"{gtfs_path}/routes.txt")
+    calendar = pd.read_csv(f"{gtfs_path}/calendar.txt")                             # type: ignore[type-arg]
+    calendar_dates = pd.read_csv(f"{gtfs_path}/calendar_dates.txt")                 # type: ignore[type-arg]
+    stop_times: pd.DataFrame = pd.read_csv(f"{gtfs_path}/stop_times.txt")           # type: ignore[type-arg]
+    trips: pd.DataFrame = pd.read_csv(f"{gtfs_path}/trips.txt")                     # type: ignore[type-arg]
+    routes: pd.DataFrame = pd.read_csv(f"{gtfs_path}/routes.txt")                   # type: ignore[type-arg]
 
     # Map route_short_name to route_id
     routes_dict = dict(zip(routes["route_short_name"], routes["route_id"]))
@@ -37,7 +39,6 @@ def load_gtfs_data(gtfs_path: str = "../datasets/gtfs"):
     }
 
     # Map stop_id to list of (trip_id, departure_time)
-    stop_to_trips_dict = defaultdict(list)
     for _, row in stop_times.iterrows():
         stop_to_trips_dict[row["stop_id"]].append((row["trip_id"], row["departure_time"]))
 
@@ -50,7 +51,7 @@ def load_gtfs_data(gtfs_path: str = "../datasets/gtfs"):
             color = None
         colors_dict[row["route_id"]] = color
 
-def get_color(public_code: str):
+def get_color(public_code: str) -> None | str:
     print("function: get_color")
     global routes_dict, colors_dict
 
@@ -60,7 +61,7 @@ def get_color(public_code: str):
         return colors_dict.get(route_id)
     return None
 
-def valid_services_for_date(ref_date: date):
+def valid_services_for_date(ref_date: date) -> Set[str]:
     print("function: valid_services_for_date")
     global services_cache, calendar, calendar_dates
 
@@ -94,7 +95,14 @@ def valid_services_for_date(ref_date: date):
     services_cache[ref_date] = services
     return services
 
-def get_departures_via(from_stop_id: str, to_stop_id: str, route_short_name: str, aimed_start_time: str, n_prev: int = 4, n_next: int = 20):
+def get_departures_via(
+    from_stop_id: str, 
+    to_stop_id: str, 
+    route_short_name: str, 
+    aimed_start_time: str, 
+    n_prev: int = 4, 
+    n_next: int = 20
+) -> Departures:
     print("function: get_departures_via")
 
     # Parse and normalize time to local timezone
@@ -119,8 +127,8 @@ def get_departures_via(from_stop_id: str, to_stop_id: str, route_short_name: str
     trips_with_dest = {tid for tid, _ in stop_to_trips_dict.get(to_stop_id, [])}
 
     # Collect departures for given valid_service
-    def collect_departures_for_date(valid_service: set) -> list[dict]:
-        departures = []
+    def collect_departures_for_date(valid_service: Set[str]) -> List[OtherDeparture]:
+        departures: List[OtherDeparture] = []
         for trip_id, departure_time in stop_to_trips_dict.get(from_stop_id, []):
             trip_info = trips_dict.get(trip_id)
             if not trip_info:
@@ -138,16 +146,17 @@ def get_departures_via(from_stop_id: str, to_stop_id: str, route_short_name: str
                 "trip_id": trip_id,
                 "departure_time": departure_time,
                 "direction": trip_info["headsign"],
+                "departure_dt": datetime.min
             })
         return departures
 
     # Collect departures for previous, current and next day
-    all_departures = []
+    all_departures: List[OtherDeparture] = []
     for date, services in [(previous_date, valid_services_previous), (ref_date, valid_services_today), (next_date, valid_services_next)]:
         departures = collect_departures_for_date(services)
         for departure in departures:
             # Converts GTFS time HH:MM:SS to YYYY-MM-DDTHH:MM:SStime_zone
-            td = pd.to_timedelta(departure["departure_time"])
+            td = pd.to_timedelta(departure["departure_time"])                           # type: ignore[type-arg]
             dt = datetime.combine(date, datetime.min.time(), tzinfo=time_zone) + td
             departure["departure_dt"] = dt
             departure["departure_time"] = dt.isoformat()
@@ -162,7 +171,7 @@ def get_departures_via(from_stop_id: str, to_stop_id: str, route_short_name: str
     MAX_GAP = pd.Timedelta(hours=2)
 
     # Collect previous departures
-    previous = []
+    previous: List[OtherDeparture] = []
     for i in list(reversed(range(index))):
         current = all_departures[i]
         # Insert first
@@ -180,7 +189,7 @@ def get_departures_via(from_stop_id: str, to_stop_id: str, route_short_name: str
     previous.reverse()
 
     # Collect future departures
-    nexts = []
+    nexts: List[OtherDeparture] = []
     for i in range(index, len(all_departures)):
         current = all_departures[i]
         # Insert first
@@ -217,9 +226,9 @@ station_information_urls = {
 }
 
 # Maps station_id to capacity
-bike_station_capacities = defaultdict(lambda: None)
+bike_station_capacities: defaultdict[str, int | None] = defaultdict(lambda: None)
 
-def load_gbfs_data():
+def load_gbfs_data() -> None:
     print("function: load_gbfs_data")
     global station_information_urls, bike_station_capacities
 
