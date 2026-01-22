@@ -10,6 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import "./Section.css";
+import { useRef, useState } from 'react';
 
 type SectionProps = {
     label: string;                                                  // Label for the input field
@@ -24,6 +25,7 @@ function Section({
     setValue,
     bounds
 } : SectionProps) {
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     /**
      * Handles manual input value change
@@ -31,8 +33,36 @@ function Section({
      * @param e Change event from the input filed
      */
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(Number(e.target.value));
+        const value = e.target.value;
+
+        if (value === "") {
+            setRawValue("");
+            return;
+        }
+
+        if (!/^\d+$/.test(value) || value.length > 3){
+            return;
+        }
+
+        const cleaned = (value.startsWith("0") && value.length > 1) ? value.substring(1) : value;
+
+        setRawValue(cleaned);
+        setValue(Number(cleaned));
     };
+
+    const validate = () => {
+        if (rawValue === "") {
+            setRawValue(bounds.min.toString());
+            setValue(bounds.min);
+        }
+        else {
+            const newValue = Math.max(bounds.min, Math.min(bounds.max, Number(rawValue)));
+            setRawValue(newValue.toString());
+            setValue(newValue);
+        }
+    }
+
+    const [rawValue, setRawValue] = useState<string>(value.toString());
 
     return(
         <div className="section">
@@ -40,31 +70,61 @@ function Section({
                 {label}
             </span>
             <TextField
-                type="number"
-                value={value}
+                type="text"
+                inputMode="numeric"
+                value={rawValue}
                 onChange={handleChange}
+                onBlur={validate}
                 className="number-input"
+                autoComplete="off"
                 slotProps={{
                     htmlInput: {
+                        autoComplete: "off",
                         ...bounds,
                         step: 1,
                     },
                     input: {
+                        sx: {
+                            '& input[type=number]': {
+                                MozAppearance: 'textfield', // Firefox
+                            },
+                            '& input[type=number]::-webkit-outer-spin-button': {
+                                WebkitAppearance: 'none',
+                                margin: 0,
+                            },
+                            '& input[type=number]::-webkit-inner-spin-button': {
+                                WebkitAppearance: 'none',
+                                margin: 0,
+                            },
+                        },
                         endAdornment: (
-                            <InputAdornment position="end" style={{ display: 'flex', gap: '4px' }}>
+                            <InputAdornment 
+                                position="end" 
+                                className="settings-adornment"
+                            >
 
                                 {/* Decrease value button */}
                                 <IconButton
-                                    onClick={() => setValue(prev => Math.max(0, prev - 1))}
+                                    onClick={() => {
+                                        const newValue = Math.max(bounds.min, value - 1);
+                                        setValue(newValue);
+                                        setRawValue(newValue.toString());
+                                    }}
                                     size="small"
+                                    disabled={value === bounds.min}
                                 >
                                     <RemoveIcon fontSize="small" />
                                 </IconButton>
 
                                 {/* Increase value button */}
                                 <IconButton
-                                    onClick={() => setValue(prev => Math.min(10, prev + 1))}
+                                    onClick={() => {
+                                        const newValue = Math.min(bounds.max, value + 1);
+                                        setValue(newValue);
+                                        setRawValue(newValue.toString());
+                                    }}
                                     size="small"
+                                    disabled={value === bounds.max}
                                 >
                                     <AddIcon fontSize="small" />
                                 </IconButton>

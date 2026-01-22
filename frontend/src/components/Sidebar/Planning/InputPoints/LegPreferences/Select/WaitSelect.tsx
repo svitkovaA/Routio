@@ -1,6 +1,6 @@
 /**
- * @file AccuracySelect.tsx
- * @brief Dropdown component for selecting accuracy preference in leg preferences
+ * @file WaitSelect.tsx
+ * @brief Component for selecting wait time between locations
  * @author Andrea Svitkova (xsvitka00)
  */
 

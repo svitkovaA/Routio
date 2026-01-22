@@ -8,12 +8,13 @@
     background-color: var(--color-background);
     height: 58px;
     font-size: 20pt;
+    padding-top: 7px;
 }
 
 .sidebar-header{
     margin: -20px;
     padding-left: 20px;
-    border-bottom: 1px solid gray;
+    border-bottom: 1px solid var(--color-text-secondary);
     cursor: pointer;
     position: absolute;
     width: 100%;
@@ -26,6 +27,9 @@
 .sidebar-header > span{
     font-size: 20pt;
     font-weight: bold;
+    position: relative;
+    bottom: 8px;
+    color: var(--color-text-primary);
 }
 
 /** End of file Settings.css */

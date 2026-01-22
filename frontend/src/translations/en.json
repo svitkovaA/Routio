@@ -25,11 +25,6 @@
       "bicycle": "Bicycle",
       "walk": "Walk"
     },
-    "accuracy": "Accuracy",
-    "accuracies": {
-      "exact": "Exact",
-      "approximate": "Approximate"
-    },
     "time": "Time",
     "date": "Date",
     "departureArrival": {
@@ -72,35 +67,15 @@
       "train": "Train",
       "trolleybus": "Trolleybus",
       "subway": "Subway",
-      "boat": "Boat",
-      "travelWithBike": "Travel with bike"
+      "boat": "Boat"
     },
     "bikesharingPreferences": "Bikesharing preferences",
-    "bikesharingPreferencesTab": {
-      "maxBikesharingDistance": "Max bikesharing distance",
-      "averageBikesharingSpeed": "Average bikesharing speed",
-      "bikesharingLockTime": "Time to lock bike"
-    },
     "cyclingPreferences": "Cycling preferences",
-    "cyclingPreferencesTab": {
-      "maxCyclingDistance": "Max cycling distance",
-      "averageCyclingSpeed": "Average cycling speed",
-      "cyclingLockTime": "Time to lock bike"
-    },
     "walkingPreferences": "Walking preferences",
-    "walkingPreferencesTab": {
-      "maxWalkingDistance": "Max walking distance",
-      "averageWalkingSpeed": "Average walking speed"
-    },
-    "weatherPreferences": "Weather preferences",
-    "weatherPreferencesTab": {
-      "conditions": "Conditions for bike use",
-      "rain": "Rain",
-      "snow": "Snow",
-      "tooLowTemperature": "Too low temperature",
-      "tooHighTemperature": "Too high temperature",
-      "strongWind": "Strong wind",
-      "dark": "Dark"
+    "preferencesTab": {
+      "maxDistance": "Max distance",
+      "averageSpeed": "Average speed",
+      "lockTime": "Bike lock time"
     }
   },
   "information": "Start your journey with GreenGo",

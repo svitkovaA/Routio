@@ -12,6 +12,7 @@ import Checkbox from '@mui/material/Checkbox';
 import { useTranslation } from "react-i18next";
 import { useSettings } from '../../../SettingsContext';
 import Section from '../ModePreferences/Section/Section';
+import "./TransportPreferences.css";
 
 function TransportPreferences() {
     const { t } = useTranslation();
@@ -47,7 +48,11 @@ function TransportPreferences() {
             {/* Section toggle */}
             <div className="toggle-settings" onClick={() => setIsOpen(!isOpen)}>
                 <span>{t("settingsTab.transportPreferences")}</span>
-                <KeyboardArrowLeftIcon fontSize="large" className={isOpen ? "rotate90" : ""}/>
+                <KeyboardArrowLeftIcon 
+                    fontSize="large" 
+                    className={isOpen ? "rotate90" : ""} 
+                    sx={{ color: 'var(--color-text-primary)' }}
+                />
             </div>
             <div className={isOpen ? "settings-content" : "settings-content hidden"}>
 
@@ -60,7 +65,7 @@ function TransportPreferences() {
                 />
                 
                 {/* Transport mode selection */}
-                <div className="section">
+                <div className="section transport-modes">
                     <span className="section-label">{t("settingsTab.transportPreferencesTab.transportModes")}</span>
                     <FormGroup className="options">
                         <FormControlLabel control={
@@ -106,14 +111,6 @@ function TransportPreferences() {
                         } 
                         label={t("settingsTab.transportPreferencesTab.boat")} />
                     </FormGroup>
-                </div>
-
-                {/* Bike transport option */}
-                <div className="section">
-                    <span className="section-label">{t("settingsTab.transportPreferencesTab.travelWithBike")}</span>
-                        <Checkbox 
-                            defaultChecked 
-                        />
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 /**
  * @file LegPreferences.css
- * @brief Styles for editing trip prefferences in the leg preferences component
+ * @brief Styles for editing trip preferences in the leg preferences component
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -33,16 +33,6 @@
     position: absolute;
 }
 
-.leg-preferences-button .accuracy {
-    position: relative;
-    left: 20px;
-    top: -5px;
-}
-
-.multimodal .accuracy {
-    left: 40px;
-}
-
 .multimodal .circle {
     top: 0px;
 }
@@ -68,6 +58,7 @@
 .leg-preferences-select-wrapper > svg {
     position: relative;
     top: -2px;
+    cursor: pointer;
 }
 
 .leg-preferences-time {

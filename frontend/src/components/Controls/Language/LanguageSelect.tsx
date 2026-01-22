@@ -92,7 +92,7 @@ function LanguageSelect({
                 <ExpandMoreIcon 
                     fontSize="small" 
                     className={open ? "rotate" : ""}
-                    sx={{ color: 'var(--color-icons)' }}
+                    sx={{ color: 'var(--color-text-primary)' }}
                 />
             </button>
 

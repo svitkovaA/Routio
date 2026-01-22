@@ -8,18 +8,16 @@ import { useState } from 'react';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import Section from './Section/Section';
 import "./ModePreferences.css";
+import { useTranslation } from 'react-i18next';
 
 type ModePreferencesProps = {
     title: string;                                                      // Section title
-    speedLabel: string;                                                 // Label for average speed
     speed: number;                                                      // Average speed value 
     setSpeed: (value: number | ((prev: number) => number)) => void;     // Setter for average speed value
     speedBounds: { min: number, max: number };                          // Bounds for speed value
-    distanceLabel: string;                                              // Label for max distance
     distance: number;                                                   // Max distance
     setDistance: (value: number | ((prev: number) => number)) => void;  // Setter for max distance
     distanceBounds: { min: number, max: number };                       // Bounds for max distance
-    lockLabel?: string | null;                                          // Label for lock time
     lockTime?: number;                                                  // Lock time
     setLockTime?: (value: number | ((prev: number) => number)) => void; // Setter for lock time
     lockBounds?: { min: number, max: number };                          // Bounds for lock time
@@ -27,19 +25,18 @@ type ModePreferencesProps = {
 
 function ModePreferences({ 
     title,
-    speedLabel,
     speed,
     setSpeed,
     speedBounds,
-    distanceLabel,
     distance,
     setDistance,
     distanceBounds,
-    lockLabel,
     lockTime,
     setLockTime,
     lockBounds
 }: ModePreferencesProps) {
+    const { t } = useTranslation();
+
     // State controlling section expansion 
     const [isOpen, setIsOpen] = useState<boolean>(false);
     
@@ -48,14 +45,18 @@ function ModePreferences({
             {/* Section toggle */}
             <div className="toggle-settings" onClick={() => setIsOpen(!isOpen)}>
                 <span>{title}</span>
-                <KeyboardArrowLeftIcon fontSize="large" className={isOpen ? "rotate90" : ""} />
+                <KeyboardArrowLeftIcon 
+                    fontSize="large" 
+                    className={isOpen ? "rotate90" : ""} 
+                    sx={{ color: 'var(--color-text-primary)' }}
+                />
             </div>
             <div className={isOpen ? "settings-content" : "settings-content hidden"}>
                 <div className="preferences">
 
                     {/* Maximum distance preference */}
                     <Section
-                        label={distanceLabel}
+                        label={t("settingsTab.preferencesTab.maxDistance")}
                         value={distance}
                         setValue={setDistance}
                         bounds={distanceBounds}
@@ -63,16 +64,16 @@ function ModePreferences({
 
                     {/* Average speed preference */}
                     <Section
-                        label={speedLabel}
+                        label={t("settingsTab.preferencesTab.averageSpeed")}
                         value={speed}
                         setValue={setSpeed}
                         bounds={speedBounds}
                     />
 
                     {/* Lock time preference */}
-                    {lockLabel && lockTime && setLockTime && lockBounds && (
+                    {lockTime !== undefined && setLockTime && lockBounds && (
                         <Section
-                            label={lockLabel}
+                            label={t("settingsTab.preferencesTab.lockTime")}
                             value={lockTime}
                             setValue={setLockTime}
                             bounds={lockBounds}

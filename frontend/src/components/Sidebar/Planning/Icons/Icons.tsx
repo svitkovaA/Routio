@@ -1,6 +1,6 @@
 /**
  * @file Icons.tsx
- * @brief Provides icons for transport modes, multimodal trips, accuracy indicators, and timeline display
+ * @brief Provides icons for transport modes, multimodal trips, and timeline display
  * @author Andrea Svitkova (xsvitka00)
  */
 

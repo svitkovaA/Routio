@@ -35,7 +35,9 @@ function Settings({ closeSettings } : SettingsProps) {
         {/* Sidebar header with back navigation */}
         <div className="sidebar-header">
             <button className="back-button" onClick={closeSettings}  >
-                <KeyboardArrowLeftIcon fontSize="large" />
+                <KeyboardArrowLeftIcon 
+                    fontSize="large"
+                />
             </button>
             <span onClick={closeSettings}>{t("settings")}</span>
         </div>
@@ -49,15 +51,12 @@ function Settings({ closeSettings } : SettingsProps) {
             {/* Cycling preferences */}
             <ModePreferences 
                 title={t("settingsTab.cyclingPreferences")}
-                speedLabel={t("settingsTab.cyclingPreferencesTab.averageCyclingSpeed")}
                 speed={bikeAverageSpeed}
                 setSpeed={setBikeAverageSpeed}
                 speedBounds={{ min: 5, max: 40 }}
-                distanceLabel={t("settingsTab.cyclingPreferencesTab.maxCyclingDistance")}
                 distance={maxBikeDistance}
                 setDistance={setMaxBikeDistance}
                 distanceBounds={{ min: 0, max: 100}}
-                lockLabel={t("settingsTab.cyclingPreferencesTab.cyclingLockTime")}
                 lockTime={bikeLockTime}
                 setLockTime={setBikeLockTime}
                 lockBounds={{ min: 0, max: 10 }}
@@ -66,15 +65,12 @@ function Settings({ closeSettings } : SettingsProps) {
             {/* Bikesharing preferences */}
             <ModePreferences 
                 title={t("settingsTab.bikesharingPreferences")}
-                speedLabel={t("settingsTab.bikesharingPreferencesTab.averageBikesharingSpeed")}
                 speed={bikesharingAverageSpeed}
                 setSpeed={setBikesharingAverageSpeed}
                 speedBounds={{ min: 5, max: 30 }}
-                distanceLabel={t("settingsTab.bikesharingPreferencesTab.maxBikesharingDistance")}
                 distance={maxBikesharingDistance}
                 setDistance={setMaxBikesharingDistance}
                 distanceBounds={{ min: 0, max: 30}}
-                lockLabel={t("settingsTab.bikesharingPreferencesTab.bikesharingLockTime")}
                 lockTime={bikesharingLockTime}
                 setLockTime={setBikesharingLockTime}
                 lockBounds={{ min: 0, max: 15 }}
@@ -83,11 +79,9 @@ function Settings({ closeSettings } : SettingsProps) {
             {/* Walking preferences */}
             <ModePreferences 
                 title={t("settingsTab.walkingPreferences")}
-                speedLabel={t("settingsTab.walkingPreferencesTab.averageWalkingSpeed")}
                 speed={walkAverageSpeed}
                 setSpeed={setWalkAverageSpeed}
                 speedBounds={{ min: 2, max: 15 }}
-                distanceLabel={t("settingsTab.walkingPreferencesTab.maxWalkingDistance")}
                 distance={maxWalkDistance}
                 setDistance={setMaxWalkDistance}
                 distanceBounds={{ min: 0, max: 15}}

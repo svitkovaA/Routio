@@ -72,7 +72,8 @@
     border-bottom-right-radius: 6px; 
     border-top: 1px solid #000;
     border-right: 1px solid #000;
-    border-bottom: 1px solid #000;  
+    border-bottom: 1px solid #000;
+    padding-top: 6px;
 }
 
 .rotate {
@@ -110,7 +111,7 @@
     }
 
     .content-wrapper {
-        max-height: calc(85vh - 60px);
+        max-height: calc(85vh - 60px - 3px);
     }
 
     .content-wrapper.results-open {

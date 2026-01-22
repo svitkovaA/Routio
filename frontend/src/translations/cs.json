@@ -25,11 +25,6 @@
       "bicycle": "Cyklistika",
       "walk": "Chůze"
     },
-    "accuracy": "Přesnost",
-    "accuracies": {
-      "exact": "Přesně",
-      "approximate": "Přibližně"
-    },
     "time": "Čas",
     "date": "Dátum",
     "departureArrival": {
@@ -72,35 +67,15 @@
       "train": "Vlak",
       "trolleybus": "Trolejbus",
       "subway": "Metro",
-      "boat": "Loď",
-      "travelWithBike": "Cestovat s kolem"
+      "boat": "Loď"
     },
     "cyclingPreferences": "Preference cyklistiky",
-    "cyclingPreferencesTab": {
-      "maxCyclingDistance": "Maximální vzdálenost na kole",
-      "averageCyclingSpeed": "Průměrná rychlost jízdy na kole",
-      "cyclingLockTime": "Čas na uzamknutí kola"
-    },
     "bikesharingPreferences": "Preference sdílené cyklistiky",
-    "bikesharingPreferencesTab": {
-      "maxBikesharingDistance": "Maximální vzdálenost na sdíleném kole",
-      "averageBikesharingSpeed": "Průměrná rychlost jízdy na sdíleném kole",
-      "bikesharingLockTime": "Čas na uzamknutí kola"
-    },
     "walkingPreferences": "Preference chůze",
-    "walkingPreferencesTab": {
-      "maxWalkingDistance": "Maximální vzdálenost chůze",
-      "averageWalkingSpeed": "Průměrná rychlost chůze"
-    },
-    "weatherPreferences": "Preference počasí",
-    "weatherPreferencesTab": {
-      "conditions": "Podmínky pro jízdu na kole",
-      "rain": "Déšť",
-      "snow": "Sníh",
-      "tooLowTemperature": "Příliš nízká teplota",
-      "tooHighTemperature": "Příliš vysoká teplota",
-      "strongWind": "Silný vítr",
-      "dark": "Tma"
+    "preferencesTab": {
+      "maxDistance": "Maximální vzdálenost",
+      "averageSpeed": "Průměrná rychlost",
+      "lockTime": "Čas na uzamknutí kola"
     }
   },
   "information": "Začněte svou cestu s GreenGo",

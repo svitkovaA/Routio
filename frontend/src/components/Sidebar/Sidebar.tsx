@@ -100,7 +100,7 @@ function Sidebar({
                 <KeyboardArrowLeftIcon 
                     fontSize="large" 
                     className={sidebarOpen ? "" : "rotate"}
-                    sx={{ color: 'var(--color-icons)' }}
+                    sx={{ color: 'var(--color-text-primary)' }}
                 />
             </button>
 
