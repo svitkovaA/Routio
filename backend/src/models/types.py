@@ -1,13 +1,17 @@
-from typing import Dict, TypedDict, List, Any
+from typing import Dict, Tuple, TypedDict, List, Any
 from datetime import datetime
 
 class Quay(TypedDict):
     id: str
     name: str
 
+class PassingTime(TypedDict):
+    time: str
+
 class ServiceJourney(TypedDict):
     quays: List[Quay]
     direction: str
+    passingTimes: List[Dict[str, PassingTime]]
 
 class PointOnLink(TypedDict):
     points: str | List[str]
@@ -18,7 +22,7 @@ class Departure(TypedDict):
 
 class OtherOptions(TypedDict):
     departures: List[Departure]
-    currentIndex: int
+    currentIndex: int | None
 
 class Line(TypedDict):
     publicCode: str
@@ -48,6 +52,7 @@ class Leg(LegBase, total=False):
     line: Line
     serviceJourney: ServiceJourney
     accumulatedDuration: int
+    delays: Dict[str, int]
 
 class TripPatternBase(TypedDict):
     legs: List[Leg]
@@ -107,9 +112,12 @@ class RouteData(TypedDict):
     stopOrder: List[str]
     trips_by_time: Dict[str, int]
 
+class LissyShapeStop(TypedDict):
+    stop_name: str
+
 class LissyShape(TypedDict):
-    coords: List[List[int]]
-    stops: Any
+    coords: List[List[Tuple[float, float]]]
+    stops: List[LissyShapeStop]
 
 class LissyShapeTrips(TypedDict):
     shape_id: int
@@ -119,3 +127,10 @@ class LissyShapes(TypedDict):
     route_short_name: str
     route_color: str
     trips: List[LissyShapeTrips]
+
+class TripResponse(TypedDict):
+    tripPatterns: List[TripPattern]
+    nextPageCursor: str
+
+class OTPPublicQueryResponse(TypedDict):
+    trip: TripResponse

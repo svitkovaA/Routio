@@ -13,7 +13,7 @@ MAX_SHAPE_CACHE_SIZE = 5000
 
 shapes_cache: Dict[str, Dict[str, LissyShapes]] = {}
 routes_cache: Dict[str, Dict[str, RouteData]] = {}
-shape_detail_cache: OrderedDict[int, List[LissyShape]] = OrderedDict()
+shape_detail_cache: OrderedDict[int, LissyShape] = OrderedDict()
 lissy_client = httpx.AsyncClient(timeout=10, headers={"Authorization": LISSY_API_KEY})
 
 async def lissy_status(date: d) -> bool:
@@ -222,7 +222,7 @@ async def get_shapes(date: d) -> list[LissyShapes] | None:
         return None
     return data
  
-async def get_shape(shape_id: int) -> List[LissyShape] | None: 
+async def get_shape(shape_id: int) -> LissyShape | None: 
     print("function: get_shape")
     if shape_id in shape_detail_cache:
         shape_detail_cache.move_to_end(shape_id)
@@ -232,7 +232,7 @@ async def get_shape(shape_id: int) -> List[LissyShape] | None:
         url = LISSY_URL + "shapes/getShape"
         r = await lissy_client.get(url, params={"shape_id": shape_id})
         r.raise_for_status()
-        data: List[LissyShape] = r.json()
+        data: LissyShape = r.json()
     except Exception:
         return None
         
