@@ -1,28 +1,43 @@
+"""
+file: geo.py
+
+Helper functions for geographic computations, including:
+- the distance calculation using the Haversine formula,
+- interpolation between coordinates,
+- merging spatially close and duplicate results,
+- estimating the distance threshold at which cycling becomes 
+  more time efficient than walking
+"""
+
 from math import radians, sin, cos, sqrt, atan2, acos, degrees
 from typing import List
 from models.types import Suggestion
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """
-    Calculate great-circle distance between two points on the Earth using Haversine formula
+    Calculate great-circle distance between two points on the Earth
+    using Haversine formula
 
     Args:
-        lat1, lon1: First point latitude and longitude
-        lat2, lon2: Second point latitude and longitude
+        lat1: Latitude of the first point
+        lon1: Longitude of the first point
+        lat2: Latitude of the second point
+        lon2: Longitude of the second point
 
-    Returns: 
-        Distance between two point in kilometers
+    Returns:
+        Distance between the two points in kilometers
     """
-    # Earths radius
+    # Earths radius in kilometers
     R = 6371
 
-    # Convert points differences info radians
+    # Convert coordinate differences to radians
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
 
-    # Apply Haversine formula
+    # Apply the Haversine formula
     a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
     return R * c
 
 def interpolate_point(lat1: float, lon1: float, lat2: float, lon2: float, distance_from_start: float) -> tuple[float, float]:
@@ -30,13 +45,12 @@ def interpolate_point(lat1: float, lon1: float, lat2: float, lon2: float, distan
     Computes an interpolated point on the great-circle path between two coordinates
 
     Args:
-        lat1, lon1: First point latitude and longitude
-        lat2, lon2: Second point latitude and longitude
-        distance_from_start: The distance from the first point
+        lat1, lon1: Latitude and longitude of the first point
+        lat2, lon2: Latitude and longitude of the second point
+        distance_from_start: The distance from the first point in kilometers
 
     Returns:
-        tuple [float, float]: Latitude and longitude of the new point in the
-        exact distance from point 1 on the shortest path from point 1 to point 2
+        tuple (latitude, longitude) of the new point in the degrees
     """
     print("function: interpolate_point")
     # Distance between to coordinates
@@ -114,8 +128,10 @@ def get_borderline_distance(bike_average_speed: float, walk_average_speed: float
         bike_walk_distance: Additional distance for walking to/from bike station
     
     Returns:
-        The borderline distance when cycling equals to walking time in km
+        The borderline distance when cycling equals to walking time in kilometers
     """
     print("function: get_borderline_distance")
     distance = bike_walk_distance + ((bike_lock_time / 60) / (1 / walk_average_speed - 1 / bike_average_speed))
     return distance
+
+# End of file geo.py

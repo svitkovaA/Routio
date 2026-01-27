@@ -25,3 +25,5 @@ class RouteData(BaseModel):
     bikesharing_lock_time: int
     bike_lock_time: int
     route_preference: str
+
+# End of file route_data.py

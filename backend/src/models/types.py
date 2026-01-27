@@ -166,3 +166,5 @@ class BikeStationNodeWrapper(TypedDict):
 class Results(TypedDict):
     tripPatterns: List[TripPattern]
     active: bool
+
+# End of file types.py

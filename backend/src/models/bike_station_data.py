@@ -12,3 +12,5 @@ class BikeStationData(BaseModel):
     original_legs: List[Any]
     route_data: RouteData
     bike_rack: bool
+
+# End of file bike_station_data.py

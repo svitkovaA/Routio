@@ -6,3 +6,4 @@ class DepartureData(BaseModel):
     public_leg_index: int
     selected_index: int
 
+# End of file departure_data.py
