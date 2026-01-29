@@ -106,6 +106,16 @@ export type Leg = {
 
 export type RoutePreference = "shortest" | "fastest" | "transfers";
 
+export type VehiclePosition = {
+    tripId: number;
+    publicCode: string;
+    mode: string;
+    color: string;
+    lat: number;
+    lon: number;
+    direction: string;
+};
+
 export type TripPattern = {
     aimedEndTime: string;
     totalDuration: number;
@@ -119,6 +129,7 @@ export type TripPattern = {
     northWest?: L.LatLngExpression;
     tooLongWalkDistance?: boolean;
     tooLongBikeDistance?: boolean;
+    vehiclePositions: VehiclePosition[];
 }
 
 export type ResultsType = {

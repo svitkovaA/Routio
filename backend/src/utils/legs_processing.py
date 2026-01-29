@@ -10,7 +10,7 @@ Processing trip legs, including:
 
 from copy import deepcopy
 from datetime import datetime, timedelta
-from models.types import Leg, ServiceJourney, TripPattern
+from models.types import Leg, ServiceJourney, TripPattern, VehiclePositions
 from typing import Optional, List
 
 # Default route colors based on transport mode (used when route colors are not provided either from Lissy nor GTFS)
@@ -168,18 +168,30 @@ def process_legs(pattern: TripPattern) -> None:
     distance = 0
     num_of_transfers = None
 
-    # Merge consecutive legs with the same mode and public transport code
     mode_index = 0
     mode = ""
     public_code = ""
     new_legs: List[Leg] = []
     prev_leg = None
     modes = pattern.get("modes") or []
+    vehiclePositions: List[VehiclePositions] = []
 
     for leg in legs:
         # Assign default color based on transport mode (used when route color is not provided from Lissy or GTFS)
         if not leg.get("color"):
             leg["color"] = COLORS.get(leg["mode"], "gray")
+
+        # Append information necessary for vehicle position visualisation
+        if "tripId" in leg:
+            vehiclePositions.append({
+                "tripId": leg["tripId"], 
+                "publicCode": leg["line"]["publicCode"],
+                "color": leg["color"],
+                "mode": leg["mode"],
+                "lat": -1,
+                "lon": -1,
+                "direction": leg["otherOptions"]["departures"][leg["otherOptions"]["currentIndex"]]["direction"]
+            })
 
         # Waypoint found between foot/bicycle segments
         if mode == leg["mode"] and mode in ["foot", "bicycle"]:
@@ -294,6 +306,7 @@ def process_legs(pattern: TripPattern) -> None:
     pattern["totalDistance"] = distance
     pattern["bikeDistance"] = bike_distance
     pattern["walkDistance"] = walk_distance
+    pattern["vehiclePositions"] = vehiclePositions
 
     if num_of_transfers:
         pattern["numOfTransfers"] = num_of_transfers - 1

@@ -24,6 +24,9 @@ LISSY_URL = "https://dexter.fit.vutbr.cz/lissy/api/"
 # TODO currently unused
 NEXTBIKE_URL = "https://api.nextbike.net/maps/nextbike-live.json?countries=cz"
 
+# GTFS-RealTime data used for current vehicle position visualisation
+GTFSRT_URL = "https://kordis-jmk.cz/gtfs/gtfsReal.dat"
+
 # Load variables from .env into the environment
 load_dotenv()
 LISSY_API_KEY = os.environ.get("LISSY_API_KEY", "")

@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { MapContainer, TileLayer, ZoomControl, Marker, Popup, ScaleControl } from 'react-leaflet'
+import { MapContainer, TileLayer, ZoomControl, Marker, Popup, ScaleControl, CircleMarker } from 'react-leaflet'
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +18,8 @@ import { useInput } from '../InputContext';
 import { useSettings } from '../SettingsContext';
 import { useResult } from '../ResultContext';
 import MapInfoPopup from './MapInfoPopup/MapInfoPopup';
-import { createPinIcon, SetViewOnClick } from './MapComponents';
+import { createPinIcon, SetViewOnClick, createVehiclePositionIcon } from './MapComponents';
+import { timelineIcons } from '../Sidebar/Planning/Icons/Icons';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -44,7 +45,7 @@ function Map({
     const { t } = useTranslation();
 
     // Contexts
-    const { showResults } = useResult();
+    const { showResults, vehiclePositions } = useResult();
     const { selectedLayerIndex } = useSettings();
     const { baseLayers, satelliteOverlay } = useLayers();
     const {
@@ -112,7 +113,7 @@ function Map({
         for (let i = 0; i < elements.length; i++) {
             (elements[i] as HTMLElement).style.cursor = cursor;
         }
-    }, [mapSelectionIndex])
+    }, [mapSelectionIndex]);
 
     return (
         <MapContainer center={center} zoom={defaultZoom} zoomControl={false} id="map" className={mapSelectionIndex !== -1 ? "selected" : ""}>
@@ -186,6 +187,25 @@ function Map({
 
             {/* Bicycle stations visualisation */}
             <BikeStations />
+
+            {/* Actual vehicle position visualisation */}
+            {vehiclePositions.filter(p => p.lat > 0 && p.lon > 0).map((p, i) => (
+                <Marker
+                    key={`${p.tripId}`}
+                    position={[p.lat, p.lon]}
+                    icon={createVehiclePositionIcon(p.publicCode, p.color)}
+                >
+                    {/* Popup information */}
+                    <Popup>
+                        <div className="vehicle-position-popup">
+                            {timelineIcons[p.mode]}
+                            <div className="vehicle-position-popup-direction">
+                                {p.direction}
+                            </div>
+                        </div>
+                    </Popup>
+                </Marker>
+            ))}
         </MapContainer>
     )
 }

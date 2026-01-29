@@ -30,12 +30,12 @@
 }
 
 .marker {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  background: red;
-  border-radius: 50%;
-  box-shadow: 0 0 3px rgba(0,0,0,0.4);
+    position: relative;
+    width: 30px;
+    height: 30px;
+    background: red;
+    border-radius: 50%;
+    box-shadow: 0 0 3px rgba(0,0,0,0.4);
 }
 
 .marker.start-end-marker {
@@ -85,6 +85,41 @@
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
     border-top: 20px solid red;
+}
+
+.vehicle-marker {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+}
+
+.vehicle-marker .vehicle-marker-inner {
+    width: 22px;
+    height: 22px;
+    color: white;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vehicle-position-popup > .timeline-icon {
+    position: relative;
+    display: inline-block;
+    top: 5px;
+    left: 0px;
+}
+
+.vehicle-position-popup > .timeline-icon > svg {
+    position: relative;
+    left: 1px;
+}
+
+.vehicle-position-popup-direction {
+    display: inline-block;
+    position: relative;
+    left: 5px;
 }
 
 .map-popup {

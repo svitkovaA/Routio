@@ -30,7 +30,7 @@ export function createPinIcon(label: string, translatedLabel?: string) {
 
     // Adjusts anchor positions for START/END markers
     if (startEndMarker) {
-        anchor = [20,53];
+        anchor = [20, 53];
         popupAnchor = [0, -55];
     }
     return L.divIcon({
@@ -42,6 +42,27 @@ export function createPinIcon(label: string, translatedLabel?: string) {
         className: "",
         iconAnchor: anchor,
         popupAnchor: popupAnchor
+    });
+}
+
+/**
+ * Creates an icon with a text label for vehicle visualisation
+ * 
+ * @param label Marker label
+ * @param color Background color of the marker based on the route color 
+ * @returns Leaflet DivIcon instance
+ */
+export function createVehiclePositionIcon(label: string, color: string) {
+    return L.divIcon({
+        html: `
+            <div class="vehicle-marker" style="background: ${color};">
+                <div class="vehicle-marker-inner">${label}</div>
+            </div>
+        `,
+        className: "",
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+        popupAnchor: [0, -11]
     });
 }
 

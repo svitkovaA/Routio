@@ -1,10 +1,13 @@
 from collections import defaultdict
 from datetime import date, datetime
+import json
 from typing import Dict, List, Set, Tuple
 import httpx
 import pandas as pd
 from zoneinfo import ZoneInfo
 from models.types import OtherDeparture, Departures
+from google.transit.gtfs_realtime_pb2 import FeedMessage
+from config import GTFSRT_URL
 
 calendar: pd.DataFrame
 calendar_dates: pd.DataFrame
@@ -13,9 +16,17 @@ trips_dict = {}                                                 # Maps trip_id t
 stop_to_trips_dict: defaultdict[str, List[Tuple[str, str]]] = defaultdict(list)    # Maps stop_id to list of (trip_id, departure_time)
 colors_dict: Dict[str, str | None] = {}                         # Maps route_id to route_color, used in case lissy is unavailable
 services_cache: Dict[date, Set[str]] = {}                       # Maps ref_date to set(service_id)
+vehicle_position_map: Dict[int, Tuple[float, float]] = {}
 
 def load_gtfs_data(gtfs_path: str = "../datasets/gtfs"):
+    """
+    Loads and preprocess selected GTFS CSV data files into global in-memory structures
+
+    Args:
+        gtfs_path: Path to the directory containing GTFS CSV files
+    """
     print("function: load_gtfs_data")
+    # Declares global variables which will store parsed GTFS data
     global calendar, calendar_dates, routes_dict, trips_dict, stop_to_trips_dict, colors_dict
 
     # Load GTFS CSV files
@@ -52,6 +63,15 @@ def load_gtfs_data(gtfs_path: str = "../datasets/gtfs"):
         colors_dict[row["route_id"]] = color
 
 def get_color(public_code: str) -> None | str:
+    """
+    Retrieve the color associated with a public transport route
+    
+    Args:
+        public_code: Public route identifier (route_short_name)
+
+    Return:
+        The route color in hexadecimal format or None if route or its colors is not available
+    """
     print("function: get_color")
     global routes_dict, colors_dict
 
@@ -62,17 +82,27 @@ def get_color(public_code: str) -> None | str:
     return None
 
 def valid_services_for_date(ref_date: date) -> Set[str]:
+    """
+    Determine all GTFS service IDs valid for a given date
+    
+    Args:
+        ref_date: Reference date for which valid services are requested
+
+    Returns:
+        Set of service_id strings active on the given day
+    """
     print("function: valid_services_for_date")
+    # Access global GTFS data structures and cache
     global services_cache, calendar, calendar_dates
 
-    # Result from cache
+    # Return result from cache if available
     if ref_date in services_cache:
         return services_cache[ref_date]
 
     # Map date to day of the week
     weekday = ref_date.strftime("%A").lower()
 
-    # Services at given date
+    # Select services active on the given date and within the date range
     services = calendar[
         (calendar[weekday] == 1) &
         (calendar["start_date"] <= int(ref_date.strftime("%Y%m%d"))) &
@@ -87,11 +117,11 @@ def valid_services_for_date(ref_date: date) -> Set[str]:
     added = exceptions[exceptions["exception_type"] == 1]["service_id"].tolist()
     removed = exceptions[exceptions["exception_type"] == 2]["service_id"].tolist()
 
-    # Add / remove exceptional services based on exception_type
+    # Add/remove exceptional services based on exception_type
     services.update(added)
     services.difference_update(removed)
 
-    # Add services to cache
+    # Store the result in cache for future queries
     services_cache[ref_date] = services
     return services
 
@@ -212,17 +242,68 @@ def get_departures_via(
     # Return departures with additional information
     return {
         "departures": [
-            {"departureTime": dep["departure_time"], "direction": dep["direction"]}
+            {"departureTime": dep["departure_time"], "direction": dep["direction"], "tripId": dep["trip_id"]}
             for dep in final_departures
         ],
         "currentIndex": current_index,
     }
 
-# GBFS URLs for Brno, Hodonin, Kahan
+async def vehicle_position():
+    """
+    Fetch and parse GTFS-Realtime vehicle position data
+    """
+    print("function: vehicle_position")
+    global vehicle_position_map
+
+    # Fetch GTFS-Realtime feed
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.get(GTFSRT_URL)
+        resp.raise_for_status()
+        data = resp.content
+
+    # Parse protobuf GTFS-RT message
+    feed = FeedMessage()
+    feed.ParseFromString(data)
+    
+    # Reset and update vehicle position map
+    vehicle_position_map = {}
+
+    for entity in feed.entity:
+        # Process only vehicle position entities
+        if entity.HasField("vehicle"):
+            v = entity.vehicle
+
+            # Skip entities without a valid trip ID
+            if not (v.HasField("trip") and v.trip.trip_id):
+                continue
+            
+            trip_id = v.trip.trip_id
+            
+            # Skip entities without valid position data
+            if not (v.HasField("position") and v.position.latitude and v.position.longitude):
+                continue
+
+            # Store current vehicle position for the trip
+            vehicle_position_map[trip_id] = (v.position.latitude, v.position.longitude)
+
+def get_vehicle_position(trip_id: int) -> Tuple[float, float] | None:
+    """
+    Returns the latest known vehicle position for a given trip_id
+
+    Args:
+        trip_id: GTFS trip_id
+
+    Returns:
+        Tuple(latitude, longitude) if position is available, otherwise None
+    """
+    global vehicle_position_map
+    return vehicle_position_map.get(str(trip_id))
+
+# GBFS URLs for Brno, Hodonin and Kahan
 station_information_urls = {
-    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_te/cs/station_information.json",
-    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nh/cs/station_information.json",
-    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_oc/cs/station_information.json"
+    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_te/cs/station_information.json",   # Brno
+    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nh/cs/station_information.json",   # Hodonin
+    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_oc/cs/station_information.json"    # Kahan
 }
 
 # Maps station_id to capacity
@@ -243,3 +324,5 @@ def load_gbfs_data() -> None:
             capacity = station.get("capacity")
             if capacity is not None:
                 bike_station_capacities[station["station_id"]] = capacity
+
+# End of file gtfs_gbfs_service.py

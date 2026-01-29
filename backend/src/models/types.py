@@ -19,6 +19,7 @@ class PointOnLink(TypedDict):
 class Departure(TypedDict):
     departureTime: str
     direction: str
+    tripId: int
 
 class OtherOptions(TypedDict):
     departures: List[Departure]
@@ -43,6 +44,15 @@ class LegBase(TypedDict):
     duration: int
     pointsOnLink: PointOnLink
 
+class VehiclePositions(TypedDict):
+    tripId: int
+    publicCode: str
+    mode: str
+    color: str
+    lat: float
+    lon: float
+    direction: str
+
 class Leg(LegBase, total=False):
     fromPlace: Place
     toPlace: Place
@@ -54,6 +64,7 @@ class Leg(LegBase, total=False):
     accumulatedDuration: int
     delays: Dict[str, int]
     bikeStationInfo: Any
+    vehiclePositions: List[VehiclePositions]
 
 class TripPatternBase(TypedDict):
     legs: List[Leg]
@@ -71,6 +82,7 @@ class TripPattern(TripPatternBase, total=False):
     tooLongWalkDistance: bool
     tooLongBikeDistance: bool
     bikeSegmentFound: bool
+    tripIds: List[int]
 
 class Suggestion(TypedDict):
     name: str

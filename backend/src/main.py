@@ -12,13 +12,30 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from config import BEN_API_KEY, LISSY_API_KEY, LISSY_URL
 from services.public_transport_service.lissy import cache_lissy
-from services.gtfs_gbfs_service import load_gbfs_data, load_gtfs_data
-from routes import geocode, route, status, departures
+from services.gtfs_gbfs_service import load_gbfs_data, load_gtfs_data, vehicle_position
+from routes import geocode, route, status, departures, vehicle_positions
+import asyncio
+import logging
+
+async def vehicle_position_worker():
+    """
+    Background worker that periodically updates vehicle position data
+    """
+    while True:
+        try:
+            # Update vehicle positions
+            await vehicle_position()
+        except Exception as e:
+            # Log the exception without terminating the worker
+            logging.exception("vehicle_position failed")
+        # Wait before the next update cycle
+        await asyncio.sleep(10)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Loads and cache data required by the application during startup
+    and starts background worker
     """
     # Load General Bike Feed Specification data (bikesharing stations capacities)
     load_gbfs_data()
@@ -28,7 +45,17 @@ async def lifespan(app: FastAPI):
 
     # Cache data from Lissy (delays and route shapes)
     await cache_lissy()
+
+    # Start background worker for vehicle position updates
+    task = asyncio.create_task(vehicle_position_worker())
     yield
+
+    # Gracefully shut down background worker
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
 
 app = FastAPI(lifespan=lifespan)
 
@@ -46,6 +73,7 @@ app.include_router(geocode.router)
 app.include_router(route.router)
 app.include_router(status.router)
 app.include_router(departures.router)
+app.include_router(vehicle_positions.router)
 
 # TODO Lissy delays endpoints
 @app.get("/lissy/availableDates")
@@ -103,16 +131,17 @@ async def trip_data():
 async def test():
     async with httpx.AsyncClient(timeout=10.0) as client:
         r = await client.get(
-            "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1759701600000&to=1759741860000",
+            # "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1768950000000&to=1769537357380",
+            # "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1759701600000&to=1759741860000",
             # "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1760047200000&to=1760220000000",
-            # "https://walter.fit.vutbr.cz/ben/nextbike/records?from=1759701600000&to=1859701600000&station_uid=27618846",
+            "https://walter.fit.vutbr.cz/ben/nextbike/records?from=1768950000000&to=1737500400000&station_uid=29078342",
+            # "https://walter.fit.vutbr.cz/ben/nextbike/records?from=1737846000000&to=1769537357380&station_uid=27618921",
             # "https://walter.fit.vutbr.cz/ben/nextbike/placesAround?from=1759701600000&to=1859701600000&limit=2&position=[49.194872,16.606506]",
             headers={"Authorization": BEN_API_KEY}
         )
         r.raise_for_status()
         return r.json()
-    
-    
+ 
 @app.get("/testWeather")
 async def test1():
     async with httpx.AsyncClient(timeout=10.0) as client:
@@ -134,22 +163,7 @@ async def test2():
         r.raise_for_status()
         return r.json()
 
-from datetime import datetime
-from zoneinfo import ZoneInfo
-
-
-
 if __name__ == "__main__":
-    dt = datetime(2025, 10, 6, 11, 11, tzinfo=ZoneInfo("Europe/Bratislava"))
-    print(int(dt.timestamp() * 1000))
-
-    ts_ms = 1759701600000  # sem daj svoj unix čas v ms
-    dt = datetime.fromtimestamp(ts_ms / 1000, tz=ZoneInfo("Europe/Bratislava"))
-    print(dt)
-
-    ts_ms = 1759741860000  # sem daj svoj unix čas v ms
-    dt = datetime.fromtimestamp(ts_ms / 1000, tz=ZoneInfo("Europe/Bratislava"))
-    print(dt)
     uvicorn.run("main:app", port=8000, reload=True)
 
 # End of file main.py
