@@ -11,10 +11,11 @@ import { useEffect, useRef, useState } from "react";
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import DepartureBoardIcon from '@mui/icons-material/DepartureBoard';
 import { Leg, VerticalTimeline } from "../../../../types/types";
-import "./PublicTransportDetail.css";
 import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
 import { timelineIcons } from '../../../Planning/Icons/Icons';
 import Waystop from '../Waystop/Waystop';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import "./PublicTransportDetail.css";
 
 type PublicTransportDetailProps = {
     leg: Leg;
@@ -52,7 +53,7 @@ function PublicTransportDetail({
         leg,
         setVerticalTimeline,
         index,
-        -33
+        -30
     );
 
     useEffect(() => setStopsOpen(false), [leg]);
@@ -66,7 +67,13 @@ function PublicTransportDetail({
                 name={leg.fromPlace?.name}
             />
             {timelineIcons[leg.mode]}
-            {leg.mode + " " + leg.line?.publicCode + " -> " + leg.serviceJourney?.direction}
+            <div className="detail-direction">
+                <div className="detail-public-code" style={{ backgroundColor: leg.color}}>
+                    {leg.line?.publicCode}
+                </div>
+                <ArrowForwardIcon sx={{ fontSize: '18px' }}/> 
+                {leg.serviceJourney?.direction}
+            </div>
             <div>
                 {leg.nonContinuousDepartures ? (
                     <div className="non-continuous-departures">
@@ -91,6 +98,7 @@ function PublicTransportDetail({
                 )}
                 <div 
                     onClick={() => setDeparturesOpen(!departuresOpen)}
+                    className="detail-departures"
                 >
                     <KeyboardArrowDownIcon className={departuresOpen ? "" : "rotate90"}/>
                     <DepartureBoardIcon 
@@ -102,10 +110,12 @@ function PublicTransportDetail({
                     {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => (
                         <>
                             {leg.otherOptions?.currentIndex !== undefined && leg?.otherOptions?.currentIndex - 1 <= index && leg?.otherOptions?.currentIndex + 2 >= index && (
-                                <div className={leg?.otherOptions?.currentIndex === index ? "selected" : ""} onClick={() => recalculatePattern(index)}>
+                                <div 
+                                    className={"departure-time" + (leg?.otherOptions?.currentIndex === index ? " selected" : "")} 
+                                    onClick={() => recalculatePattern(index)}
+                                >
                                     {departure.departureTime}
                                 </div>
-
                             )}
                         </>
                     ))}
@@ -121,6 +131,7 @@ function PublicTransportDetail({
             <div>
                 <div 
                     onClick={() => setStopsOpen(!stopsOpen)}
+                    className="detail-stops"
                 >
                     <KeyboardArrowDownIcon className={stopsOpen ? "" : "rotate90"}/>
                     <span className="station-icon">

@@ -40,14 +40,18 @@
     position: relative;
 }
 
-.detail-time, .detail-distance {
+.detail-time, .detail-distance, .detail-lock, .detail-direction, .detail-departures, .detail-stops {
     display: flex;
     align-items: center;
     padding: 5px 0;
     font-size: var(--font-size-detail);
 }
 
-.detail-time-distance .timeline-icon {
+.bicycle-detail {
+    position: relative;
+}
+
+.detail-time-distance .timeline-icon, .bicycle-detail .timeline-icon {
     top: 5px;
     left: -40px;
 }

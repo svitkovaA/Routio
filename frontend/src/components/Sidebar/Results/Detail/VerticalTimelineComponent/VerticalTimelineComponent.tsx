@@ -11,10 +11,11 @@ type VerticalTimelineComponentProps = {
     verticalTimeline: VerticalTimeline[];
 }
 
-function VerticalTimelineComponent({ verticalTimeline }: VerticalTimelineComponentProps) {
+function VerticalTimelineComponent({ verticalTimeline } : VerticalTimelineComponentProps) {
+    const nonWaitLegs = verticalTimeline.filter((i) => i.mode != "wait");
     return (
         <div className="vertical-timeline">
-            {verticalTimeline.map((item, index) => (
+            {nonWaitLegs.map((item, index) => (
                 <div
                     className="vertical-timeline-item"
                     style={{
@@ -24,7 +25,7 @@ function VerticalTimelineComponent({ verticalTimeline }: VerticalTimelineCompone
                     }}
                 >
                     <div className="timeline-dot" />
-                    {index === verticalTimeline.length -1 && <div className="timeline-dot last"/>}
+                    {index === nonWaitLegs.length - 1 && <div className="timeline-dot last"/>}
                 </div>
             ))}
         </div>

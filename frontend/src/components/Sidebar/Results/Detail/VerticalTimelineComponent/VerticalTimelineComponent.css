@@ -8,7 +8,7 @@
     display: flex;
     width: 23px;
     flex-direction: column;
-    padding-top: 15px;
+    padding-top: 12px;
 }
 
 .vertical-timeline-item {
@@ -30,7 +30,7 @@
 
 .last {
     top: auto;
-    bottom: -6px;
+    bottom: -12px;
 }
 
 /** End of file VerticalTimelineComponent.css */

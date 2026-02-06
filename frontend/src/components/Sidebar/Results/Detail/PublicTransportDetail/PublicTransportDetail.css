@@ -11,10 +11,11 @@
 
 .stop {
     position: relative;
+    padding-left: 30px;
 }
 
 .timeline-dot.public {
-    top: 4px;
+    top: 5px;
     left: -64px;
 }
 
@@ -43,8 +44,23 @@
 }
 
 .public-transport-detail .timeline-icon {
-    top: 27px;
+    top: 35px;
     left: -40px;
+}
+
+.detail-direction, .detail-departures, .detail-stops {
+    gap: 5px;
+}
+
+.detail-public-code {
+    border-radius: 3px;
+    min-width: 23px;
+    height: 23px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 5px;
 }
 
 /** End of file PublicTransportDetail.css */

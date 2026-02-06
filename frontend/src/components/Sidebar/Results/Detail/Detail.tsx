@@ -5,16 +5,15 @@
  */
 
 import { useEffect, useState } from "react";
-import { TripPattern, VerticalTimeline, Waypoint } from "../../../types/types";
+import { TripPattern, VerticalTimeline } from "../../../types/types";
 import PublicTransportDetail from "./PublicTransportDetail/PublicTransportDetail";
 import WalkDetail from "./WalkDetail/WalkDetail";
 import BicycleDetail from "./BicycleDetail/BicycleDetail";
-import WaitDetail from "./WaitDetail/WaitDetail";
 import VerticalTimelineComponent from "./VerticalTimelineComponent/VerticalTimelineComponent";
 import Transfer from "./Transfer/Transfer";
-import "./Detail.css"
 import { useInput } from "../../../InputContext";
 import Waystop from "./Waystop/Waystop";
+import "./Detail.css"
 
 type DetailProps = {
     tripPattern: TripPattern;
@@ -91,10 +90,9 @@ function Detail({
                                     index={index}
                                 />
                             ) : leg.mode === "wait" ? (
-                                <WaitDetail
-                                    leg={leg}
-                                    setVerticalTimeline={setVerticalTimeline}
-                                    index={index}
+                                <Waystop
+                                    time={previousLegMode == "bicycle" ? endTime :time}
+                                    name={leg.bikeStationInfo?.bikeStations[leg.bikeStationInfo.selectedBikeStationIndex].place.name}
                                 />
                             ) : leg.mode === "transfer" ? (
                                 <Transfer

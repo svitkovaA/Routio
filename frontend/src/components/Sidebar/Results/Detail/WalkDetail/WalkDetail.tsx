@@ -29,7 +29,7 @@ function WalkDetail({
         leg,
         setVerticalTimeline,
         index,
-        27
+        30
     );
 
     return (
