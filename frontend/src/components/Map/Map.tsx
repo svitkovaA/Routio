@@ -77,6 +77,19 @@ function Map({
         const targetIndex = index !== undefined ? index : mapSelectionIndex;
         if (targetIndex === -1) 
             return false;
+
+        const updateWaypoints = (displayName: string) => {
+            const newWaypoints = [...waypoints];
+            newWaypoints[targetIndex] = {
+                ...newWaypoints[targetIndex], lat, lon, displayName, isActive: true
+            };
+            setWaypoints(newWaypoints);
+
+            // Automatically open sidebar on small screens
+            if (window.innerWidth < 769) 
+                openSidebar();
+            setMapSelectionIndex(-1);
+        }
         fetch(`${API_BASE_URL}/geocode/latLon?lat=${lat}&lon=${lon}`)
             .then((res) => {
                 if (!res.ok) throw new Error("Network response was not ok");
@@ -84,19 +97,12 @@ function Map({
             })
             .then((data: InputText) => {
                 const displayName = [data.street, data.city].filter(Boolean).join(", ");
-
-                const newWaypoints = [...waypoints];
-                newWaypoints[targetIndex] = {
-                ...newWaypoints[targetIndex], lat, lon, displayName, isActive: true
-                };
-                setWaypoints(newWaypoints);
-
-                // Automatically open sidebar on small screens
-                if (window.innerWidth < 769) 
-                    openSidebar();
-                setMapSelectionIndex(-1);
+                updateWaypoints(displayName);
             })
-            .catch(console.error);
+            .catch((err) => {
+                const displayName = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                updateWaypoints(displayName);
+            });
         closeResults();
         return true;
     };
