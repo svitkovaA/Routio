@@ -11,11 +11,13 @@ import './AddPointIcon.css'
 type AddPointIconProps = {
     onClick: () => void;
     render: boolean;
+    disabled: boolean;
 }
 
 function AddPointIcon({
     onClick,
-    render
+    render,
+    disabled
 } : AddPointIconProps) {
     if (!render) 
         return null;
@@ -28,6 +30,7 @@ function AddPointIcon({
                 size="small"
                 sx={{ marginBottom: 1, color: 'var(--color-icons)' }}
                 tabIndex={-1}
+                disabled={disabled}
             >
                 <AddBoxIcon/>
             </IconButton>

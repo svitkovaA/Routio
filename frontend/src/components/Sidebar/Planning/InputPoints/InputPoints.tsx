@@ -53,7 +53,9 @@ function InputPoints({
                             <div className={"input-buttons " + (waypoints.length > 2 && index < waypoints.length - 1 && legPreferences[index].open ? "leg-preferences-open" : "")}>
                                 <AddPointIcon 
                                     onClick={() => addWaypoint(index)} 
-                                    render={index < waypoints.length - 1}/>
+                                    render={index < waypoints.length - 1}
+                                    disabled={waypoints.length >= 10}
+                                />
                                 <LegPreferences 
                                     render={index < waypoints.length - 1 && waypoints.length > 2}
                                     index={index}

@@ -110,6 +110,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
     };
 
     const addWaypoint = (index: number) => {
+        if (waypoints.length >= 10) {
+            return;
+        }
         const newWaypoints = [...waypoints];
         newWaypoints.splice(index + 1, 0, {
             lat: 0,
