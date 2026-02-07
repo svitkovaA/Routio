@@ -33,6 +33,7 @@
 .drag-and-drop {
     cursor: grab;
     margin: 0px -4px 5px -20px;
+    touch-action: none;
 }
 
 .sortable-item {

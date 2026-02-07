@@ -78,6 +78,7 @@ function DragHandle({
 
 
     const onPointerDown = (e: React.PointerEvent<HTMLDivElement>, left: boolean) => {
+        e.preventDefault();
         dragging.current = true;
         hasDragged.current = false;
         clickable.current = left;

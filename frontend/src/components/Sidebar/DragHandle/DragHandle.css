@@ -10,16 +10,19 @@
     cursor: grab;
     display: flex;
     flex-direction: row;
+    touch-action: none;
 }
 
 .drag-inner-left {
     height: 100%;
     width: calc(50% - 40px);
+    touch-action: none;
 }
 
 .drag-inner-right {
     height: 100%;
     width: calc(50% + 40px);
+    touch-action: none;
 }
 
 .drag-inner {
@@ -33,4 +36,5 @@
     margin: 5px auto;
     pointer-events: auto;
     cursor: pointer;
+    touch-action: none;
 }

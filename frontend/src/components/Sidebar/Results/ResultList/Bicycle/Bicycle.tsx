@@ -20,6 +20,7 @@ function Bicycle() {
         <>
             {result.tripPatterns.map((pattern, index) => (
                 <div 
+                    key={`${index}`}
                     className={"pattern " + (index === selectedTripPatternIndex ? "selected" : "")}
                     onClick={() => setSelectedTripPatternIndex(index)}
                 >
