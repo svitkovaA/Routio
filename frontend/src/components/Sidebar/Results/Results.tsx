@@ -26,6 +26,7 @@ function Results({ closeResults } : ResultsProps) {
     // Results context
     const {
         showDetail, setShowDetail,
+        showDepartures,
         result,
         resultActiveIndex,
         pattern
@@ -47,8 +48,10 @@ function Results({ closeResults } : ResultsProps) {
      */
     const handleBackButtonClick = () => {
         if (showDetail) {
-            setShowDetail(false);
             setPublicLegIndex(-1);
+            if (!showDepartures) {
+                setShowDetail(false);
+            }
         }
         else {
             closeResults();
@@ -62,7 +65,7 @@ function Results({ closeResults } : ResultsProps) {
                 <button className="back-button" onClick={handleBackButtonClick}>
                     <KeyboardArrowLeftIcon fontSize="large" />
                 </button>
-                <span onClick={handleBackButtonClick}>{showDetail ? "Details" : t("results")}</span>
+                <span onClick={handleBackButtonClick}>{showDetail ? showDepartures ? "Other departures" : "Details" : t("results")}</span>
 
                 {/* Header content depends on current view */}
                 {!showDetail ? (
@@ -77,19 +80,23 @@ function Results({ closeResults } : ResultsProps) {
                         </div>
                     </>
                 ) : (
-                    <div className="detail-header">
-
-                        {/* Summary of selected trip pattern */}
-                        <ResultListItem
-                            pattern={pattern}
-                        />
-
-                        {/* Trip details */}
-                        <DetailSwitch
-                            numOfPatterns={result.tripPatterns.length}
-                            setPublicLegIndex={setPublicLegIndex}
-                        />
-                    </div>
+                    <>
+                        {!showDepartures && (
+                            <div className="detail-header">
+        
+                                {/* Summary of selected trip pattern */}
+                                <ResultListItem
+                                    pattern={pattern}
+                                />
+        
+                                {/* Trip details */}
+                                <DetailSwitch
+                                    numOfPatterns={result.tripPatterns.length}
+                                    setPublicLegIndex={setPublicLegIndex}
+                                />
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -100,7 +107,7 @@ function Results({ closeResults } : ResultsProps) {
                 ) : !showDetail ? (
                     // List of available trip patterns
                     <ResultList />
-                ) : publicLegIndex !== -1 ? (
+                ) : showDepartures ? (
                     // Alternative departures for a selected public transport
                     <MoreDepartures
                         leg={pattern.originalLegs[publicLegIndex]}  

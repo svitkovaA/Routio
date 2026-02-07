@@ -21,6 +21,8 @@ type ResultContextType = {
     setShowResults: (value: boolean) => void;
     showDetail: boolean;
     setShowDetail: (value: boolean) => void;
+    showDepartures: boolean;
+    setShowDepartures: (value: boolean) => void;
     loading: boolean;
     setLoading: (value: boolean) => void;
     vehiclePositions: VehiclePosition[];
@@ -36,6 +38,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     const [selectedTripPatternIndex, setSelectedTripPatternIndex] = useState<number>(0);
     const [showResults, setShowResults] = useState(false);
     const [showDetail, setShowDetail] = useState<boolean>(false);
+    const [showDepartures, setShowDepartures] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [vehiclePositions, setVehiclePositions] = useState<VehiclePosition[]>([]);
     const prevPositionsRef = useRef<Record<number, VehiclePosition>>({});
@@ -68,6 +71,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         selectedTripPatternIndex, setSelectedTripPatternIndex,
         showResults, setShowResults,
         showDetail, setShowDetail,
+        showDepartures, setShowDepartures,
         loading, setLoading,
         vehiclePositions,
         clearResults
@@ -77,6 +81,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         selectedTripPatternIndex,
         showResults,
         showDetail,
+        showDepartures,
         loading,
         vehiclePositions
     ]);

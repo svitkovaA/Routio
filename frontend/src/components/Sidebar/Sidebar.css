@@ -36,6 +36,11 @@
     margin-top: 149px;
 }
 
+.content-wrapper.results-open.detail-open.more-departures-open {
+    margin-top: 60px;
+    max-height: calc(65vh - 60px);
+}
+
 #sidebar.open-info {
     max-height: 100vh;
     height: 100%;

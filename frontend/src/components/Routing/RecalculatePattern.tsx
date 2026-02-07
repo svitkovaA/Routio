@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { API_BASE_URL } from "../config/config";
 import { useResult } from "../ResultContext";
 
@@ -19,11 +19,14 @@ export function useRecalculatePattern() {
         result,
         selectedTripPatternIndex, 
         setResults,
+        setShowDepartures,
         resultActiveIndex,
     } = useResult();
 
     // Index of leg being recalculated
     const [publicLegIndex, setPublicLegIndex] = useState<number>(-1);
+
+    useEffect(() => setShowDepartures(publicLegIndex !== -1), [publicLegIndex]);
 
     /**
      * Requests a recalculated trip pattern from the backend

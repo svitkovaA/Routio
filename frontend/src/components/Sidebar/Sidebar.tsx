@@ -16,6 +16,7 @@ import { useResult } from '../ResultContext';
 import { useRoute } from '../Routing/Route';
 import DragHandle from './DragHandle';
 import './Sidebar.css';
+import { useRecalculatePattern } from '../Routing/RecalculatePattern';
 
 type sidebarProps = {
     sidebarOpen: boolean;                       // State indicating whether the sidebar is open
@@ -43,6 +44,7 @@ function Sidebar({
         resultActiveIndex, setResultActiveIndex,
         showResults,
         showDetail,
+        showDepartures,
     } = useResult();
 
     // Route context
@@ -114,7 +116,7 @@ function Sidebar({
             }}
             ref={sidebarRef}
         >
-            <div className={"content-wrapper " + (showResults ? "results-open " : "") + (showDetail ? "detail-open" : "")}>
+            <div className={"content-wrapper " + (showResults ? "results-open " : "") + (showDetail ? "detail-open " : "") + (showDepartures ? "more-departures-open" : "")}>
                 {/* Planning view */}
                 {!showSettings && !showResults && (
                     <Planning 

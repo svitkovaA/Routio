@@ -20,8 +20,8 @@ function MoreDepartures({
 } : MoreDeparturesProps) {
     return (
         <div className="more-departure-detail">
-            {leg.otherOptions?.departures.map((departure, index) => {   
-                const currentIndex = leg.otherOptions?.currentIndex; 
+            {leg?.otherOptions?.departures.map((departure, index) => {   
+                const currentIndex = leg?.otherOptions?.currentIndex; 
 
                 return (
                     <div
