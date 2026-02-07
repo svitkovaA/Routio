@@ -7,6 +7,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { ResultsType, TripPattern, VehiclePosition } from "./types/types";
 import { API_BASE_URL } from "./config/config";
+import { useInput } from "./InputContext";
+import { useRecalculatePattern } from "./Routing/RecalculatePattern";
 
 type ResultContextType = {
     pattern: TripPattern;
@@ -23,10 +25,12 @@ type ResultContextType = {
     setShowDetail: (value: boolean) => void;
     showDepartures: boolean;
     setShowDepartures: (value: boolean) => void;
+    showSettings: boolean;
+    setShowSettings: (value: boolean) => void;
     loading: boolean;
     setLoading: (value: boolean) => void;
     vehiclePositions: VehiclePosition[];
-    clearResults: () => void;
+    closeResults: () => void;
 };
 
 const ResultContext = createContext<ResultContextType | undefined>(undefined);
@@ -39,13 +43,16 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     const [showResults, setShowResults] = useState(false);
     const [showDetail, setShowDetail] = useState<boolean>(false);
     const [showDepartures, setShowDepartures] = useState<boolean>(false);
+    const [showSettings, setShowSettings] = useState(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [vehiclePositions, setVehiclePositions] = useState<VehiclePosition[]>([]);
     const prevPositionsRef = useRef<Record<number, VehiclePosition>>({});
     const intervalRef = useRef<NodeJS.Timer | null>(null);
     const animationRef = useRef<number | null>(null);
 
-    const clearResults = () => {
+    const { setMode } = useInput();
+
+    const closeResults = () => {
         setShowResults(false);
         setResults(prev => prev.map(result => ({...result, active: false, tripPatterns: [], originBikeStations: [], destinationBikeStations: []})));
         setShowDetail(false);
@@ -61,6 +68,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             cancelAnimationFrame(animationRef.current);
             animationRef.current = null;
         }
+        setMode(undefined);
     };
 
     const value = useMemo(() => ({
@@ -72,9 +80,10 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         showResults, setShowResults,
         showDetail, setShowDetail,
         showDepartures, setShowDepartures,
+        showSettings, setShowSettings,
         loading, setLoading,
         vehiclePositions,
-        clearResults
+        closeResults
     }), [
         results,
         resultActiveIndex,
@@ -82,11 +91,12 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         showResults,
         showDetail,
         showDepartures,
+        showSettings,
         loading,
         vehiclePositions
     ]);
 
-    const lerp = (a: number, b: number, t: number) => {
+    const linearInterpolation = (a: number, b: number, t: number) => {
         return a + (b - a) * t;
     };
 
@@ -115,8 +125,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                 } else {
                     interpolated.push({
                         ...next,
-                        lat: lerp(prev.lat, next.lat, t),
-                        lon: lerp(prev.lon, next.lon, t)
+                        lat: linearInterpolation(prev.lat, next.lat, t),
+                        lon: linearInterpolation(prev.lon, next.lon, t)
                     });
                 }
             }

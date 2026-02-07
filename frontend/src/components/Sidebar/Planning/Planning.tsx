@@ -15,17 +15,15 @@ import FindButton from "./FindButton/FindButton";
 import { useResult } from "../../ResultContext";
 
 type PlanningProps = {
-    showSettings: () => void;
     showInfo: () => void;
     closeSidebar: () => void;
     selectMultimodalResult: () => void;
 };
 
 function Planning({ 
-        showSettings, 
-        showInfo, 
-        closeSidebar, 
-        selectMultimodalResult,
+    showInfo, 
+    closeSidebar, 
+    selectMultimodalResult,
 }: PlanningProps) {
     const { setLoading } = useResult();
 
@@ -50,7 +48,6 @@ function Planning({
                 <TimeDate />
                 <ArrivalDeparture />
                 <InfoSettings 
-                    showSettings={showSettings}
                     showInfo={showInfo}
                 />
                 <Options />

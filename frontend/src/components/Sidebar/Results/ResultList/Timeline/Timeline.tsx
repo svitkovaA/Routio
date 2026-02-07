@@ -40,12 +40,13 @@ function Timeline({
             ref={timelineRef}
             className="timeline"
         >
-            {legs.map((leg) => {
+            {legs.map((leg, index) => {
                 const legWidth = leg.duration / totalDuration * width;
                 const left = leg.accumulatedDuration / totalDuration * width;
 
                 return (
                     <div 
+                        id={`${index}`}
                         className="timeline-leg"
                         style={{
                             left: left,

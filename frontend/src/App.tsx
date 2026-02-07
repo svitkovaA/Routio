@@ -14,11 +14,10 @@ import './App.css';
 
 function App() {
     // Context for handling results
-    const { clearResults } = useResult();
+    const { closeResults } = useResult();
 
     // Context for handling user input and waypoint manipulation
     const {
-        setMode,
         waypoints,
         clearWaypoint,
         removeWaypoint
@@ -29,15 +28,6 @@ function App() {
 
     // State controlling the visibility of the information panel
     const [showInfo, setShowInfo] = useState(false);   
-
-    /**
-     * Clears computed results and resets the application mode
-     * Function called when the user modifies waypoints or returns to the main search form
-     */
-    const closeResults = () => {
-        clearResults();
-        setMode(undefined);
-    };
 
     /**
      * If exactly two waypoints exist, the selected waypoint is cleared instead
@@ -67,13 +57,11 @@ function App() {
                 sidebarOpen={sidebarOpen}
                 openSidebar={() => setSidebarOpen(true)}
                 handleMarkerRemove={handleMarkerRemove}
-                closeResults={closeResults}
             />
             {/* Sidebar component with the search form, results, and trip details */}
             <SideBar 
                 sidebarOpen={sidebarOpen}
                 setSidebarOpen={setSidebarOpen}
-                closeResults={closeResults}
                 showInfo={showInfo}
                 setShowInfo={setShowInfo}
             />

@@ -15,17 +15,14 @@ import MoreDepartures from "./MoreDepartures/MoreDepartures";
 import { useResult } from "../../ResultContext";
 import { useRecalculatePattern } from "../../Routing/RecalculatePattern";
 import "./Results.css";
+import { useBackButtonClick } from './useBackButtonClick';
 
-type ResultsProps = {
-    closeResults: () => void;
-};
-
-function Results({ closeResults } : ResultsProps) {
+function Results() {
     const { t } = useTranslation();
 
     // Results context
     const {
-        showDetail, setShowDetail,
+        showDetail,
         showDepartures,
         result,
         resultActiveIndex,
@@ -35,44 +32,30 @@ function Results({ closeResults } : ResultsProps) {
     // Hook for recalculating trip pattern
     const { recalculatePattern, publicLegIndex, setPublicLegIndex } = useRecalculatePattern();
 
+    const { backButtonClick } = useBackButtonClick();
+
     // Description of the routing modes
     const descriptions: String[] = [
         t("modeDescriptions.multimodalTransport") as String,
         t("modeDescriptions.publicTransport") as String,
         t("modeDescriptions.bicycle") as String,
         t("modeDescriptions.walk") as String
-    ]
-
-    /**
-     * Handle back navigation within the results view
-     */
-    const handleBackButtonClick = () => {
-        if (showDetail) {
-            setPublicLegIndex(-1);
-            if (!showDepartures) {
-                setShowDetail(false);
-            }
-        }
-        else {
-            closeResults();
-        }
-    };
+    ];
 
     return (
         <div className="results">
             {/* Results header */}
             <div className="sidebar-header">
-                <button className="back-button" onClick={handleBackButtonClick}>
+                <button className="back-button" onClick={backButtonClick}>
                     <KeyboardArrowLeftIcon fontSize="large" />
                 </button>
-                <span onClick={handleBackButtonClick}>{showDetail ? showDepartures ? "Other departures" : "Details" : t("results")}</span>
+                <span onClick={backButtonClick}>{showDetail ? showDepartures ? "Other departures" : "Details" : t("results")}</span>
 
                 {/* Header content depends on current view */}
                 {!showDetail ? (
                     <>
                         {/* Tabs for switching routing modes */}
-                        <ResultTabs 
-                        />
+                        <ResultTabs />
 
                         {/* Description of the selected routing mode */}
                         <div className="description selected">

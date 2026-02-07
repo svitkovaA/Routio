@@ -33,19 +33,17 @@ type MapProps = {
     sidebarOpen: boolean;                           // State whether the sidebar is currently opened
     openSidebar: () => void;                        // Callback used to open the sidebar
     handleMarkerRemove: (index: number) => void;    // Removes or clears a waypoint marker
-    closeResults: () => void;                       // Clear trip results
 };
 
 function Map({ 
     sidebarOpen,
     openSidebar,
     handleMarkerRemove,
-    closeResults 
 }: MapProps) {
     const { t } = useTranslation();
 
     // Contexts
-    const { showResults, vehiclePositions } = useResult();
+    const { showResults, vehiclePositions, closeResults } = useResult();
     const { selectedLayerIndex } = useSettings();
     const { baseLayers, satelliteOverlay } = useLayers();
     const {

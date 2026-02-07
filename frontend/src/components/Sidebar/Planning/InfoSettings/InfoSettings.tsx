@@ -7,18 +7,19 @@
 import SettingsIcon from '@mui/icons-material/Settings';
 import InfoIcon from '@mui/icons-material/Info';
 import "./InfoSettings.css";
+import { useResult } from '../../../ResultContext';
 
 type InfoSettingsProps = {
-    showSettings: () => void;
     showInfo: () => void;
 };
 
-function InfoSettings({ showSettings, showInfo }: InfoSettingsProps) {
+function InfoSettings({ showInfo }: InfoSettingsProps) {
+    const { setShowSettings } = useResult();
     return (
         <div className="grid-wrapper">
             <button 
                 className="input-wrapper" 
-                onClick={showSettings} 
+                onClick={() => setShowSettings(true)} 
                 type="button"
             >
                 <SettingsIcon sx={{ color: 'var(--color-icons)' }} />

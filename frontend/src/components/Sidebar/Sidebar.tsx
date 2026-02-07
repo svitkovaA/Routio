@@ -14,28 +14,22 @@ import Results from './Results/Results';
 import { useInput } from '../InputContext';
 import { useResult } from '../ResultContext';
 import { useRoute } from '../Routing/Route';
-import DragHandle from './DragHandle';
+import DragHandle from './DragHandle/DragHandle';
 import './Sidebar.css';
-import { useRecalculatePattern } from '../Routing/RecalculatePattern';
 
 type sidebarProps = {
     sidebarOpen: boolean;                       // State indicating whether the sidebar is open
     setSidebarOpen: (value: boolean) => void;   // Setter controlling sidebar visibility
-    closeResults: () => void;                   // Closes routing results
     showInfo: boolean;                          // State indicating whether the information view is active
     setShowInfo: (value: boolean) => void;      // Setter controlling information panel visibility
 };
 
 function Sidebar({ 
     sidebarOpen, 
-    setSidebarOpen,  
-    closeResults,
+    setSidebarOpen, 
     showInfo,
     setShowInfo
 }: sidebarProps) {
-    // State controlling settings view
-    const [showSettings, setShowSettings] = useState(false);
-
     // User input context
     const { mode, setMode, waypoints } = useInput();
 
@@ -45,6 +39,7 @@ function Sidebar({
         showResults,
         showDetail,
         showDepartures,
+        showSettings
     } = useResult();
 
     // Route context
@@ -120,7 +115,6 @@ function Sidebar({
                 {/* Planning view */}
                 {!showSettings && !showResults && (
                     <Planning 
-                        showSettings={() => setShowSettings(true)}
                         showInfo={() => setShowInfo(true)}
                         closeSidebar={() => setSidebarOpen(false)}
                         selectMultimodalResult={() => {
@@ -131,9 +125,7 @@ function Sidebar({
                 )}
 
                 {/* Settings view */}
-                {showSettings && (
-                    <Settings closeSettings={() => setShowSettings(false)} />
-                )}
+                {showSettings && <Settings/>}
 
                 {/* Info view */}
                 {showInfo && (
@@ -141,9 +133,7 @@ function Sidebar({
                 )}
 
                 {/* Results view */}
-                {showResults && (
-                    <Results closeResults={closeResults} />
-                )}
+                {showResults && <Results/>}
             </div>
 
             {/* Sidebar toggle button */}

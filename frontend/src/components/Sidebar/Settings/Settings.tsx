@@ -10,13 +10,12 @@ import TransportPreferences from "./TransportPreferences/TransportPreferences";
 import ModePreferences from "./ModePreferences/ModePreferences";
 import { useSettings } from "../../SettingsContext";
 import "./Settings.css";
+import { useResult } from '../../ResultContext';
 
-type SettingsProps = {
-    closeSettings: () => void;  // Callback used to close the settings view
-};
-
-function Settings({ closeSettings } : SettingsProps) {
+function Settings() {
     const { t } = useTranslation();
+
+    const { setShowSettings } = useResult();
 
     // Settings context 
     const { 
@@ -34,12 +33,12 @@ function Settings({ closeSettings } : SettingsProps) {
     <div className="settings">
         {/* Sidebar header with back navigation */}
         <div className="sidebar-header">
-            <button className="back-button" onClick={closeSettings}  >
+            <button className="back-button" onClick={() => setShowSettings(false)}>
                 <KeyboardArrowLeftIcon 
                     fontSize="large"
                 />
             </button>
-            <span onClick={closeSettings}>{t("settings")}</span>
+            <span onClick={() => setShowSettings(false)}>{t("settings")}</span>
         </div>
 
         {/* Settings content */}
