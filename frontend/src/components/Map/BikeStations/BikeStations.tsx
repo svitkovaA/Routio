@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { CircleMarker, Popup, useMapEvent } from "react-leaflet";
 import { useResult } from "../../ResultContext";
 import { useChangeBikeStation } from "../../Routing/ChangeBikeStation";
@@ -69,7 +69,7 @@ function BikeStations() {
                 const selectedIndex = leg.bikeStationInfo.selectedBikeStationIndex;
                 const rack = leg.bikeStationInfo.rack;
                 return (
-                    <>
+                    <Fragment key={`${index}`}>
                         {/* Currently selected bike station */}
                         <CircleMarker
                             center={[leg.bikeStationInfo.latitude, leg.bikeStationInfo.longitude]}
@@ -89,6 +89,7 @@ function BikeStations() {
                         {showBikeStations[index] && leg?.bikeStationInfo.bikeStations.map((station, bikeStationIndex) => 
                             bikeStationIndex !== selectedIndex && zoom > 12 &&(
                                 <CircleMarker
+                                    key={`${bikeStationIndex}`}
                                     center={[station.place.latitude, station.place.longitude]}
                                     radius={5}
                                     pathOptions={{ color: color }}
@@ -112,7 +113,7 @@ function BikeStations() {
                                 </CircleMarker>
                             )
                         )}
-                    </>
+                    </Fragment>
                 )
             })}
         </>

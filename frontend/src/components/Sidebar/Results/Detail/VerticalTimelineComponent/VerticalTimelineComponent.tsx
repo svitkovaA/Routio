@@ -17,6 +17,7 @@ function VerticalTimelineComponent({ verticalTimeline } : VerticalTimelineCompon
         <div className="vertical-timeline">
             {nonWaitLegs.map((item, index) => (
                 <div
+                    key={`${index}`}
                     className="vertical-timeline-item"
                     style={{
                         borderColor: item.color,

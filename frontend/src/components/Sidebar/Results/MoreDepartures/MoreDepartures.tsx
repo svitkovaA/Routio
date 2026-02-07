@@ -25,6 +25,7 @@ function MoreDepartures({
 
                 return (
                     <div
+                        key={`${index}`}
                         className={"more-departure-row" + (currentIndex === index ? " selected" : "") + (currentIndex === index + 1 ? " before-selected" : "")}
                         onClick={() => recalculatePattern(index)}
                     >   

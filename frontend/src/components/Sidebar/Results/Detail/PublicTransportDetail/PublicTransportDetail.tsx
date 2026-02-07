@@ -121,6 +121,7 @@ function PublicTransportDetail({
 
                         return (
                             <div 
+                                key={`${index}`}
                                 className={"departure-row" + (currentIndex === index ? " selected" : "")} 
                                 onClick={() => recalculatePattern(index)}
                             >
@@ -156,8 +157,11 @@ function PublicTransportDetail({
                     {((leg.serviceJourney?.quays.length ?? 0) + 1)} Stops
                 </div>
                 <div>
-                    {stopsOpen && leg.serviceJourney?.quays.map(quay => (
-                        <div className="stop">
+                    {stopsOpen && leg.serviceJourney?.quays.map((quay, index) => (
+                        <div
+                            key={`${index}`}
+                            className="stop"
+                        >
                             <div className="timeline-dot public"/>
                             {quay.name}
                         </div>

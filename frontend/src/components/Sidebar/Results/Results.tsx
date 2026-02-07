@@ -26,11 +26,12 @@ function Results() {
         showDepartures,
         result,
         resultActiveIndex,
-        pattern
+        pattern,
+        publicLegIndex
     } = useResult();
 
     // Hook for recalculating trip pattern
-    const { recalculatePattern, publicLegIndex, setPublicLegIndex } = useRecalculatePattern();
+    const { recalculatePattern } = useRecalculatePattern();
 
     const { backButtonClick } = useBackButtonClick();
 
@@ -68,15 +69,10 @@ function Results() {
                             <div className="detail-header">
         
                                 {/* Summary of selected trip pattern */}
-                                <ResultListItem
-                                    pattern={pattern}
-                                />
+                                <ResultListItem pattern={pattern} />
         
                                 {/* Trip details */}
-                                <DetailSwitch
-                                    numOfPatterns={result.tripPatterns.length}
-                                    setPublicLegIndex={setPublicLegIndex}
-                                />
+                                <DetailSwitch numOfPatterns={result.tripPatterns.length}/>
                             </div>
                         )}
                     </>
@@ -100,7 +96,6 @@ function Results() {
                     // Detailed view of the selected trip pattern
                     <Detail
                         tripPattern={pattern}
-                        setPublicLegIndex={setPublicLegIndex}
                         recalculatePattern={recalculatePattern}
                     />
                 )}

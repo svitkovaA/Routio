@@ -1,29 +1,29 @@
+import { useCallback } from "react";
 import { useResult } from "../../ResultContext";
-import { useRecalculatePattern } from "../../Routing/RecalculatePattern";
 
 export function useBackButtonClick() {
     const {
         showDetail, setShowDetail,
         showDepartures,
-        closeResults
+        closeResults,
+        setPublicLegIndex
     } = useResult();
-
-    const { setPublicLegIndex } = useRecalculatePattern();
 
     /**
      * Handle back navigation within the results view
      */
-    const backButtonClick = () => {
+    const backButtonClick = useCallback(() => {
         if (showDetail) {
-            setPublicLegIndex(-1);
             if (!showDepartures) {
                 setShowDetail(false);
+            } else {
+                setPublicLegIndex(-1);
             }
         }
         else {
             closeResults();
         }
-    };
+    }, [showDetail, showDepartures, closeResults]);
 
     return { backButtonClick };
 }

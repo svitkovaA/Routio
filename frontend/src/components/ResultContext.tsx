@@ -8,7 +8,6 @@ import React, { createContext, useContext, useEffect, useMemo, useRef, useState 
 import { ResultsType, TripPattern, VehiclePosition } from "./types/types";
 import { API_BASE_URL } from "./config/config";
 import { useInput } from "./InputContext";
-import { useRecalculatePattern } from "./Routing/RecalculatePattern";
 
 type ResultContextType = {
     pattern: TripPattern;
@@ -24,12 +23,13 @@ type ResultContextType = {
     showDetail: boolean;
     setShowDetail: (value: boolean) => void;
     showDepartures: boolean;
-    setShowDepartures: (value: boolean) => void;
     showSettings: boolean;
     setShowSettings: (value: boolean) => void;
     loading: boolean;
     setLoading: (value: boolean) => void;
     vehiclePositions: VehiclePosition[];
+    publicLegIndex: number;
+    setPublicLegIndex: (value: number) => void;
     closeResults: () => void;
 };
 
@@ -46,6 +46,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     const [showSettings, setShowSettings] = useState(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [vehiclePositions, setVehiclePositions] = useState<VehiclePosition[]>([]);
+    // Index of leg being recalculated
+    const [publicLegIndex, setPublicLegIndex] = useState<number>(-1);
     const prevPositionsRef = useRef<Record<number, VehiclePosition>>({});
     const intervalRef = useRef<NodeJS.Timer | null>(null);
     const animationRef = useRef<number | null>(null);
@@ -79,10 +81,11 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         selectedTripPatternIndex, setSelectedTripPatternIndex,
         showResults, setShowResults,
         showDetail, setShowDetail,
-        showDepartures, setShowDepartures,
+        showDepartures,
         showSettings, setShowSettings,
         loading, setLoading,
         vehiclePositions,
+        publicLegIndex, setPublicLegIndex,
         closeResults
     }), [
         results,
@@ -93,7 +96,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         showDepartures,
         showSettings,
         loading,
-        vehiclePositions
+        vehiclePositions,
+        publicLegIndex
     ]);
 
     const linearInterpolation = (a: number, b: number, t: number) => {
@@ -199,6 +203,9 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             }
         };
     }, [selectedTripPatternIndex, tripIds?.join(",")]);
+
+    useEffect(() => setShowDepartures(publicLegIndex !== -1), [publicLegIndex]);
+
     
     return <ResultContext.Provider value={value}>{children}</ResultContext.Provider>;
 }

@@ -46,7 +46,7 @@ function Timeline({
 
                 return (
                     <div 
-                        id={`${index}`}
+                        key={`${index}-${totalDuration}`}
                         className="timeline-leg"
                         style={{
                             left: left,

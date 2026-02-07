@@ -26,6 +26,7 @@ function ResultList() {
             <>
                 {result.tripPatterns?.map((pattern, index) => (
                     <ResultListItem 
+                        key={`${index}`}
                         pattern={pattern}
                         selected={index === selectedTripPatternIndex}
                         onClick={() => setSelectedTripPatternIndex(index)}

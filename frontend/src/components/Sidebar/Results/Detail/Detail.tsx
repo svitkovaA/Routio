@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { TripPattern, VerticalTimeline } from "../../../types/types";
 import PublicTransportDetail from "./PublicTransportDetail/PublicTransportDetail";
 import WalkDetail from "./WalkDetail/WalkDetail";
@@ -14,19 +14,20 @@ import Transfer from "./Transfer/Transfer";
 import { useInput } from "../../../InputContext";
 import Waystop from "./Waystop/Waystop";
 import "./Detail.css"
+import { useResult } from "../../../ResultContext";
 
 type DetailProps = {
     tripPattern: TripPattern;
-    setPublicLegIndex: (value: number) => void;
     recalculatePattern: (selectedIndex: number, legIndex: number) => void;
 }
 
 function Detail({ 
     tripPattern, 
-    setPublicLegIndex,
     recalculatePattern
 } : DetailProps) {
     const { waypoints } = useInput();
+
+    const { setPublicLegIndex } = useResult();
 
     let waypointCount = 0;
 
@@ -63,7 +64,7 @@ function Detail({
                     const endTime = new Date(leg.aimedEndTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
 
                     return (
-                        <>
+                        <Fragment key={`${index}`}>
                             {index === 0 && (
                                 <Waystop
                                     time={time}
@@ -116,7 +117,7 @@ function Detail({
                                     name={waypoints[waypointCount + 1].displayName}
                                 />
                             )}
-                        </>
+                        </Fragment>
                     );
                 })}
             </div>
