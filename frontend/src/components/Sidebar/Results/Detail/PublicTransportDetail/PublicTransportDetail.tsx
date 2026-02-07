@@ -67,12 +67,19 @@ function PublicTransportDetail({
                 name={leg.fromPlace?.name}
             />
             {timelineIcons[leg.mode]}
-            <div className="detail-direction">
-                <div className="detail-public-code" style={{ backgroundColor: leg.color}}>
-                    {leg.line?.publicCode}
+            <div className="detail-trip-info">
+                <div className="detail-direction">
+                    <div className="detail-public-code" style={{ backgroundColor: leg.color}}>
+                        {leg.line?.publicCode}
+                    </div>
+                    <ArrowForwardIcon sx={{ fontSize: '18px' }}/> 
+                    {leg.serviceJourney?.direction}
                 </div>
-                <ArrowForwardIcon sx={{ fontSize: '18px' }}/> 
-                {leg.serviceJourney?.direction}
+                {averageDelayValue !== null && (
+                    <div className={"delay-info " + (averageDelayValue !== 0 ? "delayed" : "")}>
+                        +{averageDelayValue} min
+                    </div>
+                )}
             </div>
             <div>
                 {leg.nonContinuousDepartures ? (
@@ -89,13 +96,7 @@ function PublicTransportDetail({
                         </span>
                         {leg.mode} departure is before planned arrival
                     </div>
-                ) : (<></>)
-                }
-                {averageDelayValue !== null && (
-                    <div>
-                        +{averageDelayValue} min
-                    </div>
-                )}
+                ) : (<></>)}
                 <div 
                     onClick={() => setDeparturesOpen(!departuresOpen)}
                     className="detail-departures"

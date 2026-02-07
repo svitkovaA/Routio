@@ -88,4 +88,22 @@
     background-color: transparent;
 }
 
+.detail-trip-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.delay-info {
+    background-color: #0cb428;
+    color: white;
+    padding: 5px;
+    border-radius: 6px;
+}
+
+.delay-info.delayed {
+    background-color: #ff0000;
+}
+
 /** End of file PublicTransportDetail.css */
