@@ -106,21 +106,35 @@ function PublicTransportDetail({
                     />
                     Other departures
                 </div>
-                <div>
-                    {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => (
-                        <>
-                            {leg.otherOptions?.currentIndex !== undefined && leg?.otherOptions?.currentIndex - 1 <= index && leg?.otherOptions?.currentIndex + 2 >= index && (
-                                <div 
-                                    className={"departure-time" + (leg?.otherOptions?.currentIndex === index ? " selected" : "")} 
-                                    onClick={() => recalculatePattern(index)}
-                                >
-                                    {departure.departureTime}
-                                </div>
-                            )}
-                        </>
-                    ))}
+                <div className={departuresOpen ? "departure-box" : ""}>
+                    {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => {
+                        const currentIndex = leg.otherOptions?.currentIndex;
+                            
+                        if (currentIndex === undefined) {
+                            return null;
+                        } 
+
+                        if (currentIndex - 1 > index || currentIndex + 2 < index) {
+                            return null;
+                        }
+
+                        return (
+                            <div 
+                                className={"departure-row" + (currentIndex === index ? " selected" : "")} 
+                                onClick={() => recalculatePattern(index)}
+                            >
+                                <span className="departure-direction">
+                                    {departure.direction}
+                                </span>
+                                <span className="departure-time">
+                                    {new Date(departure.departureTime).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit",})}
+                                </span>
+                            </div>
+                        );
+                    })}
                     {departuresOpen && (
                         <button
+                            className="departure-button"
                             onClick={moreDeparturesClick}
                         >
                             More departures
