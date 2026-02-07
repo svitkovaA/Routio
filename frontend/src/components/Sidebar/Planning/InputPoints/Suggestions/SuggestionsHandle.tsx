@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { API_BASE_URL } from "../../../../config/config";
-import { InputText } from "../../../../types/types";
+import { InputText, StoredWaypoint } from "../../../../types/types";
 import { useInput } from "../../../../InputContext";
+import { loadDestination, loadMiddleWaypoints, loadOrigin } from "../WaypointStorage";
 
 export function useSuggestionHandle(index: number) {
     const [suggestions, setSuggestions] = useState<InputText[]>([]);
@@ -11,6 +12,29 @@ export function useSuggestionHandle(index: number) {
         waypoints, setWaypoints,
         activeField
     } = useInput();
+
+    const transformStored = (stored: StoredWaypoint[]) => {
+        return stored.map((s) => ({
+            ...s,
+            street: "",
+            city: ""
+        }));
+    }
+
+    const loadSuggestionsFromStorage = () => {
+        if (index === 0) {
+            const origin = loadOrigin();
+            setSuggestions(transformStored(origin));
+        }
+        else if (index === waypoints.length - 1) {
+            const destination = loadDestination();
+            setSuggestions(transformStored(destination));
+        }
+        else {
+            const middle_waypoints = loadMiddleWaypoints();
+            setSuggestions(transformStored(middle_waypoints));
+        }
+    }
 
     const fetchSuggestions = (query: string) => {
         fetch(`${API_BASE_URL}/geocode/name?q=${encodeURIComponent(query)}`)
@@ -66,5 +90,6 @@ export function useSuggestionHandle(index: number) {
             }
         }
     };
-    return { suggestions, fetchSuggestions, handleSuggestionClick, handleKeyDown, setSuggestions, highlightedIndex };
+    
+    return { loadSuggestionsFromStorage, suggestions, fetchSuggestions, handleSuggestionClick, handleKeyDown, setSuggestions, highlightedIndex };
 }

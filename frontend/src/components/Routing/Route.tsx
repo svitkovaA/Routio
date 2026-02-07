@@ -9,6 +9,7 @@ import { useInput } from "../InputContext";
 import { useResult } from "../ResultContext";
 import { useSettings } from "../SettingsContext";
 import dayjs from "dayjs";
+import { storeWaypoints } from "../Sidebar/Planning/InputPoints/WaypointStorage";
 
 /**
  * Hook for computing a route based on current application state
@@ -130,6 +131,9 @@ export function useRoute() {
             });
 
             const newResult = await result.json();
+
+            // Save waypoints to LocalStorage
+            storeWaypoints(waypoints);
 
             // Store routing result
             setResults(prev => 

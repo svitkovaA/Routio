@@ -5,7 +5,7 @@
  */
 
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import {CSS} from '@dnd-kit/utilities';
 import InputField from "./InputField/InputField";
@@ -35,6 +35,7 @@ function SortableItem({
     });
 
     const {
+        loadSuggestionsFromStorage,
         fetchSuggestions, 
         setSuggestions, 
         handleKeyDown, 
@@ -62,15 +63,21 @@ function SortableItem({
             clearTimeout(debounceTimeoutRef.current);
         }
 
-        if (value.length > 1) {
+        if (value.length >= 1) {
             debounceTimeoutRef.current = setTimeout(() => {
                 fetchSuggestions(value);
             }, 200);
         } else {
-            setSuggestions([]);
+            loadSuggestionsFromStorage();
             clearWaypoint(index, false);
         }
     };
+
+    useEffect(() => {
+        if (activeField === index && waypoint.displayName.length === 0) {
+            loadSuggestionsFromStorage();
+        }
+    }, [activeField, waypoint.displayName]);
 
     return (
         <div className="sortable-item" ref={setNodeRef} style={style}>

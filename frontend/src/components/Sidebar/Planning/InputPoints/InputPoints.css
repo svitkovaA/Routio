@@ -32,7 +32,7 @@
 
 .drag-and-drop {
     cursor: grab;
-    margin: 0px 0px 5px -20px;
+    margin: 0px -4px 5px -20px;
 }
 
 .sortable-item {

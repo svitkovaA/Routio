@@ -20,7 +20,13 @@ export type Waypoint = {
     displayName: string;
     isActive: boolean;
     id: any;
-}
+};
+
+export type StoredWaypoint = {
+    lat: number;
+    lon: number;
+    name: string;
+};
 
 export type Mode = "foot" | "bicycle" | "walk_transit" | "transit,bicycle,walk";
 
@@ -102,7 +108,7 @@ export type Leg = {
     delays?: {[date: string]: number};
     nonContinuousDepartures?: boolean;
     arrivalAfterDeparture?: boolean;
-}
+};
 
 export type RoutePreference = "shortest" | "fastest" | "transfers";
 
@@ -130,7 +136,7 @@ export type TripPattern = {
     tooLongWalkDistance?: boolean;
     tooLongBikeDistance?: boolean;
     vehiclePositions: VehiclePosition[];
-}
+};
 
 export type ResultsType = {
     tripPatterns: TripPattern[];
@@ -142,12 +148,12 @@ export type PolyInfo = {
     mode: string;
     color: string;
     pathOptions: {"dashArray"?: string};
-}
+};
 
 export type VerticalTimeline = {
     mode: string;
     length: number;
     color: string;
-}
+};
 
 /** End of file types.ts */
