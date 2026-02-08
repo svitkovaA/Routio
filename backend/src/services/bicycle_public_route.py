@@ -21,7 +21,8 @@ async def bicycle_public_route(
     modes: List[str], 
     max_bike_distance: float, 
     bike_average_speed: float, 
-    use_own_bike: bool, 
+    use_own_bike: bool,
+    walk_speed: float,
     session: AsyncClientSession
 ) -> List[TripPattern]: 
     print("function: bicycle_public_route")
@@ -47,13 +48,13 @@ async def bicycle_public_route(
             if extra_distance <= 1:
                 print("extra distance")
                 if use_own_bike:
-                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", session, bicycle_public=True, bike_lock_time=bike_lock_time)
+                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", bike_average_speed, walk_speed, session, bicycle_public=True, bike_lock_time=bike_lock_time)
                 else:
-                    result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, session, bicycle_public=True, use_semicircle=True)
+                    result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, bike_average_speed, walk_speed, session, bicycle_public=True, use_semicircle=True)
                 for pattern in result:
                     if "toPlace" not in pattern["legs"][-2]:
                         continue
-                    walk_result = await walk_bicycle_route(f"{pattern["legs"][-2]["toPlace"]["latitude"]}, {pattern["legs"][-2]["toPlace"]["longitude"]}", bike_group[-1], pattern["aimedEndTime"], "foot", session)
+                    walk_result = await walk_bicycle_route(f"{pattern["legs"][-2]["toPlace"]["latitude"]}, {pattern["legs"][-2]["toPlace"]["longitude"]}", bike_group[-1], pattern["aimedEndTime"], "foot", walk_speed, session)
                     if len(walk_result) > 0:
                         pattern["legs"].extend(walk_result[0]["legs"])
                         pattern["aimedEndTime"] = walk_result[0]["aimedEndTime"]
@@ -67,15 +68,15 @@ async def bicycle_public_route(
                 bike_group.append(f"{lat}, {lon}")
                 leg_index = -2
                 if use_own_bike:
-                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", session, bicycle_public=True, bike_lock_time=bike_lock_time)
+                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", bike_average_speed, walk_speed, session, bicycle_public=True, bike_lock_time=bike_lock_time)
                 else:
-                    result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, session, bicycle_public=True, use_semicircle=True)
+                    result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, bike_average_speed, walk_speed, session, bicycle_public=True, use_semicircle=True)
                 for pattern in result:
                     if "toPlace" in pattern["legs"][leg_index]:
                         toPlace = pattern["legs"][leg_index].get("toPlace", None)
                         if not toPlace:
                             continue
-                        walk_result = await walk_bicycle_route(f"{toPlace["latitude"]}, {toPlace["longitude"]}", waypoints[i], pattern["aimedEndTime"], "foot", session)
+                        walk_result = await walk_bicycle_route(f"{toPlace["latitude"]}, {toPlace["longitude"]}", waypoints[i], pattern["aimedEndTime"], "foot", walk_speed, session)
                         if len(walk_result) > 0:
                             pattern["legs"].extend(walk_result[0]["legs"])
                             pattern["aimedEndTime"] = walk_result[0]["aimedEndTime"]
@@ -87,7 +88,7 @@ async def bicycle_public_route(
             if len(waypoints[i:]) < 2:
                 trip_patterns.append(result[0])
             else:
-                pt_result = await process_public_route(waypoints[i:], time_to_depart if arrive_by else result[0]["aimedEndTime"], arrive_by, max_transfers, modes, session)
+                pt_result = await process_public_route(waypoints[i:], time_to_depart if arrive_by else result[0]["aimedEndTime"], arrive_by, max_transfers, modes, walk_speed, session)
                 for pattern in result:
                     if len(pt_result) == 0:
                         trip_patterns.append(pattern)
@@ -110,11 +111,11 @@ async def bicycle_public_route(
                 new_waypoint = f"{lat}, {lon}"
                 leg_index = -2
                 if use_own_bike:
-                    result = await group_walk_bicycle_route(bike_group + [new_waypoint], time_to_depart, "bicycle", session, bicycle_public=True, bike_lock_time=bike_lock_time)
+                    result = await group_walk_bicycle_route(bike_group + [new_waypoint], time_to_depart, "bicycle", bike_average_speed, walk_speed, session, bicycle_public=True, bike_lock_time=bike_lock_time)
                     if arrive_by and len(result) > 0:
                         justify_time(result[0], time_to_depart, True)
                 else:
-                    result = await rental_bike_route(bike_group + [new_waypoint], time_to_depart, False, arrive_by, bike_lock_time, session, bicycle_public=True, use_semicircle=True)
+                    result = await rental_bike_route(bike_group + [new_waypoint], time_to_depart, False, arrive_by, bike_lock_time, bike_average_speed, walk_speed, session, bicycle_public=True, use_semicircle=True)
                 temp_result: List[TripPattern] = []
                 for pattern in result:
                     bike_distance = 0
@@ -135,10 +136,12 @@ async def bicycle_public_route(
                 tasks.append(
                     process_public_route(
                         [f"{toPlace['latitude']}, {toPlace['longitude']}", *waypoints[i:]],
-                        time_to_depart if arrive_by else pattern["aimedEndTime"], arrive_by, max_transfers, modes, session
+                        time_to_depart if arrive_by else pattern["aimedEndTime"], arrive_by, max_transfers, modes, walk_speed, session
                     )
                 )
 
             results = await asyncio.gather(*tasks)
             trip_patterns = combine_pt(result, results, False, first_pt=True, keep_base=False)
     return trip_patterns
+
+# End of file bicycle_public_route.py

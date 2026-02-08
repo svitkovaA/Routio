@@ -113,3 +113,5 @@ async def optimal_destination_bike_station_choice(
 
     sortedNodes = sorted(scoredNodes, key=lambda x: x["score"], reverse=True)
     return sortedNodes[:10]
+
+# End of file bike_station_service.py

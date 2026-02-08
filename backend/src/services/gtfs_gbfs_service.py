@@ -1,13 +1,18 @@
+"""
+file: gtfs_gbfs_service.py
+
+Processing GTFS, GTFS-RT and GBFS files
+"""
+
 from collections import defaultdict
 from datetime import date, datetime
-import json
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Set, Tuple, cast
 import httpx
 import pandas as pd
 from zoneinfo import ZoneInfo
-from models.types import OtherDeparture, Departures
-from google.transit.gtfs_realtime_pb2 import FeedMessage
-from config import GTFSRT_URL
+from models.types import Departure, OtherDeparture, Departures
+from google.transit.gtfs_realtime_pb2 import FeedMessage        # type: ignore[import-untyped]
+from config import GTFSRT_URL, station_information_urls
 
 calendar: pd.DataFrame
 calendar_dates: pd.DataFrame
@@ -16,7 +21,7 @@ trips_dict = {}                                                 # Maps trip_id t
 stop_to_trips_dict: defaultdict[str, List[Tuple[str, str]]] = defaultdict(list)    # Maps stop_id to list of (trip_id, departure_time)
 colors_dict: Dict[str, str | None] = {}                         # Maps route_id to route_color, used in case lissy is unavailable
 services_cache: Dict[date, Set[str]] = {}                       # Maps ref_date to set(service_id)
-vehicle_position_map: Dict[int, Tuple[float, float]] = {}
+vehicle_position_map: Dict[str, Tuple[float, float]] = {}       # Maps trip_id to (latitude, longitude)
 
 def load_gtfs_data(gtfs_path: str = "../datasets/gtfs"):
     """
@@ -133,6 +138,20 @@ def get_departures_via(
     n_prev: int = 4, 
     n_next: int = 20
 ) -> Departures:
+    """
+    Returns departures for the given route
+    
+    Args:
+        from_stop_id: The identifier of the origin stop
+        to_stop_id: The identifier of the destination stop
+        route_short_name: The public code
+        aimed_start_time: Reference time in ISO format
+        n_prev: Number of departures before the reference time
+        n_next: Number of departures after the reference time
+    
+    Returns:
+        Dictionary containing ordered list of departures and index of the currently selected departure
+    """
     print("function: get_departures_via")
 
     # Parse and normalize time to local timezone
@@ -163,15 +182,19 @@ def get_departures_via(
             trip_info = trips_dict.get(trip_id)
             if not trip_info:
                 continue
+
             # Correct route
             if trip_info["route_id"] != route_id:
                 continue
+
             # Service active on the given date
             if trip_info["service_id"] not in valid_service:
                 continue
+            
             # Service reaches destination stop
             if trip_id not in trips_with_dest:
                 continue
+
             departures.append({
                 "trip_id": trip_id,
                 "departure_time": departure_time,
@@ -241,12 +264,16 @@ def get_departures_via(
 
     # Return departures with additional information
     return {
-        "departures": [
-            {"departureTime": dep["departure_time"], "direction": dep["direction"], "tripId": dep["trip_id"]}
-            for dep in final_departures
-        ],
-        "currentIndex": current_index,
-    }
+    "departures": [
+        cast(Departure, {
+            "departureTime": dep["departure_time"],
+            "direction": dep["direction"],
+            "tripId": dep["trip_id"],
+        })
+        for dep in final_departures
+    ],
+    "currentIndex": current_index,
+}
 
 async def vehicle_position():
     """
@@ -282,7 +309,7 @@ async def vehicle_position():
             # Skip entities without valid position data
             if not (v.HasField("position") and v.position.latitude and v.position.longitude):
                 continue
-
+            
             # Store current vehicle position for the trip
             vehicle_position_map[trip_id] = (v.position.latitude, v.position.longitude)
 
@@ -299,17 +326,13 @@ def get_vehicle_position(trip_id: int) -> Tuple[float, float] | None:
     global vehicle_position_map
     return vehicle_position_map.get(str(trip_id))
 
-# GBFS URLs for Brno, Hodonin and Kahan
-station_information_urls = {
-    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_te/cs/station_information.json",   # Brno
-    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nh/cs/station_information.json",   # Hodonin
-    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_oc/cs/station_information.json"    # Kahan
-}
-
 # Maps station_id to capacity
 bike_station_capacities: defaultdict[str, int | None] = defaultdict(lambda: None)
 
 def load_gbfs_data() -> None:
+    """
+    Loads and preprocess GBFS data file station_information.json
+    """
     print("function: load_gbfs_data")
     global station_information_urls, bike_station_capacities
 

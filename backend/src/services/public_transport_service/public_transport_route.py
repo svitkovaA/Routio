@@ -11,7 +11,8 @@ async def process_public_route(
     time_to_depart: str, 
     arrive_by: bool, 
     max_transfers: int, 
-    modes: List[str], 
+    modes: List[str],
+    walk_speed: float,
     session: AsyncClientSession
 ) -> List[TripPattern]:
     print("function: process_public_route")
@@ -32,11 +33,11 @@ async def process_public_route(
                 i -= 1
             if len(group) > 1:
                 tasks = [
-                    public_transport_route(group, pattern["legs"][0]["aimedStartTime"], arrive_by, max_transfers, modes, session, num_of_waypoints)
+                    public_transport_route(group, pattern["legs"][0]["aimedStartTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed)
                     for pattern in trip_patterns
                 ]
                 if tasks == []:
-                    tasks.append(public_transport_route(group, time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints))
+                    tasks.append(public_transport_route(group, time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed))
                 print(time_to_depart)
                 results = await asyncio.gather(*tasks)
                 if trip_patterns == []:
@@ -45,11 +46,11 @@ async def process_public_route(
                     trip_patterns = combine_pt(trip_patterns, results, arrive_by, keep_base=False) 
             if i >= 0:
                 tasks = [
-                    public_transport_route([waypoints[i], group[0]], pattern["legs"][0]["aimedStartTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, add_direct_mode=True)
+                    public_transport_route([waypoints[i], group[0]], pattern["legs"][0]["aimedStartTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed, add_direct_mode=True)
                     for pattern in trip_patterns
                 ]
                 if tasks == []:
-                    tasks.append(public_transport_route([waypoints[i], group[0]], time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, add_direct_mode=True))
+                    tasks.append(public_transport_route([waypoints[i], group[0]], time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed, add_direct_mode=True))
                 results = await asyncio.gather(*tasks)
                 if trip_patterns == []:
                     trip_patterns = results[0]
@@ -70,11 +71,11 @@ async def process_public_route(
                 i += 1
             if len(group) > 1:
                 tasks = [
-                    public_transport_route(group, pattern["aimedEndTime"], arrive_by, max_transfers, modes, session, num_of_waypoints)
+                    public_transport_route(group, pattern["aimedEndTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed)
                     for pattern in trip_patterns
                 ]
                 if tasks == []:
-                    tasks.append(public_transport_route(group, time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints))
+                    tasks.append(public_transport_route(group, time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed))
                 results = await asyncio.gather(*tasks)
                 if trip_patterns == [] and first_iteration:
                     trip_patterns = results[0]
@@ -82,11 +83,11 @@ async def process_public_route(
                     trip_patterns = combine_pt(trip_patterns, results, arrive_by, keep_base=False)
             if i < len(waypoints):
                 tasks = [
-                    public_transport_route([group[-1], waypoints[i]], pattern["aimedEndTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, add_direct_mode=True)
+                    public_transport_route([group[-1], waypoints[i]], pattern["aimedEndTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed, add_direct_mode=True)
                     for pattern in trip_patterns
                 ]
                 if tasks == []:
-                    tasks.append(public_transport_route([group[-1], waypoints[i]], time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, add_direct_mode=True))
+                    tasks.append(public_transport_route([group[-1], waypoints[i]], time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed, add_direct_mode=True))
                 results = await asyncio.gather(*tasks)
                 if trip_patterns == []:
                     trip_patterns = results[0]
@@ -94,3 +95,5 @@ async def process_public_route(
                     trip_patterns = combine_pt(trip_patterns, results, arrive_by, keep_base=False)
         first_iteration = False
     return trip_patterns
+
+# End of file public_transport_route.py

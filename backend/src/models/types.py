@@ -64,6 +64,7 @@ class Leg(LegBase, total=False):
     accumulatedDuration: int
     delays: Dict[str, int]
     bikeStationInfo: Any
+    tripId: int
     vehiclePositions: List[VehiclePositions]
 
 class TripPatternBase(TypedDict):
@@ -82,7 +83,7 @@ class TripPattern(TripPatternBase, total=False):
     tooLongWalkDistance: bool
     tooLongBikeDistance: bool
     bikeSegmentFound: bool
-    tripIds: List[int]
+    vehiclePositions: List[VehiclePositions]
 
 class Suggestion(TypedDict):
     name: str
@@ -170,7 +171,6 @@ class BikeRackPlace(PlaceBase):
 
 class BikeRackNode(BikeStationNodeBase):
     place: BikeRackPlace
-    tags: Any
 
 class BikeStationNodeWrapper(TypedDict):
     node: BikeStationNode

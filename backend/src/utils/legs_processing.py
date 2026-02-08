@@ -182,7 +182,7 @@ def process_legs(pattern: TripPattern) -> None:
             leg["color"] = COLORS.get(leg["mode"], "gray")
 
         # Append information necessary for vehicle position visualisation
-        if "tripId" in leg:
+        if "tripId" in leg and "line" in leg and "color" in leg and "otherOptions" in leg and leg["otherOptions"]["currentIndex"] is not None:
             vehiclePositions.append({
                 "tripId": leg["tripId"], 
                 "publicCode": leg["line"]["publicCode"],

@@ -12,7 +12,9 @@ async def rental_bike_route(
     time_to_depart: str, 
     best_option_only: bool, 
     arrive_by: bool, 
-    bike_lock_time: int, 
+    bike_lock_time: int,
+    bike_speed: float,
+    walk_speed: float,
     session: AsyncClientSession, 
     maximum_distance: int = 1000, 
     public_bicycle: bool = False, 
@@ -37,7 +39,7 @@ async def rental_bike_route(
     sortedDestinationNodes = results[1]
 
     intermediate_tasks = [
-        walk_bicycle_route(waypoints[i], waypoints[i + 1], time_to_depart, "bicycle", session)
+        walk_bicycle_route(waypoints[i], waypoints[i + 1], time_to_depart, "bicycle", bike_speed, session)
         for i in range(1, len(waypoints) - 2)
     ]
     intermediate_results = await asyncio.gather(*intermediate_tasks)
@@ -46,7 +48,7 @@ async def rental_bike_route(
     origin_to_first_map: Dict[str, List[TripPattern]] = {}
     if not public_bicycle:
         origin_to_first_tasks = {
-            origNode["place"]["id"]: walk_bicycle_route(waypoints[0], f"{origNode['place']['latitude']},{origNode['place']['longitude']}", time_to_depart, "foot", session)
+            origNode["place"]["id"]: walk_bicycle_route(waypoints[0], f"{origNode['place']['latitude']},{origNode['place']['longitude']}", time_to_depart, "foot", walk_speed, session)
             for origNode in sortedOriginNodes[:numOfNodes]
         }
         origin_to_first_results = await asyncio.gather(*origin_to_first_tasks.values())
@@ -55,7 +57,7 @@ async def rental_bike_route(
     last_to_dest_map: Dict[str, List[TripPattern]] = {}
     if not bicycle_public:
         last_to_dest_tasks = {
-            destNode["place"]["id"]: walk_bicycle_route(f"{destNode['place']['latitude']},{destNode['place']['longitude']}", waypoints[-1], time_to_depart, "foot", session)
+            destNode["place"]["id"]: walk_bicycle_route(f"{destNode['place']['latitude']},{destNode['place']['longitude']}", waypoints[-1], time_to_depart, "foot", walk_speed, session)
             for destNode in sortedDestinationNodes[:numOfNodes]
         }
         last_to_dest_results = await asyncio.gather(*last_to_dest_tasks.values())
@@ -92,9 +94,9 @@ async def rental_bike_route(
         
 
         if len(waypoints) > 2:
-            res = await walk_bicycle_route(startingBikeStation, waypoints[1], time_to_depart, "bicycle", session)
+            res = await walk_bicycle_route(startingBikeStation, waypoints[1], time_to_depart, "bicycle", bike_speed, session)
         else:
-            res = await walk_bicycle_route(startingBikeStation, endBikeStation, time_to_depart, "bicycle", session)
+            res = await walk_bicycle_route(startingBikeStation, endBikeStation, time_to_depart, "bicycle", bike_speed, session)
         origin_wait_leg = deepcopy(wait_leg)
         if "fromPlace" in res[0]["legs"][0]:
             origin_wait_leg["bikeStationInfo"]["latitude"] = res[0]["legs"][0]["fromPlace"]["latitude"]
@@ -108,7 +110,7 @@ async def rental_bike_route(
             tripPattern["legs"].extend(intermediateLegs)
 
             if len(waypoints) > 2:
-                res = await walk_bicycle_route(waypoints[-2], endBikeStation, time_to_depart, "bicycle", session)
+                res = await walk_bicycle_route(waypoints[-2], endBikeStation, time_to_depart, "bicycle", bike_speed, session)
                 tripPattern["legs"].extend(res[0]["legs"])
 
             if "toPlace" in res[0]["legs"][-1]:
@@ -136,3 +138,5 @@ async def rental_bike_route(
     trip_patterns = await asyncio.gather(*tasks)
 
     return trip_patterns
+
+# End of file rental_bike_route.py

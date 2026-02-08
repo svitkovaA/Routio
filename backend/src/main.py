@@ -5,6 +5,7 @@ The main application entry point. Initializes the FastAPI application,
 configures CORS and loads required data
 """
 
+import json
 import httpx
 import uvicorn
 from fastapi import FastAPI
@@ -16,6 +17,7 @@ from services.gtfs_gbfs_service import load_gbfs_data, load_gtfs_data, vehicle_p
 from routes import geocode, route, status, departures, vehicle_positions
 import asyncio
 import logging
+from services.bicycle_service.rack_service import init_db, close_db
 
 async def vehicle_position_worker():
     """
@@ -25,7 +27,7 @@ async def vehicle_position_worker():
         try:
             # Update vehicle positions
             await vehicle_position()
-        except Exception as e:
+        except Exception:
             # Log the exception without terminating the worker
             logging.exception("vehicle_position failed")
         # Wait before the next update cycle
@@ -48,7 +50,14 @@ async def lifespan(app: FastAPI):
 
     # Start background worker for vehicle position updates
     task = asyncio.create_task(vehicle_position_worker())
+
+    # Postgres database connection
+    await init_db()
+    
     yield
+
+    # Close postgres database connection
+    await close_db()
 
     # Gracefully shut down background worker
     task.cancel()
@@ -131,10 +140,10 @@ async def trip_data():
 async def test():
     async with httpx.AsyncClient(timeout=10.0) as client:
         r = await client.get(
-            # "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1768950000000&to=1769537357380",
+            "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1768950000000&to=1769537357380",
             # "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1759701600000&to=1759741860000",
             # "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1760047200000&to=1760220000000",
-            "https://walter.fit.vutbr.cz/ben/nextbike/records?from=1768950000000&to=1737500400000&station_uid=29078342",
+            # "https://walter.fit.vutbr.cz/ben/nextbike/records?from=1768950000000&to=1737500400000&station_uid=29078342",
             # "https://walter.fit.vutbr.cz/ben/nextbike/records?from=1737846000000&to=1769537357380&station_uid=27618921",
             # "https://walter.fit.vutbr.cz/ben/nextbike/placesAround?from=1759701600000&to=1859701600000&limit=2&position=[49.194872,16.606506]",
             headers={"Authorization": BEN_API_KEY}
@@ -150,6 +159,8 @@ async def test1():
             headers={"Authorization": LISSY_API_KEY}
         )
         r.raise_for_status()
+        data = r.json()
+        print(json.dumps(data, indent=2))
         return r.json()
     
 @app.get("/testWeatherPositions")

@@ -22,6 +22,7 @@ async def public_bicycle_route(
     max_bike_distance: float, 
     bike_average_speed: float, 
     use_own_bike: bool, 
+    walk_speed: float,
     session: AsyncClientSession
 ) -> List[TripPattern]:
     print("function: public_bicycle_route")
@@ -47,15 +48,15 @@ async def public_bicycle_route(
             if extra_distance <= 1:
                 print("extra_distance")
                 if use_own_bike:
-                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", session)
+                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", bike_average_speed, walk_speed, session)
                     if arrive_by and len(result) > 0:
                         justify_time(result[0], time_to_depart, True)
                 else:
-                    result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, session, public_bicycle=True, use_semicircle=True)
+                    result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, bike_average_speed, walk_speed, session, public_bicycle=True, use_semicircle=True)
                     for pattern in result:
                         if "fromPlace" not in pattern["legs"][1]:
                             continue
-                        walk_result = await walk_bicycle_route(bike_group[0], f"{pattern["legs"][1]["fromPlace"]["latitude"]}, {pattern["legs"][1]["fromPlace"]["longitude"]}", pattern["legs"][0]["aimedStartTime"], "foot", session)
+                        walk_result = await walk_bicycle_route(bike_group[0], f"{pattern["legs"][1]["fromPlace"]["latitude"]}, {pattern["legs"][1]["fromPlace"]["longitude"]}", pattern["legs"][0]["aimedStartTime"], "foot", walk_speed, session)
                         if arrive_by and len(walk_result) > 0:
                             justify_time(walk_result[0], result[0]["legs"][0]["aimedStartTime"], True)
                         pattern["legs"][:0] = walk_result[0]["legs"]
@@ -68,17 +69,17 @@ async def public_bicycle_route(
                 bike_group.insert(0, f"{lat}, {lon}")
                 leg_index = 0
                 if use_own_bike:
-                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", session)
+                    result = await group_walk_bicycle_route(bike_group, time_to_depart, "bicycle", bike_average_speed, walk_speed, session)
                     if arrive_by and len(result) > 0:  
                         justify_time(result[0], time_to_depart, True)  
                 else:
-                    result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, session, public_bicycle=True, use_semicircle=True)
+                    result = await rental_bike_route(bike_group, time_to_depart, True, arrive_by, bike_lock_time, bike_average_speed, walk_speed, session, public_bicycle=True, use_semicircle=True)
                     leg_index = 1
                 for pattern in result:
                     fromPlace = pattern["legs"][leg_index].get("fromPlace", None)
                     if fromPlace is None:
                         continue
-                    walk_result = await walk_bicycle_route(waypoints[i], f"{fromPlace["latitude"]}, {fromPlace["longitude"]}", pattern["legs"][0]["aimedStartTime"], "foot", session)
+                    walk_result = await walk_bicycle_route(waypoints[i], f"{fromPlace["latitude"]}, {fromPlace["longitude"]}", pattern["legs"][0]["aimedStartTime"], "foot", walk_speed, session)
                     if arrive_by and len(walk_result) > 0:
                         justify_time(walk_result[0], result[0]["legs"][0]["aimedStartTime"], True)
                     pattern["legs"][:0] = walk_result[0]["legs"]
@@ -89,7 +90,7 @@ async def public_bicycle_route(
             if len(waypoints[:i + 1]) < 2:
                 trip_patterns.append(result[0])
             else:
-                pt_result = await process_public_route(waypoints[:i + 1], result[0]["legs"][0]["aimedStartTime"] if arrive_by else time_to_depart, arrive_by, max_transfers, modes, session)
+                pt_result = await process_public_route(waypoints[:i + 1], result[0]["legs"][0]["aimedStartTime"] if arrive_by else time_to_depart, arrive_by, max_transfers, modes, walk_speed, session)
                 for pattern in result:
                     if len(pt_result) == 0:
                         trip_patterns.append(pattern)
@@ -103,18 +104,18 @@ async def public_bicycle_route(
             factor = 0.9
             step = 0.05
             leg_index = 0
-            while len(result) == 0 and factor > 0.7:
+            while len(result) == 0 and factor > 0.6:
                 lat1, lon1 = map(float, waypoints[i + 1].split(','))
                 lat2, lon2 = map(float, waypoints[i].split(','))
                 lat, lon = interpolate_point(lat1, lon1, lat2, lon2, extra_distance * factor)
                 new_waypoint = f"{lat}, {lon}"
                 leg_index = 0
                 if use_own_bike:
-                    result = await group_walk_bicycle_route([new_waypoint] + bike_group, time_to_depart, "bicycle", session)
+                    result = await group_walk_bicycle_route([new_waypoint] + bike_group, time_to_depart, "bicycle", bike_average_speed, walk_speed, session)
                     if arrive_by and len(result) > 0:
                         justify_time(result[0], time_to_depart, True)
                 else:
-                    result = await rental_bike_route([new_waypoint] + bike_group, time_to_depart, True, arrive_by, bike_lock_time, session, public_bicycle=True, use_semicircle=True)
+                    result = await rental_bike_route([new_waypoint] + bike_group, time_to_depart, True, arrive_by, bike_lock_time, bike_average_speed, walk_speed, session, public_bicycle=True, use_semicircle=True)
                     leg_index = 1
                 temp_result: List[TripPattern] = []
                 for pattern in result:
@@ -136,7 +137,7 @@ async def public_bicycle_route(
                 tasks.append(
                     process_public_route(
                         [*waypoints[:i + 1], f"{fromPlace['latitude']}, {fromPlace['longitude']}"],
-                        pattern["legs"][0]["aimedStartTime"] if arrive_by else time_to_depart, arrive_by, max_transfers, modes, session
+                        pattern["legs"][0]["aimedStartTime"] if arrive_by else time_to_depart, arrive_by, max_transfers, modes, walk_speed, session
                     )
                 )
 
@@ -144,3 +145,5 @@ async def public_bicycle_route(
             trip_patterns = combine_pt(result, results, True, first_pt=True, keep_base=False, combination=True)
 
     return trip_patterns
+
+# End of file public_bicycle_route.py
