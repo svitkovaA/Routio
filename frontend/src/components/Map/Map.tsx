@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { MapContainer, TileLayer, ZoomControl, Marker, Popup, ScaleControl, CircleMarker } from 'react-leaflet'
+import { MapContainer, TileLayer, ZoomControl, Marker, Popup, ScaleControl } from 'react-leaflet'
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { useTranslation } from 'react-i18next';

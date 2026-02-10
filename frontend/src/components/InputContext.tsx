@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import React, { createContext, useContext, useMemo, useState } from "react"
+import React, { createContext, useCallback, useContext, useMemo, useState } from "react"
 import { LegPreference, Mode, RoutePreference, Waypoint } from "./types/types";
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -74,7 +74,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
 
     const [mapSelectionIndex, setMapSelectionIndex] = useState<number>(-1);
 
-    const clearWaypoint = (index: number, clearDisplayName: boolean) => {
+    const clearWaypoint = useCallback((index: number, clearDisplayName: boolean) => {
         setWaypoints(prev => {
             const newWaypoints = [...prev];
             newWaypoints[index] = { 
@@ -84,9 +84,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             };
             return newWaypoints;
         });
-    };
+    }, []);
 
-    const removeWaypoint = (currentIndex: number) => {
+    const removeWaypoint = useCallback((currentIndex: number) => {
         if (currentIndex === activeField) setActiveField(null);
         setLegPreferences(prev => {
             const newPrefs = [...prev];
@@ -107,9 +107,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             return newPrefs;
         });
         setWaypoints(prev => prev.filter((_, i) => i !== currentIndex));
-    };
+    }, [activeField, waypoints.length]);
 
-    const addWaypoint = (index: number) => {
+    const addWaypoint = useCallback((index: number) => {
         if (waypoints.length >= 10) {
             return;
         }
@@ -129,22 +129,22 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             open: false
         });
         setLegPreferences(newLegPreferences);
-    };
+    }, [waypoints, legPreferences]);
 
-    const swapWaypoints = () => {
+    const swapWaypoints = useCallback(() => {
         if (waypoints.length === 2) {
             setWaypoints(prev => [prev[1], prev[0]]);
         }
-    };
+    }, [waypoints.length]);
 
-    const onDragEnd = (event: DragEndEvent) => {
+    const onDragEnd = useCallback((event: DragEndEvent) => {
         const {active, over} = event;
         if (over && active.id !== over.id) {
             const oldIndex = waypoints.findIndex(w => w.id === active.id);
             const newIndex = waypoints.findIndex(w => w.id === over.id);
             setWaypoints(prev => arrayMove(prev, oldIndex, newIndex));
         }
-    };
+    }, [waypoints]);
 
     const value = useMemo(() => ({
         waypoints, setWaypoints,

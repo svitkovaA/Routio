@@ -28,5 +28,5 @@ export function useVerticalTimeLineHandle(
         observer.observe(ref.current);
 
         return () => observer.disconnect();
-    }, [leg, index]);
+    }, [leg, index, ref, offset, setVerticalTimeline]);
 }

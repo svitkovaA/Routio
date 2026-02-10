@@ -27,3 +27,4 @@ backend/venv/
 /backend/datasets
 
 .vscode/
+.env-dev

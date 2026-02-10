@@ -8,7 +8,6 @@ import { API_BASE_URL } from "../config/config";
 import { useInput } from "../InputContext";
 import { useResult } from "../ResultContext";
 import { useSettings } from "../SettingsContext";
-import dayjs from "dayjs";
 import { storeWaypoints } from "../Sidebar/Planning/InputPoints/WaypointStorage";
 
 /**

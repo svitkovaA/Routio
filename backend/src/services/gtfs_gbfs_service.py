@@ -6,13 +6,18 @@ Processing GTFS, GTFS-RT and GBFS files
 
 from collections import defaultdict
 from datetime import date, datetime
+import os
+import shutil
 from typing import Dict, List, Set, Tuple, cast
+import zipfile
 import httpx
 import pandas as pd
 from zoneinfo import ZoneInfo
+
+import requests
 from models.types import Departure, OtherDeparture, Departures
 from google.transit.gtfs_realtime_pb2 import FeedMessage        # type: ignore[import-untyped]
-from config import GTFSRT_URL, station_information_urls
+from config import GTFSRT_URL, station_information_urls, GTFS_PATH, GTFS_URL
 
 calendar: pd.DataFrame
 calendar_dates: pd.DataFrame
@@ -23,23 +28,39 @@ colors_dict: Dict[str, str | None] = {}                         # Maps route_id 
 services_cache: Dict[date, Set[str]] = {}                       # Maps ref_date to set(service_id)
 vehicle_position_map: Dict[str, Tuple[float, float]] = {}       # Maps trip_id to (latitude, longitude)
 
-def load_gtfs_data(gtfs_path: str = "../datasets/gtfs"):
+def load_gtfs_data():
     """
     Loads and preprocess selected GTFS CSV data files into global in-memory structures
-
-    Args:
-        gtfs_path: Path to the directory containing GTFS CSV files
     """
     print("function: load_gtfs_data")
+
+    if os.path.exists(GTFS_PATH):
+        shutil.rmtree(GTFS_PATH)
+
+    os.makedirs(GTFS_PATH, exist_ok=True)
+
+    zip_path = os.path.join(GTFS_PATH, "gtfs.zip")
+
+    response = requests.get(GTFS_URL, timeout=60)
+    response.raise_for_status()
+
+    with open(zip_path, "wb") as f:
+        f.write(response.content)
+
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(GTFS_PATH)
+
+    os.remove(zip_path)
+
     # Declares global variables which will store parsed GTFS data
     global calendar, calendar_dates, routes_dict, trips_dict, stop_to_trips_dict, colors_dict
 
     # Load GTFS CSV files
-    calendar = pd.read_csv(f"{gtfs_path}/calendar.txt")                             # type: ignore[type-arg]
-    calendar_dates = pd.read_csv(f"{gtfs_path}/calendar_dates.txt")                 # type: ignore[type-arg]
-    stop_times: pd.DataFrame = pd.read_csv(f"{gtfs_path}/stop_times.txt")           # type: ignore[type-arg]
-    trips: pd.DataFrame = pd.read_csv(f"{gtfs_path}/trips.txt")                     # type: ignore[type-arg]
-    routes: pd.DataFrame = pd.read_csv(f"{gtfs_path}/routes.txt")                   # type: ignore[type-arg]
+    calendar = pd.read_csv(f"{GTFS_PATH}/calendar.txt")                             # type: ignore[type-arg]
+    calendar_dates = pd.read_csv(f"{GTFS_PATH}/calendar_dates.txt")                 # type: ignore[type-arg]
+    stop_times: pd.DataFrame = pd.read_csv(f"{GTFS_PATH}/stop_times.txt")           # type: ignore[type-arg]
+    trips: pd.DataFrame = pd.read_csv(f"{GTFS_PATH}/trips.txt")                     # type: ignore[type-arg]
+    routes: pd.DataFrame = pd.read_csv(f"{GTFS_PATH}/routes.txt")                   # type: ignore[type-arg]
 
     # Map route_short_name to route_id
     routes_dict = dict(zip(routes["route_short_name"], routes["route_id"]))

@@ -17,8 +17,6 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
     // Result context
     const {
         resultActiveIndex,
-        selectedTripPatternIndex,
-        results,
         result,
         pattern
     } = useResult();
@@ -73,7 +71,7 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
             }
         }
         return L.latLngBounds(L.latLng(minLat, minLon), L.latLng(maxLat, maxLon));
-    }, [results, resultActiveIndex, selectedTripPatternIndex]);
+    }, [resultActiveIndex, pattern, result.active]);
 
     /**
      * Updates the map view whenever computed bounds or sidebar state changes.

@@ -57,7 +57,7 @@ function ShowRoute() {
         
         // Force rerender to update displayed polylines
         setForceUpdate(prev => prev + 1);
-    }, [results, resultActiveIndex, selectedTripPatternIndex]);
+    }, [results, resultActiveIndex, selectedTripPatternIndex, pattern, setResults, result?.active]);
     
     // Do not render if results are not available
     if (!showResults || 

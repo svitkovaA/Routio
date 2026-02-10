@@ -77,7 +77,7 @@ function SortableItem({
         if (activeField === index && waypoint.displayName.length === 0) {
             loadSuggestionsFromStorage();
         }
-    }, [activeField, waypoint.displayName]);
+    }, [activeField, waypoint.displayName, index, loadSuggestionsFromStorage]);
 
     return (
         <div className="sortable-item" ref={setNodeRef} style={style}>

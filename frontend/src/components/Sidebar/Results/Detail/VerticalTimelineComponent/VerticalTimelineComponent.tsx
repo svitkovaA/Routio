@@ -12,7 +12,7 @@ type VerticalTimelineComponentProps = {
 }
 
 function VerticalTimelineComponent({ verticalTimeline } : VerticalTimelineComponentProps) {
-    const nonWaitLegs = verticalTimeline.filter((i) => i.mode != "wait");
+    const nonWaitLegs = verticalTimeline.filter((i) => i.mode !== "wait");
     return (
         <div className="vertical-timeline">
             {nonWaitLegs.map((item, index) => (

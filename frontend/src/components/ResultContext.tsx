@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { ResultsType, TripPattern, VehiclePosition } from "./types/types";
 import { API_BASE_URL } from "./config/config";
 import { useInput } from "./InputContext";
@@ -54,7 +54,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
 
     const { setMode } = useInput();
 
-    const closeResults = () => {
+    const closeResults = useCallback(() => {
         setShowResults(false);
         setResults(prev => prev.map(result => ({...result, active: false, tripPatterns: [], originBikeStations: [], destinationBikeStations: []})));
         setShowDetail(false);
@@ -71,7 +71,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             animationRef.current = null;
         }
         setMode(undefined);
-    };
+    }, [setMode]);
 
     const value = useMemo(() => ({
         pattern: results[resultActiveIndex]?.tripPatterns[selectedTripPatternIndex],
@@ -97,14 +97,15 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         showSettings,
         loading,
         vehiclePositions,
-        publicLegIndex
+        publicLegIndex,
+        closeResults
     ]);
 
-    const linearInterpolation = (a: number, b: number, t: number) => {
+    const linearInterpolation = useCallback((a: number, b: number, t: number) => {
         return a + (b - a) * t;
-    };
+    }, []);
 
-    const animatePositions = (
+    const animatePositions = useCallback((
         from: Record<number, VehiclePosition>,
         to: Record<number, VehiclePosition>,
         duration = 2000
@@ -143,11 +144,16 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         }
 
         animationRef.current = requestAnimationFrame(frame);
-    };
+    }, [linearInterpolation]);
+    const pattern = value.pattern;
 
-    const tripIds = value.pattern?.vehiclePositions?.map(p => p.tripId);
-    const fetchPositions = async () => {
-        if (!value.pattern) return;
+    const tripIds = useMemo(
+        () => pattern?.vehiclePositions?.map(p => p.tripId) ?? [],
+        [pattern]
+    );
+
+    const fetchPositions = useCallback(async () => {
+        if (!pattern) return;
 
         const res = await fetch(`${API_BASE_URL}/vehiclePositions`, {
             method: "POST",
@@ -159,7 +165,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
 
         const nextMap: Record<number, VehiclePosition> = {};
 
-        for (const v of value.pattern.vehiclePositions) {
+        for (const v of pattern.vehiclePositions) {
             const pos = realtime[v.tripId];
             if (!pos) continue;
 
@@ -177,7 +183,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         }
 
         prevPositionsRef.current = nextMap;
-    };
+    }, [pattern, tripIds, animatePositions]);
 
     useEffect(() => {
         setVehiclePositions([]);
@@ -190,7 +196,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             cancelAnimationFrame(animationRef.current);
             animationRef.current = null;
         }
-        if (selectedTripPatternIndex === -1 || !value.pattern)
+        if (selectedTripPatternIndex === -1 || !pattern)
             return;
 
         fetchPositions();
@@ -202,7 +208,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                 intervalRef.current = null;
             }
         };
-    }, [selectedTripPatternIndex, tripIds?.join(",")]);
+    }, [selectedTripPatternIndex, fetchPositions, pattern]);
 
     useEffect(() => setShowDepartures(publicLegIndex !== -1), [publicLegIndex]);
 

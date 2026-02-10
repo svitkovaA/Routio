@@ -92,7 +92,7 @@ function Detail({
                                 />
                             ) : leg.mode === "wait" ? (
                                 <Waystop
-                                    time={previousLegMode == "bicycle" ? endTime :time}
+                                    time={previousLegMode === "bicycle" ? endTime :time}
                                     name={leg.bikeStationInfo?.bikeStations[leg.bikeStationInfo.selectedBikeStationIndex].place.name}
                                 />
                             ) : leg.mode === "transfer" ? (

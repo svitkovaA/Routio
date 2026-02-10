@@ -23,7 +23,7 @@ export function useBackButtonClick() {
         else {
             closeResults();
         }
-    }, [showDetail, showDepartures, closeResults]);
+    }, [showDetail, showDepartures, closeResults, setShowDetail, setPublicLegIndex]);
 
     return { backButtonClick };
 }

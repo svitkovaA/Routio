@@ -140,10 +140,10 @@ async def trip_data():
 async def test():
     async with httpx.AsyncClient(timeout=10.0) as client:
         r = await client.get(
-            "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1768950000000&to=1769537357380",
+            # "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1768950000000&to=1769537357380",
             # "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1759701600000&to=1759741860000",
             # "https://walter.fit.vutbr.cz/ben/nextbike/places?from=1760047200000&to=1760220000000",
-            # "https://walter.fit.vutbr.cz/ben/nextbike/records?from=1768950000000&to=1737500400000&station_uid=29078342",
+            "https://walter.fit.vutbr.cz/ben/nextbike/records?from=1768950000000&to=1737500400000&station_uid=29078342",
             # "https://walter.fit.vutbr.cz/ben/nextbike/records?from=1737846000000&to=1769537357380&station_uid=27618921",
             # "https://walter.fit.vutbr.cz/ben/nextbike/placesAround?from=1759701600000&to=1859701600000&limit=2&position=[49.194872,16.606506]",
             headers={"Authorization": BEN_API_KEY}

@@ -53,7 +53,7 @@ function Sidebar({
         if (mode && resultActiveIndex !== -1) {
             route();
         }
-    }, [mode, resultActiveIndex]);
+    }, [mode, resultActiveIndex, route]);
 
     const sidebarRef = useRef<HTMLDivElement>(null);
     const isMobile = useMediaQuery("(max-width: 768px)");
@@ -95,9 +95,9 @@ function Sidebar({
         });
 
         prevClosedOffset.current = next;
-    }, [closedOffset, isMobile, sidebarOpen]);
+    }, [closedOffset, isMobile, sidebarOpen, sheetHeight]);
 
-    useEffect(() => setTranslateY(sidebarOpen ? -closedOffset : 0), [sidebarOpen]);
+    useEffect(() => setTranslateY(sidebarOpen ? -closedOffset : 0), [sidebarOpen, closedOffset]);
 
     return (
         <div 

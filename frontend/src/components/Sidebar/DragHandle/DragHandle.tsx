@@ -74,7 +74,17 @@ function DragHandle({
             window.removeEventListener("pointerup", handleUp);
             window.removeEventListener("pointercancel", handleUp);
         };
-    }, [translateY, maxDrag, sidebarOpen, showSettings, showResults, backButtonClick]);
+    }, [translateY, 
+        maxDrag, 
+        sidebarOpen, 
+        showSettings, 
+        showResults, 
+        backButtonClick, 
+        dragging, 
+        setShowSettings, 
+        setSidebarOpen, 
+        setTranslateY
+    ]);
 
 
     const onPointerDown = (e: React.PointerEvent<HTMLDivElement>, left: boolean) => {

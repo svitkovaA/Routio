@@ -59,7 +59,7 @@ function LanguageSelect({
     };
     
     // State to trigger rerender on window resize
-    const [_, setCloseDropdown] = useState<boolean>(true);
+    const [, setCloseDropdown] = useState<boolean>(true);
 
     /**
      * When the information panel is visible on small screens, 

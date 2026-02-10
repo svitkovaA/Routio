@@ -9,8 +9,8 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
+import { useState } from 'react';
 import "./Section.css";
-import { useRef, useState } from 'react';
 
 type SectionProps = {
     label: string;                                                  // Label for the input field
@@ -25,7 +25,6 @@ function Section({
     setValue,
     bounds
 } : SectionProps) {
-    const inputRef = useRef<HTMLInputElement | null>(null);
 
     /**
      * Handles manual input value change

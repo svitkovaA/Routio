@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 PHOTON_URL = "https://photon.komoot.io/api"
 
 # Nominatim geocoding API used for reverse geocoding (coordinates to address)
-NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse" 
+NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse"
 
 # OpenTripPlanner API used for multimodal route planning
 # OTP_URL = "https://walter.fit.vutbr.cz/otp/transmodel/v3"
@@ -27,12 +27,17 @@ NEXTBIKE_URL = "https://api.nextbike.net/maps/nextbike-live.json?countries=cz"
 # GTFS-RealTime data used for current vehicle position visualisation
 GTFSRT_URL = "https://kordis-jmk.cz/gtfs/gtfsReal.dat"
 
+GTFS_PATH = "../datasets/gtfs"
+
+GTFS_URL = "https://kordis-jmk.cz/gtfs/gtfs.zip"
+
 # GBFS URLs for Brno, Hodonin and Kahan
 station_information_urls = {
     "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_te/cs/station_information.json",   # Brno
     "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nh/cs/station_information.json",   # Hodonin
     "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_oc/cs/station_information.json"    # Kahan
 }
+
 
 # Load variables from .env into the environment
 load_dotenv()
