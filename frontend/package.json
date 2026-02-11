@@ -23,6 +23,7 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
+    "dayjs": "^1.11.19",
     "i18next": "^22.5.1",
     "i18next-browser-languagedetector": "^8.2.0",
     "leaflet": "^1.9.4",

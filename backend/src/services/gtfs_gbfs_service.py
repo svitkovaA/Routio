@@ -17,7 +17,7 @@ from zoneinfo import ZoneInfo
 import requests
 from models.types import Departure, OtherDeparture, Departures
 from google.transit.gtfs_realtime_pb2 import FeedMessage        # type: ignore[import-untyped]
-from config import GTFSRT_URL, station_information_urls, GTFS_PATH, GTFS_URL
+from config import GTFSRT_URL, STATION_INFORMATION_URLS, GTFS_PATH, GTFS_URL
 
 calendar: pd.DataFrame
 calendar_dates: pd.DataFrame
@@ -355,10 +355,10 @@ def load_gbfs_data() -> None:
     Loads and preprocess GBFS data file station_information.json
     """
     print("function: load_gbfs_data")
-    global station_information_urls, bike_station_capacities
+    global STATION_INFORMATION_URLS, bike_station_capacities
 
     # Get station information
-    for url in station_information_urls:
+    for url in STATION_INFORMATION_URLS:
         response = httpx.get(url, timeout=10)
         response_data = response.json()
         stations = response_data.get("data", {}).get("stations", [])

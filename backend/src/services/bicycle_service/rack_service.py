@@ -1,31 +1,12 @@
 from typing import List
 import numpy as np
-# import overpy   # type: ignore[import-untyped]
 from scipy.spatial.distance import cosine
-# from utils.geo import haversine_distance
 from models.types import BikeRackNode
-import asyncpg  # type: ignore[import-untyped]
-
-db_pool: asyncpg.Pool | None = None
-
-async def init_db():
-    global db_pool
-    db_pool = await asyncpg.create_pool(    # type: ignore
-        user="andrea",
-        password="",
-        database="osm",
-        host="localhost",
-        port=5432,
-        min_size=1,
-        max_size=10
-    )
-
-async def close_db():
-    global db_pool
-    if db_pool is not None:
-        await db_pool.close()
+from database.db import create_conn
 
 # TODO unused function
+# import overpy   # type: ignore[import-untyped]
+# from utils.geo import haversine_distance
 # async def find_bike_rack(lat: float, lon: float, radius: int = 1000) -> List[BikeRackNode]:
 #     """
 #     Find bicycle parking racks near a given geographic location
@@ -87,9 +68,6 @@ async def find_bike_rack(lat: float, lon: float, radius: int = 1000) -> List[Bik
     """
     print("function: find_bike_rack")
 
-    if db_pool is None:
-        raise RuntimeError("DB pool is None - lifespan not executed or import mismatch")
-
     query = """
         SELECT
             osm_id,
@@ -100,7 +78,7 @@ async def find_bike_rack(lat: float, lon: float, radius: int = 1000) -> List[Bik
                 geom::geography,
                 ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
             ) AS distance
-        FROM bicycle_parking
+        FROM bicycle_racks
         WHERE ST_DWithin(
             geom::geography,
             ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
@@ -109,7 +87,7 @@ async def find_bike_rack(lat: float, lon: float, radius: int = 1000) -> List[Bik
         ORDER BY distance;
     """
 
-    async with db_pool.acquire() as conn:                   # type: ignore
+    async with create_conn() as conn:                       # type: ignore
         rows = await conn.fetch(query, lon, lat, radius)    # type: ignore
 
     racks: List[BikeRackNode] = []

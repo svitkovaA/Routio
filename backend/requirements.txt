@@ -12,3 +12,5 @@ overpy
 mysql-connector-python
 asyncpg
 osmium
+gtfs-realtime-bindings
+protobuf

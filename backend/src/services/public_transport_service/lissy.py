@@ -12,7 +12,7 @@ import httpx
 from collections import OrderedDict
 from dateutil.relativedelta import relativedelta
 from models.types import LissyAvailableRoute, LissyDelayTrips, LissyShape, LissyShapes, LissyTrips, RouteData
-from config import LISSY_API_KEY, LISSY_URL
+from config import DELAY_DATA_URL, DELAY_ROUTES_URL, DELAY_TRIPS_URL, LISSY_API_KEY, SHAPE_URL, SHAPES_URL
 
 # Size of the cache window
 CACHE_DAYS = 7
@@ -29,7 +29,7 @@ lissy_client = httpx.AsyncClient(timeout=10, headers={"Authorization": LISSY_API
 async def lissy_status(date: d) -> bool:
     print("function: lissy_status")
     try:
-        url = LISSY_URL + "shapes/getShapes"
+        url = SHAPES_URL
         api_date = f"{date.year}-{date.month - 1}-{date.day}"
         r = await lissy_client.get(url, params={"date": api_date})
         r.raise_for_status()
@@ -64,7 +64,7 @@ async def get_shapes(date: d) -> list[LissyShapes] | None:
     """
     print("function: get_shapes")
     try:
-        url = LISSY_URL + "shapes/getShapes"
+        url = SHAPES_URL
         api_date = f"{date.year}-{date.month - 1}-{date.day}"
         r = await lissy_client.get(url, params={"date": api_date})
         r.raise_for_status()
@@ -106,7 +106,7 @@ async def build_routes_map(routes_list: List[LissyAvailableRoute], cache_window:
         # Fetch available trips for the selected date range
         try:
             # Returns shape id, stops and trips
-            url = LISSY_URL + "delayTrips/getAvailableTrips"
+            url = DELAY_TRIPS_URL
             r = await lissy_client.get(url, params={ "dates": f'[["{start_str}","{end_str}"]]', "route_id": route_id, "fullStopOrder": True})
             r.raise_for_status()
             data: List[LissyDelayTrips] = r.json()
@@ -182,7 +182,7 @@ async def cache_lissy() -> None:
     try:
         # Example of dates_param format '[["2025-9-8","2025-9-10"]]'
         dates_param = f'[["{cache_window_minus_month[3]}","{cache_window_minus_month[1]}"]]'
-        url = LISSY_URL + "delayTrips/getAvailableRoutes"
+        url = DELAY_ROUTES_URL
         r = await lissy_client.get(url, params={"dates": dates_param})
         r.raise_for_status()
     except Exception:
@@ -270,7 +270,7 @@ async def get_delays(trip_id: int, index: int) -> Dict[str, int] | None:
         cache_window_minus_month.append(f"{dt.year}-{dt.month}-{dt.day}")
 
     dates_param = f'[["{cache_window_minus_month[3]}","{cache_window_minus_month[1]}"]]'
-    url = LISSY_URL + "delayTrips/getTripData"
+    url = DELAY_DATA_URL
 
     # Fetch delay data for the given trip
     try:
@@ -359,7 +359,7 @@ async def get_shape(shape_id: int) -> LissyShape | None:
     
     # Fetch shape if not already present
     try:
-        url = LISSY_URL + "shapes/getShape"
+        url = SHAPE_URL
         r = await lissy_client.get(url, params={"shape_id": shape_id})
         r.raise_for_status()
         data: LissyShape = r.json()

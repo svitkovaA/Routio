@@ -23,8 +23,7 @@ yarn-error.log*
 # Python
 *__pycache__
 backend/venv/
-/backend/.env
 /backend/datasets
 
 .vscode/
-.env-dev
+.env*
