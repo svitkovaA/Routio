@@ -41,7 +41,7 @@ function SortableItem({
         handleKeyDown, 
         suggestions, 
         handleSuggestionClick, 
-        highlightedIndex
+        highlightedIndex, resetHighlightedIndex
     } = useSuggestionHandle(index);
 
     const style: React.CSSProperties = {
@@ -54,7 +54,8 @@ function SortableItem({
             const newWaypoints = [...prev];
                 newWaypoints[index] = { 
                 ...newWaypoints[index], 
-                displayName: value 
+                displayName: value,
+                isActive: false
             };
             return newWaypoints;
         });
@@ -79,6 +80,22 @@ function SortableItem({
         }
     }, [activeField, waypoint.displayName, index, loadSuggestionsFromStorage]);
 
+    useEffect(() => {
+        if (highlightedIndex >= 0 && suggestions.length > 0) {
+            setWaypoints(prev => {
+                const newWaypoints = [...prev];
+
+                newWaypoints[index] = {
+                    ...newWaypoints[index],
+                    isPreview: true,
+                    lat: suggestions[highlightedIndex].lat,
+                    lon: suggestions[highlightedIndex].lon
+                }
+                return newWaypoints;
+            });
+        }
+    }, [highlightedIndex]);
+
     return (
         <div className="sortable-item" ref={setNodeRef} style={style}>
             <div
@@ -97,7 +114,10 @@ function SortableItem({
                 waypoint={waypoint}
                 handleWaypointChange={handleWaypointChange}
                 handleKeyDown={handleKeyDown}
+                suggestions={suggestions}
                 setSuggestions={setSuggestions}
+                highlightedIndex={highlightedIndex}
+                resetHighlightedIndex={resetHighlightedIndex}
                 closeSidebar={closeSidebar}
             />
 

@@ -33,7 +33,7 @@
     position: relative;
     width: 30px;
     height: 30px;
-    background: red;
+    background: var(--color-pin-icon);
     border-radius: 50%;
     box-shadow: 0 0 3px rgba(0,0,0,0.4);
 }
@@ -41,6 +41,10 @@
 .marker.start-end-marker {
     width: 40px;
     height: 40px;
+}
+
+.marker.preview-marker {
+    background: var(--color-pin-icon-preview);
 }
 
 .marker::after {
@@ -53,7 +57,7 @@
     height: 0;
     border-left: 12px solid transparent;
     border-right: 12px solid transparent;
-    border-top: 15px solid red;
+    border-top: 15px solid var(--color-pin-icon);
 }
 
 .marker-inner {
@@ -84,7 +88,11 @@
     bottom: -13px;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
-    border-top: 20px solid red;
+    border-top: 20px solid var(--color-pin-icon);
+}
+
+.marker.preview-marker::after {
+    border-top-color: var(--color-pin-icon-preview);
 }
 
 .vehicle-marker {

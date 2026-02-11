@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { API_BASE_URL } from "../../../../config/config";
 import { InputText, StoredWaypoint } from "../../../../types/types";
 import { useInput } from "../../../../InputContext";
@@ -21,7 +21,7 @@ export function useSuggestionHandle(index: number) {
         }));
     }
 
-    const loadSuggestionsFromStorage = () => {
+    const loadSuggestionsFromStorage = useCallback(() => {
         if (index === 0) {
             const origin = loadOrigin();
             setSuggestions(transformStored(origin));
@@ -34,7 +34,7 @@ export function useSuggestionHandle(index: number) {
             const middle_waypoints = loadMiddleWaypoints();
             setSuggestions(transformStored(middle_waypoints));
         }
-    }
+    }, [index, waypoints.length]);
 
     const fetchSuggestions = (query: string) => {
         fetch(`${API_BASE_URL}/geocode/name?q=${encodeURIComponent(query)}`)
@@ -43,7 +43,10 @@ export function useSuggestionHandle(index: number) {
                     return res.json();
                 }
             )
-            .then((data: InputText[]) => setSuggestions(data))
+            .then((data: InputText[]) => {
+                setSuggestions(data);
+                setHighlightedIndex(-1);
+            })
             .catch(console.error);
     };
 
@@ -60,10 +63,12 @@ export function useSuggestionHandle(index: number) {
                 lon: suggestion.lon,
                 displayName: parts.join(", "),
                 isActive: true,
+                isPreview: false,
                 id: waypoints[index].id
             };
             setWaypoints(newWaypoints);
             setSuggestions([]);
+            setHighlightedIndex(-1);
         }
     };
   
@@ -91,5 +96,12 @@ export function useSuggestionHandle(index: number) {
         }
     };
     
-    return { loadSuggestionsFromStorage, suggestions, fetchSuggestions, handleSuggestionClick, handleKeyDown, setSuggestions, highlightedIndex };
+    return { 
+        loadSuggestionsFromStorage, 
+        suggestions, setSuggestions,
+        fetchSuggestions, 
+        handleSuggestionClick, 
+        handleKeyDown, 
+        highlightedIndex, resetHighlightedIndex: () => setHighlightedIndex(-1)
+    };
 }

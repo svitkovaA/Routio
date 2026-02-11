@@ -4,15 +4,15 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { memo } from "react";
+import { memo, useRef } from "react";
 import TextField from "@mui/material/TextField";
 import { useTranslation } from "react-i18next";
 import { InputText, Waypoint } from "../../../../types/types";
 import LocationDot from "./LocationDot";
 import ClearInputField from "./ClearInputField";
 import RemoveInputField from "./RemoveInputField";
-import "./InputField.css";
 import { useInput } from "../../../../InputContext";
+import "./InputField.css";
 
 type InputFieldProps = {
     index: number;
@@ -21,7 +21,10 @@ type InputFieldProps = {
     waypointsLength: number;
     handleWaypointChange: (index: number, value: string) => void;
     handleKeyDown: (e: React.KeyboardEvent<HTMLDivElement>, index: number) => void;
+    suggestions: InputText[];
     setSuggestions: (value: InputText[]) => void;
+    highlightedIndex: number;
+    resetHighlightedIndex: () => void;
     closeSidebar: () => void;
 }
 
@@ -32,16 +35,22 @@ function InputField({
     waypointsLength,
     handleWaypointChange,
     handleKeyDown,
+    suggestions,
     setSuggestions,
+    highlightedIndex,
+    resetHighlightedIndex,
     closeSidebar
 } : InputFieldProps) {
     const { t } = useTranslation();
+
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const {
         activeField, setActiveField,
         clearWaypoint,
         removeWaypoint,
-        setMapSelectionIndex
+        setMapSelectionIndex,
+        setWaypoints
     } = useInput();
 
     const label = () => {
@@ -73,16 +82,37 @@ function InputField({
             onChange={(e) => handleWaypointChange(index, e.target.value)}
             onFocus={() => setActiveField(index)}
             onBlur={() => {
+                if (!waypoint.isActive) {
+                    const suggestionIndex = highlightedIndex >= 0 ? highlightedIndex : 0;
+                    const suggestion = suggestions[suggestionIndex];
+                    setWaypoints(prev => {
+                        prev[index] = {
+                            ...prev[index],
+                            isPreview: false,
+                            isActive: true,
+                            displayName: [suggestion.name, suggestion.street, suggestion.city].filter(Boolean).join(", "),
+                            lat: suggestion.lat,
+                            lon: suggestion.lon
+                        }
+                        return prev;
+                    });
+                }
                 setActiveField(null);
                 setSuggestions([]);
+                resetHighlightedIndex();
             }}
-            onKeyDown={(e) => handleKeyDown(e, index)}
+            onKeyDown={(e) => {
+                handleKeyDown(e, index);
+                if (e.key === "Enter")
+                    inputRef.current?.blur();
+            }}
             fullWidth
             className="input-field"
             autoComplete="off"
             slotProps={{
                 inputLabel: { shrink: true },
                 input: {
+                    inputRef: inputRef,
                     endAdornment: (
                     <>
                         <ClearInputField 

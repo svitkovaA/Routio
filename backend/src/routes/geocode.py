@@ -113,9 +113,12 @@ async def geocode_lat_lon(
 
     # Configure HTTP timeout for the API request
     timeout = httpx.Timeout(10.0)
+    headers = {
+        "User-Agent": "GreenGo/1.0 (academic project)"
+    }
 
     # Query the Nominatim reverse geocoding API
-    async with httpx.AsyncClient(timeout=timeout) as client:
+    async with httpx.AsyncClient(timeout=timeout, headers=headers) as client:
         try:
             r = await client.get(NOMINATIM_URL, params=params)
             r.raise_for_status()

@@ -57,8 +57,8 @@ function Map({
     const defaultZoom = 13;
 
     // Custom marker icons
-    const startMarker = createPinIcon("START", t("map.markers.start") as string);
-    const endMarker = createPinIcon("END", t("map.markers.end") as string);
+    const startMarker = createPinIcon("START", waypoints[0].isPreview, t("map.markers.start") as string);
+    const endMarker = createPinIcon("END", waypoints[waypoints.length - 1].isPreview, t("map.markers.end") as string);
 
     // Reference to popup instance 
     const popupRefs = useRef<(L.Popup | null)[]>([]);
@@ -158,11 +158,11 @@ function Map({
             
             {/* Render waypoint markers */}
             {waypoints.map((w, i) =>
-                w.isActive && (
+                (w.isActive || w.isPreview) && (
                     <Marker
                         key={i}
                         position={[w.lat, w.lon]}
-                        icon={i === 0 ? startMarker : i !== waypoints.length - 1 ? createPinIcon(i.toString()) : endMarker}
+                        icon={i === 0 ? startMarker : i !== waypoints.length - 1 ? createPinIcon(i.toString(), w.isPreview) : endMarker}
                     >
                         <Popup
                             ref={el => {

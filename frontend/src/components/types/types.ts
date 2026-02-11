@@ -19,6 +19,7 @@ export type Waypoint = {
     lon: number; 
     displayName: string;
     isActive: boolean;
+    isPreview: boolean;
     id: any;
 };
 

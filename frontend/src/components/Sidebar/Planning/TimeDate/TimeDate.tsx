@@ -8,10 +8,10 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import "dayjs/locale/cs"; 
 import { useTranslation } from "react-i18next";
-import "./TimeDate.css";
+import "dayjs/locale/cs"; 
 import { useInput } from '../../../InputContext';
+import "./TimeDate.css";
 
 function TimeDate(){
     const { t } = useTranslation();
@@ -36,6 +36,9 @@ function TimeDate(){
                     slotProps={{
                         textField: {
                             InputLabelProps: { shrink: true }
+                        },
+                        openPickerButton: {
+                            tabIndex: -1
                         }
                     }}
                 />
@@ -44,12 +47,15 @@ function TimeDate(){
                     value={time}
                     ampm={false}
                     onChange={(newValue) => {if (newValue !== null) setTime(newValue)}}
-                    slotProps={{
-                        actionBar: { actions: ['accept'] }
-                    }}
                     sx={{ 
                         '& .MuiSvgIcon-root': {
                             color: 'var(--color-icons)',
+                        }
+                    }}
+                    slotProps={{
+                        actionBar: { actions: ['accept'] },
+                        openPickerButton: {
+                            tabIndex: -1
                         }
                     }}
                 />

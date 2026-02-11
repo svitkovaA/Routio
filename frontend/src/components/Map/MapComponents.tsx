@@ -14,12 +14,12 @@ import { useMapEvent } from "react-leaflet";
  * @param translatedLabel Translated label for STAR/END mark
  * @returns Leaflet DivIcon instance
  */
-export function createPinIcon(label: string, translatedLabel?: string) {
+export function createPinIcon(label: string, isPreview: boolean, translatedLabel?: string) {
     // Determine whether the marker represents start or end point
     const startEndMarker = label === "START" || label === "END";
     
     // CSS class applied to the marker 
-    const className = "marker " + (startEndMarker ? "start-end-marker" : "");
+    const className = "marker " + (startEndMarker ? "start-end-marker " : "") + (isPreview ? "preview-marker" : "");
 
     // Default anchor positions
     let anchor: [number, number] = [14, 39];

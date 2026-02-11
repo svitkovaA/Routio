@@ -6,8 +6,8 @@
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import InfoIcon from '@mui/icons-material/Info';
-import "./InfoSettings.css";
 import { useResult } from '../../../ResultContext';
+import "./InfoSettings.css";
 
 type InfoSettingsProps = {
     showInfo: () => void;
@@ -21,6 +21,7 @@ function InfoSettings({ showInfo }: InfoSettingsProps) {
                 className="input-wrapper" 
                 onClick={() => setShowSettings(true)} 
                 type="button"
+                tabIndex={-1}
             >
                 <SettingsIcon sx={{ color: 'var(--color-icons)' }} />
             </button>
@@ -28,6 +29,7 @@ function InfoSettings({ showInfo }: InfoSettingsProps) {
                 className="input-wrapper" 
                 onClick={showInfo} 
                 type="button"
+                tabIndex={-1}
             >
                 <InfoIcon sx={{ color: 'var(--color-icons)' }} />
             </button>

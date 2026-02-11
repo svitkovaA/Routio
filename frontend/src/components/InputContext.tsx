@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { LegPreference, Mode, RoutePreference, Waypoint } from "./types/types";
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -47,12 +47,14 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         lon: 0,
         displayName: "",
         isActive: false,
+        isPreview: false,
         id: Math.random().toString(36).substring(2,9)
     }, {
         lat: 0,
         lon: 0,
         displayName: "",
         isActive: false,
+        isPreview: false,
         id: Math.random().toString(36).substring(2,9)
     }]);
 
@@ -73,6 +75,13 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
     const [time, setTime] = useState(() => dayjs());
 
     const [mapSelectionIndex, setMapSelectionIndex] = useState<number>(-1);
+
+    // Unset mapSelectionIndex if other action occurs
+    useEffect(() => {
+        if (mapSelectionIndex !== -1) {
+            setMapSelectionIndex(-1);
+        }
+    }, [waypoints, time, date, preference, useOwnBike, arriveBy, legPreferences, mode]);
 
     const clearWaypoint = useCallback((index: number, clearDisplayName: boolean) => {
         setWaypoints(prev => {
@@ -119,6 +128,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             lon: 0,
             displayName: "",
             isActive: false,
+            isPreview: false,
             id: Math.random().toString(36).substring(2,9)
         });
         setWaypoints(newWaypoints);

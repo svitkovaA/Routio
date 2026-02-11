@@ -5,10 +5,15 @@
  */
 
 import MenuItem from '@mui/material/MenuItem';
-import { TextField } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { RoutePreference } from "../../../types/types";
 import { useInput } from '../../../InputContext';
+import OptionSelect from './OptionSelect';
+
+function getNextValue<T>(array: T[], current: T, direction: number): T {
+    const index = array.indexOf(current);
+    return array[(index + direction + array.length) % array.length];
+}
 
 function Options() {
     const { t } = useTranslation();
@@ -18,40 +23,56 @@ function Options() {
         useOwnBike, setUseOwnBike
     } = useInput();
 
+    const routePreferences: RoutePreference[] = [
+        "fastest",
+        "shortest",
+        "transfers"
+    ];
+
+    const bikeOptions = [true, false];
+
     return (
         <div className="grid-wrapper">
-            <TextField
-                select
+            {/* Route preferences */}
+            <OptionSelect
                 label={t("planning.routePreferences")}
                 value={preference}
-                variant="outlined"
                 onChange={(event) => {
                     setPreference(event.target.value as RoutePreference);
                 }}
-                slotProps={{
-                    inputLabel: { shrink: true },
-                }}
+                setOption={(direction: number) => setPreference(
+                    getNextValue(routePreferences, preference, direction)
+                )}
             >
-                <MenuItem value={"fastest"}>{t("planning.routePreference.fastestRoute")}</MenuItem>
-                <MenuItem value={"shortest"}>{t("planning.routePreference.shortestRoute")}</MenuItem>
-                <MenuItem value={"transfers"}>{t("planning.routePreference.minimizeTransfers")}</MenuItem>
-            </TextField>
-            
-            <TextField
-                select
+                <MenuItem value={"fastest"}>
+                    {t("planning.routePreference.fastestRoute")}
+                </MenuItem>
+                <MenuItem value={"shortest"}>
+                    {t("planning.routePreference.shortestRoute")}
+                </MenuItem>
+                <MenuItem value={"transfers"}>
+                    {t("planning.routePreference.minimizeTransfers")}
+                </MenuItem>
+            </OptionSelect>
+
+            {/* Bicycle preferences */}
+            <OptionSelect
                 label={t("planning.bikeOptions")}
                 value={useOwnBike.toString()}
-                variant="outlined"
                 onChange={(event) => {
                     setUseOwnBike(event.target.value === "true");
                 }}
-                slotProps={{
-                    inputLabel: { shrink: true },
-                }}
+                setOption={(direction: number) => setUseOwnBike(
+                    getNextValue(bikeOptions, useOwnBike, direction)
+                )}
             >
-                <MenuItem value="true">{t("planning.bikeOption.ownBike")}</MenuItem>
-                <MenuItem value="false">{t("planning.bikeOption.sharedBike")}</MenuItem>
-            </TextField>
+                <MenuItem value="true">
+                    {t("planning.bikeOption.ownBike")}
+                </MenuItem>
+                <MenuItem value="false">
+                    {t("planning.bikeOption.sharedBike")}
+                </MenuItem>
+            </OptionSelect>
         </div>
     );
 }

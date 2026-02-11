@@ -31,8 +31,7 @@ function Suggestions ({
             {suggestions.map((s, i) => (
                 <li
                     key={i}
-                    onClick={() => handleSuggestionClick(s)}
-                    onMouseDown={(e) => e.preventDefault()}
+                    onMouseDown={() => handleSuggestionClick(s)}
                     className={`suggestion-item ${i === highlightedIndex ? "selected" : ""}`}
                 >
                     {[s.name, s.street, s.city].filter(Boolean).join(", ")}
