@@ -38,7 +38,7 @@ async def vehicle_position_worker():
         await asyncio.sleep(10)
 
 async def database_worker():
-    load_osm_data = await bike_racks_empty_wrapper()
+    load_osm_data = False
     while True:
         try:
             await database(load_osm_data)

@@ -21,6 +21,18 @@ async def init_pool():
         database=DB_DATABASE,
     )
 
+    if DB_PASSWORD == "":
+        from .create_db import create_database
+        await create_database()
+
+    async with create_conn() as conn:
+        await create_tables(conn)
+
+        bike_racks_not_loaded = await bike_racks_empty(conn)
+        if bike_racks_not_loaded:
+            await load_bike_racks(conn)
+
+
 async def close_pool():
     global pool
     if pool is not None:
@@ -31,17 +43,8 @@ async def create_conn():
     async with pool.acquire() as conn:
         yield conn
 
-async def bike_racks_empty_wrapper() -> bool:
-    async with create_conn() as conn:
-        return await bike_racks_empty(conn)
-
 async def database(load_osm_data: bool = False):
-    if DB_PASSWORD == "":
-        from .create_db import create_database
-        await create_database()
     async with create_conn() as conn:
-        await create_tables(conn)
-
         await weather_stations(conn)
 
         await stations(conn)
