@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from services.public_transport_service.lissy import cache_lissy
-from database.db import database, bike_racks_empty_wrapper
+from database.db import database
 from services.gtfs_gbfs_service import load_gbfs_data, load_gtfs_data, vehicle_position
 from datetime import datetime, timedelta
 
