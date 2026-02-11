@@ -58,6 +58,10 @@ function PublicTransportDetail({
 
     useEffect(() => setStopsOpen(false), [leg]);
 
+    const currentIndex = leg.otherOptions?.currentIndex;
+    const departures = leg?.otherOptions?.departures;
+    const moreResults = departures && currentIndex !== undefined && (currentIndex - 1 > 0 || currentIndex + 2 < departures.length - 1);
+
     return (
         <div
             ref={publicTransportDetailRef} className="public-transport-detail"
@@ -109,8 +113,6 @@ function PublicTransportDetail({
                 </div>
                 <div className={departuresOpen ? "departure-box" : ""}>
                     {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => {
-                        const currentIndex = leg.otherOptions?.currentIndex;
-                            
                         if (currentIndex === undefined) {
                             return null;
                         } 
@@ -138,6 +140,7 @@ function PublicTransportDetail({
                         <button
                             className="departure-button"
                             onClick={moreDeparturesClick}
+                            disabled={!moreResults}
                         >
                             More departures
                         </button>
