@@ -1,7 +1,7 @@
 import asyncpg  # type: ignore[import-untyped]
 from contextlib import asynccontextmanager
 from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE
-from .osm import load_bike_racks, bike_racks_empty
+# from .osm import load_bike_racks, bike_racks_empty
 from .load_weather import load_weather
 from .load_station import stations
 from .load_weather_stations import weather_stations
@@ -28,10 +28,6 @@ async def init_pool():
     async with create_conn() as conn:
         await create_tables(conn)
 
-        bike_racks_not_loaded = await bike_racks_empty(conn)
-        if bike_racks_not_loaded:
-            await load_bike_racks(conn)
-
 
 async def close_pool():
     global pool
@@ -43,7 +39,7 @@ async def create_conn():
     async with pool.acquire() as conn:
         yield conn
 
-async def database(load_osm_data: bool = False):
+async def database():
     async with create_conn() as conn:
         await weather_stations(conn)
 
@@ -52,8 +48,5 @@ async def database(load_osm_data: bool = False):
         await load_bicycle_records(conn)
 
         await load_weather(conn)
-
-        if load_osm_data:
-            await load_bike_racks(conn)
 
 # End of file db.py

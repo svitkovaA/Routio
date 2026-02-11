@@ -38,11 +38,9 @@ async def vehicle_position_worker():
         await asyncio.sleep(10)
 
 async def database_worker():
-    load_osm_data = False
     while True:
         try:
-            await database(load_osm_data)
-            load_osm_data = True
+            await database()
         except Exception:
             # Log the exception without terminating the worker
             logging.exception("database failed")
