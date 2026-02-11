@@ -25,11 +25,8 @@
 }
 
 .suggestion-item:hover {
-    background: #f0f0f0;
+    background: var(--color-item-hover);
 }
 
-.suggestion-item.highlighted {
-    background-color: #eee;
-}
 
 /* End of file Suggestions.css */

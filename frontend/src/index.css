@@ -14,8 +14,8 @@ body {
     --color-text-primary: black;
     --color-text-secondary: grey;
     --color-background: #fafafa;
-    --color-item-hover: #e4e4e4;
-    --color-item-selected: lightgray;
+    --color-item-hover: lightgray;
+    --color-item-selected: #eeecec;
     --color-icons: #7e7e7e;
     --color-icons-darker: #484848;
 
