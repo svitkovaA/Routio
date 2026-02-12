@@ -174,7 +174,8 @@ export function useRoute() {
         }
     }, [waypoints, legPreferences, arriveBy, useOwnBike, preference, date, time, maxTransfers, selectedModes,
         maxBikeDistance,bikeAverageSpeed, maxBikesharingDistance, bikesharingAverageSpeed, maxWalkDistance, 
-        walkAverageSpeed, bikesharingLockTime, bikeLockTime, results
+        walkAverageSpeed, bikesharingLockTime, bikeLockTime, results, abortRef, setLoading, setResultActiveIndex,
+        setResults, setShowResults
     ]);
     return route;
 }

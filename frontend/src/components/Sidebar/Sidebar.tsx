@@ -58,7 +58,7 @@ function Sidebar({
         }
 
         prevLoadingRef.current = loading;
-    }, [loading]);
+    }, [loading, setSidebarOpen]);
 
     useLayoutEffect(() => {
         if (!sidebarRef.current || !isMobile) return;

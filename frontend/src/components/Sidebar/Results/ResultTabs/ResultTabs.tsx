@@ -8,7 +8,6 @@ import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import PedalBikeIcon from '@mui/icons-material/PedalBike';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import { MultimodalIcon } from "../../Planning/Icons/Icons";
-import { useInput } from "../../../InputContext";
 import { useResult } from "../../../ResultContext";
 import "./ResultTabs.css";
 import { useRoute } from '../../../Routing/Route';

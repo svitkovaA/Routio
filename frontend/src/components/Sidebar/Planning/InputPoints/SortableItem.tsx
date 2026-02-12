@@ -94,7 +94,7 @@ function SortableItem({
                 return newWaypoints;
             });
         }
-    }, [highlightedIndex]);
+    }, [highlightedIndex, index, setWaypoints, suggestions]);
 
     return (
         <div className="sortable-item" ref={setNodeRef} style={style}>
