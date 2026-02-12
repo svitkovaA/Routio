@@ -38,7 +38,8 @@ function Sidebar({
         showDetail,
         showDepartures,
         showSettings,
-        loading
+        loading,
+        setMobileSidebarHeight
     } = useResult();
 
     const sidebarRef = useRef<HTMLDivElement>(null);
@@ -94,6 +95,20 @@ function Sidebar({
     }, [closedOffset, isMobile, sidebarOpen, sheetHeight]);
 
     useEffect(() => setTranslateY(sidebarOpen ? -closedOffset : 0), [sidebarOpen, closedOffset]);
+
+    useEffect(() => {
+        if (!isMobile) {
+            setMobileSidebarHeight(0);
+            return;
+        }
+
+        if (sidebarOpen) {
+            setMobileSidebarHeight(closedOffset);
+        } else {
+            setMobileSidebarHeight(0);
+        }
+
+    }, [sidebarOpen, closedOffset, isMobile]);
 
     return (
         <div 

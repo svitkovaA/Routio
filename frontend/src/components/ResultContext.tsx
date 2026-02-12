@@ -31,6 +31,8 @@ type ResultContextType = {
     setPublicLegIndex: (value: number) => void;
     closeResults: () => void;
     abortRef: React.RefObject<AbortController | null>;
+    mobileSidebarHeight: number;
+    setMobileSidebarHeight: (value: number) => void;
 };
 
 const ResultContext = createContext<ResultContextType | undefined>(undefined);
@@ -53,6 +55,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     const animationRef = useRef<number | null>(null);
 
     const abortRef = useRef<AbortController | null>(null);
+
+    const [mobileSidebarHeight, setMobileSidebarHeight] = useState(0);
 
     const closeResults = useCallback(() => {
         setShowResults(false);
@@ -91,7 +95,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         vehiclePositions,
         publicLegIndex, setPublicLegIndex,
         closeResults,
-        abortRef
+        abortRef,
+        mobileSidebarHeight, setMobileSidebarHeight
     }), [
         results,
         resultActiveIndex,
@@ -103,7 +108,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         loading,
         vehiclePositions,
         publicLegIndex,
-        closeResults
+        closeResults,
+        mobileSidebarHeight
     ]);
 
     const linearInterpolation = useCallback((a: number, b: number, t: number) => {

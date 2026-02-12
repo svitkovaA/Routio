@@ -28,9 +28,9 @@
 .drag-inner {
     position: absolute;
     top: 0;
-    left: calc(50% - 17.5px);
-    width: 35px;
-    height: 8px;
+    left: calc(50% - 22.5px);
+    width: 45px;
+    height: 4px;
     background: #ccc;
     border-radius: 3px;
     margin: 5px auto;

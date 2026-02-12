@@ -15,7 +15,7 @@ type FitBoundProps = {
 
 function FitBound({ sidebarOpen }: FitBoundProps) {
     // Result context
-    const { pattern } = useResult();
+    const { pattern, mobileSidebarHeight } = useResult();
 
     // Leaflet map instance
     const map = useMap();
@@ -66,17 +66,28 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
     useEffect(() => {
         if (!bounds) return;
 
-        // Adjust padding to account for sidebar on larger screens
-        if (sidebarOpen && window.innerWidth > 768) {
+        // Detect is the device is mobile based on the screen width
+        const isMobile = window.innerWidth <= 768;
+
+        // Adjust mobile layout for route to fit map bounds
+        if (isMobile) {
+            map.fitBounds(bounds, {
+                paddingTopLeft: [50, 50],
+                paddingBottomRight: [50, mobileSidebarHeight + 50],
+            });
+        }
+        // Adjust notebook layout with open sidebar for route to fit map bounds
+        else if (sidebarOpen) {
             map.fitBounds(bounds, {
                 paddingTopLeft: [370, 50],
                 paddingBottomRight: [50, 50],
             });
-        } 
+        }
+        // Adjust notebook layout with closed sidebar for route to fit map bounds
         else {
             map.fitBounds(bounds, { padding: [50, 50] });
         }
-    }, [bounds, sidebarOpen, map]);
+    }, [bounds, mobileSidebarHeight, map, sidebarOpen]);
 
     return null;
 }
