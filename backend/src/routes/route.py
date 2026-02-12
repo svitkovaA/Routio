@@ -520,7 +520,7 @@ async def get_route(data: RouteData):
         )
     
     # Post-processing of the returned trip patterns
-    for pattern in results["tripPatterns"]: 
+    for pattern in results["tripPatterns"]:
         process_legs(pattern)
 
     # Filter and sort trip patterns based on the user preferences

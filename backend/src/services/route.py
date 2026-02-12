@@ -73,7 +73,7 @@ async def multimodal_route(
             continue
 
         print(combination)
-        # if combination != ('walk_transit_bicycle', 'walk_transit'):
+        # if combination != ('foot',):
         #     continue
         tasks.append(route(waypoint_groups, time_to_depart, session, True, data, bike_segment_found))
 
@@ -267,7 +267,7 @@ async def recursive_planner(
                 for pat, valid in results_raw:
                     patterns.append(pat)
                     validity.append(valid)
-            return combine_pt(trip_patterns, results, data.arrive_by, validity=validity), any(validity) and len(trip_patterns) > 0
+            return combine_pt(trip_patterns, patterns, data.arrive_by, validity=validity), any(validity) and len(trip_patterns) > 0
         
         elif trip_patterns == []:
             if not group.get("tripPatterns"):
