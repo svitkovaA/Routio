@@ -4,11 +4,13 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { useCallback } from "react";
 import { API_BASE_URL } from "../config/config";
 import { useInput } from "../InputContext";
 import { useResult } from "../ResultContext";
 import { useSettings } from "../SettingsContext";
 import { storeWaypoints } from "../Sidebar/Planning/InputPoints/WaypointStorage";
+import { Mode } from "../types/types";
 
 /**
  * Hook for computing a route based on current application state
@@ -19,13 +21,12 @@ export function useRoute() {
     // Input context
     const {
         waypoints,
-        mode, setMode,
         legPreferences,
         arriveBy,
         useOwnBike,
         preference,
         date,
-        time,
+        time
     } = useInput();
 
     // Settings context
@@ -44,18 +45,26 @@ export function useRoute() {
 
     // Results context
     const {
-        resultActiveIndex, setResultActiveIndex,
+        setResultActiveIndex,
         results, setResults,
         setShowResults,
+        setLoading,
+        abortRef
     } = useResult();
-
+    
     /**
      * Sends a routing request to the backend and updates application state
-     */
-    const route = async () => {
-        if (!results[resultActiveIndex].active) {
-            let resultIndex = resultActiveIndex;
-            let newMode = mode;
+    */
+   const route = useCallback(async (resultIndex: number) => {
+        // Abort operation
+        if (abortRef.current) {
+            abortRef.current.abort();
+            abortRef.current = null;
+            setLoading(false);
+        }
+        if (!results[resultIndex].active) {
+            setLoading(true);
+            setShowResults(true);
 
             // Convert waypoints to to compatible format
             let waypointsArray: string[] = [];
@@ -89,7 +98,6 @@ export function useRoute() {
 
             // Determine routing mode and target result index
             if (equalPrefs) {
-                newMode = firstPref;
                 if (firstPref === "foot") {
                     resultIndex = 3;
                 }
@@ -101,50 +109,73 @@ export function useRoute() {
                 }
             }
 
-            // Send routing request to backend
-            const result = await fetch(`${API_BASE_URL}/route`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    waypoints: waypointsArray,
-                    time: time.format('HH:mm:ss'),
-                    date: date.format('YYYY-MM-DD'),
-                    arrive_by: arriveBy,
-                    leg_preferences: legPreferencesArray,
-                    use_own_bike: useOwnBike,
-                    mode: mode,
-                    max_transfers: maxTransfers,
-                    selected_modes: selectedModes,
-                    max_bike_distance: maxBikeDistance,
-                    bike_average_speed: bikeAverageSpeed,
-                    max_bikesharing_distance: maxBikesharingDistance,
-                    bikesharing_average_speed: bikesharingAverageSpeed,
-                    max_walk_distance: maxWalkDistance,
-                    walk_average_speed: walkAverageSpeed,
-                    bikesharing_lock_time: bikesharingLockTime,
-                    bike_lock_time: bikeLockTime,
-                    route_preference: preference
-                })
-            });
+            // Create new abort controller
+            const controller = new AbortController();
+            abortRef.current = controller;
 
-            const newResult = await result.json();
+            const mode: Mode = resultIndex === 0 ? "transit,bicycle,walk" : 
+                resultIndex === 1 ? "walk_transit" :
+                resultIndex === 2 ? "bicycle" : "foot";
 
-            // Save waypoints to LocalStorage
-            storeWaypoints(waypoints);
-
-            // Store routing result
-            setResults(prev => 
-                prev.map((originalResult, index) => 
-                    index === resultIndex ? newResult : originalResult
-            ));
-            setShowResults(true);
-
-            setResultActiveIndex(resultIndex);
-            setMode(newMode);
+            try {
+                // Send routing request to backend
+                const result = await fetch(`${API_BASE_URL}/route`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    signal: controller.signal,
+                    body: JSON.stringify({
+                        waypoints: waypointsArray,
+                        time: time.format('HH:mm:ss'),
+                        date: date.format('YYYY-MM-DD'),
+                        arrive_by: arriveBy,
+                        leg_preferences: legPreferencesArray,
+                        use_own_bike: useOwnBike,
+                        mode: mode,
+                        max_transfers: maxTransfers,
+                        selected_modes: selectedModes,
+                        max_bike_distance: maxBikeDistance,
+                        bike_average_speed: bikeAverageSpeed,
+                        max_bikesharing_distance: maxBikesharingDistance,
+                        bikesharing_average_speed: bikesharingAverageSpeed,
+                        max_walk_distance: maxWalkDistance,
+                        walk_average_speed: walkAverageSpeed,
+                        bikesharing_lock_time: bikesharingLockTime,
+                        bike_lock_time: bikeLockTime,
+                        route_preference: preference
+                    })
+                });
+                const newResult = await result.json();
+    
+                // Save waypoints to LocalStorage
+                storeWaypoints(waypoints);
+    
+                // Store routing result
+                setResults(prev => 
+                    prev.map((originalResult, index) => 
+                        index === resultIndex ? newResult : originalResult
+                ));
+    
+                setResultActiveIndex(resultIndex);
+            }
+            catch (error: any) {
+                if (error.name === "AbortError") {
+                    return;
+                }
+                console.error(error);
+            }
+            finally {
+                if (abortRef.current === controller) {
+                    setLoading(false);
+                    abortRef.current = null;
+                }
+            }
         }
-    };
+    }, [waypoints, legPreferences, arriveBy, useOwnBike, preference, date, time, maxTransfers, selectedModes,
+        maxBikeDistance,bikeAverageSpeed, maxBikesharingDistance, bikesharingAverageSpeed, maxWalkDistance, 
+        walkAverageSpeed, bikesharingLockTime, bikeLockTime, results
+    ]);
     return route;
 }
 

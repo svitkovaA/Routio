@@ -132,8 +132,7 @@ export type TripPattern = {
     originalLegs: Leg[];
     modes: string[];
     polyInfo: PolyInfo[];
-    southWest?: L.LatLngExpression;
-    northWest?: L.LatLngExpression;
+    bounds?: L.LatLngBounds;
     tooLongWalkDistance?: boolean;
     tooLongBikeDistance?: boolean;
     vehiclePositions: VehiclePosition[];

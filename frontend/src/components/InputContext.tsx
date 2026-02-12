@@ -5,16 +5,15 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
-import { LegPreference, Mode, RoutePreference, Waypoint } from "./types/types";
+import { LegPreference, RoutePreference, Waypoint } from "./types/types";
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import dayjs from "dayjs";
+import { useResult } from "./ResultContext";
 
 type InputContextType = {
     waypoints: Waypoint[];
     setWaypoints: (value: Waypoint[] | ((prev: Waypoint[]) => Waypoint[])) => void;
-    mode: Mode | undefined;
-    setMode: (value: Mode | undefined) => void;
     arriveBy: boolean;
     setArriveBy: (value: boolean) => void;
     useOwnBike: boolean;
@@ -41,6 +40,7 @@ type InputContextType = {
 const InputContext = createContext<InputContextType | undefined>(undefined);
 
 export function InputProvider({ children } : {children: React.ReactNode}) {
+    const { resultActiveIndex } = useResult();
 
     const [waypoints, setWaypoints] = useState<Waypoint[]>([{
         lat: 0,
@@ -57,8 +57,6 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         isPreview: false,
         id: Math.random().toString(36).substring(2,9)
     }]);
-
-    const [mode, setMode] = useState<Mode | undefined>(undefined);
 
     const [arriveBy, setArriveBy] = useState<boolean>(false);
     const [useOwnBike, setUseOwnBike] = useState<boolean>(true);
@@ -78,10 +76,8 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
 
     // Unset mapSelectionIndex if other action occurs
     useEffect(() => {
-        if (mapSelectionIndex !== -1) {
-            setMapSelectionIndex(-1);
-        }
-    }, [waypoints, time, date, preference, useOwnBike, arriveBy, legPreferences, mode]);
+        setMapSelectionIndex(-1);
+    }, [waypoints, time, date, preference, useOwnBike, arriveBy, legPreferences, resultActiveIndex]);
 
     const clearWaypoint = useCallback((index: number, clearDisplayName: boolean) => {
         setWaypoints(prev => {
@@ -158,7 +154,6 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
 
     const value = useMemo(() => ({
         waypoints, setWaypoints,
-        mode, setMode,
         arriveBy, setArriveBy,
         useOwnBike, setUseOwnBike,
         preference, setPreference,
@@ -174,7 +169,6 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         swapWaypoints
     }), [
         waypoints,
-        mode,
         arriveBy,
         useOwnBike,
         preference,

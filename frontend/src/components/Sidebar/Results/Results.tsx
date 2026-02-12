@@ -16,6 +16,7 @@ import { useResult } from "../../ResultContext";
 import { useRecalculatePattern } from "../../Routing/RecalculatePattern";
 import "./Results.css";
 import { useBackButtonClick } from './useBackButtonClick';
+import ResultLoading from './ResultLoading/ResultLoading';
 
 function Results() {
     const { t } = useTranslation();
@@ -27,7 +28,8 @@ function Results() {
         result,
         resultActiveIndex,
         pattern,
-        publicLegIndex
+        publicLegIndex,
+        loading
     } = useResult();
 
     // Hook for recalculating trip pattern
@@ -81,7 +83,9 @@ function Results() {
 
             {/* Results content */}
             <div className="results-content">
-                {result?.tripPatterns?.length === 0 ? (
+                {loading ? (
+                    <ResultLoading />
+                ) : result?.tripPatterns?.length === 0 ? (
                     <>No results found</>
                 ) : !showDetail ? (
                     // List of available trip patterns

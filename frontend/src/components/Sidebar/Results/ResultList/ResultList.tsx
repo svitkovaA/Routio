@@ -7,21 +7,17 @@
 import Bicycle from "./Bicycle/Bicycle";
 import Foot from "./Walk/Walk";
 import ResultListItem from "./ResultListItem/ResultListItem";
-import { useInput } from "../../../InputContext";
 import { useResult } from "../../../ResultContext";
 
 function ResultList() {
     const {
         result,
         selectedTripPatternIndex, setSelectedTripPatternIndex,
-        setShowDetail
+        setShowDetail,
+        resultActiveIndex
     } = useResult();
-    const { mode } = useInput();
 
-    if (!mode) 
-        return null;
-    
-    if (mode === "transit,bicycle,walk" || mode === "walk_transit" || (mode === "bicycle" && result.tripPatterns.length > 1)) {
+    if ([0,1].includes(resultActiveIndex) || (resultActiveIndex === 2 && result.tripPatterns.length > 1)) {
         return (
             <>
                 {result.tripPatterns?.map((pattern, index) => (
@@ -38,7 +34,7 @@ function ResultList() {
     }
     return (
         <>
-            {mode === "bicycle" ? (
+            {resultActiveIndex === 2 ? (
                 <Bicycle />
             ) : (
                 <Foot />

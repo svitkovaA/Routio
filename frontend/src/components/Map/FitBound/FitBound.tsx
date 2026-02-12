@@ -15,31 +15,18 @@ type FitBoundProps = {
 
 function FitBound({ sidebarOpen }: FitBoundProps) {
     // Result context
-    const {
-        resultActiveIndex,
-        result,
-        pattern
-    } = useResult();
+    const { pattern } = useResult();
 
     // Leaflet map instance
     const map = useMap();
 
     // Computes map bounds for the active trip pattern
     const bounds = useMemo(() => {
-        if (resultActiveIndex === -1 || !result.active || !pattern?.legs) {
+        if (!pattern?.polyInfo?.length) {
             return null;
-        }
-
-        // Use precomputed bounds if available
-        if (pattern?.southWest && pattern?.northWest) {
-            return L.latLngBounds(pattern.southWest, pattern.northWest);
         }
 
         const polyInfo = pattern.polyInfo;
-
-        if (polyInfo.length === 0) {
-            return null;
-        }
         
         // Initialize bounds using first available coordinate
         const firstCoords = polyInfo.find(p => p.coords.length > 0)?.coords;
@@ -71,7 +58,7 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
             }
         }
         return L.latLngBounds(L.latLng(minLat, minLon), L.latLng(maxLat, maxLon));
-    }, [resultActiveIndex, pattern, result.active]);
+    }, [pattern?.polyInfo]);
 
     /**
      * Updates the map view whenever computed bounds or sidebar state changes.

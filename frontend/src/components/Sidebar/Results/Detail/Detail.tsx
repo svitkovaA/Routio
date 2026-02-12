@@ -13,8 +13,8 @@ import VerticalTimelineComponent from "./VerticalTimelineComponent/VerticalTimel
 import Transfer from "./Transfer/Transfer";
 import { useInput } from "../../../InputContext";
 import Waystop from "./Waystop/Waystop";
-import "./Detail.css"
 import { useResult } from "../../../ResultContext";
+import "./Detail.css"
 
 type DetailProps = {
     tripPattern: TripPattern;
@@ -68,13 +68,13 @@ function Detail({
                             {index === 0 && (
                                 <Waystop
                                     time={time}
-                                    name={waypoints[waypointCount].displayName}
+                                    name={waypoints[waypointCount]?.displayName}
                                 />
                             )}
                             {displayWaypoint && (
                                 <Waystop
                                     time={time}
-                                    name={waypoints[waypointCount].displayName}
+                                    name={waypoints[waypointCount]?.displayName}
                                 />
                             )}
 
@@ -114,7 +114,7 @@ function Detail({
                             {index === tripPattern.originalLegs.length - 1 && (
                                 <Waystop
                                     time={endTime}
-                                    name={waypoints[waypointCount + 1].displayName}
+                                    name={waypoints[waypointCount + 1]?.displayName}
                                 />
                             )}
                         </Fragment>

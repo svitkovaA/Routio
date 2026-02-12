@@ -13,30 +13,28 @@ import InfoSettings from "./InfoSettings/InfoSettings";
 import Options from "./Options/Options";
 import FindButton from "./FindButton/FindButton";
 import { useResult } from "../../ResultContext";
-import { useInput } from "../../InputContext";
+import { useRoute } from "../../Routing/Route";
 
 type PlanningProps = {
     showInfo: () => void;
     closeSidebar: () => void;
-    selectMultimodalResult: () => void;
 };
 
 function Planning({ 
     showInfo, 
-    closeSidebar, 
-    selectMultimodalResult,
+    closeSidebar
 }: PlanningProps) {
-    const { setMapSelectionIndex } = useInput();
-    const { setLoading } = useResult();
+    const { setResultActiveIndex } = useResult();
+
+    const route = useRoute();
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         if (!event.currentTarget.checkValidity()) {
             return;
         }
         event.preventDefault();
-        selectMultimodalResult();
-        setMapSelectionIndex(-1);
-        setLoading(true);
+        setResultActiveIndex(0);
+        route(0);
     }
     
     return (

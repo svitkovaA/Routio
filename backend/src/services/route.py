@@ -262,7 +262,7 @@ async def recursive_planner(
             results_raw = await asyncio.gather(*tasks)
             validity: List[bool] = [len(waypoint_groups[i + 1:]) < 1]
             patterns: List[List[TripPattern]] = []
-            if len(results) > 0:
+            if len(results_raw) > 0:
                 validity = []
                 for pat, valid in results_raw:
                     patterns.append(pat)

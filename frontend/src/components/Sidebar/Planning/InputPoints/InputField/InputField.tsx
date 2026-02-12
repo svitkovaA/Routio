@@ -86,13 +86,24 @@ function InputField({
                     const suggestionIndex = highlightedIndex >= 0 ? highlightedIndex : 0;
                     const suggestion = suggestions[suggestionIndex];
                     setWaypoints(prev => {
-                        prev[index] = {
-                            ...prev[index],
-                            isPreview: false,
-                            isActive: true,
-                            displayName: [suggestion.name, suggestion.street, suggestion.city].filter(Boolean).join(", "),
-                            lat: suggestion.lat,
-                            lon: suggestion.lon
+                        if (!suggestion) {
+                            prev[index] = {
+                                ...prev[index],
+                                isPreview: false,
+                                displayName: "",
+                                lat: 0,
+                                lon: 0
+                            }
+                        }
+                        else {
+                            prev[index] = {
+                                ...prev[index],
+                                isPreview: false,
+                                isActive: true,
+                                displayName: [suggestion.name, suggestion.street, suggestion.city].filter(Boolean).join(", "),
+                                lat: suggestion.lat,
+                                lon: suggestion.lon
+                            }
                         }
                         return prev;
                     });

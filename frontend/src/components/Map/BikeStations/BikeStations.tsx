@@ -16,7 +16,8 @@ function BikeStations() {
         showResults,
         resultActiveIndex,
         selectedTripPatternIndex,
-        pattern
+        pattern,
+        loading
     } = useResult();
 
     // State handling map zoom level
@@ -78,7 +79,8 @@ function BikeStations() {
                         >
                             <Popup autoPan={false}>
                                 <button
-                                    onClick={() => invertBikeStationAtIndex(index)}    
+                                    onClick={() => invertBikeStationAtIndex(index)}
+                                    disabled={loading}
                                 >
                                     {showBikeStations[index] ? "Hide bike stations" : "Show bike stations"}
                                 </button>

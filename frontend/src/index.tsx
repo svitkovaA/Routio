@@ -18,13 +18,13 @@ const root = ReactDOM.createRoot(
 );
 root.render(
     <React.StrictMode>
-        <InputProvider>
-            <ResultProvider>
+        <ResultProvider>
+            <InputProvider>
                 <SettingsProvider>
                     <App />
                 </SettingsProvider>
-            </ResultProvider>
-        </InputProvider>
+            </InputProvider>
+        </ResultProvider>
     </React.StrictMode>
 );
 

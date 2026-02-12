@@ -13,7 +13,6 @@ import Info from './Info/Info';
 import Results from './Results/Results';
 import { useInput } from '../InputContext';
 import { useResult } from '../ResultContext';
-import { useRoute } from '../Routing/Route';
 import DragHandle from './DragHandle/DragHandle';
 import './Sidebar.css';
 
@@ -31,29 +30,16 @@ function Sidebar({
     setShowInfo
 }: sidebarProps) {
     // User input context
-    const { mode, setMode, waypoints } = useInput();
+    const { waypoints } = useInput();
 
     //Results context
     const {
-        resultActiveIndex, setResultActiveIndex,
         showResults,
         showDetail,
         showDepartures,
-        showSettings
+        showSettings,
+        loading
     } = useResult();
-
-    // Route context
-    const route = useRoute();
-
-    /**
-     * Automatically triggers route computation when a routing mode and active
-     * result index are set
-     */
-    useEffect(() => {
-        if (mode && resultActiveIndex !== -1) {
-            route();
-        }
-    }, [mode, resultActiveIndex, route]);
 
     const sidebarRef = useRef<HTMLDivElement>(null);
     const isMobile = useMediaQuery("(max-width: 768px)");
@@ -63,6 +49,16 @@ function Sidebar({
     const [sheetHeight, setSheetHeight] = useState(0);
     const prevClosedOffset = useRef<number | null>(null);
     const closedOffset = Math.max(0, sheetHeight - 58);
+
+    const prevLoadingRef = useRef(loading);
+
+    useEffect(() => {
+        if (prevLoadingRef.current && !loading) {
+            setSidebarOpen(true);
+        }
+
+        prevLoadingRef.current = loading;
+    }, [loading]);
 
     useLayoutEffect(() => {
         if (!sidebarRef.current || !isMobile) return;
@@ -117,10 +113,6 @@ function Sidebar({
                     <Planning 
                         showInfo={() => setShowInfo(true)}
                         closeSidebar={() => setSidebarOpen(false)}
-                        selectMultimodalResult={() => {
-                            setResultActiveIndex(0);
-                            setMode("transit,bicycle,walk");
-                        }}
                     />
                 )}
 

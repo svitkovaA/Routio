@@ -43,7 +43,7 @@ function Map({
     const { t } = useTranslation();
 
     // Contexts
-    const { showResults, vehiclePositions, closeResults } = useResult();
+    const { showResults, vehiclePositions, closeResults, loading } = useResult();
     const { selectedLayerIndex } = useSettings();
     const { baseLayers, satelliteOverlay } = useLayers();
     const {
@@ -122,7 +122,7 @@ function Map({
     return (
         <MapContainer center={center} zoom={defaultZoom} zoomControl={false} id="map" className={mapSelectionIndex !== -1 ? "selected" : ""}>
             {/* Popup information during waypoint selection */}
-            <MapInfoPopup 
+            <MapInfoPopup
                 waypoints={waypoints}
                 handleMapSelection={handleMapSelection}
             />
@@ -177,7 +177,8 @@ function Map({
                                 onClick={() => {
                                     handleMarkerRemove(i);
                                     popupRefs.current[i]?.remove();
-                                }}                          
+                                }}
+                                disabled={loading}
                             >
                                 {waypoints.length === 2 ? "Clear waypoint" : "Remove waypoint"}
                             </button>

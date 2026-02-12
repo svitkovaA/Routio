@@ -7,6 +7,7 @@
 import { Popup, useMapEvent } from "react-leaflet";
 import { useState } from "react";
 import { Waypoint } from "../../types/types";
+import { useResult } from "../../ResultContext";
 
 type MapInfoPopupProps = {
     waypoints: Waypoint[];                                                      // List of currently defined waypoints
@@ -19,6 +20,8 @@ function MapInfoPopup({
 } : MapInfoPopupProps) {
     // Position state of the menu popup
     const [position, setPosition] = useState<[number, number] | null>(null);
+
+    const { loading } = useResult();
 
     // Displays popup on right mouse click
     useMapEvent('contextmenu', (e) => {
@@ -40,7 +43,16 @@ function MapInfoPopup({
         setPosition(null);
     };
 
-    return position ? (
+    if (!position) {
+        return null;
+    }
+
+    if (loading) {
+        setPosition(null);
+        return null;
+    }
+
+    return (
         <Popup
             position={position}
             eventHandlers={{ remove: () => setPosition(null) }}
@@ -58,7 +70,7 @@ function MapInfoPopup({
                 ))}
             </div>
         </Popup>
-    ) : null;
+    );
 }
 
 export default MapInfoPopup;

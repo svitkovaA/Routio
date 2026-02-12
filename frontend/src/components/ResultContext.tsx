@@ -7,7 +7,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { ResultsType, TripPattern, VehiclePosition } from "./types/types";
 import { API_BASE_URL } from "./config/config";
-import { useInput } from "./InputContext";
 
 type ResultContextType = {
     pattern: TripPattern;
@@ -31,6 +30,7 @@ type ResultContextType = {
     publicLegIndex: number;
     setPublicLegIndex: (value: number) => void;
     closeResults: () => void;
+    abortRef: React.RefObject<AbortController | null>;
 };
 
 const ResultContext = createContext<ResultContextType | undefined>(undefined);
@@ -52,7 +52,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     const intervalRef = useRef<NodeJS.Timer | null>(null);
     const animationRef = useRef<number | null>(null);
 
-    const { setMode } = useInput();
+    const abortRef = useRef<AbortController | null>(null);
 
     const closeResults = useCallback(() => {
         setShowResults(false);
@@ -61,6 +61,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         setSelectedTripPatternIndex(0);
         setLoading(false);
         setVehiclePositions([]);
+        setResultActiveIndex(-1);
         prevPositionsRef.current = {};
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -70,8 +71,11 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             cancelAnimationFrame(animationRef.current);
             animationRef.current = null;
         }
-        setMode(undefined);
-    }, [setMode]);
+        if (abortRef.current) {
+            abortRef.current.abort();
+            abortRef.current = null;
+        }
+    }, []);
 
     const value = useMemo(() => ({
         pattern: results[resultActiveIndex]?.tripPatterns[selectedTripPatternIndex],
@@ -86,7 +90,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         loading, setLoading,
         vehiclePositions,
         publicLegIndex, setPublicLegIndex,
-        closeResults
+        closeResults,
+        abortRef
     }), [
         results,
         resultActiveIndex,

@@ -11,6 +11,7 @@ import { MultimodalIcon } from "../../Planning/Icons/Icons";
 import { useInput } from "../../../InputContext";
 import { useResult } from "../../../ResultContext";
 import "./ResultTabs.css";
+import { useRoute } from '../../../Routing/Route';
 
 function ResultTabs() { 
     // Result context 
@@ -20,7 +21,9 @@ function ResultTabs() {
     } = useResult();
 
     // User input context
-    const { setMode } = useInput();
+    // const { setMode } = useInput();
+
+    const route = useRoute();
 
     return (
         <div className="result-tabs" onClick={() => setSelectedTripPatternIndex(0)}>
@@ -30,7 +33,8 @@ function ResultTabs() {
                 className={"result-mode " + (resultActiveIndex === 0 ? "selected" : "")}
                 onClick={() => {
                     setResultActiveIndex(0);
-                    setMode("transit,bicycle,walk"); 
+                    // setMode("transit,bicycle,walk"); 
+                    route(0);
                 }}
             >
                 <MultimodalIcon iconSize={24}/>
@@ -41,7 +45,8 @@ function ResultTabs() {
                 className={"result-mode " + (resultActiveIndex === 1 ? "selected" : "")} 
                 onClick={() => {
                     setResultActiveIndex(1);
-                    setMode("walk_transit");
+                    // setMode("walk_transit");
+                    route(1);
                 }}
             >
                 <div className="circle">
@@ -54,7 +59,8 @@ function ResultTabs() {
                 className={"result-mode " + (resultActiveIndex === 2 ? "selected" : "")}
                 onClick={() => {
                     setResultActiveIndex(2);
-                    setMode("bicycle");
+                    // setMode("bicycle");
+                    route(2);
                 }}
             >
                 <div className="circle">
@@ -67,7 +73,8 @@ function ResultTabs() {
                 className={"result-mode " + (resultActiveIndex === 3 ? "selected" : "")}
                 onClick={() => {
                     setResultActiveIndex(3);
-                    setMode("foot");
+                    // setMode("foot");
+                    route(3);
                 }}
             >
                 <div className="circle">
