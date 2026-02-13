@@ -1,0 +1,49 @@
+/* Origin/destination bike stations */
+.station-svg {
+    width: 16px;
+    height: 16px;
+}
+
+.marker.origin-marker {
+    background: var(--color-origin-station);
+}
+
+.marker.origin-marker::after {
+    border-top-color: var(--color-origin-station);
+}
+
+.marker.destination-marker {
+    background: var(--color-destination-station);
+}
+
+.marker.destination-marker::after {
+    border-top-color: var(--color-destination-station);
+}
+
+/* Other stations */
+.marker.small-bike-marker {
+    width: 16px;
+    height: 16px;
+}
+
+.marker.small-bike-marker::after {
+    bottom: -7px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 12px solid;
+}
+
+.marker-inner.small-inner {
+    width: 6px;
+    height: 6px;
+}
+
+.origin-marker.small-bike-marker::after {
+    border-top-color: var(--color-origin-station);
+}
+
+.destination-marker.small-bike-marker::after {
+    border-top-color: var(--color-destination-station);
+}
+
+/* End of file BikeStations.css */

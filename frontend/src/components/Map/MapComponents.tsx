@@ -6,6 +6,8 @@
 
 import L from "leaflet";
 import { useMapEvent } from "react-leaflet";
+import { PUBLIC_URL } from "../config/config";
+
 
 /**
  * Creates a custom pin icon with a text label
@@ -63,6 +65,40 @@ export function createVehiclePositionIcon(label: string, color: string) {
         iconSize: [22, 22],
         iconAnchor: [11, 11],
         popupAnchor: [0, -11]
+    });
+}
+
+export function createBikeStationPin(origin: boolean) {
+    const typeClass = origin ? "origin-marker" : "destination-marker";
+
+    const imgSrc = origin ? `${PUBLIC_URL}/img/originStation.svg` : `${PUBLIC_URL}/img/destinationStation.svg`;
+
+    return L.divIcon({
+        html: `
+            <div class="marker ${typeClass}">
+                <div class="marker-inner">
+                    <img src="${imgSrc}" class="station-svg" />
+                </div>
+            </div>
+        `,
+        className: "",
+        iconAnchor: [15, 40],
+        popupAnchor: [0, -40],
+    });
+}
+
+export function createSmallBikeStationPin(origin: boolean) {
+    const typeClass = origin ? "origin-marker" : "destination-marker";
+
+    return L.divIcon({
+        html: `
+            <div class="marker small-bike-marker ${typeClass}">
+                <div class="marker-inner small-inner"></div>
+            </div>
+        `,
+        className: "",
+        iconAnchor: [5, 25],
+        popupAnchor: [2, -25],
     });
 }
 

@@ -5,9 +5,11 @@
  */
 
 import { Fragment, useEffect, useState } from "react";
-import { CircleMarker, Popup, useMapEvent } from "react-leaflet";
+import { Marker, Popup, useMapEvent } from "react-leaflet";
 import { useResult } from "../../ResultContext";
 import { useChangeBikeStation } from "../../Routing/ChangeBikeStation";
+import { createBikeStationPin, createSmallBikeStationPin } from "../MapComponents";
+import "./BikeStations.css"
 
 function BikeStations() {
     // Result context
@@ -72,10 +74,9 @@ function BikeStations() {
                 return (
                     <Fragment key={`${index}`}>
                         {/* Currently selected bike station */}
-                        <CircleMarker
-                            center={[leg.bikeStationInfo.latitude, leg.bikeStationInfo.longitude]}
-                            radius={8}
-                            pathOptions={{ color: color}}
+                        <Marker
+                            position={[leg.bikeStationInfo.latitude, leg.bikeStationInfo.longitude]}
+                            icon={createBikeStationPin(origin)}
                         >
                             <Popup autoPan={false}>
                                 <button
@@ -85,16 +86,15 @@ function BikeStations() {
                                     {showBikeStations[index] ? "Hide bike stations" : "Show bike stations"}
                                 </button>
                             </Popup>
-                        </CircleMarker>
+                        </Marker>
 
                         {/* Alternative bike stations */}
                         {showBikeStations[index] && leg?.bikeStationInfo.bikeStations.map((station, bikeStationIndex) => 
                             bikeStationIndex !== selectedIndex && zoom > 12 &&(
-                                <CircleMarker
+                                <Marker
                                     key={`${bikeStationIndex}`}
-                                    center={[station.place.latitude, station.place.longitude]}
-                                    radius={5}
-                                    pathOptions={{ color: color }}
+                                    position={[station.place.latitude, station.place.longitude]}
+                                    icon={createSmallBikeStationPin(origin)}  
                                 >
                                     <Popup autoPan={false}>
                                         Index: {bikeStationIndex} <br/>
@@ -112,7 +112,7 @@ function BikeStations() {
                                             Set as {origin ? "origin" : "destination"} bike station
                                         </button>
                                     </Popup>
-                                </CircleMarker>
+                                </Marker>
                             )
                         )}
                     </Fragment>
