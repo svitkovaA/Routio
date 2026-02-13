@@ -68,7 +68,6 @@ function BikeStations() {
                 }
 
                 const origin = leg.bikeStationInfo.origin
-                const color = origin ? 'green' : 'blue';
                 const selectedIndex = leg.bikeStationInfo.selectedBikeStationIndex;
                 const rack = leg.bikeStationInfo.rack;
                 return (

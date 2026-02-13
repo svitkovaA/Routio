@@ -106,7 +106,7 @@ function Sidebar({
             setMobileSidebarHeight(0);
         }
 
-    }, [sidebarOpen, closedOffset, isMobile]);
+    }, [sidebarOpen, closedOffset, isMobile, setMobileSidebarHeight]);
 
     return (
         <div 

@@ -10,7 +10,7 @@ function Information({
 } : InformationProps) {
     return (
         <button 
-            className={"controls-button " + "controls-info"}
+            className={"controls-button controls-info"}
             onClick={() => setShowInfo(true)} 
             type="button"
             tabIndex={-1}
