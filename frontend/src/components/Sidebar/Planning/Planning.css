@@ -1,0 +1,7 @@
+.preferences-find {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+/* End of file Planning.css */

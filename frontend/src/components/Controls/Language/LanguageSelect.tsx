@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -27,15 +27,7 @@ const languages: Language[] = [{
     }
 ];
 
-type LanguageSelectProps = {
-    showInfo: boolean;      // State whether the information panel is currently visible
-    closeInfo: () => void;  // Callback used to close the information panel
-}
-
-function LanguageSelect({
-    showInfo,
-    closeInfo
-} : LanguageSelectProps) {
+function LanguageSelect() {
     // i18next instance for language switching
     const { i18n } = useTranslation();
 
@@ -57,35 +49,15 @@ function LanguageSelect({
         setSelectedLang(lang);
         setOpen(false);
     };
-    
-    // State to trigger rerender on window resize
-    const [, setCloseDropdown] = useState<boolean>(true);
-
-    /**
-     * When the information panel is visible on small screens, 
-     * the language selector is hidden
-     */
-    useEffect(() => {
-        const handleResize = () => setCloseDropdown(!(window.innerWidth < 769 && showInfo));
-        handleResize();
-
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [showInfo]);
 
     return (
-        <div className={"controls-select " + (window.innerWidth < 769 && showInfo ? "hidden" : "")}>
+        <div className={"controls-select " + (window.innerWidth < 768)}>
             {/* Button opening the language selection dropdown */}
             <button
                 onBlur={() => setOpen(false)}
                 className={"controls-button " + (open ? "open" : "")}
                 onClick={() => {
-                    if (showInfo) {
-                        closeInfo();
-                    }
-                    else {
-                        setOpen(!open);
-                    }
+                    setOpen(!open);
                 }}
             >
                 {selectedLang.flagCode}

@@ -10,8 +10,8 @@ import { PUBLIC_URL } from "../../../config/config";
 function Logo() {
     return (
         <div className="logo">
-            <img src={`${PUBLIC_URL}/logo.png`} alt="Logo" />
-            <img src={`${PUBLIC_URL}/logo-text.png`} alt="Logo-text" />
+            <img src={`${PUBLIC_URL}/routioLogo.png`} alt="Logo" />
+            <img src={`${PUBLIC_URL}/routioText.png`} alt="Logo-text" />
         </div>
     );
 }

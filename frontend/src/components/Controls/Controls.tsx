@@ -6,26 +6,24 @@
 
 import LanguageSelect from "./Language/LanguageSelect";
 import LayerSelect from "./Layer/LayerSelect";
+import Information from "./Information/Information";
 import './Controls.css'
 
 type ControlsProps = {
-    showInfo: boolean;      // State whether the information is currently visible
-    closeInfo: () => void;  // Callback function used to close the information panel
+    setShowInfo: (value: boolean) => void;
 }
 
 function Controls({
-    showInfo,
-    closeInfo
+    setShowInfo
 } : ControlsProps) {
     return (
         <div className="controls">
-            <LayerSelect
-                showInfo={showInfo}
-                closeInfo={closeInfo}
-            />
-            <LanguageSelect 
-                showInfo={showInfo}
-                closeInfo={closeInfo}
+            <div className="controls-right">
+                <LayerSelect />
+                <LanguageSelect />
+            </div>
+            <Information
+                setShowInfo={setShowInfo}
             />
         </div>
     );

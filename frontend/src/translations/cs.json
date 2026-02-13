@@ -44,7 +44,7 @@
     },
     "find": "Najít"
   },
-  "settings": "Nastavení",
+  "settings": "Preference",
   "settingsTab": {
     "generalSettings": "Obecné nastavení",
     "generalSettingsTab": {
@@ -78,10 +78,11 @@
       "lockTime": "Čas na uzamknutí kola"
     }
   },
-  "information": "Začněte svou cestu s GreenGo",
   "informationTab": {
-    "about": "O aplikaci",
-    "gettingStarted": "Začínáme"
+    "overview": "O aplikaci",
+    "howToUse": "Jak začít",
+    "features": "Další funkce",
+    "contact": "Kontakt"
   },
   "results": "Výsledky",
   "modeDescriptions": {

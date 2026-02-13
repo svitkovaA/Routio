@@ -9,8 +9,8 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import { useTranslation } from "react-i18next";
-import "./ArrivalDeparture.css";
 import { useInput } from '../../../InputContext';
+import "./ArrivalDeparture.css";
 
 function ArrivalDeparture() {
     const { t } = useTranslation();

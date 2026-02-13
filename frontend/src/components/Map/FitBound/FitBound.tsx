@@ -67,7 +67,7 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
         if (!bounds) return;
 
         // Detect is the device is mobile based on the screen width
-        const isMobile = window.innerWidth <= 768;
+        const isMobile = window.innerWidth < 768;
 
         // Adjust mobile layout for route to fit map bounds
         if (isMobile) {

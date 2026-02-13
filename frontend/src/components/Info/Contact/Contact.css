@@ -1,0 +1,13 @@
+.contact-mail {
+    display: inline-block;
+    font-weight: 700;
+    color: var(--color-info);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.contact-mail:hover {
+    border-bottom: 1px solid var(--color-info);
+    font-weight: 900;
+}

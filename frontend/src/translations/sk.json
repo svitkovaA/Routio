@@ -44,7 +44,7 @@
     },
     "find": "Nájsť"
   },
-  "settings": "Nastavenia",
+  "settings": "Preferencie",
   "settingsTab": {
     "generalSettings": "Všeobecné nastavenia",
      "generalSettingsTab": {
@@ -78,10 +78,11 @@
       "lockTime": "Čas na uzamknutie bicykla"
     }
   },
-  "information": "Začnite svoju cestu s GreenGo",
   "informationTab": {
-    "about": "O aplikácii",
-    "gettingStarted": "Začíname"
+    "overview": "O aplikácii",
+    "howToUse": "Ako začať",
+    "features": "Ďalšie funkcie",
+    "contact": "Kontakt"
   },
   "results": "Výsledky",
   "modeDescriptions": {

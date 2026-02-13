@@ -9,7 +9,6 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { useMediaQuery } from '@mui/material';
 import Planning from './Planning/Planning';
 import Settings from './Settings/Settings';
-import Info from './Info/Info';
 import Results from './Results/Results';
 import { useInput } from '../InputContext';
 import { useResult } from '../ResultContext';
@@ -20,14 +19,12 @@ type sidebarProps = {
     sidebarOpen: boolean;                       // State indicating whether the sidebar is open
     setSidebarOpen: (value: boolean) => void;   // Setter controlling sidebar visibility
     showInfo: boolean;                          // State indicating whether the information view is active
-    setShowInfo: (value: boolean) => void;      // Setter controlling information panel visibility
 };
 
 function Sidebar({ 
     sidebarOpen, 
     setSidebarOpen, 
     showInfo,
-    setShowInfo
 }: sidebarProps) {
     // User input context
     const { waypoints } = useInput();
@@ -43,7 +40,7 @@ function Sidebar({
     } = useResult();
 
     const sidebarRef = useRef<HTMLDivElement>(null);
-    const isMobile = useMediaQuery("(max-width: 768px)");
+    const isMobile = useMediaQuery("(max-width: 767px)");
     const dragging = useRef(false);
     const [translateY, setTranslateY] = useState<number>(0);
 
@@ -96,6 +93,7 @@ function Sidebar({
 
     useEffect(() => setTranslateY(sidebarOpen ? -closedOffset : 0), [sidebarOpen, closedOffset]);
 
+    // UseEffect for the route to fit map bound
     useEffect(() => {
         if (!isMobile) {
             setMobileSidebarHeight(0);
@@ -126,18 +124,12 @@ function Sidebar({
                 {/* Planning view */}
                 {!showSettings && !showResults && (
                     <Planning 
-                        showInfo={() => setShowInfo(true)}
                         closeSidebar={() => setSidebarOpen(false)}
                     />
                 )}
 
                 {/* Settings view */}
                 {showSettings && <Settings/>}
-
-                {/* Info view */}
-                {showInfo && (
-                    <Info closeInfo={() => setShowInfo(false)} />
-                )}
 
                 {/* Results view */}
                 {showResults && <Results/>}

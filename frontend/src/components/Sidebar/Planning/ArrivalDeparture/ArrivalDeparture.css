@@ -7,7 +7,7 @@
 .mode-switch {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 10px;
 }
 
 .MuiFormControl-root.css-1iw3t7y-MuiFormControl-root {

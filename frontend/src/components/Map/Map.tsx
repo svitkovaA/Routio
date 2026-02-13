@@ -84,7 +84,7 @@ function Map({
             setWaypoints(newWaypoints);
 
             // Automatically open sidebar on small screens
-            if (window.innerWidth < 769) 
+            if (window.innerWidth < 768) 
                 openSidebar();
             setMapSelectionIndex(-1);
         }

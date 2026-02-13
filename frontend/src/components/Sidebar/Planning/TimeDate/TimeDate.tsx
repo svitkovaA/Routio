@@ -8,21 +8,36 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { csCZ, enUS, skSK } from '@mui/x-date-pickers/locales';
 import { useTranslation } from "react-i18next";
 import "dayjs/locale/cs"; 
+import "dayjs/locale/en"; 
+import "dayjs/locale/sk"; 
 import { useInput } from '../../../InputContext';
 import "./TimeDate.css";
 
 function TimeDate(){
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const {
         date, setDate,
         time, setTime
     } = useInput();
-    
+
+    const pickerLocaleMap: Record<string, any> = {
+        cs: csCZ,
+        sk: skSK,
+        en: enUS,
+    };
+
+    const currentPickerLocale = pickerLocaleMap[i18n.language] || enUS;
+
     return (
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={"cs"}>
+        <LocalizationProvider 
+            dateAdapter={AdapterDayjs} 
+            adapterLocale={i18n.language || "cs"}
+            localeText={currentPickerLocale.components.MuiLocalizationProvider.defaultProps.localeText}
+        >
             <div className="grid-wrapper time-date">
                 <DatePicker
                     label={t("planning.date")}

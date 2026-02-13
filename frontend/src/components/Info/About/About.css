@@ -1,0 +1,95 @@
+.about-wrapper {
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: var(--font-size-text);
+}
+
+.about-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    line-height: 1.5;
+}
+
+.about-header {
+    font-size: 20px;
+    font-weight: bolder;
+    color: var(--color-info);
+}
+
+.about-transport-modes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    max-width: 500px;
+}
+
+.about-transport-modes div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.about-transport-modes img {
+    width: 100%;
+    height: auto;
+    max-height: 80px;
+}
+
+.about-external {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.external-item {
+    display: grid;
+    gap: 5px;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-info);
+    text-decoration: none;
+    color: black;
+}
+
+.external-item:last-child {
+    border-bottom: none;
+}
+
+.external-item img {
+    max-height: 100px;
+    min-height: 70px;
+    transition: all 0.3s ease;
+}
+
+.external-item .data-brno {
+    width: 200px;
+}
+
+.external-item:hover img {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+@media screen and (min-width: 500px) {
+    .external-item {
+        grid-template-columns: 200px 1fr;
+        padding-bottom: 10px;
+        gap: 25px;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .external-text {
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+    }
+
+    .external-item:hover .external-text {
+        opacity: 1;
+    }
+}
+
+/* End of file About.css */

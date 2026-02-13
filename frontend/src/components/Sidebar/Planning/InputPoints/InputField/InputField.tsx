@@ -134,8 +134,9 @@ function InputField({
                         <LocationDot 
                             onClick={() => {
                                 setMapSelectionIndex(index);
-                                if (window.innerWidth < 769) 
+                                if (window.innerWidth < 768) {
                                     closeSidebar();
+                                }
                             }}
                         />
 

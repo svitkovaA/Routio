@@ -6,11 +6,11 @@
 
 .find-button {
     padding: 10px 15px;
-    background-color: #1976d2;
     color: var(--color-background);
+    background-color: var(--color-info);
     border-radius: 4px;
     cursor: pointer;
-    width: 100%;
+    width: calc(100% - 70px);
 }
 
 .find-button:disabled {

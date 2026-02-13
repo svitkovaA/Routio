@@ -44,7 +44,7 @@
     },
     "find": "Find"
   },
-  "settings": "Settings",
+  "settings": "Preferences",
   "settingsTab": {
     "generalSettings": "General settings",
     "generalSettingsTab": {
@@ -78,10 +78,11 @@
       "lockTime": "Bike lock time"
     }
   },
-  "information": "Start your journey with GreenGo",
   "informationTab": {
-    "about": "About the app",
-    "gettingStarted": "Getting started"
+    "overview": "Overview",
+    "howToUse": "Getting started",
+    "features": "Features",
+    "contact": "Contact"
   },
   "results": "Results",
   "modeDescriptions": {

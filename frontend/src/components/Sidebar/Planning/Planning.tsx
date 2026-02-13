@@ -9,19 +9,18 @@ import Logo from "./Logo/Logo";
 import InputPoints from "./InputPoints/InputPoints";
 import TimeDate from "./TimeDate/TimeDate";
 import ArrivalDeparture from "./ArrivalDeparture/ArrivalDeparture";
-import InfoSettings from "./InfoSettings/InfoSettings";
 import Options from "./Options/Options";
 import FindButton from "./FindButton/FindButton";
 import { useResult } from "../../ResultContext";
 import { useRoute } from "../../Routing/Route";
+import Preferences from "./Preferences/Preferences";
+import "./Planning.css"
 
 type PlanningProps = {
-    showInfo: () => void;
     closeSidebar: () => void;
 };
 
 function Planning({ 
-    showInfo, 
     closeSidebar
 }: PlanningProps) {
     const { setResultActiveIndex } = useResult();
@@ -48,11 +47,11 @@ function Planning({
                 />
                 <TimeDate />
                 <ArrivalDeparture />
-                <InfoSettings 
-                    showInfo={showInfo}
-                />
                 <Options />
-                <FindButton />
+                <div className="preferences-find">
+                    <Preferences />
+                    <FindButton />
+                </div>
             </div>
         </form>
     );

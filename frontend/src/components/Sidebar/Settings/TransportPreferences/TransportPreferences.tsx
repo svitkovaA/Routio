@@ -28,6 +28,15 @@ function TransportPreferences() {
         setSelectedModes
     } = useSettings();
 
+    const transportModes = [
+        { value: "bus", labelKey: "bus" },
+        { value: "tram", labelKey: "tram" },
+        { value: "rail", labelKey: "train" },
+        { value: "trolleybus", labelKey: "trolleybus" },
+        { value: "metro", labelKey: "subway" },
+        { value: "water", labelKey: "boat" },
+    ];
+
     /**
      * Handles selection and deselection of transport modes
      * @param mode Transport mode identifier
@@ -66,50 +75,24 @@ function TransportPreferences() {
                 
                 {/* Transport mode selection */}
                 <div className="section transport-modes">
-                    <span className="section-label">{t("settingsTab.transportPreferencesTab.transportModes")}</span>
+                    <span className="section-label">
+                        {t("settingsTab.transportPreferencesTab.transportModes")}
+                    </span>
+
+                    {/* Transport modes checkboxes */}
                     <FormGroup className="options">
-                        <FormControlLabel control={
-                            <Checkbox 
-                                checked={selectedModes.includes("bus")}
-                                onChange={handleModeSelection("bus")}
+                        {transportModes.map((mode) => (
+                            <FormControlLabel
+                                key={mode.value}
+                                control={
+                                    <Checkbox
+                                        checked={selectedModes.includes(mode.value)}
+                                        onChange={handleModeSelection(mode.value)}
+                                    />
+                                }
+                                label={t(`settingsTab.transportPreferencesTab.${mode.labelKey}`)}
                             />
-                        } 
-                        label={t("settingsTab.transportPreferencesTab.bus")} />
-                        <FormControlLabel control={
-                            <Checkbox 
-                                checked={selectedModes.includes("tram")}
-                                onChange={handleModeSelection("tram")} 
-                            />
-                        } 
-                        label={t("settingsTab.transportPreferencesTab.tram")} />
-                        <FormControlLabel control={
-                            <Checkbox 
-                                checked={selectedModes.includes("rail")}
-                                onChange={handleModeSelection("rail")} 
-                            />
-                        } 
-                        label={t("settingsTab.transportPreferencesTab.train")} />
-                        <FormControlLabel control={
-                            <Checkbox 
-                                checked={selectedModes.includes("trolleybus")}
-                                onChange={handleModeSelection("trolleybus")}
-                            />
-                        } 
-                        label={t("settingsTab.transportPreferencesTab.trolleybus")} />
-                        <FormControlLabel control={
-                            <Checkbox 
-                                checked={selectedModes.includes("metro")}
-                                onChange={handleModeSelection("metro")}
-                            />
-                        } 
-                        label={t("settingsTab.transportPreferencesTab.subway")} />
-                        <FormControlLabel control={
-                            <Checkbox 
-                                checked={selectedModes.includes("water")}
-                                onChange={handleModeSelection("water")} 
-                            />
-                        } 
-                        label={t("settingsTab.transportPreferencesTab.boat")} />
+                        ))}
                     </FormGroup>
                 </div>
             </div>
