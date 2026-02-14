@@ -16,7 +16,8 @@ i18n
             sk: { translation: sk },
         },
         detection: {
-            order: ["navigator"],
+            order: ["localStorage", "navigator"],
+            caches: ["localStorage"],
         },
         interpolation: {
             escapeValue: false,
