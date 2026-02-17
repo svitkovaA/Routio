@@ -1,3 +1,9 @@
+/**
+ * @file About.css
+ * @brief Styles for the component for displaying general information abut the application
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 .about-wrapper {
     padding: 0 10px;
     display: flex;
@@ -82,13 +88,13 @@
 }
 
 @media screen and (min-width: 768px) {
+    .external-item:hover .external-text {
+        opacity: 1;
+    }
+
     .external-text {
         opacity: 0.6;
         transition: opacity 0.3s ease;
-    }
-
-    .external-item:hover .external-text {
-        opacity: 1;
     }
 }
 

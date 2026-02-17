@@ -70,6 +70,7 @@ function BikeStations() {
                 const origin = leg.bikeStationInfo.origin
                 const selectedIndex = leg.bikeStationInfo.selectedBikeStationIndex;
                 const rack = leg.bikeStationInfo.rack;
+
                 return (
                     <Fragment key={`${index}`}>
                         {/* Currently selected bike station */}
@@ -95,6 +96,7 @@ function BikeStations() {
                                     position={[station.place.latitude, station.place.longitude]}
                                     icon={createSmallBikeStationPin(origin)}  
                                 >
+                                    {/* Popup information */}
                                     <Popup autoPan={false}>
                                         Index: {bikeStationIndex} <br/>
                                         Score: {station.score} <br/>

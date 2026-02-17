@@ -1,34 +1,43 @@
 /**
  * @file Info.tsx
- * @brief Displays information about the app and the usage
+ * @brief Displays information about the application
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import CloseIcon from '@mui/icons-material/Close';
-import { useTranslation } from "react-i18next";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useTranslation } from "react-i18next";
+import Logo from "../Sidebar/Planning/Logo/Logo";
 import About from "./About/About";
 import HowToUse from "./HowToUse/HowToUse";
 import Features from "./Features/Features";
 import Contact from "./Contact/Contact";
-import { createPortal } from "react-dom";
-import Logo from "../Sidebar/Planning/Logo/Logo";
 import "./Info.css";
 
 type InfoProps = {
-    closeInfo: () => void,
+    closeInfo: () => void,  // Callback for closing the information panel
 };
 
 function Info({ closeInfo }: InfoProps) {
-    type InfoTab = "about" | "howto" | "features" | "contact";
-    const [tab, setTab] = useState<InfoTab>("about");
+    // Translation function
     const { t } = useTranslation();
 
+    // Information tabs
+    type InfoTab = "about" | "howto" | "features" | "contact";
+
+    // Currently active tab
+    const [tab, setTab] = useState<InfoTab>("about");
+
+    // Determines whether desktop layout should be used
     const isDesktop = useMediaQuery('(min-width:768px)');
+
+    // Controls visibility of the navigation menu on mobile devices
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
+    // Prevents the planel from closing when clicking inside its content
     const keepOpen = (e: React.MouseEvent) => {
         e.stopPropagation();
     }
@@ -37,6 +46,7 @@ function Info({ closeInfo }: InfoProps) {
         <div className="info-wrapper" onClick={closeInfo}>
             <div className="info" onClick={keepOpen}>
     
+                {/* Information panel header with optional mobile toggle, logo and close button */}
                 <div className="info-header">
                     {!isDesktop && (
                         <button
@@ -52,7 +62,7 @@ function Info({ closeInfo }: InfoProps) {
                     </button>
                 </div>
 
-
+                {/* Navigation tabs */}
                 {isDesktop ? (
                     <div className="info-grid-wrapper">
                         <h3
@@ -104,6 +114,7 @@ function Info({ closeInfo }: InfoProps) {
                     </div>
                 )}
 
+                {/* Information panel content */}
                 <div className="text-wrapper">
                 {tab === "about" && <About />}
                 {tab === "howto" && <HowToUse />}

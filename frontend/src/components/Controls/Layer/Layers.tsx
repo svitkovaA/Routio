@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
  * @returns Object containing base layers and satellite overlay
  */
 export const useLayers = () => {
+    // Translation function
     const { t } = useTranslation();
 
     // Available base map layers
@@ -32,7 +33,7 @@ export const useLayers = () => {
         }
     ]
 
-    // Satellite overlay layer
+    // Optional satellite overlay layer
     const satelliteOverlay =
         { 
             name: t("map.satelliteOverlay"),

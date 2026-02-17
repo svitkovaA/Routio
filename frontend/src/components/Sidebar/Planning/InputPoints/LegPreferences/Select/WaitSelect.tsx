@@ -9,12 +9,15 @@ import { TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import CustomTooltip from "../../../../../CustomTooltip/CustomTooltip";
+import { useTranslation } from "react-i18next";
 
-type AccuracySelectProps = {
+type WaitSelectProps = {
     index: number;
 }
 
-function AccuracySelect({ index }: AccuracySelectProps) {
+function WaitSelect({ index }: WaitSelectProps) {
+    const { t } = useTranslation()
     const { legPreferences, setLegPreferences } = useInput();
     
     const handleSelect = (value: dayjs.Dayjs) => {
@@ -28,36 +31,40 @@ function AccuracySelect({ index }: AccuracySelectProps) {
     return (
         <div className="select wait-select">
             <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={"cs"}>
-                <TimePicker
-                    value={legPreferences[index].wait}
-                    ampm={false}
-                    onChange={(newValue) => {if (newValue !== null) handleSelect(newValue)}}
-                    slotProps={{
-                        actionBar: { actions: ['accept'] },
-                        textField: {
-                            sx: {
-                                '& .MuiPickersInputBase-root': {
-                                    height: '30px',
-                                    bottom: '1px',
-                                    backgroundColor: 'var(--color-item-hover)',
-                                    borderRadius: '6px'
-                                },
-                                '& .MuiPickersOutlinedInput-notchedOutline': {
-                                    border: '1px solid black',
-                                    borderRadius: '6px'                               
-                                },
-                                '& .MuiSvgIcon-root': {
-                                    color: 'var(--color-icons)'
+                <CustomTooltip title={t("tooltips.inputForm.timeInWaypoint")}>
+                    <div>
+                        <TimePicker
+                            value={legPreferences[index].wait}
+                            ampm={false}
+                            onChange={(newValue) => {if (newValue !== null) handleSelect(newValue)}}
+                            slotProps={{
+                                actionBar: { actions: ['accept'] },
+                                textField: {                            
+                                    sx: {
+                                        '& .MuiPickersInputBase-root': {
+                                            height: '30px',
+                                            bottom: '1px',
+                                            backgroundColor: 'var(--color-item-hover)',
+                                            borderRadius: '6px'
+                                        },
+                                        '& .MuiPickersOutlinedInput-notchedOutline': {
+                                            border: '1px solid black',
+                                            borderRadius: '6px'                               
+                                        },
+                                        '& .MuiSvgIcon-root': {
+                                            color: 'var(--color-icons)'
+                                        }
+                                    }
                                 }
-                            }
-                        }
-                    }}
-                />
+                            }}
+                        />
+                    </div>
+                </CustomTooltip>
             </LocalizationProvider>
         </div>
     );
 }
 
-export default AccuracySelect;
+export default WaitSelect;
 
-/** End of file AccuracySelect.tsx */
+/** End of file WaitSelect.tsx */

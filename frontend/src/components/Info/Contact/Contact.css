@@ -1,3 +1,9 @@
+/**
+ * @file Contact.css
+ * @brief Styles for the component for displaying contact information
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 .contact-mail {
     display: inline-block;
     font-weight: 700;
@@ -11,3 +17,5 @@
     border-bottom: 1px solid var(--color-info);
     font-weight: 900;
 }
+
+/** End of file Contact.css */

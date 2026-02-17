@@ -1,6 +1,6 @@
 /**
  * @file SettingsContext.tsx
- * @brief 
+ * @brief Provides global state management for user preferences
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -33,12 +33,22 @@ type SettingsContextType = {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
+/**
+ * Hook for persisting state in local storage
+ * 
+ * @template T Type of stored value
+ * @param key Unique local storage key
+ * @param defaultValue Default value used if no stored data exists
+ * @returns Tuple containing current value and setter function
+ */
 function useSettingsFromLocalStorage<T>(key: string, defaultValue: T) {
+    // Attempt to read value from local storage, otherwise use default value
     const [value, setValue] = useState<T>(() => {
         const stored = localStorage.getItem(key);
         return stored ? JSON.parse(stored) : defaultValue;
     });
 
+    // Store state changes into local storage
     useEffect(() => {
         localStorage.setItem(key, JSON.stringify(value));
     }, [key, value]);

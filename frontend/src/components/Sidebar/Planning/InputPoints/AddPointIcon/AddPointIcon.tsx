@@ -7,6 +7,8 @@
 import { IconButton } from "@mui/material";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import './AddPointIcon.css'
+import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
+import { useTranslation } from "react-i18next";
 
 type AddPointIconProps = {
     onClick: () => void;
@@ -19,21 +21,25 @@ function AddPointIcon({
     render,
     disabled
 } : AddPointIconProps) {
+    const { t } = useTranslation();
+
     if (!render) 
         return null;
 
     return (
         <div className="line">
-            <IconButton
-                aria-label="Add intermediate waypoint"
-                onClick={onClick}
-                size="small"
-                sx={{ marginBottom: 1, color: 'var(--color-icons)' }}
-                tabIndex={-1}
-                disabled={disabled}
-            >
-                <AddBoxIcon/>
-            </IconButton>
+            <CustomTooltip title={t("tooltips.inputForm.addWaypoint")}>
+                <IconButton
+                    aria-label="Add intermediate waypoint"
+                    onClick={onClick}
+                    size="small"
+                    sx={{ marginBottom: 1, color: 'var(--color-icons)' }}
+                    tabIndex={-1}
+                    disabled={disabled}
+                >
+                    <AddBoxIcon/>
+                </IconButton>
+            </CustomTooltip>
         </div>
     );
 }

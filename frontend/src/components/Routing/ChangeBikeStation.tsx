@@ -9,6 +9,10 @@ import { useInput } from "../InputContext";
 import { useResult } from "../ResultContext";
 import { useSettings } from "../SettingsContext";
 
+/**
+ * Hook that provides functionality for updating bikesharing station selection
+ * within an already computed route
+ */
 export function useChangeBikeStation() {
     // User input context
     const {
@@ -41,9 +45,9 @@ export function useChangeBikeStation() {
     } = useResult();
 
     /**
-     * Requests a route recalculation with a different bikesharing station
+     * Requests route recalculation with a selected bikesharing station
      * 
-     * @param originBikeStation True if the station is the origin, false otherwise
+     * @param originBikeStation True if the station is the origin station, false otherwise
      * @param bikeStationIndex Index of the newly selected bike station
      * @param bikeStations List of available bike stations
      * @param legIndex Index of the route leg being modified

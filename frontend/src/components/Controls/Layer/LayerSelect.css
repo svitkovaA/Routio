@@ -1,8 +1,12 @@
 /**
  * @file LayerSelect.css
- * @brief Styles for layer dropdown component
+ * @brief Styles for the layer dropdown component
  * @author Andrea Svitkova (xsvitka00)
  */
+
+.controls-button-layer {
+    font-size: 1.0rem;
+}
 
 .dropdown.dropdown-layer {
     position: absolute;
@@ -15,10 +19,6 @@
 .dropdown-layer .dropdown-item {
     font-size: 0.9rem;
     padding: 4px 8px !important;
-}
-
-.controls-button-layer {
-    font-size: 1.0rem;
 }
 
 /** End of file LayerSelect.css */

@@ -118,4 +118,8 @@
     color: red;
 }
 
+.hidden {
+    display: none;
+}
+
 /** End of file ResultListItem.css */

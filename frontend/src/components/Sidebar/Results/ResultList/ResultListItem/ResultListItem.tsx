@@ -11,6 +11,8 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { IconButton } from "@mui/material";
 import { TripPattern } from "../../../../types/types";
 import Timeline from "../Timeline/Timeline";
+import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
+import { useTranslation } from 'react-i18next';
 import "./ResultListItem.css"
 
 type ResultListItemProps = {
@@ -26,6 +28,8 @@ function ResultListItem({
     onClick,
     onClickDetail
 } : ResultListItemProps) {
+    const { t } = useTranslation();
+
     return (
         <div 
             className={"pattern " + (selected ? "selected" : "")}
@@ -47,19 +51,27 @@ function ResultListItem({
                     legs={pattern.legs}
                 />
                 <div className="pattern-info-wrapper">
-                    <span>
-                        <AccessTimeIcon sx={{ color: 'var(--color-icons-darker)' }} />
-                        {Math.round(pattern.totalDuration / 60)} min
-                    </span>
-                    <span>
-                        <RouteIcon sx={{ color: 'var(--color-icons-darker)' }} />
-                        {(pattern.totalDistance / 1000).toFixed(1)} km
-                    </span>
-                    {pattern?.numOfTransfers !== undefined && (
+                    <CustomTooltip title={t("tooltips.results.resultList.duration")}>
                         <span>
-                            <SwapHorizIcon sx={{ color: 'var(--color-icons-darker)' }} />
-                            {pattern.numOfTransfers}
+                            <AccessTimeIcon sx={{ color: 'var(--color-icons-darker)' }} />
+                            {Math.round(pattern.totalDuration / 60)} min
                         </span>
+                    </CustomTooltip>
+
+                    <CustomTooltip title={t("tooltips.results.resultList.distance")}>
+                        <span>
+                            <RouteIcon sx={{ color: 'var(--color-icons-darker)' }} />
+                            {(pattern.totalDistance / 1000).toFixed(1)} km
+                        </span>
+                    </CustomTooltip>
+
+                    {pattern?.numOfTransfers !== undefined && (
+                        <CustomTooltip title={t("tooltips.results.resultList.transfers")}>
+                            <span>
+                                <SwapHorizIcon sx={{ color: 'var(--color-icons-darker)' }} />
+                                {pattern.numOfTransfers}
+                            </span>
+                        </CustomTooltip>
                     )}
                 </div>
             </div>
@@ -68,12 +80,14 @@ function ResultListItem({
                     {new Date(pattern.aimedEndTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
                 <span className="hidden detail-span">
-                    <IconButton 
-                        className="detail-button"
-                        onClick={onClickDetail}
-                    >
-                        Detail
-                    </IconButton>
+                    <CustomTooltip title={t("tooltips.results.detailButton")}>
+                        <IconButton 
+                            className="detail-button"
+                            onClick={onClickDetail}
+                        >
+                            Detail
+                        </IconButton>
+                    </CustomTooltip>
                 </span>
             </div>
         </div>

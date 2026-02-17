@@ -1,12 +1,20 @@
-import "./About.css";
+/**
+ * @file About.tsx
+ * @brief Component for displaying general information abut the application
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import { PUBLIC_URL } from "../../config/config";
+import "./About.css";
 
 function About() {
     return (
         <div className="about-wrapper">
+
+            {/* Application overview */}
             <div className="about-section">
                 <p className="about-header">O aplikácii</p>
-                <p className="about-intro">
+                <p>
                     Táto práca vznikla ako súčasť bakalárskej práce na FIT VUT 
                     pod vedením Ing. Jiřího Hynka, PhD. Aplikácia poskytuje podporu pre plánovanie unimodálnych ciest,
                     kde je využitý jeden druh dopravy, ako aj multimodálnych trás
@@ -14,6 +22,7 @@ function About() {
                 </p>
             </div>
 
+            {/* Supported transport modes */}
             <div className="about-section">
                 <p className="about-header">Podporované druhy dopravy</p>
                 <div className="about-transport-modes">
@@ -32,9 +41,10 @@ function About() {
                 </div>
             </div>
 
+            {/* Motivation */}
             <div className="about-section">
                 <p className="about-header">Prečo aplikácia vznikla</p>
-                <p className="about-why">
+                <p>
                     Každodenná mobilita je neoddeliteľnou súčasťou života. 
                     Preprava môže prebiehať pomocou osobnej automobilovej dopravy, 
                     verejnej dopravy, chôdze alebo alternatívnych foriem, ako sú zdieľané bicykle.<br/>
@@ -48,6 +58,7 @@ function About() {
                 </p>
             </div>
 
+            {/* External services and data sources */}
             <div className="about-section">
                 <p className="about-header">Externé služby a dátové zdroje</p>
                 <div className="about-external">

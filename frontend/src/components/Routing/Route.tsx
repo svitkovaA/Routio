@@ -1,6 +1,6 @@
 /**
  * @file Route.tsx
- * @brief Hook responsible for route computation and request handling
+ * @brief Hook responsible for route computation
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -54,14 +54,16 @@ export function useRoute() {
     
     /**
      * Sends a routing request to the backend and updates application state
-    */
-   const route = useCallback(async (resultIndex: number) => {
-        // Abort operation
+     */
+    const route = useCallback(async (resultIndex: number) => {
+        // Abort any running request
         if (abortRef.current) {
             abortRef.current.abort();
             abortRef.current = null;
             setLoading(false);
         }
+
+        // Execute only if selected result is not already active
         if (!results[resultIndex].active) {
             setLoading(true);
             setShowResults(true);
@@ -113,6 +115,7 @@ export function useRoute() {
             const controller = new AbortController();
             abortRef.current = controller;
 
+            // Determine routing mode string expected by backend
             const mode: Mode = resultIndex === 0 ? "transit,bicycle,walk" : 
                 resultIndex === 1 ? "walk_transit" :
                 resultIndex === 2 ? "bicycle" : "foot";
@@ -146,6 +149,7 @@ export function useRoute() {
                         route_preference: preference
                     })
                 });
+            
                 const newResult = await result.json();
     
                 // Save waypoints to LocalStorage
@@ -157,15 +161,18 @@ export function useRoute() {
                         index === resultIndex ? newResult : originalResult
                 ));
     
+                // Set result active index to the result index
                 setResultActiveIndex(resultIndex);
             }
             catch (error: any) {
+                // Ignore abort errors
                 if (error.name === "AbortError") {
                     return;
                 }
                 console.error(error);
             }
             finally {
+                // Reset loading state
                 if (abortRef.current === controller) {
                     setLoading(false);
                     abortRef.current = null;

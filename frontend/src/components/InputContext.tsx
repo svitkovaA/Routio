@@ -1,14 +1,14 @@
 /**
  * @file InputContext.tsx
- * @brief 
+ * @brief Provides global state management for user input parameters
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
-import { LegPreference, RoutePreference, Waypoint } from "./types/types";
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import dayjs from "dayjs";
+import { LegPreference, RoutePreference, Waypoint } from "./types/types";
 import { useResult } from "./ResultContext";
 
 type InputContextType = {
@@ -40,8 +40,10 @@ type InputContextType = {
 const InputContext = createContext<InputContextType | undefined>(undefined);
 
 export function InputProvider({ children } : {children: React.ReactNode}) {
+    // Currently active result index
     const { resultActiveIndex } = useResult();
 
+    // Waypoints initialization
     const [waypoints, setWaypoints] = useState<Waypoint[]>([{
         lat: 0,
         lon: 0,
@@ -58,50 +60,84 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         id: Math.random().toString(36).substring(2,9)
     }]);
 
+    // Determines whether the selected time represents arrival time, or departure time
     const [arriveBy, setArriveBy] = useState<boolean>(false);
+
+    // Indicates whether the user prefers using their own bicycle instead of shared bicycles
     const [useOwnBike, setUseOwnBike] = useState<boolean>(true);
+
+    // Route optimization preference
     const [preference, setPreference] = useState<RoutePreference>("fastest");
+
+    // Index of the currently active input field
     const [activeField, setActiveField] = useState<number | null>(null);
 
+    // Transport mode preferences per leg between waypoints
     const [legPreferences, setLegPreferences] = useState<LegPreference[]>([{
         mode: "transit,bicycle,walk",
         wait: dayjs().startOf("day"),
         open: false
     }]);
 
+    // Selected travel date and time
     const [date, setDate] = useState(() => dayjs());
     const [time, setTime] = useState(() => dayjs());
 
+    // Index of the waypoint currently being assigned via map click
     const [mapSelectionIndex, setMapSelectionIndex] = useState<number>(-1);
 
-    // Unset mapSelectionIndex if other action occurs
+    /**
+     * Unset mapSelectionIndex if other action occurs
+     */
     useEffect(() => {
         setMapSelectionIndex(-1);
     }, [waypoints, time, date, preference, useOwnBike, arriveBy, legPreferences, resultActiveIndex]);
 
+    /**
+     *  Clears waypoint at the specified index
+     * 
+     * @param index Index of the waypoint to clear
+     * @param clearDisplayName If true, displayName is reset to an empty string
+     */
     const clearWaypoint = useCallback((index: number, clearDisplayName: boolean) => {
         setWaypoints(prev => {
             const newWaypoints = [...prev];
+
             newWaypoints[index] = { 
                 ...newWaypoints[index], 
                 displayName: clearDisplayName ? "" : newWaypoints[index].displayName,
                 isActive: false 
             };
+
             return newWaypoints;
         });
     }, []);
 
-    const removeWaypoint = useCallback((currentIndex: number) => {
-        if (currentIndex === activeField) setActiveField(null);
+    /**
+     * Removes a waypoint at the specified index
+     * 
+     * @param index Index of the waypoint to remove
+     */
+    const removeWaypoint = useCallback((index: number) => {
+        // If removed waypoint is the currently active one, clear focus
+        if (index === activeField) {
+            setActiveField(null);
+        }
+
+        // Update leg preferences to match the new waypoint structure
         setLegPreferences(prev => {
             const newPrefs = [...prev];
 
-            if (currentIndex === waypoints.length - 1) {
+            // Removing the last waypoint removes the last leg preference
+            if (index === waypoints.length - 1) {
                 newPrefs.splice(prev.length - 1, 1);
             } 
+            // Removing an intermediate waypoint removes the preference at the same index
             else {
-                newPrefs.splice(currentIndex, 1);
+                newPrefs.splice(index, 1);
             }
+
+            // Restore default if only one preference remains
             if (newPrefs.length === 1) {
                 return [{
                     mode: "transit,bicycle,walk",
@@ -109,15 +145,25 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
                     open: false
                 }];
             }
+
             return newPrefs;
         });
-        setWaypoints(prev => prev.filter((_, i) => i !== currentIndex));
+        // Remove waypoint entry from state
+        setWaypoints(prev => prev.filter((_, i) => i !== index));
     }, [activeField, waypoints.length]);
 
+    /**
+     * Inserts a new waypoint after the specified index
+     * 
+     * @param index Index after which the new waypoint will be inserted
+     */
     const addWaypoint = useCallback((index: number) => {
+        // Maximum available waypoints reached
         if (waypoints.length >= 10) {
             return;
         }
+
+        // Insert new waypoint after the given index
         const newWaypoints = [...waypoints];
         newWaypoints.splice(index + 1, 0, {
             lat: 0,
@@ -128,6 +174,8 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             id: Math.random().toString(36).substring(2,9)
         });
         setWaypoints(newWaypoints);
+
+        // Insert default leg preference for the newly added segment
         const newLegPreferences = [...legPreferences];
         newLegPreferences.splice(index + 1, 0, {
             mode: "transit,bicycle,walk",
@@ -135,19 +183,31 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             open: false
         });
         setLegPreferences(newLegPreferences);
+
     }, [waypoints, legPreferences]);
 
+    /**
+     * Swaps origin and destination waypoints
+     */
     const swapWaypoints = useCallback(() => {
         if (waypoints.length === 2) {
             setWaypoints(prev => [prev[1], prev[0]]);
         }
     }, [waypoints.length]);
 
+    /**
+     * Handles drag and drop reordering of waypoints
+     */
     const onDragEnd = useCallback((event: DragEndEvent) => {
         const {active, over} = event;
+
+        // Ensure valid drop target
         if (over && active.id !== over.id) {
+            // Determine original and new indices based on waypoint ids
             const oldIndex = waypoints.findIndex(w => w.id === active.id);
             const newIndex = waypoints.findIndex(w => w.id === over.id);
+
+            // Reorder waypoints using arrayMove utility
             setWaypoints(prev => arrayMove(prev, oldIndex, newIndex));
         }
     }, [waypoints]);

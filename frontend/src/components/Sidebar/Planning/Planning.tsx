@@ -37,7 +37,7 @@ function Planning({
     }
     
     return (
-        <form className="planning" onSubmit={handleSubmit}>
+        <form className="planning" onSubmit={handleSubmit} noValidate>
             <div className="sidebar-header">
                 <Logo />
             </div>

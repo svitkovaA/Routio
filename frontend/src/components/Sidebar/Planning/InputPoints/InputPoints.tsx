@@ -14,6 +14,8 @@ import SortableItem from "./SortableItem";
 import LegPreferences from "./LegPreferences/LegPreferences";
 import "./InputPoints.css";
 import { useInput } from "../../../InputContext";
+import CustomTooltip from "../../../CustomTooltip/CustomTooltip";
+import { useTranslation } from "react-i18next";
 
 type InputPointsProps = {
     closeSidebar: () => void;
@@ -22,6 +24,8 @@ type InputPointsProps = {
 function InputPoints({
     closeSidebar
 }: InputPointsProps) {
+    const { t } = useTranslation();
+    
     const {
         waypoints,
         legPreferences,
@@ -66,11 +70,13 @@ function InputPoints({
                 </SortableContext>
             </DndContext>
             {waypoints.length === 2 && (
-                <SwapVertIcon 
-                    className="swap" 
-                    onClick={swapWaypoints}
-                    sx={{ color: 'var(--color-icons)' }}
-                />
+                <CustomTooltip title={t("tooltips.inputForm.swapWaypoints")}>
+                    <SwapVertIcon 
+                        className="swap" 
+                        onClick={swapWaypoints}
+                        sx={{ color: 'var(--color-icons)' }}
+                    />
+                </CustomTooltip>
             )}
         </div>
     );

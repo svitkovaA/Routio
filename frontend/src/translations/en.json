@@ -90,5 +90,63 @@
     "publicTransport": "Public transport",
     "bicycle": "Bicycle",
     "walk": "Walk"
+  },
+  "tooltips": {
+    "controls": {
+      "language": "Change application language",
+      "layer": "Change map style",
+      "info": "About this application",
+      "map": {
+        "zoomIn": "Zoom in map",
+        "zoomOut": "Zoom out map",
+        "mapScaleIndicator": "Shows the current map scale"
+      }
+    },
+    "inputForm": {
+      "clearField": "Clear this field",
+      "mapSelect": "Pick a location from the map",
+      "removeWaypoint": "Remove this stop",
+      "swapWaypoints": "Swap origin and destination",
+      "addWaypoint": "Add another stop",
+      "dragAndDrop": "Drag to change stop order",
+      "modeTimePrefs": "Set transport mode or stop duration",
+      "modePreferences": "Choose transport mode",
+      "timeInWaypoint": "Set stop duration",
+      "closeLegPrefs": "Close segment settings",
+      "preferencesButton": "Open route preferences"
+    },
+    "sidebar": {
+      "closeSidebar": "Close panel",
+      "openSidebar": "Open panel"
+    },
+    "results": {
+      "detailButton": "Open route detail",
+      "resultTabs": {
+        "multimodal": "Multimodal",
+        "publicTransport": "Public Transport",
+        "bicycle": "Bicycle",
+        "foot": "Walking"
+      },
+      "resultList": {
+        "duration": "Trip duration",
+        "distance": "Trip distance",
+        "transfers": "Number of transfers on route"
+      }
+    },
+    "detail": {
+      "detailPreview": {
+        "previousRoute": "Previous route",
+        "nextRoute": "Next route",
+        "otherRouteDots": "Select another route detail"
+      }
+    },
+    "settings": {
+      "openSections": {
+        "openTransportPreferences": "Open transport preferences",
+        "openCyclingPreferences": "Open cycling preferences",
+        "openBikesharingPreferences": "Open bikesharing preferences",
+        "openWalkingPreferences": "Open walking preferences"
+      }
+    }
   }
 }

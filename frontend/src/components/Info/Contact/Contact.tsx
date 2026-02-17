@@ -1,3 +1,9 @@
+/**
+ * @file Contact.tsx
+ * @brief Component for displaying contact information
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import "./Contact.css"
 
 function Contact() {
@@ -19,3 +25,5 @@ function Contact() {
 }
 
 export default Contact;
+
+/** End of file Contact.tsx */

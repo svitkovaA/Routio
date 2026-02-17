@@ -1,6 +1,6 @@
 /**
  * @file Info.css
- * @brief Styles for info component including layout and close button
+ * @brief Styles for the info component
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -32,6 +32,10 @@
     min-width: 300px;
 }
 
+.info .selected {
+    border-bottom-width: 3px;
+}
+
 .info-header {
     display: flex;
     gap: 5px;
@@ -42,17 +46,11 @@
     padding-right: 40px;
 }
 
-.info-header .logo {
-    justify-content: center;
-    flex-grow: 1;
-}
-
 .mobile-menu-button {
     background: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-
 }
 
 .mobile-menu-button svg {
@@ -60,25 +58,9 @@
     position: relative;
 }
 
-.info-header p {
-    font-size: 30px;
-    font-weight: 700;
-}
-
-.info .info-grid-wrapper {
-    gap: 0;
-}
-
-.info .input-wrapper {
-    text-align: center;
-    padding: 9px;
-    border-bottom: 1px solid black;
-    margin-bottom: 0;
-    cursor: pointer;
-}
-
-.info .selected {
-    border-bottom-width: 3px;
+.info-header .logo {
+    justify-content: center;
+    flex-grow: 1;
 }
 
 .close-button {
@@ -91,24 +73,6 @@
 
 .close-button svg {
     font-size: 30px;
-}
-
-.hidden {
-    display: none;
-}
-
-.text-wrapper {
-    padding: 20px;
-    padding-top: 10px;
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
-}
-
-.info h2 {
-    padding: 9px;
-    text-align: center;
-    border-bottom: 1px solid black;
 }
 
 .mobile-navigation {
@@ -131,6 +95,14 @@
     cursor: pointer;
 }
 
+.text-wrapper {
+    padding: 20px;
+    padding-top: 10px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
 @media screen and (min-width: 768px) {
     .info {
         background-color: var(--color-background);
@@ -140,27 +112,23 @@
         max-width: min(1200px, calc(100% - 150px));
         height: calc(100% - 150px);
     }
-}
 
-.info .info-grid-wrapper {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-}
+    .info .info-grid-wrapper {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+    }
 
-.info .input-wrapper {
-    text-align: center;
-    padding: 12px;
-    cursor: pointer;
-}
+    .info .input-wrapper {
+        text-align: center;
+        border-bottom: 1px solid black;
+        margin-bottom: 0;
+        cursor: pointer;
+        padding: 12px;
+    }
 
-.info-grid-wrapper h3 {
-    border-bottom: 1px solid #d9d6d6;
-    display: block;
-}
-
-.info .input-wrapper.selected {
-    border-bottom: 2px solid black !important;
-    font-weight: 600;
+    .info .input-wrapper.selected {
+        border-bottom: 2px solid black;
+    }
 }
 
 /** End of file Info.css */

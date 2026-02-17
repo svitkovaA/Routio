@@ -10,9 +10,9 @@ import { createTheme } from "@mui/material/styles";
 import Map from './components/Map/Map';
 import SideBar from './components/Sidebar/Sidebar';
 import Controls from './components/Controls/Controls';
+import Info from './components/Info/Info';
 import { useInput } from './components/InputContext';
 import { useResult } from './components/ResultContext';
-import Info from './components/Info/Info';
 import './App.css';
 
 function App() {

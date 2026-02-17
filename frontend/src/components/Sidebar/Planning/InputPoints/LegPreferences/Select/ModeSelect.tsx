@@ -10,12 +10,15 @@ import { Mode } from "../../../../../types/types";
 import { modeIcons } from "../../../Icons/Icons";
 import "./Select.css";
 import { useInput } from "../../../../../InputContext";
+import CustomTooltip from "../../../../../CustomTooltip/CustomTooltip";
+import { useTranslation } from "react-i18next";
 
 type ModeSelectProps = {
     index: number;
 }
 
 function ModeSelect({ index }: ModeSelectProps) {
+    const { t } = useTranslation();
     const { legPreferences, setLegPreferences } = useInput();
     const [open, setOpen] = useState<boolean>(false);
 
@@ -29,23 +32,25 @@ function ModeSelect({ index }: ModeSelectProps) {
 
     return (
         <div className="select">
-            <button
-                onBlur={() => setOpen(false)}
-                className={"controls-button mode " + (open ? "open" : "")}
-                onClick={() => setOpen(!open)}
-                type="button"
-                tabIndex={-1}
-            >
-                {modeIcons.map((mode) => 
-                    mode.value === legPreferences[index].mode ? mode.html : null
-                )}
-                <span className="mode-arrow">
-                    <KeyboardArrowDownIcon 
-                        className={open ? "rotate" : ""}
-                        sx={{ color: 'var(--color-icons)' }}
-                    />
-                </span>
-            </button>
+            <CustomTooltip title={t("tooltips.inputForm.modePreferences")}>
+                <button
+                    onBlur={() => setOpen(false)}
+                    className={"controls-button mode " + (open ? "open" : "")}
+                    onClick={() => setOpen(!open)}
+                    type="button"
+                    tabIndex={-1}
+                >
+                    {modeIcons.map((mode) => 
+                        mode.value === legPreferences[index].mode ? mode.html : null
+                    )}
+                    <span className="mode-arrow">
+                        <KeyboardArrowDownIcon 
+                            className={open ? "rotate" : ""}
+                            sx={{ color: 'var(--color-icons)' }}
+                        />
+                    </span>
+                </button>
+            </CustomTooltip>
 
             {open && (
                 <div className="dropdown dropdown-mode">

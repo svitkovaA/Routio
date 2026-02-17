@@ -10,10 +10,12 @@ import L from "leaflet";
 import { useResult } from "../../ResultContext";
 
 type FitBoundProps = {
-    sidebarOpen: boolean;   // State indicating whether the sidebar is currently open
+    sidebarOpen: boolean;   // Indicates whether the sidebar is currently open
 }
 
-function FitBound({ sidebarOpen }: FitBoundProps) {
+function FitBound({ 
+    sidebarOpen
+}: FitBoundProps) {
     // Result context
     const { pattern, mobileSidebarHeight } = useResult();
 
@@ -22,6 +24,7 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
 
     // Computes map bounds for the active trip pattern
     const bounds = useMemo(() => {
+        // No route polyline data available
         if (!pattern?.polyInfo?.length) {
             return null;
         }
@@ -66,7 +69,7 @@ function FitBound({ sidebarOpen }: FitBoundProps) {
     useEffect(() => {
         if (!bounds) return;
 
-        // Detect is the device is mobile based on the screen width
+        // Detect mobile layout
         const isMobile = window.innerWidth < 768;
 
         // Adjust mobile layout for route to fit map bounds

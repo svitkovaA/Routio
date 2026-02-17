@@ -4,8 +4,8 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { Popup, useMapEvent } from "react-leaflet";
 import { useState } from "react";
+import { Popup, useMapEvent } from "react-leaflet";
 import { Waypoint } from "../../types/types";
 import { useResult } from "../../ResultContext";
 
@@ -21,6 +21,7 @@ function MapInfoPopup({
     // Position state of the menu popup
     const [position, setPosition] = useState<[number, number] | null>(null);
 
+    // Result context
     const { loading } = useResult();
 
     // Displays popup on right mouse click
@@ -38,15 +39,19 @@ function MapInfoPopup({
         if (!position) {
             return;
         }
+        // Prevents popup close propagation
         e.stopPropagation();
+        
         handleMapSelection(position[0], position[1], index);
         setPosition(null);
     };
 
+    // Do not render popup if no position is selected
     if (!position) {
         return null;
     }
 
+    // Automatically close popup during loading state
     if (loading) {
         setPosition(null);
         return null;

@@ -4,8 +4,8 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { MapContainer, TileLayer, ZoomControl, Marker, Popup, ScaleControl } from 'react-leaflet'
 import { useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, ZoomControl, Marker, Popup, ScaleControl, useMap } from 'react-leaflet'
 import L from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import { API_BASE_URL } from '../config/config';
@@ -29,8 +29,40 @@ L.Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
+function MapControlTooltips() {
+    // Translation function
+    const { t } = useTranslation();
+
+    // Leaflet map instance
+    const map = useMap();
+
+    useEffect(() => {
+        map.whenReady(() => {
+            const container = map.getContainer();
+
+            const zoomIn = container.querySelector(".leaflet-control-zoom-in");
+            const zoomOut = container.querySelector(".leaflet-control-zoom-out");
+            const scale = container.querySelector(".leaflet-control-scale");
+
+            if (zoomIn) {
+                zoomIn.setAttribute("title", t("tooltips.controls.map.zoomIn"));
+            }
+
+            if (zoomOut) {
+                zoomOut.setAttribute("title", t("tooltips.controls.map.zoomOut"));
+            }
+
+            if (scale) {
+                scale.setAttribute("title", t("tooltips.controls.map.mapScaleIndicator"));
+            }
+        });
+    }, [map, t]);
+
+    return null;
+}
+
 type MapProps = {
-    sidebarOpen: boolean;                           // State whether the sidebar is currently opened
+    sidebarOpen: boolean;                           // Indicates whether the sidebar is currently open
     openSidebar: () => void;                        // Callback used to open the sidebar
     handleMarkerRemove: (index: number) => void;    // Removes or clears a waypoint marker
 };
@@ -40,12 +72,24 @@ function Map({
     openSidebar,
     handleMarkerRemove,
 }: MapProps) {
+    // Translation function
     const { t } = useTranslation();
 
     // Contexts
-    const { showResults, vehiclePositions, closeResults, loading } = useResult();
+    const {
+        showResults,
+        vehiclePositions,
+        closeResults,
+        loading 
+    } = useResult();
+
     const { selectedLayerIndex } = useSettings();
-    const { baseLayers, satelliteOverlay } = useLayers();
+
+    const { 
+        baseLayers,
+        satelliteOverlay
+    } = useLayers();
+
     const {
         waypoints, 
         setWaypoints, 
@@ -53,7 +97,10 @@ function Map({
         setMapSelectionIndex,
     } = useInput();
 
-    const center: L.LatLngTuple = [49.1951, 16.6068];
+    // Default map center
+    const defaultCenter: L.LatLngTuple = [49.1951, 16.6068];
+
+    // Default map zoom
     const defaultZoom = 13;
 
     // Custom marker icons
@@ -64,44 +111,67 @@ function Map({
     const popupRefs = useRef<(L.Popup | null)[]>([]);
 
     /**
-     * Handles selection of the location on the map
+     * Handles location selection on the map
      * 
      * @param lat Latitude of the selected location
      * @param lon Longitude of the selected location
      * @param index Waypoint index
-     * @returns True if the click was handled false otherwise
+     * @returns True if the selection was handled, false otherwise
      */
     const handleMapSelection = (lat: number, lon: number, index?: number): boolean => {
+        // Resolve target waypoint index
         const targetIndex = index !== undefined ? index : mapSelectionIndex;
-        if (targetIndex === -1) 
-            return false;
 
+        // No active click, ignore selection
+        if (targetIndex === -1) {
+            return false;
+        }
+
+        /**
+         * Updates the selected waypoint with resolved display name
+         * 
+         * @param displayName Address resolved from reverse geocoding
+         */
         const updateWaypoints = (displayName: string) => {
             const newWaypoints = [...waypoints];
             newWaypoints[targetIndex] = {
                 ...newWaypoints[targetIndex], lat, lon, displayName, isActive: true
             };
+
+            // Update waypoint state
             setWaypoints(newWaypoints);
 
-            // Automatically open sidebar on small screens
-            if (window.innerWidth < 768) 
+            // Automatically open sidebar on mobile devices
+            if (window.innerWidth < 768) {
                 openSidebar();
+            }
+
+            // Cancel map selection mode
             setMapSelectionIndex(-1);
-        }
+        };
+
+        // Reverse geocoding request to backend API
         fetch(`${API_BASE_URL}/geocode/latLon?lat=${lat}&lon=${lon}`)
             .then((res) => {
-                if (!res.ok) throw new Error("Network response was not ok");
+                if (!res.ok) {
+                    throw new Error("Network response was not ok");
+                }
                 return res.json();
             })
             .then((data: InputText) => {
+                // Build display name from street and city information
                 const displayName = [data.street, data.city].filter(Boolean).join(", ");
                 updateWaypoints(displayName);
             })
             .catch((err) => {
+                // Fallback to use coordinates if reverse geocoding fails
                 const displayName = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
                 updateWaypoints(displayName);
             });
+
+        // Close route results after selecting new location
         closeResults();
+
         return true;
     };
 
@@ -109,10 +179,10 @@ function Map({
      * Updates cursor style while map selection mode is active
      */
     useEffect(() => {
-        let cursor = "";
-        if (mapSelectionIndex !== -1) {
-            cursor="crosshair";
-        }
+        // Determine cursor style based on selection state
+        const cursor = mapSelectionIndex !== -1 ? "crosshair" : "";
+
+        // Overwrite cursor style
         const elements = document.getElementsByClassName("leaflet-grab");
         for (let i = 0; i < elements.length; i++) {
             (elements[i] as HTMLElement).style.cursor = cursor;
@@ -120,14 +190,21 @@ function Map({
     }, [mapSelectionIndex]);
 
     return (
-        <MapContainer center={center} zoom={defaultZoom} zoomControl={false} id="map" className={mapSelectionIndex !== -1 ? "selected" : ""}>
+        <MapContainer center={defaultCenter} zoom={defaultZoom} zoomControl={false} className={"map" + (mapSelectionIndex !== -1 ? "selected" : "")}>
             {/* Popup information during waypoint selection */}
             <MapInfoPopup
                 waypoints={waypoints}
                 handleMapSelection={handleMapSelection}
             />
+
+            {/* Zoom handler */}
             <ZoomControl position="bottomright"/>
+
+            {/* Scale indicator */}
             <ScaleControl position="bottomleft" imperial={false} />
+
+            {/* Custom tooltips for leaflet components */}
+            <MapControlTooltips />
 
             {/* Base map layer */}
             <TileLayer 
@@ -164,6 +241,7 @@ function Map({
                         position={[w.lat, w.lon]}
                         icon={i === 0 ? startMarker : i !== waypoints.length - 1 ? createPinIcon(i.toString(), w.isPreview) : endMarker}
                     >
+                        {/* Popup for waypoint markers */}
                         <Popup
                             ref={el => {
                                 popupRefs.current[i] = el 
@@ -200,7 +278,7 @@ function Map({
                     position={[p.lat, p.lon]}
                     icon={createVehiclePositionIcon(p.publicCode, p.color)}
                 >
-                    {/* Popup information */}
+                    {/* Popup for vehicle position */}
                     <Popup>
                         <div className="vehicle-position-popup">
                             {timelineIcons[p.mode]}

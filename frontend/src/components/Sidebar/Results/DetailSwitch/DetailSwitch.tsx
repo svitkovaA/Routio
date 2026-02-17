@@ -10,15 +10,19 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { IconButton } from "@mui/material";
 import { useResult } from "../../../ResultContext";
+import { useTranslation } from 'react-i18next';
+import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
 import "./DetailSwitch.css"
 
 type DetailSwitchProps = {
-    numOfPatterns: number;                          // Total number of available trip patterns
+    numOfPatterns: number;      // Total number of available trip patterns
 };
 
 function DetailSwitch({
     numOfPatterns,
 }: DetailSwitchProps) {
+    const { t } = useTranslation();
+
     // Result context
     const { selectedTripPatternIndex, setSelectedTripPatternIndex } = useResult();
 
@@ -26,44 +30,50 @@ function DetailSwitch({
         <div className="detail-switch">
 
             {/* Navigation to the previous trip pattern */}
-            <IconButton
-                className="detail-switch-arrow"
-                onClick={() => {
-                    setSelectedTripPatternIndex((prev) =>
-                        prev > 0 ? prev - 1 : numOfPatterns - 1
-                    );
-                }}
-            >
-                <KeyboardArrowLeftIcon />
-            </IconButton>
+            <CustomTooltip title={t("tooltips.detail.detailPreview.previousRoute")}>
+                <IconButton
+                    className="detail-switch-arrow"
+                    onClick={() => {
+                        setSelectedTripPatternIndex((prev) =>
+                            prev > 0 ? prev - 1 : numOfPatterns - 1
+                        );
+                    }}
+                >
+                    <KeyboardArrowLeftIcon />
+                </IconButton>
+            </CustomTooltip>
 
             {/* Dots for direct pattern selection */}
-            <div className="dots">
-                {Array.from({ length: numOfPatterns }, (_, i) => (
-                <IconButton 
-                    key={i} 
-                    onClick={() => setSelectedTripPatternIndex(i)}
-                >
-                    {i === selectedTripPatternIndex ? (
-                        <RadioButtonCheckedIcon className="dot"/>
-                    ) : (
-                        <RadioButtonUncheckedIcon className="dot"/>
-                    )}
-                </IconButton>
-                ))}
-            </div>
+            <CustomTooltip title={t("tooltips.detail.detailPreview.otherRouteDots")}>
+                <div className="dots">
+                    {Array.from({ length: numOfPatterns }, (_, i) => (
+                        <IconButton 
+                        key={i} 
+                        onClick={() => setSelectedTripPatternIndex(i)}
+                    >
+                        {i === selectedTripPatternIndex ? (
+                            <RadioButtonCheckedIcon className="dot"/>
+                        ) : (
+                            <RadioButtonUncheckedIcon className="dot"/>
+                        )}
+                    </IconButton>
+                    ))}
+                </div>
+            </CustomTooltip>
 
             {/* Navigation to the next trip pattern */}
-            <IconButton
-                className="detail-switch-arrow"
-                onClick={() => {
-                    setSelectedTripPatternIndex((prev) =>
-                        prev < numOfPatterns - 1 ? prev + 1 : 0
-                    );
-                }}
-            >
-                <KeyboardArrowRightIcon />
-            </IconButton>
+            <CustomTooltip title={t("tooltips.detail.detailPreview.nextRoute")}>
+                <IconButton
+                    className="detail-switch-arrow"
+                    onClick={() => {
+                        setSelectedTripPatternIndex((prev) =>
+                            prev < numOfPatterns - 1 ? prev + 1 : 0
+                        );
+                    }}
+                >
+                    <KeyboardArrowRightIcon />
+                </IconButton>
+            </CustomTooltip>
         </div>
     );
 }

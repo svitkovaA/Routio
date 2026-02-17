@@ -12,6 +12,8 @@ import InputField from "./InputField/InputField";
 import Suggestions from "./Suggestions/Suggestions";
 import { useInput } from "../../../InputContext";
 import { useSuggestionHandle } from "./Suggestions/SuggestionsHandle";
+import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
+import { useTranslation } from 'react-i18next';
 
 type SortableItemProps = {
     index: number;
@@ -22,6 +24,8 @@ function SortableItem({
     index,
     closeSidebar
 }: SortableItemProps) {
+    const { t } = useTranslation();
+
     const {
         waypoints, setWaypoints,
         activeField,
@@ -104,7 +108,9 @@ function SortableItem({
                 className="drag-and-drop"
                 tabIndex={-1}
             >
-                <DragIndicatorIcon sx={{ color: 'var(--color-icons)' }}/>
+                <CustomTooltip title={t("tooltips.inputForm.dragAndDrop")}>
+                    <DragIndicatorIcon sx={{ color: 'var(--color-icons)' }}/>
+                </CustomTooltip>
             </div>
 
             <InputField

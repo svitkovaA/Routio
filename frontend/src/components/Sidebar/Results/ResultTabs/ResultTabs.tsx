@@ -9,18 +9,18 @@ import PedalBikeIcon from '@mui/icons-material/PedalBike';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import { MultimodalIcon } from "../../Planning/Icons/Icons";
 import { useResult } from "../../../ResultContext";
-import "./ResultTabs.css";
 import { useRoute } from '../../../Routing/Route';
+import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
+import { useTranslation } from 'react-i18next';
+import "./ResultTabs.css";
 
 function ResultTabs() { 
+    const { t } = useTranslation();
     // Result context 
     const {
         setSelectedTripPatternIndex,
         resultActiveIndex ,setResultActiveIndex
     } = useResult();
-
-    // User input context
-    // const { setMode } = useInput();
 
     const route = useRoute();
 
@@ -28,58 +28,62 @@ function ResultTabs() {
         <div className="result-tabs" onClick={() => setSelectedTripPatternIndex(0)}>
 
             {/* Multimodal transport tab */}
-            <div 
-                className={"result-mode " + (resultActiveIndex === 0 ? "selected" : "")}
-                onClick={() => {
-                    setResultActiveIndex(0);
-                    // setMode("transit,bicycle,walk"); 
-                    route(0);
-                }}
-            >
-                <MultimodalIcon iconSize={24}/>
-            </div>
+            <CustomTooltip title={t("tooltips.results.resultTabs.multimodal")}>
+                <div 
+                    className={"result-mode " + (resultActiveIndex === 0 ? "selected" : "")}
+                    onClick={() => {
+                        setResultActiveIndex(0);
+                        route(0);
+                    }}
+                >
+                    <MultimodalIcon iconSize={24}/>
+                </div>
+            </CustomTooltip>
 
             {/* Public transport tab */}
-            <div 
-                className={"result-mode " + (resultActiveIndex === 1 ? "selected" : "")} 
-                onClick={() => {
-                    setResultActiveIndex(1);
-                    // setMode("walk_transit");
-                    route(1);
-                }}
-            >
-                <div className="circle">
-                    <DirectionsBusIcon />
+            <CustomTooltip title={t("tooltips.results.resultTabs.publicTransport")}>
+                <div 
+                    className={"result-mode " + (resultActiveIndex === 1 ? "selected" : "")} 
+                    onClick={() => {
+                        setResultActiveIndex(1);
+                        route(1);
+                    }}
+                >
+                    <div className="circle">
+                        <DirectionsBusIcon />
+                    </div>
                 </div>
-            </div>
+            </CustomTooltip>
 
             {/* Bicycle transport tab */}
-            <div 
-                className={"result-mode " + (resultActiveIndex === 2 ? "selected" : "")}
-                onClick={() => {
-                    setResultActiveIndex(2);
-                    // setMode("bicycle");
-                    route(2);
-                }}
-            >
-                <div className="circle">
-                    <PedalBikeIcon />
+            <CustomTooltip title={t("tooltips.results.resultTabs.bicycle")}>
+                <div 
+                    className={"result-mode " + (resultActiveIndex === 2 ? "selected" : "")}
+                    onClick={() => {
+                        setResultActiveIndex(2);
+                        route(2);
+                    }}
+                >
+                    <div className="circle">
+                        <PedalBikeIcon />
+                    </div>
                 </div>
-            </div>
+            </CustomTooltip>
 
             {/* Walking transport tab */}
-            <div 
-                className={"result-mode " + (resultActiveIndex === 3 ? "selected" : "")}
-                onClick={() => {
-                    setResultActiveIndex(3);
-                    // setMode("foot");
-                    route(3);
-                }}
-            >
-                <div className="circle">
-                    <DirectionsWalkIcon />
+            <CustomTooltip title={t("tooltips.results.resultTabs.foot")}>
+                <div 
+                    className={"result-mode " + (resultActiveIndex === 3 ? "selected" : "")}
+                    onClick={() => {
+                        setResultActiveIndex(3);
+                        route(3);
+                    }}
+                >
+                    <div className="circle">
+                        <DirectionsWalkIcon />
+                    </div>
                 </div>
-            </div>
+            </CustomTooltip>
         </div>
     );
 }

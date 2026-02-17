@@ -33,11 +33,12 @@ function ShowRoute() {
         }
         
         // Do not recompute if polyline data already exists
-        const legs = pattern.legs;
         if (pattern.polyInfo.length !== 0) {
             return;
         }
         
+        const legs = pattern.legs;
+
         // Decode polyline coordinates for each leg
         const polyInfoTemp = legs.map(leg => {
             const coords = Array.isArray(leg.pointsOnLink.points) ? leg.pointsOnLink.points.flatMap(p => polyline.decode(p)) : polyline.decode(leg.pointsOnLink.points);
@@ -69,6 +70,7 @@ function ShowRoute() {
     
     const polyInfo = pattern.polyInfo || [];
     
+    // Do not render if no polyline data is available
     if (polyInfo.length === 0) {
         return null;
     }

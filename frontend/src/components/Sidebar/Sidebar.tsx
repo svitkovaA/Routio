@@ -7,12 +7,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { useMediaQuery } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import Planning from './Planning/Planning';
 import Settings from './Settings/Settings';
 import Results from './Results/Results';
 import { useInput } from '../InputContext';
 import { useResult } from '../ResultContext';
 import DragHandle from './DragHandle/DragHandle';
+import CustomTooltip from '../CustomTooltip/CustomTooltip';
 import './Sidebar.css';
 
 type sidebarProps = {
@@ -26,6 +28,7 @@ function Sidebar({
     setSidebarOpen, 
     showInfo,
 }: sidebarProps) {
+    const { t } = useTranslation();
     // User input context
     const { waypoints } = useInput();
 
@@ -136,16 +139,18 @@ function Sidebar({
             </div>
 
             {/* Sidebar toggle button */}
-            <button 
-                id="toggle-sidebar" 
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-                <KeyboardArrowLeftIcon 
-                    fontSize="large" 
-                    className={sidebarOpen ? "" : "rotate"}
-                    sx={{ color: 'var(--color-text-primary)' }}
-                />
-            </button>
+            <CustomTooltip title={sidebarOpen ? t("tooltips.sidebar.closeSidebar") : t("tooltips.sidebar.openSidebar")}>
+                <button 
+                    id="toggle-sidebar" 
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                    <KeyboardArrowLeftIcon 
+                        fontSize="large" 
+                        className={sidebarOpen ? "" : "rotate"}
+                        sx={{ color: 'var(--color-text-primary)' }}
+                    />
+                </button>
+            </CustomTooltip>
 
             {/* Clickable area for toggling sidebar */}
             {isMobile && (

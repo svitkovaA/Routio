@@ -1,16 +1,16 @@
 /**
  * @file Controls.tsx
- * @brief Renders control elements for map interaction
+ * @brief Renders control elements including layer selection, language selection and information panel
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import LanguageSelect from "./Language/LanguageSelect";
 import LayerSelect from "./Layer/LayerSelect";
+import LanguageSelect from "./Language/LanguageSelect";
 import Information from "./Information/Information";
 import './Controls.css'
 
 type ControlsProps = {
-    setShowInfo: (value: boolean) => void;
+    setShowInfo: (value: boolean) => void;  // Controls visibility of the information panel
 }
 
 function Controls({

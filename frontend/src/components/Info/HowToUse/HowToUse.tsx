@@ -1,10 +1,18 @@
-import "./HowToUse.css";
-import { PUBLIC_URL } from "../../config/config";
+/**
+ * @file HowToUse.tsx
+ * @brief Component for displaying information about the application usage
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import { useState } from "react";
+import { PUBLIC_URL } from "../../config/config";
+import "./HowToUse.css";
 
 function HowToUse() {
+    // Currently selected instruction step
     const [step, setStep] = useState(1);
 
+    // Available instruction steps
     const steps = [
         { id: 1, title: "Plánovanie" },
         { id: 2, title: "Preferencie" },
@@ -21,6 +29,7 @@ function HowToUse() {
             {/* Step navigation */}
             <div className="howto-steps">
                 <div className="howto-steps-tuple">
+                    {/* Fist two steps */}
                     {steps.slice(0,2).map((s, i) => (
                         <div
                             key={s.id}
@@ -34,6 +43,7 @@ function HowToUse() {
                     ))}
                 </div>
                 <div className="howto-steps-tuple">
+                    {/* Second two steps */}
                     {steps.slice(2).map((s, i) => (
                         <div
                             key={s.id}
@@ -94,3 +104,5 @@ function HowToUse() {
 }
 
 export default HowToUse;
+
+/** End of file HowToUse.tsx */

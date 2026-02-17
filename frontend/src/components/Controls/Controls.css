@@ -49,10 +49,6 @@
     border-bottom-right-radius: 0px;
 }
 
-.controls-button span {
-    font-size: 2rem;
-}
-
 .dropdown {
     position: absolute;
     right: 0;

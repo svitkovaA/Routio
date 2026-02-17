@@ -7,10 +7,12 @@
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { modeIcons } from "../../Icons/Icons";
-import AccuracySelect from "./Select/WaitSelect";
 import ModeSelect from "./Select/ModeSelect";
 import "./LegPreferences.css";
 import { useInput } from "../../../../InputContext";
+import { useTranslation } from "react-i18next";
+import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
+import WaitSelect from "./Select/WaitSelect";
 
 type LegPreferencesProps = {
     render: boolean;
@@ -21,6 +23,7 @@ function LegPreferences({
     render,
     index
 }: LegPreferencesProps) {
+    const { t } = useTranslation();
     const { legPreferences, setLegPreferences } = useInput();
     const setLegPreference = (value: boolean) => {
         setLegPreferences((prev) => {
@@ -37,17 +40,19 @@ function LegPreferences({
     return (
         <div className="leg-preferences-wrapper">
             {!legPreferences[index].open ? (
-                <div
-                    className={"leg-preferences-button " + (legPreferences[index].mode === "transit,bicycle,walk" ? "multimodal" : "")}
-                    onClick={() => setLegPreference(true)}
-                >
-                    {modeIcons.map((mode) => 
-                        mode.value === legPreferences[index].mode ? mode.html : null
-                    )}
-                    <div className={"leg-preferences-time " + (legPreferences[index].mode !== "transit,bicycle,walk" ? "short" : "")}>
-                        {legPreferences[index].wait.hour()*60+legPreferences[index].wait.minute()} min
+                <CustomTooltip title={t("tooltips.inputForm.modeTimePrefs")}>
+                    <div
+                        className={"leg-preferences-button " + (legPreferences[index].mode === "transit,bicycle,walk" ? "multimodal" : "")}
+                        onClick={() => setLegPreference(true)}
+                    >
+                        {modeIcons.map((mode) => 
+                            mode.value === legPreferences[index].mode ? mode.html : null
+                        )}
+                        <div className={"leg-preferences-time " + (legPreferences[index].mode !== "transit,bicycle,walk" ? "short" : "")}>
+                            {legPreferences[index].wait.hour()*60+legPreferences[index].wait.minute()} min
+                        </div>
                     </div>
-                </div>
+                </CustomTooltip>
             ) : (
                 <ClickAwayListener
                     mouseEvent="onMouseDown"
@@ -62,15 +67,17 @@ function LegPreferences({
                         <div className="select-wrapper">
                             <ModeSelect
                                 index={index}
-                            />
-                            <AccuracySelect
+                            />                                
+                            <WaitSelect
                                 index={index}
                             />
                         </div>
-                        <KeyboardArrowLeftIcon 
-                            onClick={() => setLegPreference(false)}
-                            sx={{ color: 'var(--color-icons)' }}
-                        />
+                        <CustomTooltip title={t("tooltips.inputForm.closeLegPrefs")}>
+                            <KeyboardArrowLeftIcon 
+                                onClick={() => setLegPreference(false)}
+                                sx={{ color: 'var(--color-icons)' }}
+                            />
+                        </CustomTooltip>
                     </div>
                 </ClickAwayListener>
             )}

@@ -5,20 +5,26 @@
  */
 
 import TuneIcon from '@mui/icons-material/Tune';
+import { useTranslation } from 'react-i18next';
 import { useResult } from '../../../ResultContext';
+import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
 import "./Preferences.css";
 
 function Preferences() {
+    const { t } = useTranslation();
     const { setShowSettings } = useResult();
+
     return (
-        <button 
-            className="input-wrapper preferences-button" 
-            onClick={() => setShowSettings(true)} 
-            type="button"
-            tabIndex={-1}
-        >
+        <CustomTooltip title={t("tooltips.inputForm.preferencesButton")}>
+            <button 
+                className="input-wrapper preferences-button" 
+                onClick={() => setShowSettings(true)} 
+                type="button"
+                tabIndex={-1}
+            >
             <TuneIcon sx={{ color: 'var(--color-icons)' }} />
         </button>
+        </CustomTooltip>
     );
 }
 

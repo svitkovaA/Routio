@@ -6,12 +6,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import "./i18n";
 import App from './App';
 import { SettingsProvider } from './components/SettingsContext';
 import { InputProvider } from './components/InputContext';
-import "./i18n";
-import './index.css';
 import { ResultProvider } from './components/ResultContext';
+import './index.css';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement

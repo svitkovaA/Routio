@@ -1,20 +1,21 @@
 /**
  * @file LanguageSelect.tsx
- * @brief Dropdown component for selecting the currently used language
+ * @brief Dropdown component for selecting the applications active language
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CustomTooltip from "../../CustomTooltip/CustomTooltip";
 
-// Language definition including code and flag code
+// Language representation
 type Language = {
-    code: string;
-    flagCode: string;
+    code: string;       // Language code
+    flagCode: string;   // Unicode flag representation
 };
 
-// List of all supported languages in the application
+// List of all supported  application languages
 const languages: Language[] = [{
         code: "en",
         flagCode: "\uD83C\uDDEC\uD83C\uDDE7"
@@ -28,20 +29,20 @@ const languages: Language[] = [{
 ];
 
 function LanguageSelect() {
-    // i18next instance for language switching
-    const { i18n } = useTranslation();
+    // Translation function and i18n instance
+    const { t, i18n } = useTranslation();
 
     // Currently active language
     const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
 
-    // State storing the selected language
+    // Stores the selected language
     const [selectedLang, setSelectedLang] = useState<Language>(currentLanguage);
 
-    // State controlling visibility of the dropdown menu
+    // Controls visibility of the dropdown menu
     const [open, setOpen] = useState<boolean>(false);
     
     /**
-     * Handles selection of the language 
+     * Handles language selection
      * @param lang Selected language
      */
     const handleSelect = (lang: Language) => {
@@ -52,21 +53,24 @@ function LanguageSelect() {
 
     return (
         <div className={"controls-select " + (window.innerWidth < 768)}>
+            
             {/* Button opening the language selection dropdown */}
-            <button
-                onBlur={() => setOpen(false)}
-                className={"controls-button " + (open ? "open" : "")}
-                onClick={() => {
-                    setOpen(!open);
-                }}
-            >
-                {selectedLang.flagCode}
-                <ExpandMoreIcon 
-                    fontSize="small" 
-                    className={open ? "rotate" : ""}
-                    sx={{ color: 'var(--color-text-primary)' }}
-                />
-            </button>
+            <CustomTooltip title={t("tooltips.controls.language")}>
+                <button
+                    onBlur={() => setOpen(false)}
+                    className={"controls-button " + (open ? "open" : "")}
+                    onClick={() => {
+                        setOpen(!open);
+                    }}
+                >
+                    {selectedLang.flagCode}
+                    <ExpandMoreIcon 
+                        fontSize="small" 
+                        className={open ? "rotate" : ""}
+                        sx={{ color: 'var(--color-text-primary)' }}
+                    />
+                </button>
+            </CustomTooltip>
 
             {/* Dropdown menu with available languages */}
             {open && (

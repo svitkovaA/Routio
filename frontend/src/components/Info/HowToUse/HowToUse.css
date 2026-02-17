@@ -1,3 +1,9 @@
+/**
+ * @file HowToUse.css
+ * @brief Styles for the component for displaying information about the application usage
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 .howto-steps {
     display: flex;
     flex-direction: column;
@@ -105,3 +111,5 @@
         border-bottom: 2px solid var(--color-info);
     }
 }
+
+/** End of file HowToUse.css */

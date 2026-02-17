@@ -90,5 +90,63 @@
     "publicTransport": "Verejná doprava",
     "bicycle": "Bicykel",
     "walk": "Chôdza"
+  },
+  "tooltips": {
+    "controls": {
+      "language": "Zmeniť jazyk aplikácie",
+      "layer": "Zmeniť štýl mapy",
+      "info": "O aplikácii",
+      "map": {
+        "zoomIn": "Priblížiť mapu",
+        "zoomOut": "Oddialiť mapu",
+        "mapScaleIndicator": "Aktuálna mierka mapy"
+      }
+    },
+    "inputForm": {
+      "clearField": "Vymazať toto pole",
+      "mapSelect": "Vybrať polohu z mapy",
+      "removeWaypoint": "Odstrániť tento bod",
+      "swapWaypoints": "Vymeniť začiatok a cieľ",
+      "addWaypoint": "Pridať ďalší bod",
+      "dragAndDrop": "Potiahnutím zmeniť poradie bodov",
+      "modeTimePrefs": "Nastaviť druh dopravy alebo čas strávený v bode",
+      "modePreferences": "Nastaviť druh dopravy",
+      "timeInWaypoint": "Nastaviť čas strávený v bode",
+      "closeLegPrefs": "Zavrieť nastavenia úseku trasy",
+      "preferencesButton": "Otvoriť nastavenia trasy"
+    },
+    "sidebar": {
+      "closeSidebar": "Zavrieť panel",
+      "openSidebar": "Otvoriť panel"
+    },
+    "results": {
+      "detailButton": "Otvoriť detail trasy",
+      "resultTabs": {
+        "multimodal": "Multimodálna doprava",
+        "publicTransport": "Verejná doprava",
+        "bicycle": "Bicykel",
+        "foot": "Pešo"
+      },
+      "resultList": {
+        "duration": "Trvanie",
+        "distance": "Vzdialenosť",
+        "transfers": "Počet prestupov"
+      }
+    },
+    "detail": {
+      "detailPreview": {
+        "previousRoute": "Predchádzajúca trasa",
+        "nextRoute": "Následujúca trasa",
+        "otherRouteDots": "Zvoliť detail inej trasy"
+      }
+    },
+    "settings": {
+      "openSections": {
+        "openTransportPreferences": "Otvoriť preferencie dopravy",
+        "openCyclingPreferences": "Otvoriť preferencie pre vlastný bicykel",
+        "openBikesharingPreferences": "Otvoriť preferencie pre zdielané bicykle",
+        "openWalkingPreferences": "Otvoriť preferencie chôdze"
+      }
+    }
   }
 }

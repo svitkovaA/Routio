@@ -90,5 +90,67 @@
     "publicTransport": "Veřejná doprava",
     "bicycle": "Kolo",
     "walk": "Chůze"
+  },
+  "tooltips": {
+    "controls": {
+      "language": "Změnit jazyk aplikace",
+      "layer": "Změnit styl mapy",
+      "info": "O aplikaci",
+      "map": {
+        "zoomIn": "Přiblížit mapu",
+        "zoomOut": "Oddálit mapu",
+        "mapScaleIndicator": "Aktuální měřítko mapy"
+      }
+    },
+    "inputForm": {
+      "clearField": "Vymazat toto pole",
+      "mapSelect": "Vybrat polohu z mapy",
+      "removeWaypoint": "Odstranit tento bod",
+      "swapWaypoints": "Vymenit začátek a cíl",
+      "addWaypoint": "Přidat další bod",
+      "dragAndDrop": "Přetažením změnit pořadí bodů",
+      "modeTimePrefs": "Nastavit druh dopravy nebo čas strávený v bodě",
+      "modePreferences": "Nastavit druh dopravy",
+      "timeInWaypoint": "Nastavit čas strávený v bodě",
+      "closeLegPrefs": "Zavřít preference úseku trasy",
+      "preferencesButton": "Otevřít nastavení trasy"
+    },
+    "sidebar": {
+      "closeSidebar": "Zavřít panel",
+      "openSidebar": "Otevřít panel"
+    },
+    "results": {
+      "detailButton": "Otevřít detail trasy",
+      "resultTabs": {
+        "multimodal": "Multimodálna doprava",
+        "publicTransport": "Veřejná doprava",
+        "bicycle": "Kolo",
+        "foot": "Pěšky"
+      },
+      "resultList": {
+        "duration": "Trvání",
+        "distance": "Vzdálenost",
+        "transfers": "Počet přestupů"
+      }
+    },
+    "detail": {
+      "detailPreview": {
+        "previousRoute": "Předchozí trasa",
+        "nextRoute": "Následující trasa",
+        "otherRouteDots": "Zvolit detail jiné trasy"
+      }
+    },
+    "settings": {
+      "openSections": {
+        "openTransportPreferences": "Otevřít preference dopravy",
+        "openCyclingPreferences": "Otevřít preference pro vlastné kolo",
+        "openBikesharingPreferences": "Otevřít preference pro sdílená kola",
+        "openWalkingPreferences": "Otevřít preference chůze"
+      },
+      "transportPreferences": {
+        "checkedPref": "Click to unselect the mode",
+        "uncheckedPref": "Click to select the mode"
+      }
+    }
   }
 }

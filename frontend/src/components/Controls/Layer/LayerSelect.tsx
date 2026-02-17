@@ -7,22 +7,27 @@
 import { useState } from "react";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LayersIcon from '@mui/icons-material/Layers';
+import { useTranslation } from "react-i18next";
+import CustomTooltip from "../../CustomTooltip/CustomTooltip";
 import { useSettings } from "../../SettingsContext";
 import { useLayers } from "./Layers";
 import "./LayerSelect.css";
 
 function LayerSelect() {
+    // Translation function
+    const { t } = useTranslation();
+
     // Context for storing the selected map layer to the settings
     const { selectedLayerIndex, setSelectedLayerIndex } = useSettings();
 
-    // State controlling the visibility of the dropdown menu
+    // Controls visibility of the dropdown menu
     const [open, setOpen] = useState<boolean>(false);
 
     // Available base map layers
     const { baseLayers } = useLayers();
 
     /**
-     * Handles selection of the map layer 
+     * Handles map layer selection
      * @param index Index of the selected layer
      */
     const handleSelect = (index: number) => {
@@ -32,26 +37,29 @@ function LayerSelect() {
 
     return (
         <div className={"controls-select " + (window.innerWidth < 768)}>
+
             {/* Button opening the layer selection dropdown */}
-            <button
-                onBlur={() => setOpen(false)}
-                className={"controls-button controls-button-layer " + (open ? "open" : "")}
-                onClick={() => {
-                    setOpen(!open);
-                }}
-            >
-                <LayersIcon 
-                    fontSize="small"
-                    sx={{ color: 'var(--color-text-primary)' }}
-                />
-                <ExpandMoreIcon 
-                    fontSize="small" 
-                    className={open ? "rotate" : ""}
-                    sx={{ 
-                        color: 'var(--color-text-primary)'
+            <CustomTooltip title={t("tooltips.controls.layer")}>
+                <button
+                    onBlur={() => setOpen(false)}
+                    className={"controls-button controls-button-layer " + (open ? "open" : "")}
+                    onClick={() => {
+                        setOpen(!open);
                     }}
-                />
-            </button>
+                >
+                    <LayersIcon 
+                        fontSize="small"
+                        sx={{ color: 'var(--color-text-primary)' }}
+                    />
+                    <ExpandMoreIcon 
+                        fontSize="small" 
+                        className={open ? "rotate" : ""}
+                        sx={{ 
+                            color: 'var(--color-text-primary)'
+                        }}
+                    />
+                </button>
+            </CustomTooltip>
 
             {/* Dropdown menu with available map layers */}
             {open && (
