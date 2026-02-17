@@ -5,10 +5,10 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import Section from './Section/Section';
 import "./ModePreferences.css";
-import { useTranslation } from 'react-i18next';
 
 type ModePreferencesProps = {
     title: string;                                                      // Section title
@@ -35,6 +35,7 @@ function ModePreferences({
     setLockTime,
     lockBounds
 }: ModePreferencesProps) {
+    // Translation function
     const { t } = useTranslation();
 
     // State controlling section expansion 

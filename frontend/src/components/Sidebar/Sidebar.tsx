@@ -12,9 +12,9 @@ import Planning from './Planning/Planning';
 import Settings from './Settings/Settings';
 import Results from './Results/Results';
 import DragHandle from './DragHandle/DragHandle';
+import CustomTooltip from '../CustomTooltip/CustomTooltip';
 import { useInput } from '../InputContext';
 import { useResult } from '../ResultContext';
-import CustomTooltip from '../CustomTooltip/CustomTooltip';
 import './Sidebar.css';
 
 type sidebarProps = {

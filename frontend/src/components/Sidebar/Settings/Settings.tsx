@@ -9,12 +9,14 @@ import { useTranslation } from "react-i18next";
 import TransportPreferences from "./TransportPreferences/TransportPreferences";
 import ModePreferences from "./ModePreferences/ModePreferences";
 import { useSettings } from "../../SettingsContext";
-import "./Settings.css";
 import { useResult } from '../../ResultContext';
+import "./Settings.css";
 
 function Settings() {
+    // Translation function
     const { t } = useTranslation();
 
+    // Result context
     const { setShowSettings } = useResult();
 
     // Settings context 

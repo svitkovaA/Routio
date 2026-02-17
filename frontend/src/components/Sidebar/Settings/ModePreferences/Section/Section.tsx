@@ -4,12 +4,12 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import { useState } from 'react';
 import "./Section.css";
 
 type SectionProps = {
@@ -25,6 +25,8 @@ function Section({
     setValue,
     bounds
 } : SectionProps) {
+    // Stores the temporary raw string representation of the input value
+    const [rawValue, setRawValue] = useState<string>(value.toString());
 
     /**
      * Handles manual input value change
@@ -34,34 +36,41 @@ function Section({
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
 
+        // Allow empty string temporarily
         if (value === "") {
             setRawValue("");
             return;
         }
 
+        // Reject non numeric input or long values
         if (!/^\d+$/.test(value) || value.length > 3){
             return;
         }
 
+        // Remove leading zero if more than one digit
         const cleaned = (value.startsWith("0") && value.length > 1) ? value.substring(1) : value;
 
+        // Update local raw state and validated numeric state
         setRawValue(cleaned);
         setValue(Number(cleaned));
     };
 
+    /**
+     * Validates and clamps the value on blur
+     */
     const validate = () => {
+        // If input left empty, reset to minimum bound
         if (rawValue === "") {
             setRawValue(bounds.min.toString());
             setValue(bounds.min);
         }
         else {
+            // Clamp value within allowed bounds
             const newValue = Math.max(bounds.min, Math.min(bounds.max, Number(rawValue)));
             setRawValue(newValue.toString());
             setValue(newValue);
         }
     }
-
-    const [rawValue, setRawValue] = useState<string>(value.toString());
 
     return(
         <div className="section">

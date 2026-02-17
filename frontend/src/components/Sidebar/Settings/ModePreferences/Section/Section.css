@@ -1,3 +1,9 @@
+/**
+ * @file Section.css
+ * @brief Styles for the reusable component for settings configuration
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 .section {
     display: flex;
     justify-content: space-between;
@@ -32,3 +38,5 @@
     cursor: not-allowed !important;
     pointer-events: all;
 }
+
+/** End of file Section.css */

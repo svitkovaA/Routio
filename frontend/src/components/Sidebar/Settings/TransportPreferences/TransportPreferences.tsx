@@ -5,17 +5,18 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from "react-i18next";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
-import { useTranslation } from "react-i18next";
-import { useSettings } from '../../../SettingsContext';
 import Section from '../ModePreferences/Section/Section';
 import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
+import { useSettings } from '../../../SettingsContext';
 import "./TransportPreferences.css";
 
 function TransportPreferences() {
+    // Translation function
     const { t } = useTranslation();
 
     // State controlling section expansion
@@ -29,6 +30,7 @@ function TransportPreferences() {
         setSelectedModes
     } = useSettings();
 
+    // List of supported public transport modes
     const transportModes = [
         { value: "bus", labelKey: "bus" },
         { value: "tram", labelKey: "tram" },
@@ -40,14 +42,20 @@ function TransportPreferences() {
 
     /**
      * Handles selection and deselection of transport modes
+     * 
      * @param mode Transport mode identifier
      */
     const handleModeSelection = (mode: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        // If checkbox was checked
         if (event.target.checked) {
+
+            // Prevent duplicate entries in selectedModes
             if (!selectedModes.includes(mode)) {
+                // Add selected mode to the list
                 setSelectedModes([...selectedModes, mode]);
             }
         }
+        // Remove mode from selectedModes when unchecked
         else {
             setSelectedModes(selectedModes.filter(m => m !== mode));
         }
@@ -56,18 +64,18 @@ function TransportPreferences() {
     return (
         <div className={"settings-section " + (isOpen ? "opened" : "")}>
             {/* Section toggle */}
-                <div className="toggle-settings" onClick={() => setIsOpen(!isOpen)}>
-                    <span>{t("settingsTab.transportPreferences")}</span>
-                    <CustomTooltip title={t("tooltips.settings.openSections.openTransportPreferences")}>
-                        <KeyboardArrowLeftIcon 
-                            fontSize="large" 
-                            className={isOpen ? "rotate90" : ""} 
-                            sx={{ color: 'var(--color-text-primary)' }}
-                        />
-                    </CustomTooltip>
-                </div>
-                <div className={isOpen ? "settings-content" : "settings-content hidden"}>
-                {/* Maximum transfers preference */}
+            <div className="toggle-settings" onClick={() => setIsOpen(!isOpen)}>
+                <span>{t("settingsTab.transportPreferences")}</span>
+                <CustomTooltip title={t("tooltips.settings.openSections.openTransportPreferences")}>
+                    <KeyboardArrowLeftIcon 
+                        fontSize="large" 
+                        className={isOpen ? "rotate90" : ""} 
+                        sx={{ color: 'var(--color-text-primary)' }}
+                    />
+                </CustomTooltip>
+            </div>
+            <div className={isOpen ? "settings-content" : "settings-content hidden"}>
+            {/* Maximum transfers preference */}
                 <Section
                     label={t("settingsTab.transportPreferencesTab.maxTransfers")}
                     value={maxTransfers}
@@ -85,18 +93,15 @@ function TransportPreferences() {
                     <FormGroup className="options">
                         {transportModes.map((mode) => (
                             <FormControlLabel
-                                    key={mode.value}
-                                    control={
-                                        <CustomTooltip title={selectedModes.includes(mode.value) ? "asdf" : "nn"}>
-                                        <Checkbox
-                                            checked={selectedModes.includes(mode.value)}
-                                            onChange={handleModeSelection(mode.value)}
-                                        />
-                            </CustomTooltip>
-                                    }
-                                    label={t(`settingsTab.transportPreferencesTab.${mode.labelKey}`)}
+                                key={mode.value}
+                                control={
+                                    <Checkbox
+                                        checked={selectedModes.includes(mode.value)}
+                                        onChange={handleModeSelection(mode.value)}
                                     />
-
+                                }
+                                label={t(`settingsTab.transportPreferencesTab.${mode.labelKey}`)}
+                            />
                         ))}
                     </FormGroup>
                 </div>
