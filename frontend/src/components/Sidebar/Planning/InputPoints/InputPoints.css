@@ -1,17 +1,11 @@
 /**
  * @file InputPoints.css
- * @brief Styles for the input points for origin and destination in the planning sidebar component
+ * @brief Styles for the component for managing waypoint input fields
  * @author Andrea Svitkova (xsvitka00)
  */
 
 .input-wrapper {
     position: relative;
-}
-
-.waypoints-wrapper {
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
 }
 
 .swap {

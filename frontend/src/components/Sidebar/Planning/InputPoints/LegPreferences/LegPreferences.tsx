@@ -1,38 +1,48 @@
 /**
  * @file LegPreferences.tsx
- * @brief Displays component for editing trip preferences, handles user interactions for opening and closing preferences with click-away behaviour
- * @author Andrea Svitkova (xsvitka00)
+ * @brief Component for editing leg preferences
  */
 
+import { useTranslation } from "react-i18next";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { modeIcons } from "../../Icons/Icons";
 import ModeSelect from "./Select/ModeSelect";
-import "./LegPreferences.css";
 import { useInput } from "../../../../InputContext";
-import { useTranslation } from "react-i18next";
 import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
 import WaitSelect from "./Select/WaitSelect";
+import "./LegPreferences.css";
 
 type LegPreferencesProps = {
-    render: boolean;
-    index: number;
+    render: boolean;        // Determines whether the component should be rendered
+    index: number;          // Index of the leg in legPreferences array
 }
 
 function LegPreferences({
     render,
     index
 }: LegPreferencesProps) {
+    // Translation function
     const { t } = useTranslation();
+
+    // User input context
     const { legPreferences, setLegPreferences } = useInput();
+
+    /**
+     * Updates state of the preference panel for the specific leg
+     * 
+     * @param value True, open panel, false close panel
+     */
     const setLegPreference = (value: boolean) => {
         setLegPreferences((prev) => {
             const newLegPreferences = [...prev];
             newLegPreferences[index] = { ...newLegPreferences[index], open: value};
+            
             return newLegPreferences;
         })
     }
 
+    // Do not render component if disabled
     if (!render) {
         return null;
     }

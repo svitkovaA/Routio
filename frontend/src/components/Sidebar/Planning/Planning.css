@@ -1,3 +1,9 @@
+/**
+ * @file Planning.css
+ * @brief Styles for the route planning component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 .preferences-find {
     display: flex;
     flex-direction: row;

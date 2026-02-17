@@ -1,19 +1,19 @@
 /**
  * @file AddPointIcon.tsx
- * @brief Displays icon for displaying an intermediate point, and vertical line
+ * @brief Renders an icon for adding an intermediate waypoint, including a vertical connector line
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { useTranslation } from "react-i18next";
 import { IconButton } from "@mui/material";
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import './AddPointIcon.css'
 import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
-import { useTranslation } from "react-i18next";
+import './AddPointIcon.css'
 
 type AddPointIconProps = {
-    onClick: () => void;
-    render: boolean;
-    disabled: boolean;
+    onClick: () => void;        // Callback triggered when the add icon is clicked
+    render: boolean;            // Determines whether the component should be rendered
+    disabled: boolean;          // Disables the button when adding a waypoint is not allowed
 }
 
 function AddPointIcon({
@@ -21,8 +21,10 @@ function AddPointIcon({
     render,
     disabled
 } : AddPointIconProps) {
+    // Translation function
     const { t } = useTranslation();
 
+    // Do not render the component if adding waypoints is not allowed
     if (!render) 
         return null;
 

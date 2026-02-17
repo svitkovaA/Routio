@@ -1,14 +1,16 @@
 /**
  * @file Logo.tsx
- * @brief Displays the logo in the planning sidebar
+ * @brief Displays the logo
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import "./Logo.css";
 import { PUBLIC_URL } from "../../../config/config";
+import "./Logo.css";
 
 function Logo() {
-
+    /**
+     * Reload when clicking on application logo
+     */
     const handleClick = () => {
         window.location.reload();
     };

@@ -1,18 +1,34 @@
+/**
+ * @file SuggestionsHandle.tsx
+ * @brief Hook managing autocomplete suggestion logic for waypoint input fields
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import { useCallback, useState } from "react";
 import { API_BASE_URL } from "../../../../config/config";
 import { InputText, StoredWaypoint } from "../../../../types/types";
 import { useInput } from "../../../../InputContext";
 import { loadDestination, loadMiddleWaypoints, loadOrigin } from "../WaypointStorage";
 
+/**
+ * Hook for managing suggestion behavior for a specific waypoint index
+ * 
+ * @param index Index of waypoint in input list
+ */
 export function useSuggestionHandle(index: number) {
+    // List of currently available suggestions
     const [suggestions, setSuggestions] = useState<InputText[]>([]);
+
+    // Index of currently highlighted suggestion
     const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
 
+    // User input context
     const {
         waypoints, setWaypoints,
         activeField
     } = useInput();
 
+    // Transforms stored waypoints into InputText format
     const transformStored = (stored: StoredWaypoint[]) => {
         return stored.map((s) => ({
             ...s,
@@ -21,6 +37,9 @@ export function useSuggestionHandle(index: number) {
         }));
     }
 
+    /**
+     * Loads suggestions from localStorage
+     */
     const loadSuggestionsFromStorage = useCallback(() => {
         if (index === 0) {
             const origin = loadOrigin();
@@ -36,6 +55,11 @@ export function useSuggestionHandle(index: number) {
         }
     }, [index, waypoints.length]);
 
+    /**
+     * Fetches suggestions from backend geocoding API
+     * 
+     * @param query Input string
+     */
     const fetchSuggestions = (query: string) => {
         fetch(`${API_BASE_URL}/geocode/name?q=${encodeURIComponent(query)}`)
             .then((res) => {
@@ -50,6 +74,11 @@ export function useSuggestionHandle(index: number) {
             .catch(console.error);
     };
 
+    /**
+     * Handles selection of suggestion
+     * 
+     * @param suggestion The selected suggestion
+     */
     const handleSuggestionClick = (suggestion: InputText) => {
         if (activeField === index) {
             const newWaypoints = [...waypoints];
@@ -58,6 +87,7 @@ export function useSuggestionHandle(index: number) {
                 suggestion.street,
                 suggestion.city,
             ].filter(Boolean);
+
             newWaypoints[index] = {
                 lat: suggestion.lat,
                 lon: suggestion.lon,
@@ -71,23 +101,31 @@ export function useSuggestionHandle(index: number) {
             setHighlightedIndex(-1);
         }
     };
-  
+
+    /**
+     * Handles keyboard navigation in suggestion list
+     */
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, currentIndex: number) => {
         if (activeField !== index || currentIndex !== index) {
             return;
         }
     
+        // Move selection down
         if (e.key === "ArrowDown") {
             e.preventDefault();
             setHighlightedIndex(
                 highlightedIndex < suggestions.length - 1 ? highlightedIndex + 1 : 0
             );
-        } else if (e.key === "ArrowUp") {
+        }
+        // Move selection up
+        else if (e.key === "ArrowUp") {
             e.preventDefault();
             setHighlightedIndex(
                 highlightedIndex > 0 ? highlightedIndex - 1 : suggestions.length - 1
             );
-        } else if (e.key === "Enter") {
+        }
+        // Confirm selection
+        else if (e.key === "Enter") {
             if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
                 e.preventDefault();
                 handleSuggestionClick(suggestions[highlightedIndex]);
@@ -105,3 +143,5 @@ export function useSuggestionHandle(index: number) {
         highlightedIndex, resetHighlightedIndex: () => setHighlightedIndex(-1)
     };
 }
+
+/** End of file SuggestionsHandle.tsx */

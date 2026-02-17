@@ -1,26 +1,28 @@
 /**
  * @file RemoveInputField.tsx
- * @brief Display component with an icon for deleting the input field
+ * @brief Component with an icon for removing the input field
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { useTranslation } from "react-i18next";
 import { IconButton } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import DeleteIcon from '@mui/icons-material/Delete';
 import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
-import { useTranslation } from "react-i18next";
 
 type RemoveInputFieldProps = {
-    onClick: () => void;
-    render: boolean;
+    onClick: () => void;        // Callback that removes the waypoint data
+    render: boolean;            // Determines whether the remove button should be rendered
 }
 
 function RemoveInputField({
     onClick,
     render
 } : RemoveInputFieldProps) {
+    // Translation function
     const { t } = useTranslation();
 
+    // Do not render the component if rendering is disabled
     if (!render) 
         return null;
     

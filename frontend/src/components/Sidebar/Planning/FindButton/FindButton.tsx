@@ -1,16 +1,19 @@
 /**
  * @file FindButton.tsx
- * @brief Displays a button to plan route in the planning sidebar
+ * @brief Displays a button to plan route in the planning form
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import { useTranslation } from "react-i18next";
-import "./FindButton.css";
 import { useResult } from "../../../ResultContext";
+import "./FindButton.css";
 
 function FindButton() {
-    const { loading } = useResult();
+    // Translation function
     const { t } = useTranslation();
+
+    // Result context
+    const { loading } = useResult();
 
     return (
         <button 

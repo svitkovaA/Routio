@@ -1,22 +1,18 @@
 /**
  * @file LegPreferences.css
- * @brief Styles for editing trip preferences in the leg preferences component
+ * @brief Styles for the component for editing leg preferences
  * @author Andrea Svitkova (xsvitka00)
  */
+
+.leg-preferences-wrapper {
+    width: 100%;
+}
 
 .leg-preferences-button{
     color: gray;
     position: relative;
     top: 1px;
     cursor: pointer;
-}
-
-.leg-preferences-button .circle {
-    width: 18px;
-    height: 18px;
-    font-size: 12px;
-    color: gray;
-    top: 5px;
 }
 
 .leg-preferences-button .bicycle {
@@ -33,12 +29,27 @@
     position: absolute;
 }
 
+.leg-preferences-button .circle {
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    color: gray;
+    top: 5px;
+}
+
 .multimodal .circle {
     top: 0px;
 }
 
-.leg-preferences-wrapper {
-    width: 100%;
+.leg-preferences-time {
+    position: relative;
+    left: 50px;
+    bottom: 5px;
+    width: 100px;
+}
+
+.leg-preferences-time.short{
+    left: 30px;
 }
 
 .leg-preferences-select-wrapper {
@@ -59,17 +70,6 @@
     position: relative;
     top: -2px;
     cursor: pointer;
-}
-
-.leg-preferences-time {
-    position: relative;
-    left: 50px;
-    bottom: 5px;
-    width: 100px;
-}
-
-.leg-preferences-time.short{
-    left: 30px;
 }
 
 /** End of file LegPreferences.css */

@@ -1,23 +1,28 @@
 /**
  * @file Icons.tsx
- * @brief Provides icons for transport modes, multimodal trips, and timeline display
+ * @brief Provides icons for transport modes and timeline display
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { JSX } from "react";
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import PedalBikeIcon from '@mui/icons-material/PedalBike';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import TrainIcon from '@mui/icons-material/Train';
 import TramIcon from '@mui/icons-material/Tram';
 import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
-import { JSX } from "react";
 import { Mode } from "../../../types/types";
 import "./Icons.css";
 
 type MultimodalIconProps = {
-    iconSize?: number;
+    iconSize?: number;      // Optional icon size
 };
 
+/**
+ * Renders a combined icon representing a multimodal trip
+ * 
+ * @param iconSize Optional icon size
+ */
 export function MultimodalIcon({
     iconSize = 16
 } : MultimodalIconProps) {
@@ -36,6 +41,9 @@ export function MultimodalIcon({
     );
 }
 
+/**
+ * Mapping of available planning modes to their corresponding icons
+ */
 export const modeIcons: {html: JSX.Element, value: Mode}[] = [{
         html: <MultimodalIcon />, 
         value: "transit,bicycle,walk"
@@ -60,6 +68,9 @@ export const modeIcons: {html: JSX.Element, value: Mode}[] = [{
     }
 ]
 
+/**
+ * Mapping of transport mode identifiers to timeline display icons
+ */
 export const timelineIcons: {[mode: string]: JSX.Element} = {
     foot:
         <div className="timeline-icon">

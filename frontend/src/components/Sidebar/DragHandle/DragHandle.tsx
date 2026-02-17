@@ -1,15 +1,21 @@
+/**
+ * @file DragHandle.tsx
+ * @brief Mobile drag controller for the sidebar component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import { PointerEventHandler, useEffect, useRef } from "react";
-import "./DragHandle.css";
 import { useResult } from "../../ResultContext";
 import { useBackButtonClick } from "../Results/useBackButtonClick";
+import "./DragHandle.css";
 
 type DragHandleProps = {
-    translateY: number;
-    setTranslateY: (value: number | ((prev: number) => number)) => void;
-    dragging: React.RefObject<boolean>;
-    maxDrag: number;
-    sidebarOpen: boolean;
-    setSidebarOpen: (value: boolean) => void;
+    translateY: number;                                                     // Current vertical translation value
+    setTranslateY: (value: number | ((prev: number) => number)) => void;    // Setter for vertical translation
+    dragging: React.RefObject<boolean>;                                     // Reference indicating whether dragging is active
+    maxDrag: number;                                                        // Maximum allowed drag distance for fully opened state
+    sidebarOpen: boolean;                                                   // Indicates whether sidebar is currently open
+    setSidebarOpen: (value: boolean) => void;                               // Setter controlling sidebar visibility
 };
 
 function DragHandle({ 
@@ -20,33 +26,59 @@ function DragHandle({
     sidebarOpen,
     setSidebarOpen
 } : DragHandleProps) {
+    // Stores pointer Y position at drag start
     const startY = useRef<number>(0);
+
+    // Stores translateY value at drag start
     const startTranslate = useRef<number>(0);
+
+    // Indicates whether pointer movement exceeded drag threshold
     const hasDragged = useRef<boolean>(false);
+
+    // Determines whether click should trigger view navigation
     const clickable = useRef<boolean>(false);
 
+    // Result context
     const { showSettings, setShowSettings, showResults } = useResult();
+
+    // Back button click navigation
     const { backButtonClick } = useBackButtonClick();
 
+    /**
+     * Pointer release handler
+     */
     useEffect(() => {
         const handleUp = () => {
-            if (!dragging.current) return;
+            // Ignore if dragging was not active
+            if (!dragging.current) {
+                return;
+            }
 
+            // No drag detected, treat as click
             if (!hasDragged.current) {
                 if (clickable.current) {
+                    // Close settings
                     if (showSettings) {
                         setShowSettings(false);
-                    } else if (showResults) {
+                    } 
+                    // Trigger back navigation from results to input form
+                    else if (showResults) {
                         backButtonClick();
                     }
+
+                    // When returning from settings or results set sidebar open
                     if (showSettings || showResults) {
                         setTranslateY(-maxDrag);
                         setSidebarOpen(true);
                     }
                 }
-            } else {
+            }
+            // Drag detected
+            else {
+                // Sidebar openness in range (0,1)
                 const openness = -translateY / maxDrag;
     
+                // Handle opening/closing sidebar based on the openness variable
                 if (sidebarOpen) {
                     if (openness < 0.95) {
                         setTranslateY(0);
@@ -63,13 +95,17 @@ function DragHandle({
                     }
                 }
             }
+
+            // Reset drag state
             dragging.current = false;
             hasDragged.current = false;
         };
 
+        // Ensures release is handled even if pointer leaves the area
         window.addEventListener("pointerup", handleUp);
         window.addEventListener("pointercancel", handleUp);
 
+        // Cleanup
         return () => {
             window.removeEventListener("pointerup", handleUp);
             window.removeEventListener("pointercancel", handleUp);
@@ -86,7 +122,12 @@ function DragHandle({
         setTranslateY
     ]);
 
-
+    /**
+     * Initializes dragging
+     * 
+     * @param e Pointer event
+     * @param left Indicates whether the left drag area was pressed
+     */
     const onPointerDown = (e: React.PointerEvent<HTMLDivElement>, left: boolean) => {
         e.preventDefault();
         dragging.current = true;
@@ -97,8 +138,15 @@ function DragHandle({
         e.currentTarget.setPointerCapture(e.pointerId);
     };
 
+    /**
+     * Handles pointer movement during drag
+     * 
+     * @param e Pointer event
+     */
     const onPointerMove: PointerEventHandler<HTMLDivElement> = (e) => {
-        if (!dragging.current) return;
+        if (!dragging.current) {
+            return;
+        }
 
         const delta = e.clientY - startY.current;
 
@@ -106,13 +154,20 @@ function DragHandle({
             hasDragged.current = true;
         }
 
-        if (!hasDragged.current) return;
+        if (!hasDragged.current) {
+            return;
+        }
 
         const clamped = Math.max(-maxDrag, Math.min(0, startTranslate.current + delta));
 
         setTranslateY(clamped);
     };
 
+    /**
+     * Toggles sidebar state on click
+     * 
+     * @param e Pointer event
+     */
     const handleClick: PointerEventHandler<HTMLDivElement> = (e) => {
         setTranslateY(prev => (prev === 0 ? -maxDrag : 0));
         e.preventDefault();
@@ -120,7 +175,7 @@ function DragHandle({
     };
 
     return (
-        <div id="drag-sidebar">
+        <div className="drag-sidebar">
             <div
                 className="drag-inner-left"
                 onPointerDown={(e) => onPointerDown(e, true)}
@@ -140,3 +195,5 @@ function DragHandle({
 };
 
 export default DragHandle;
+
+/** End of file DragHandle.tsx */

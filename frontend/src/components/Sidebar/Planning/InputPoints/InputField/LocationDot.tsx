@@ -1,6 +1,6 @@
 /**
  * @file LocationDot.tsx
- * @brief Displays location icon for getting location from the map
+ * @brief Component with an icon for selecting the location form map
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -11,12 +11,13 @@ import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
 import { useTranslation } from "react-i18next";
 
 type LocationDotProps = {
-    onClick: () => void;
+    onClick: () => void;    // // Callback triggered when the map selection icon is clicked
 }
 
 function LocationDot({
     onClick
 } : LocationDotProps) {
+    // Translation function
     const { t } = useTranslation();
 
     return (

@@ -1,12 +1,18 @@
-import TextField from "@mui/material/TextField";
+/**
+ * @file OptionSelect.tsx
+ * @brief Select input component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import { ChangeEventHandler } from "react";
+import TextField from "@mui/material/TextField";
 
 type OptionSelectProps = {
-    label: string;
-    value: string;
-    onChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
-    setOption: (direction: number) => void;
-    children: React.ReactNode;
+    label: string;                                                          // Label displayed above the field
+    value: string;                                                          // Currently selected value
+    onChange: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;   // Change handler
+    setOption: (direction: number) => void;                                 // Function for cycling through options
+    children: React.ReactNode;                                              // Select menu items
 };
 
 function OptionSelect({

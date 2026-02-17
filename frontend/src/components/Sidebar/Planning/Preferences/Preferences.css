@@ -1,6 +1,6 @@
 /**
- * @file InfoSettings.css
- * @brief Styles for the buttons for settings and information in the sidebar component
+ * @file Preferences.css
+ * @brief Styles for the button component for opening advanced routing preferences
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -15,4 +15,4 @@
     width: 60px;
 }
 
-/** End of file InfoSettings.css */
+/** End of file Preferences.css */

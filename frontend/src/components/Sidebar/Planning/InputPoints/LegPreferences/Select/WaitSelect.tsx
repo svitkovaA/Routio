@@ -4,26 +4,37 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useInput } from "../../../../../InputContext";
+import { useTranslation } from "react-i18next";
 import { TimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import { useInput } from "../../../../../InputContext";
 import CustomTooltip from "../../../../../CustomTooltip/CustomTooltip";
-import { useTranslation } from "react-i18next";
 
 type WaitSelectProps = {
-    index: number;
+    index: number;      // Index of the leg in legPreferences array
 }
 
 function WaitSelect({ index }: WaitSelectProps) {
+    // Translation function
     const { t } = useTranslation()
-    const { legPreferences, setLegPreferences } = useInput();
+
+    // User input context
+    const {
+        legPreferences, setLegPreferences
+    } = useInput();
     
+    /**
+     * Updates waiting time for the selected leg
+     * 
+     * @param value Selected time value
+     */
     const handleSelect = (value: dayjs.Dayjs) => {
         setLegPreferences((prev) => {
             const newLegPreferences = [...prev];
             newLegPreferences[index] = { ...newLegPreferences[index], wait: value};
+            
             return newLegPreferences;
         });
     }

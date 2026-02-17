@@ -1,6 +1,6 @@
 /**
- * @file InfoSettings.tsx
- * @brief Display buttons for settings and information in the sidebar
+ * @file Preferences.tsx
+ * @brief Button component for opening advanced routing preferences
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -11,7 +11,10 @@ import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
 import "./Preferences.css";
 
 function Preferences() {
+    // Translation function
     const { t } = useTranslation();
+
+    // Result context
     const { setShowSettings } = useResult();
 
     return (
@@ -22,12 +25,12 @@ function Preferences() {
                 type="button"
                 tabIndex={-1}
             >
-            <TuneIcon sx={{ color: 'var(--color-icons)' }} />
-        </button>
+                <TuneIcon sx={{ color: 'var(--color-icons)' }} />
+            </button>
         </CustomTooltip>
     );
 }
 
 export default Preferences;
 
-/** End of file InfoSettings.tsx */
+/** End of file Preferences.tsx */

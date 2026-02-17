@@ -1,4 +1,10 @@
-#drag-sidebar {
+/**
+ * @file DragHandle.css
+ * @brief Styles for the mobile drag controller for the sidebar component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.drag-sidebar {
     width: 100%;
     height: 58px;
     border-radius: 3px;
@@ -38,3 +44,5 @@
     cursor: pointer;
     touch-action: none;
 }
+
+/** End of file DragHandle.css */

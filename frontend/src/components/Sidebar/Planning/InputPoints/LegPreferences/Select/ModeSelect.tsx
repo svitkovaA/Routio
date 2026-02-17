@@ -1,31 +1,44 @@
 /**
  * @file ModeSelect.tsx
- * @brief Dropdown component for selecting mode preference in leg preferences
+ * @brief Component for selecting transport mode preference for a route leg
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { Mode } from "../../../../../types/types";
 import { modeIcons } from "../../../Icons/Icons";
-import "./Select.css";
 import { useInput } from "../../../../../InputContext";
 import CustomTooltip from "../../../../../CustomTooltip/CustomTooltip";
-import { useTranslation } from "react-i18next";
+import "./Select.css";
 
 type ModeSelectProps = {
-    index: number;
+    index: number;          // Index of the leg in legPreferences array
 }
 
 function ModeSelect({ index }: ModeSelectProps) {
+    // Translation function
     const { t } = useTranslation();
-    const { legPreferences, setLegPreferences } = useInput();
+
+    // User input preference
+    const {
+        legPreferences, setLegPreferences
+    } = useInput();
+
+    // Controls visibility of dropdown menu
     const [open, setOpen] = useState<boolean>(false);
 
+    /**
+     * Updates selected transport mode for current leg
+     * 
+     * @param value Selected transport mode
+     */
     const handleSelect = (value: Mode) => {
         setLegPreferences((prev) => {
             const newLegPreferences = [...prev];
             newLegPreferences[index] = { ...newLegPreferences[index], mode: value};
+            
             return newLegPreferences;
         });
     }

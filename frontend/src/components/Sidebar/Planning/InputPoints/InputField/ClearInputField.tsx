@@ -1,26 +1,28 @@
 /**
  * @file ClearInputField.tsx
- * @brief Displays component with an icon for clearing the input field
+ * @brief Component with an icon for clearing the input field
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { useTranslation } from "react-i18next";
 import InputAdornment from "@mui/material/InputAdornment";
 import ClearIcon from '@mui/icons-material/Clear';
 import { IconButton } from "@mui/material";
 import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
-import { useTranslation } from "react-i18next";
 
 type ClearInputFieldProps = {
-    clearWaypoint: () => void;
-    render: boolean;
+    clearWaypoint: () => void;      // Callback that clears the waypoint data
+    render: boolean;                // Determines whether the clear button should be rendered
 };
 
 function ClearInputField({ 
     clearWaypoint,
     render
 } : ClearInputFieldProps) {
+    // Translation function
     const { t } = useTranslation();
     
+    // Do not render the component if rendering is disabled
     if (!render) 
         return null;
     

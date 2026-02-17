@@ -1,12 +1,12 @@
 /**
  * @file InputField.tsx
- * @brief Displays input field component for entering waypoints in the planning form
+ * @brief Input field component for waypoint entry in the planning form
  * @author Andrea Svitkova (xsvitka00)
  */
 
 import { memo, useRef } from "react";
-import TextField from "@mui/material/TextField";
 import { useTranslation } from "react-i18next";
+import TextField from "@mui/material/TextField";
 import { InputText, Waypoint } from "../../../../types/types";
 import LocationDot from "./LocationDot";
 import ClearInputField from "./ClearInputField";
@@ -15,17 +15,23 @@ import { useInput } from "../../../../InputContext";
 import "./InputField.css";
 
 type InputFieldProps = {
-    index: number;
-    lastIndex: number;
-    waypoint: Waypoint;
-    waypointsLength: number;
-    handleWaypointChange: (index: number, value: string) => void;
-    handleKeyDown: (e: React.KeyboardEvent<HTMLDivElement>, index: number) => void;
-    suggestions: InputText[];
-    setSuggestions: (value: InputText[]) => void;
-    highlightedIndex: number;
-    resetHighlightedIndex: () => void;
-    closeSidebar: () => void;
+    index: number;                                  // Index of waypoint in array
+    lastIndex: number;                              // Index of last waypoint, destination
+    waypoint: Waypoint;                             // Current waypoint object
+    waypointsLength: number;                        // Total number of waypoints
+    handleWaypointChange: (
+        index: number,
+        value: string
+    ) => void;                                      // Handler for input value change
+    handleKeyDown: (
+        e: React.KeyboardEvent<HTMLDivElement>,
+        index: number
+    ) => void;                                      // Keyboard navigation handler
+    suggestions: InputText[];                       // Current suggestion list
+    setSuggestions: (value: InputText[]) => void;   // Setter for suggestions
+    highlightedIndex: number;                       // Currently highlighted suggestion index
+    resetHighlightedIndex: () => void;              // Reset highlight state
+    closeSidebar: () => void;                       // Closes sidebar
 }
 
 function InputField({
@@ -41,10 +47,13 @@ function InputField({
     resetHighlightedIndex,
     closeSidebar
 } : InputFieldProps) {
+    // Translation function
     const { t } = useTranslation();
 
+    // Reference to the underlying input element
     const inputRef = useRef<HTMLInputElement | null>(null);
 
+    // User input context
     const {
         activeField, setActiveField,
         clearWaypoint,
@@ -53,6 +62,7 @@ function InputField({
         setWaypoints
     } = useInput();
 
+    // Returns label based on waypoint position
     const label = () => {
         if (index === 0) {
             return t("planning.origin");
@@ -63,6 +73,7 @@ function InputField({
         return t("planning.intermediatePoint", {index});
     };
 
+    // Returns placeholder text based on waypoint position
     const placeHolder = () => {
         if (index === 0) {
             return t("planning.setOrigin");
