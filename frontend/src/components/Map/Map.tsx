@@ -24,6 +24,7 @@ import { useSettings } from '../SettingsContext';
 import { useResult } from '../ResultContext';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
+import { useMediaQuery } from '@mui/material';
 
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -83,6 +84,8 @@ function Map({
     // Reference used to store tooltip opening timer
     const tooltipTimers = useRef<Record<string, NodeJS.Timeout | null>>({});
     const currentlyOpenTooltip = useRef<L.Marker | null>(null);
+
+    const isDesktop = useMediaQuery("(min-width:768px)");
 
     const tooltipHandler = (id: string): L.LeafletEventHandlerFnMap => ({
         // Triggered when popup is open
@@ -227,9 +230,11 @@ function Map({
                 waypoints={waypoints}
                 handleMapSelection={handleMapSelection}
             />
-
+            
             {/* Zoom handler */}
-            <CustomZoomControl />
+            {isDesktop && (
+                <CustomZoomControl />
+            )}
 
             {/* Scale indicator */}
             <ScaleControl position="bottomleft" imperial={false} />
