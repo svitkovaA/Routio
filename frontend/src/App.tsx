@@ -13,6 +13,7 @@ import Controls from './components/Controls/Controls';
 import Info from './components/Info/Info';
 import { useInput } from './components/InputContext';
 import { useResult } from './components/ResultContext';
+import { NotificationProvider } from './components/NotificationContext';
 import './App.css';
 
 function App() {
@@ -54,32 +55,43 @@ function App() {
                 main: "#057f73",
             },
         },
+         breakpoints: {
+            values: {
+            xs: 0,
+            sm: 768,
+            md: 1024,
+            lg: 1280,
+            xl: 1536,
+            },
+        },
     });
 
     return (
         <ThemeProvider theme={theme}>
-            <div className="app">
-                {/* Control panel with layer and language selection */}
-                <Controls 
-                    setShowInfo={setShowInfo}
-                />
-                {/* Map component with markers*/}
-                <Map 
-                    sidebarOpen={sidebarOpen}
-                    openSidebar={() => setSidebarOpen(true)}
-                    handleMarkerRemove={handleMarkerRemove}
-                />
-                {/* Sidebar component with the search form, results, and trip details */}
-                <SideBar 
-                    sidebarOpen={sidebarOpen}
-                    setSidebarOpen={setSidebarOpen}
-                    showInfo={showInfo}
-                />
-                {/* Information about the application */}
-                {showInfo && (
-                    <Info closeInfo={() => setShowInfo(false)} />
-                )}
-            </div>
+            <NotificationProvider>
+                <div className="app">
+                    {/* Control panel with layer and language selection */}
+                    <Controls 
+                        setShowInfo={setShowInfo}
+                    />
+                    {/* Map component with markers*/}
+                    <Map 
+                        sidebarOpen={sidebarOpen}
+                        openSidebar={() => setSidebarOpen(true)}
+                        handleMarkerRemove={handleMarkerRemove}
+                    />
+                    {/* Sidebar component with the search form, results, and trip details */}
+                    <SideBar 
+                        sidebarOpen={sidebarOpen}
+                        setSidebarOpen={setSidebarOpen}
+                        showInfo={showInfo}
+                    />
+                    {/* Information about the application */}
+                    {showInfo && (
+                        <Info closeInfo={() => setShowInfo(false)} />
+                    )}
+                </div>
+            </NotificationProvider>
         </ThemeProvider>
     );
 }

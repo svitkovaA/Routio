@@ -14,6 +14,7 @@ import FindButton from "./FindButton/FindButton";
 import { useResult } from "../../ResultContext";
 import { useRoute } from "../../Routing/Route";
 import Preferences from "./Preferences/Preferences";
+import { useInput } from "../../InputContext";
 import "./Planning.css"
 
 type PlanningProps = {
@@ -29,13 +30,31 @@ function Planning({
     // Routing controller hook
     const route = useRoute();
 
+    // User input context
+    const { waypoints, setFieldErrors } = useInput();
+
     // Form submit handler
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        // Stop submission if form validation fails
-        if (!event.currentTarget.checkValidity()) {
+        // Prevent default form submission behavior
+        event.preventDefault();
+
+        const invalidIndexes: number[] = [];
+
+        // Validate waypoints
+        waypoints.forEach((wp, index) => {
+            if (wp.displayName.trim() === "" && wp.lat === 0 && wp.lon === 0) {
+                invalidIndexes.push(index);
+            }
+        });
+
+        // If there are invalid fields, store their indices and stop submission
+        if (invalidIndexes.length > 0) {
+            setFieldErrors(invalidIndexes);
             return;
         }
-        event.preventDefault();
+
+        // Clear previous validation errors
+        setFieldErrors([]);
 
         // Activate first result container
         setResultActiveIndex(0);

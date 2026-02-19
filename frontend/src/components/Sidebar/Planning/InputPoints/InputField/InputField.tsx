@@ -59,7 +59,8 @@ function InputField({
         clearWaypoint,
         removeWaypoint,
         setMapSelectionIndex,
-        setWaypoints
+        setWaypoints,
+        fieldErrors, setFieldErrors
     } = useInput();
 
     // Returns label based on waypoint position
@@ -84,28 +85,67 @@ function InputField({
         return t("planning.setIntermediatePoint");
     };
 
+    // Indicates whether target field is focused
+    const isFocused = activeField === index;
+
+    // Indicate whether required error occurred
+    const isRequiredError = !isFocused && fieldErrors.includes(index);
+
+    // Indicate whether required error occurred
+    const isInvalidAddress = !isFocused && waypoint.displayName.trim() !== "" && (waypoint.lat === 0 || waypoint.lon === 0);
+
     return (
         <TextField
             required
+            error={isRequiredError || isInvalidAddress}
+            helperText={
+                isRequiredError ? t("planning.fieldRequired") : isInvalidAddress ? t("planning.invalidAddress") : ""
+            }
             label={label()}
             placeholder={placeHolder()}
             value={waypoint.displayName}
-            onChange={(e) => handleWaypointChange(index, e.target.value)}
+            sx={{
+                position: "relative",
+
+                "& .MuiFormHelperText-root": {
+                position: "absolute",
+                bottom: "-18px",
+                right: 0,
+                margin: 0
+                },
+            }}
+            onChange={(e) => {
+                const value = e.target.value;
+
+                // Update waypoint input value
+                handleWaypointChange(index, value);
+
+                // Clear validation error
+                if (fieldErrors.includes(index)) {
+                    setFieldErrors(prev => prev.filter(i => i !== index));
+                }
+            }}
             onFocus={() => setActiveField(index)}
             onBlur={() => {
+                // Clear validation error
+                if (fieldErrors.includes(index)) {
+                    setFieldErrors(prev => prev.filter(i => i !== index));
+                }
+                // Attempt to apply the selected or first suggestion
                 if (!waypoint.isActive) {
                     const suggestionIndex = highlightedIndex >= 0 ? highlightedIndex : 0;
                     const suggestion = suggestions[suggestionIndex];
                     setWaypoints(prev => {
+                        // No suggestion selected
                         if (!suggestion) {
                             prev[index] = {
                                 ...prev[index],
                                 isPreview: false,
-                                displayName: "",
                                 lat: 0,
                                 lon: 0
                             }
                         }
+                        // Apply selected suggestion
                         else {
                             prev[index] = {
                                 ...prev[index],

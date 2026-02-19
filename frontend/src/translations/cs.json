@@ -42,7 +42,9 @@
       "ownBike": "Použít vlastní kolo",
       "sharedBike": "Použít sdílené kolo"
     },
-    "find": "Najít"
+    "find": "Najít",
+    "invalidAddress": "Neplatná adresa",
+    "fieldRequired": "Prázdne pole"
   },
   "settings": "Preference",
   "settingsTab": {
@@ -228,5 +230,13 @@
       "bicycle": "Kolo",
       "sharedBicycle": "Sdílené kolo"
     }
+  },
+  "warnings": {
+    "valueClamp": "Hodnota byla upravena na povolený rozsah.",
+    "nominatim": "Služba Nominatim neodpovídá. Zobrazují se souřadnice.",
+    "photon": "Služba Photon neodpovídá. Vyberte polohu na mapě."
+  },
+  "errors": {
+    "serverOffline": "Server je momentálně nedostupný. Zkuste to prosím později."
   }
 }

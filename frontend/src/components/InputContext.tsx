@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, Dispatch, SetStateAction } from "react"
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import dayjs from "dayjs";
@@ -35,6 +35,8 @@ type InputContextType = {
     onDragEnd: (event: DragEndEvent) => void;
     addWaypoint: (index: number) => void;
     swapWaypoints: () => void;
+    fieldErrors: number[];
+    setFieldErrors: Dispatch<SetStateAction<number[]>>;
 };
 
 const InputContext = createContext<InputContextType | undefined>(undefined);
@@ -85,6 +87,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
 
     // Index of the waypoint currently being assigned via map click
     const [mapSelectionIndex, setMapSelectionIndex] = useState<number>(-1);
+
+    // Stores indices of input fields that currently contain validation errors
+    const [fieldErrors, setFieldErrors] = useState<number[]>([]);
 
     /**
      * Unset mapSelectionIndex if other action occurs
@@ -150,6 +155,10 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         });
         // Remove waypoint entry from state
         setWaypoints(prev => prev.filter((_, i) => i !== index));
+
+        // Removes the error for the deleted field and updates remaining error indices
+        setFieldErrors(prev => prev.filter(i => i !== index).map(i => i > index ? i - 1 : i)
+    );
     }, [activeField, waypoints.length]);
 
     /**
@@ -162,6 +171,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         if (waypoints.length >= 10) {
             return;
         }
+
+        // Insertion index
+        const insertIndex = index + 1;
 
         // Insert new waypoint after the given index
         const newWaypoints = [...waypoints];
@@ -183,6 +195,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             open: false
         });
         setLegPreferences(newLegPreferences);
+        
+        // Shift error indices forward after inserting a new field
+        setFieldErrors(prev => prev.map(errorIndex => errorIndex >= insertIndex ? errorIndex + 1 : errorIndex));
 
     }, [waypoints, legPreferences]);
 
@@ -192,6 +207,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
     const swapWaypoints = useCallback(() => {
         if (waypoints.length === 2) {
             setWaypoints(prev => [prev[1], prev[0]]);
+
+            // Update error indices to match swapped field positions
+            setFieldErrors(prev => prev.map(i => i === 0 ? 1 : i === 1 ? 0 : i));
         }
     }, [waypoints.length]);
 
@@ -207,8 +225,19 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             const oldIndex = waypoints.findIndex(w => w.id === active.id);
             const newIndex = waypoints.findIndex(w => w.id === over.id);
 
+            // Create a reordered copy of waypoints based
+            const reordered = arrayMove(waypoints, oldIndex, newIndex);
+
             // Reorder waypoints using arrayMove utility
             setWaypoints(prev => arrayMove(prev, oldIndex, newIndex));
+
+            // Recalculate error indices after reordering
+            setFieldErrors(prev =>
+                prev.map(errorIndex => {
+                    const waypointId = waypoints[errorIndex].id;
+                    return reordered.findIndex(w => w.id === waypointId);
+                })
+            );
         }
     }, [waypoints]);
 
@@ -226,7 +255,8 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         removeWaypoint,
         onDragEnd,
         addWaypoint,
-        swapWaypoints
+        swapWaypoints,
+        fieldErrors, setFieldErrors
     }), [
         waypoints,
         arriveBy,
@@ -241,7 +271,8 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         removeWaypoint,
         onDragEnd,
         addWaypoint,
-        swapWaypoints
+        swapWaypoints,
+        fieldErrors
     ]);
     
     return <InputContext.Provider value={value}>{children}</InputContext.Provider>;

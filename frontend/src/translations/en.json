@@ -42,7 +42,9 @@
       "ownBike": "Use own bike",
       "sharedBike": "Use shared bike"
     },
-    "find": "Find"
+    "find": "Find",
+    "invalidAddress": "Invalid address",
+    "fieldRequired": "Empty field"
   },
   "settings": "Preferences",
   "settingsTab": {
@@ -228,5 +230,13 @@
       "bicycle": "Bicycle",
       "sharedBicycle": "Shared bicycle"
     }
+  },
+  "warnings": {
+    "valueClamp": "Value adjusted to fit the allowed range",
+    "nominatim": "Nominatim is not responding. Using coordinates instead.",
+    "photon": "Photon is not responding. Please select a location on the map."
+  },
+  "errors": {
+    "serverOffline": "The server is currently unavailable. Please try again later."
   }
 }

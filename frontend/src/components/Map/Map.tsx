@@ -5,9 +5,10 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, ZoomControl, Marker, Popup, ScaleControl, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, ScaleControl } from 'react-leaflet'
 import L from 'leaflet';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@mui/material';
 import { API_BASE_URL } from '../config/config';
 import { InputText } from '../types/types';
 import { useLayers } from '../Controls/Layer/Layers';
@@ -22,9 +23,9 @@ import CustomZoomControl from './CustomZoomControl/CustomZoomControl';
 import { useInput } from '../InputContext';
 import { useSettings } from '../SettingsContext';
 import { useResult } from '../ResultContext';
+import { useNotification } from '../NotificationContext';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
-import { useMediaQuery } from '@mui/material';
 
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -66,6 +67,7 @@ function Map({
         setWaypoints, 
         mapSelectionIndex, 
         setMapSelectionIndex,
+        setFieldErrors
     } = useInput();
 
     // Default map center
@@ -86,6 +88,9 @@ function Map({
     const currentlyOpenTooltip = useRef<L.Marker | null>(null);
 
     const isDesktop = useMediaQuery("(min-width:768px)");
+
+    // Notification context
+    const { showNotification } = useNotification();
 
     const tooltipHandler = (id: string): L.LeafletEventHandlerFnMap => ({
         // Triggered when popup is open
@@ -160,7 +165,7 @@ function Map({
         if (targetIndex === -1) {
             return false;
         }
-
+        
         /**
          * Updates the selected waypoint with resolved display name
          * 
@@ -199,9 +204,13 @@ function Map({
             })
             .catch((err) => {
                 // Fallback to use coordinates if reverse geocoding fails
+                showNotification(t("warnings.nominatim"), "warning");
                 const displayName = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
                 updateWaypoints(displayName);
             });
+
+        // Clear validation error for the target field
+        setFieldErrors(prev => prev.filter((p) => p !== targetIndex));
 
         // Close route results after selecting new location
         closeResults();

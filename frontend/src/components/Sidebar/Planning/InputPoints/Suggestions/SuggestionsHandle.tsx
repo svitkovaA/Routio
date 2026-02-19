@@ -5,10 +5,12 @@
  */
 
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../../../../config/config";
 import { InputText, StoredWaypoint } from "../../../../types/types";
 import { useInput } from "../../../../InputContext";
 import { loadDestination, loadMiddleWaypoints, loadOrigin } from "../WaypointStorage";
+import { useNotification } from "../../../../NotificationContext";
 
 /**
  * Hook for managing suggestion behavior for a specific waypoint index
@@ -16,11 +18,17 @@ import { loadDestination, loadMiddleWaypoints, loadOrigin } from "../WaypointSto
  * @param index Index of waypoint in input list
  */
 export function useSuggestionHandle(index: number) {
+    // Translation function
+    const { t } = useTranslation();
+
     // List of currently available suggestions
     const [suggestions, setSuggestions] = useState<InputText[]>([]);
 
     // Index of currently highlighted suggestion
     const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+
+    // Notification context
+    const { showNotification } = useNotification();
 
     // User input context
     const {
@@ -71,7 +79,10 @@ export function useSuggestionHandle(index: number) {
                 setSuggestions(data);
                 setHighlightedIndex(-1);
             })
-            .catch(console.error);
+            .catch(() => {
+                showNotification(t("warnings.photon"), "warning");
+                console.error("Nominatim error");
+            });
     };
 
     /**

@@ -12,6 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
+import { useNotification } from "../../../../NotificationContext";
 import "./Section.css";
 
 type SectionProps = {
@@ -32,6 +33,9 @@ function Section({
 
     // Stores the temporary raw string representation of the input value
     const [rawValue, setRawValue] = useState<string>(value.toString());
+
+    // Notification context
+    const { showNotification } = useNotification();
 
     /**
      * Handles manual input value change
@@ -68,13 +72,23 @@ function Section({
         if (rawValue === "") {
             setRawValue(bounds.min.toString());
             setValue(bounds.min);
+            return;
         }
-        else {
-            // Clamp value within allowed bounds
-            const newValue = Math.max(bounds.min, Math.min(bounds.max, Number(rawValue)));
-            setRawValue(newValue.toString());
-            setValue(newValue);
+
+        // Convert input string to numeric value
+        const numericValue = Number(rawValue);
+
+        // Clamp value within defined bounds
+        const clampedValue = Math.max(bounds.min, Math.min(bounds.max, numericValue));
+
+        // Show warning notification if the value was clamped
+        if (numericValue !== clampedValue) {
+            showNotification(t("warnings.valueClamp"), "warning");
         }
+
+        // Update state with the clamped value
+        setRawValue(clampedValue.toString());
+        setValue(clampedValue);
     }
 
     return(

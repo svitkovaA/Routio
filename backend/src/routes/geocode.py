@@ -56,11 +56,20 @@ async def geocode_name(
         
         # Handle errors when connecting to Photon API
         except httpx.ReadTimeout:
-            return {"error": "Timeout connecting to Photon API"}
+            raise HTTPException(
+                status_code = 500,
+                detail = "Timeout connecting to Nominatim API"
+            )
         except httpx.HTTPStatusError as e:
-            return {"error": f"Photon API error: {e.response.status_code}"}
+            raise HTTPException(
+                status_code = 500,
+                detail = f"Photon API error: {e.response.status_code}"
+            )
         except Exception as e:
-            return {"error": f"Unexpected error: {str(e)}"}
+            raise HTTPException(
+                status_code = 500,
+                detail = "Timeout connecting to Nominatim API"
+            )
         
     # Transform Photon response into internal suggestion format
     suggestions: List[Suggestion] = []

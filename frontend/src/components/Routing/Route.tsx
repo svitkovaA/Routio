@@ -5,12 +5,14 @@
  */
 
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config/config";
 import { useInput } from "../InputContext";
 import { useResult } from "../ResultContext";
 import { useSettings } from "../SettingsContext";
 import { storeWaypoints } from "../Sidebar/Planning/InputPoints/WaypointStorage";
 import { Mode } from "../types/types";
+import { useNotification } from "../NotificationContext";
 
 /**
  * Hook for computing a route based on current application state
@@ -18,6 +20,9 @@ import { Mode } from "../types/types";
  * @returns Async function triggering route computation
  */
 export function useRoute() {
+    // Translation function
+    const { t } = useTranslation();
+    
     // Input context
     const {
         waypoints,
@@ -51,6 +56,9 @@ export function useRoute() {
         setLoading,
         abortRef
     } = useResult();
+
+    // Notification context
+    const { showNotification } = useNotification();
     
     /**
      * Sends a routing request to the backend and updates application state
@@ -66,7 +74,6 @@ export function useRoute() {
         // Execute only if selected result is not already active
         if (!results[resultIndex].active) {
             setLoading(true);
-            setShowResults(true);
 
             // Convert waypoints to to compatible format
             let waypointsArray: string[] = [];
@@ -149,6 +156,12 @@ export function useRoute() {
                         route_preference: preference
                     })
                 });
+
+                if (!result.ok) {
+                    throw new Error("Server error");
+                }
+
+                setShowResults(true);
             
                 const newResult = await result.json();
     
@@ -169,6 +182,8 @@ export function useRoute() {
                 if (error.name === "AbortError") {
                     return;
                 }
+                
+                showNotification(t("errors.serverOffline"), "error");
                 console.error(error);
             }
             finally {
@@ -182,7 +197,7 @@ export function useRoute() {
     }, [waypoints, legPreferences, arriveBy, useOwnBike, preference, date, time, maxTransfers, selectedModes,
         maxBikeDistance,bikeAverageSpeed, maxBikesharingDistance, bikesharingAverageSpeed, maxWalkDistance, 
         walkAverageSpeed, bikesharingLockTime, bikeLockTime, results, abortRef, setLoading, setResultActiveIndex,
-        setResults, setShowResults
+        setResults, setShowResults, showNotification
     ]);
     return route;
 }
