@@ -1,7 +1,7 @@
 {
   "map": {
     "cycleMap": "Cycle map",
-    "standartMap": "Standard map",
+    "standardMap": "Standard map",
     "satelliteMap": "Satellite map",
     "attribution": "&copy; OpenStreetMap contributors",
     "attributionCycle": "<a href=\"https://www.cyclosm.org/\">CyclOSM</a> & OpenStreetMap contributors",
@@ -21,9 +21,9 @@
     "mode": "Mode",
     "modes": {
       "multimodal": "Multimodal",
-      "transit": "Public transport",
+      "transit": "Public Transport",
       "bicycle": "Bicycle",
-      "walk": "Walk"
+      "walk": "Walking"
     },
     "time": "Time",
     "date": "Date",
@@ -46,18 +46,6 @@
   },
   "settings": "Preferences",
   "settingsTab": {
-    "generalSettings": "General settings",
-    "generalSettingsTab": {
-        "theme": "Theme",
-        "lightMode": "Light mode",
-        "darkMode": "Dark mode",
-        "timeFormat": "Time format",
-        "twentyfourHour": "24-hour",
-        "twelveHour": "12-hour",
-        "measurementSystem": "Measurement system",
-        "metric": "Metric",
-        "imperial": "Imperial"
-    },
     "transportPreferences": "Transport preferences",
     "transportPreferencesTab": {
       "maxTransfers": "Max transfers",
@@ -81,15 +69,72 @@
   "informationTab": {
     "overview": "Overview",
     "howToUse": "Getting started",
-    "features": "Features",
-    "contact": "Contact"
+    "features": "Advanced features"
+  },
+  "info": {
+    "overview": {
+      "aboutTheApp": "About the app",
+      "aboutTheAppSection": "Application Routio was developed as part of the bachelor's thesis at the Faculty of Information Technology, Brno University of Technology, under the supervision of Ing. Jiří Hynek, Ph.D. The application supports both unimodal routing, where only one transport mode is used, and multimodal routing, combining multiple modes within a single journey.",
+      "supportedModes": "Supported transport modes",
+      "whyApp": "Motivation and Background",
+      "whyAppSection1": "Every day mobility is an essential part of people's lives. People travel by car, public transport, walking, or by alternative options such as shared bicycles.",
+      "whyAppSection2": "As cities continue to grow and mobility demands increase, there is a rising need to combine different modes of transport. Existing solutions often do not provide sufficient support for integrating cycling and shared cycling into multimodal route planning.",
+      "whyAppSection3": "The purpose of this work was therefore to create a unified solution that enables the combination of multiple transport modes within a single journey.",
+      "external": "External services and data",
+      "externalSectionDB": "Open public transport data of the South Moravian Region in GTFS and GTFS-RT formats",
+      "externalSectionOTP": "A routing engine for planning journeys using public transport, walking, and cycling",
+      "externalSectionLissy": "API providing route shapes and historical delay information for public transport services",
+      "externalSectionNextbike": "Real-time information about shared bicycles available at Nextbike stations",
+      "externalSectionOSM": "Open map data and information about transport infrastructure",
+      "contact": "Contact",
+      "contactSection": "If you have any questions, comments or suggestions regarding the application, please feel free to contact me by email:"
+    },
+    "howToUse": {
+      "howToPlan": "How to plan a route",
+      "steps": {
+        "planning": "Planning",
+        "planningSection": "Fill in the input form by selecting the date and choosing the route points",
+        "preferences": "Preferences",
+        "preferencesSection": "Set your route preferences, such as preferred transport modes or restrictions.",
+        "results": "Results",
+        "resultsSection": "Available connections will be displayed, including duration, transfers, and individual route segments.",
+        "detail": "Detail",
+        "detailSection": "The route detail provides detailed information about individual segments and stops."
+      }
+    }
   },
   "results": "Results",
+  "resultsInfo": {
+    "detail": "Detail",
+    "noResults": "No results found"
+  },
   "modeDescriptions": {
     "multimodalTransport": "All means of transport",
     "publicTransport": "Public transport",
     "bicycle": "Bicycle",
     "walk": "Walk"
+  },
+  "detail": "Route detail",
+  "detailInfo": {
+    "publicTransport": {
+      "otherDepartures": "Other departures",
+      "moreDepartures": "More departures",
+      "stops": "Stops",
+      "arrivalAfterDeparture": "departure is before planned arrival.",
+      "nonContinuousDepartures": "No more departures available. Please reroute with a later time.",
+      "modes": {
+        "bus": "Bus",
+        "tram": "Tram",
+        "trolleybus": "Trolleybus",
+        "rail": "Train",
+        "metro": "Metro",
+        "water": "Boat"
+      }
+    },
+    "bicycle": {
+      "lockTime": "lock time",
+      "unlockTime": "unlock time"
+    }
   },
   "tooltips": {
     "controls": {
@@ -97,9 +142,8 @@
       "layer": "Change map style",
       "info": "About this application",
       "map": {
-        "zoomIn": "Zoom in map",
-        "zoomOut": "Zoom out map",
-        "mapScaleIndicator": "Shows the current map scale"
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out"
       }
     },
     "inputForm": {
@@ -137,16 +181,52 @@
       "detailPreview": {
         "previousRoute": "Previous route",
         "nextRoute": "Next route",
-        "otherRouteDots": "Select another route detail"
+        "otherRouteDots": "View another route"
+      },
+      "segment": {
+        "duration": "Duration",
+        "distance": "Distance"
+      },
+      "publicTransport": {
+        "otherDepartures": "Show other departures",
+        "closeOtherDepartures": "Hide other departures",
+        "stopsOnRoute": "Show stops on route",
+        "closeStopsOnRoute": "Hide stops on route"
+      },
+      "bicycle": {
+        "lockTime": "Time to lock the bike",
+        "unlockTime": "Time to unlock the bike"
       }
     },
     "settings": {
       "openSections": {
-        "openTransportPreferences": "Open transport preferences",
-        "openCyclingPreferences": "Open cycling preferences",
-        "openBikesharingPreferences": "Open bikesharing preferences",
-        "openWalkingPreferences": "Open walking preferences"
-      }
+        "openTransportPreferences": "Show transport preferences",
+        "openCyclingPreferences": "Show cycling preferences",
+        "openBikesharingPreferences": "Show bikesharing preferences",
+        "openWalkingPreferences": "Show walking preferences",
+        "closeTransportPreferences": "Hide transport preferences",
+        "closeCyclingPreferences": "Hide cycling preferences",
+        "closeBikesharingPreferences": "Hide bikesharing preferences",
+        "closeWalkingPreferences": "Hide walking preferences"
+      },
+      "increase": "Increase value",
+      "decrease": "Decrease value",
+      "addMode": "Include in route planning",
+      "removeMode": "Exclude from route planning"
+    },
+    "map": {
+      "originBikeStation": "Origin bicycle station",
+      "destinationBikeStation": "Destination bicycle station",
+      "alternativeOriginBikeStation": "Alternative origin station",
+      "alternativeDestinationBikeStation": "Alternative destination station",
+      "marker": "Click for stop information",
+      "vehiclePosition": "Current vehicle position"
+    },
+    "info": {
+      "bus": "Bus",
+      "foot": "Walking",
+      "bicycle": "Bicycle",
+      "sharedBicycle": "Shared bicycle"
     }
   }
 }

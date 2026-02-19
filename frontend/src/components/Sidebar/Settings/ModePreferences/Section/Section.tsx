@@ -5,11 +5,13 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
+import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
 import "./Section.css";
 
 type SectionProps = {
@@ -25,6 +27,9 @@ function Section({
     setValue,
     bounds
 } : SectionProps) {
+    //Translation function
+    const { t } = useTranslation();
+
     // Stores the temporary raw string representation of the input value
     const [rawValue, setRawValue] = useState<string>(value.toString());
 
@@ -112,30 +117,38 @@ function Section({
                             >
 
                                 {/* Decrease value button */}
-                                <IconButton
-                                    onClick={() => {
-                                        const newValue = Math.max(bounds.min, value - 1);
-                                        setValue(newValue);
-                                        setRawValue(newValue.toString());
-                                    }}
-                                    size="small"
-                                    disabled={value === bounds.min}
+                                <CustomTooltip
+                                    title={t("tooltips.settings.decrease")}
                                 >
-                                    <RemoveIcon fontSize="small" />
-                                </IconButton>
+                                    <IconButton
+                                        onClick={() => {
+                                            const newValue = Math.max(bounds.min, value - 1);
+                                            setValue(newValue);
+                                            setRawValue(newValue.toString());
+                                        }}
+                                        size="small"
+                                        disabled={value === bounds.min}
+                                    >
+                                        <RemoveIcon fontSize="small" />
+                                    </IconButton>
+                                </CustomTooltip>
 
                                 {/* Increase value button */}
-                                <IconButton
-                                    onClick={() => {
-                                        const newValue = Math.min(bounds.max, value + 1);
-                                        setValue(newValue);
-                                        setRawValue(newValue.toString());
-                                    }}
-                                    size="small"
-                                    disabled={value === bounds.max}
+                                <CustomTooltip
+                                    title={t("tooltips.settings.increase")}
                                 >
-                                    <AddIcon fontSize="small" />
-                                </IconButton>
+                                    <IconButton
+                                        onClick={() => {
+                                            const newValue = Math.min(bounds.max, value + 1);
+                                            setValue(newValue);
+                                            setRawValue(newValue.toString());
+                                        }}
+                                        size="small"
+                                        disabled={value === bounds.max}
+                                    >
+                                        <AddIcon fontSize="small" />
+                                    </IconButton>
+                                </CustomTooltip>
                             </InputAdornment>
                         ),
                     },

@@ -6,15 +6,14 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 import CloseIcon from '@mui/icons-material/Close';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuIcon from '@mui/icons-material/Menu';
-import { useTranslation } from "react-i18next";
 import Logo from "../Sidebar/Planning/Logo/Logo";
 import About from "./About/About";
 import HowToUse from "./HowToUse/HowToUse";
 import Features from "./Features/Features";
-import Contact from "./Contact/Contact";
 import "./Info.css";
 
 type InfoProps = {
@@ -26,7 +25,7 @@ function Info({ closeInfo }: InfoProps) {
     const { t } = useTranslation();
 
     // Information tabs
-    type InfoTab = "about" | "howto" | "features" | "contact";
+    type InfoTab = "about" | "howto" | "features";
 
     // Currently active tab
     const [tab, setTab] = useState<InfoTab>("about");
@@ -85,13 +84,6 @@ function Info({ closeInfo }: InfoProps) {
                         >
                             {t("informationTab.features")}
                         </h3>
-
-                        <h3
-                            className={`input-wrapper ${tab === "contact" ? "selected" : ""}`}
-                            onClick={() => setTab("contact")}
-                        >
-                            {t("informationTab.contact")}
-                        </h3>
                     </div>
                 ) : (
                     <div className="mobile-navigation">
@@ -106,9 +98,6 @@ function Info({ closeInfo }: InfoProps) {
                                 <div onClick={() => { setTab("features"); setMenuOpen(false); }}>
                                     {t("informationTab.features")}
                                 </div>
-                                <div onClick={() => { setTab("contact"); setMenuOpen(false); }}>
-                                    {t("informationTab.contact")}
-                                </div>
                             </div>
                         )}
                     </div>
@@ -119,7 +108,6 @@ function Info({ closeInfo }: InfoProps) {
                 {tab === "about" && <About />}
                 {tab === "howto" && <HowToUse />}
                 {tab === "features" && <Features />}
-                {tab === "contact" && <Contact />}
                 </div>
             </div>
         </div>,

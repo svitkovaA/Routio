@@ -4,10 +4,11 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import RouteIcon from '@mui/icons-material/Route';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { useEffect, useRef, useState } from "react";
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import DepartureBoardIcon from '@mui/icons-material/DepartureBoard';
 import { Leg, VerticalTimeline } from "../../../../types/types";
@@ -15,6 +16,7 @@ import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/Vertical
 import { timelineIcons } from '../../../Planning/Icons/Icons';
 import Waystop from '../Waystop/Waystop';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
 import "./PublicTransportDetail.css";
 
 type PublicTransportDetailProps = {
@@ -32,6 +34,9 @@ function PublicTransportDetail({
     moreDeparturesClick,
     recalculatePattern
 } : PublicTransportDetailProps) {
+    // Translation function
+    const { t } = useTranslation();
+
     const [stopsOpen, setStopsOpen] = useState<boolean>(false);
     const [departuresOpen, setDeparturesOpen] = useState<boolean>(false);
     const publicTransportDetailRef = useRef<HTMLDivElement>(null);
@@ -87,29 +92,36 @@ function PublicTransportDetail({
             </div>
             <div>
                 {leg.nonContinuousDepartures ? (
-                    <div className="non-continuous-departures">
+                    <div className="warning-departures">
                         <span className="exclamation">
                             <PriorityHighIcon />
                         </span>
-                        No more available times for this {leg.mode}. Reroute trip with later time.
+                        <span>
+                            {t("detailInfo.publicTransport.nonContinuousDepartures")}
+                        </span>
                     </div>
                 ) : leg.arrivalAfterDeparture ? (
-                    <div className="arrival-after-departure">
+                    <div className="warning-departures">
                         <span className="exclamation">
                             <PriorityHighIcon />
                         </span>
-                        {leg.mode} departure is before planned arrival
+                        <span>
+                            {t(`detailInfo.publicTransport.modes.${leg.mode}`)} {t("detailInfo.publicTransport.arrivalAfterDeparture")}
+                        </span>
                     </div>
                 ) : (<></>)}
                 <div 
                     onClick={() => setDeparturesOpen(!departuresOpen)}
                     className="detail-departures"
                 >
-                    <KeyboardArrowDownIcon className={departuresOpen ? "" : "rotate90"}/>
+                    <CustomTooltip title={departuresOpen ? t("tooltips.detail.publicTransport.closeOtherDepartures") : t("tooltips.detail.publicTransport.otherDepartures")}>
+                        <KeyboardArrowDownIcon className={departuresOpen ? "" : "rotate90"}/>
+                    </CustomTooltip>
+
                     <DepartureBoardIcon 
                         className="departure-icon" 
-                    />
-                    Other departures
+                        />
+                    {t("detailInfo.publicTransport.otherDepartures")}
                 </div>
                 <div className={departuresOpen ? "departure-box" : ""}>
                     {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => {
@@ -142,7 +154,7 @@ function PublicTransportDetail({
                             onClick={moreDeparturesClick}
                             disabled={!moreResults}
                         >
-                            More departures
+                            {t("detailInfo.publicTransport.moreDepartures")}
                         </button>
                     )}
                 </div>
@@ -152,12 +164,15 @@ function PublicTransportDetail({
                     onClick={() => setStopsOpen(!stopsOpen)}
                     className="detail-stops"
                 >
-                    <KeyboardArrowDownIcon className={stopsOpen ? "" : "rotate90"}/>
+                    <CustomTooltip title={stopsOpen ? t("tooltips.detail.publicTransport.closeStopsOnRoute") : t("tooltips.detail.publicTransport.stopsOnRoute")}>
+                        <KeyboardArrowDownIcon className={stopsOpen ? "" : "rotate90"}/>
+                    </CustomTooltip>
+
                     <span className="station-icon">
                         <div className="station-square">
                         </div>
                     </span>
-                    {((leg.serviceJourney?.quays.length ?? 0) + 1)} Stops
+                    {((leg.serviceJourney?.quays.length ?? 0) + 1)} {t("detailInfo.publicTransport.stops")}
                 </div>
                 <div>
                     {stopsOpen && leg.serviceJourney?.quays.map((quay, index) => (
@@ -172,14 +187,19 @@ function PublicTransportDetail({
                 </div>
             </div>
             <div className="detail-time-distance">
-                <div className="detail-time">
-                    <AccessTimeIcon />
-                    {(leg.duration / 60).toFixed(0)} min
-                </div>
-                <div className="detail-distance">
-                    <RouteIcon />
-                    {(leg.distance / 1000).toFixed(1)} km
-                </div>
+                <CustomTooltip title={t("tooltips.detail.segment.duration")}>
+                    <div className="detail-time">
+                        <AccessTimeIcon />
+                        {(leg.duration / 60).toFixed(0)} min
+                    </div>
+                </CustomTooltip>
+
+                <CustomTooltip title={t("tooltips.detail.segment.distance")}>
+                    <div className="detail-distance">
+                        <RouteIcon />
+                        {(leg.distance / 1000).toFixed(1)} km
+                    </div>
+                </CustomTooltip>
             </div>
             <Waystop
                 time={new Date(leg.aimedEndTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

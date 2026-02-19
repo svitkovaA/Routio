@@ -5,11 +5,15 @@
  */
 
 import { IconButton } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 function DetailButton() {
+    // Translation function
+    const { t } = useTranslation();
+
     return (
         <IconButton>
-            Details
+            {t("resultsInfo.detail")}
         </IconButton>
     );
 }

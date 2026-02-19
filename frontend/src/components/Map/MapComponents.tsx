@@ -25,7 +25,8 @@ export function createPinIcon(label: string, isPreview: boolean, translatedLabel
 
     // Default anchor positions
     let anchor: [number, number] = [14, 39];
-    let popupAnchor: [number, number] = [0, -45];
+    let popupAnchor: [number, number] = [0, -40];
+    let tooltipAnchor: [number, number] = [2, -40];
 
     // Replace label with translated version for START/END markers
     label = startEndMarker && translatedLabel ? translatedLabel : label;
@@ -34,6 +35,7 @@ export function createPinIcon(label: string, isPreview: boolean, translatedLabel
     if (startEndMarker) {
         anchor = [20, 53];
         popupAnchor = [0, -55];
+        tooltipAnchor = [0, -53];
     }
 
     return L.divIcon({
@@ -44,7 +46,8 @@ export function createPinIcon(label: string, isPreview: boolean, translatedLabel
         `,
         className: "",
         iconAnchor: anchor,
-        popupAnchor: popupAnchor
+        popupAnchor: popupAnchor,
+        tooltipAnchor: tooltipAnchor
     });
 }
 
@@ -65,7 +68,8 @@ export function createVehiclePositionIcon(label: string, color: string) {
         className: "",
         iconSize: [22, 22],
         iconAnchor: [11, 11],
-        popupAnchor: [0, -11]
+        popupAnchor: [2, -11],
+        tooltipAnchor: [2, -12]
     });
 }
 
@@ -93,6 +97,7 @@ export function createBikeStationPin(origin: boolean) {
         className: "",
         iconAnchor: [15, 40],
         popupAnchor: [0, -40],
+        tooltipAnchor: [0, -40]
     });
 }
 
@@ -115,6 +120,7 @@ export function createSmallBikeStationPin(origin: boolean) {
         className: "",
         iconAnchor: [5, 25],
         popupAnchor: [2, -25],
+        tooltipAnchor: [4, -25]
     });
 }
 

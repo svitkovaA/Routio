@@ -5,25 +5,29 @@
  */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { PUBLIC_URL } from "../../config/config";
 import "./HowToUse.css";
 
 function HowToUse() {
+    // Translation function
+    const { t } = useTranslation();
+    
     // Currently selected instruction step
     const [step, setStep] = useState(1);
 
     // Available instruction steps
     const steps = [
-        { id: 1, title: "Plánovanie" },
-        { id: 2, title: "Preferencie" },
-        { id: 3, title: "Výsledky" },
-        { id: 4, title: "Detail" },
+        { id: 1, title: t("info.howToUse.steps.planning") },
+        { id: 2, title: t("info.howToUse.steps.preferences") },
+        { id: 3, title: t("info.howToUse.steps.results") },
+        { id: 4, title: t("info.howToUse.steps.detail") },
     ];
 
     return (
         <div className="about-section">
             <div className="about-header">
-                Ako naplánovať trasu
+                {t("info.howToUse.howToPlan")}
             </div>
 
             {/* Step navigation */}
@@ -63,7 +67,7 @@ function HowToUse() {
                 {step === 1 && (
                     <>
                         <p>
-                            Vyplňte vstupný formulár zadaním dátumu a výberom bodov
+                            {t("info.howToUse.steps.planningSection")}
                         </p>
                         {/* <img src={`${PUBLIC_URL}/img/skuska.png`} alt="Plánovanie" /> */}
                     </>
@@ -72,8 +76,7 @@ function HowToUse() {
                 {step === 2 && (
                     <>
                         <p>
-                            Nastavte preferencie plánovania, ako sú preferované
-                            druhy dopravy alebo obmedzenia
+                            {t("info.howToUse.steps.preferencesSection")}
                         </p>
                         {/* <img src={`${PUBLIC_URL}/img/skuska.png`} alt="Preferencie" /> */}
                     </>
@@ -82,8 +85,7 @@ function HowToUse() {
                 {step === 3 && (
                     <>
                         <p>
-                            Zobrazia sa dostupné spojenia vrátane
-                            času, prestupov a jednotlivých úsekov trasy
+                            {t("info.howToUse.steps.resultsSection")}
                         </p>
                         {/* <img src={`${PUBLIC_URL}/img/skuska.png`} alt="Výsledky" /> */}
                     </>
@@ -92,8 +94,7 @@ function HowToUse() {
                 {step === 4 && (
                     <>
                         <p>
-                            Detail trasy poskytuje presné informácie o jednotlivých
-                            úsekoch a zastávkach
+                            {t("info.howToUse.steps.detailSection")}
                         </p>
                         {/* <img src={`${PUBLIC_URL}/img/skuska.png`} alt="Detail" /> */}
                     </>

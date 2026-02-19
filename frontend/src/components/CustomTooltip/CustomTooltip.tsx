@@ -1,43 +1,66 @@
 /**
  * @file CustomTooltip.tsx
- * @brief 
+ * @brief Custom MUI tooltip for application components
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { ReactElement, ReactNode } from "react";
+import { ReactElement, ReactNode, useState, useEffect } from "react";
 import Tooltip from "@mui/material/Tooltip";
 
 type CustomTooltipProps = {
     title: ReactNode;                                   // Tooltip content
-    children: ReactElement;                             // Wrapped element
+    children: ReactElement<any>;                        // Wrapped element
+    disableTooltip?: boolean;                           // Conditionally disable tooltip
     placement?: "top" | "bottom" | "left" | "right";    // Tooltip position
 };
 
 function CustomTooltip({
     title,
     children,
+    disableTooltip = false,
     placement = "top"
 }: CustomTooltipProps) {
+
+    const [tooltipOpen, setTooltipOpen] = useState(false);
+
+    useEffect(() => {
+        if (disableTooltip) {
+            setTooltipOpen(false);
+        }
+    }, [disableTooltip]);
+
     return (
         <Tooltip
             title={title}
             arrow
             placement={placement}
+            open={!disableTooltip && tooltipOpen}
+            onOpen={() => {
+                if (!disableTooltip) {
+                    setTooltipOpen(true);
+                }
+            }}
+            onClose={() => setTooltipOpen(false)}
             enterDelay={800}
+            enterNextDelay={800}
+            leaveDelay={100}
             slotProps={{
                 popper: {
+                    sx: {
+                        zIndex: 20500
+                    },
                     modifiers: [
                         {
                             name: "offset",
                             options: {
-                                offset: [0, -7],
+                                offset: [0, -7]
                             },
                         },
                     ],
                 },
                 tooltip: {
                     sx: {
-                        color: "#fff",
+                        color: "var(--color-white-text)",
                         fontSize: "12px",
                     },
                 }

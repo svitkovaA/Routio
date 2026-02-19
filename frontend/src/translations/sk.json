@@ -1,7 +1,7 @@
 {
   "map": {
     "cycleMap": "Cyklistická mapa",
-    "standartMap": "Štandardná mapa",
+    "standardMap": "Štandardná mapa",
     "satelliteMap": "Satelitná mapa",
     "attribution": "&copy; Prispievatelia OpenStreetMap",
     "attributionCycle": "<a href=\"https://www.cyclosm.org/\">CyclOSM</a> & Prispievatelia OpenStreetMap",
@@ -15,12 +15,12 @@
      "origin": "Štart",
     "destination": "Cieľ",
     "intermediatePoint": "Medzibod {{index}}",
-    "setOrigin": "Zadajte štart",
+    "setOrigin": "Zadajte východiskový bod",
     "setDestination": "Zadajte cieľ",
     "setIntermediatePoint": "Zadajte medzibod",
-    "mode": "Spôsob",
+    "mode": "Druh dopravy",
     "modes": {
-      "multimodal": "Multimodálny",
+      "multimodal": "Multimodálna doprava",
       "transit": "Verejná doprava",
       "bicycle": "Cyklistika",
       "walk": "Chôdza"
@@ -46,18 +46,6 @@
   },
   "settings": "Preferencie",
   "settingsTab": {
-    "generalSettings": "Všeobecné nastavenia",
-     "generalSettingsTab": {
-        "theme": "Téma",
-        "lightMode": "Svetlý režim",
-        "darkMode": "Tmavý režim",
-        "timeFormat": "Formát času",
-        "24hour": "24-hodinový",
-        "12hour": "12-hodinový",
-        "measurementSystem": "Merací systém",
-        "metric": "Metrický",
-        "imperial": "Imperiálny"
-    },
     "transportPreferences": "Preferencie dopravy",
     "transportPreferencesTab": {
       "maxTransfers": "Maximálny počet prestupov",
@@ -75,21 +63,78 @@
     "preferencesTab": {
       "maxDistance": "Maximálna vzdialenosť",
       "averageSpeed": "Priemerná rýchlosť",
-      "lockTime": "Čas na uzamknutie bicykla"
+      "lockTime": "Čas na zamknutie bicykla"
     }
   },
   "informationTab": {
     "overview": "O aplikácii",
     "howToUse": "Ako začať",
-    "features": "Ďalšie funkcie",
-    "contact": "Kontakt"
+    "features": "Ďalšie funkcie"
+  },
+  "info": {
+    "overview": {
+      "aboutTheApp": "O aplikácii",
+      "aboutTheAppSection": "Aplikácia Routio vznikla ako súčasť bakalárskej práce na Fakulte informačných technológií VUT v Brne pod vedením Ing. Jiřího Hynka, PhD. Aplikácia poskytuje podporu pre plánovanie unimodálnych trás, využívajúcich jeden druh dopravy, ako aj multimodálnych trás, ktoré kombinujú viaceré druhy dopravy v rámci jednej cesty.",
+      "supportedModes": "Podporované druhy dopravy",
+      "whyApp": "Prečo aplikácia vznikla",
+      "whyAppSection1": "Každodenná mobilita je neoddeliteľnou súčasťou života. Preprava môže prebiehať pomocou osobnej automobilovej dopravy, verejnej dopravy, chôdze alebo alternatívnych foriem, ako sú zdieľané bicykle.",
+      "whyAppSection2": "S rastúcimi mestami a zvyšujúcimi sa nárokmi na mobilitu však vzniká potreba efektívne kombinovať rôzne druhy dopravy. Existujúce riešenia často neposkytujú dostatočnú podporu integrácie cyklistiky a zdieľanej cyklistiky do multimodálneho plánovania trás.",
+      "whyAppSection3": "Cieľom tejto aplikácie bolo preto vytvoriť jednotnú aplikáciu, ktorá umožní kombinovať viacero druhov dopravy v rámci jednej trasy.",
+      "external": "Externé služby a dátové zdroje",
+      "externalSectionDB": "Otvorené dáta verejnej dopravy Juhomoravského kraja vo formáte GTFS a GTFS-RT",
+      "externalSectionOTP": "Nástroj pre plánovanie trás s využitím verejnej dopravy, chôdze a cyklistiky",
+      "externalSectionLissy": "API poskytujúce informácie o tvaroch trás liniek a historických meškaniach spojov",
+      "externalSectionNextbike": "Informácie o zdieľaných bicykloch v staniciach v reálnom čase spoločnosti Nextbike",
+      "externalSectionOSM": "Otvorené mapové podklady a informácie o dopravnej infraštruktúre",
+      "contact": "Kontakt",
+      "contactSection": "V prípade otázok, pripomienok alebo návrhov na zlepšenie aplikácie ma môžete kontaktovať prostredníctvom e-mailu:"
+    },
+    "howToUse": {
+      "howToPlan": "Ako naplánovať trasu",
+      "steps": {
+        "planning": "Plánovanie",
+        "planningSection": "Vyplňte vstupný formulár zadaním dátumu a výberom bodov",
+        "preferences": "Preferencie",
+        "preferencesSection": "Nastavte preferencie plánovania, ako sú preferované druhy dopravy alebo obmedzenia",
+        "results": "Výsledky",
+        "resultsSection": "Nastavte preferencie plánovania, ako sú preferované druhy dopravy alebo obmedzenia",
+        "detail": "Detail",
+        "detailSection": "Detail trasy poskytuje presné informácie o jednotlivých úsekoch a zastávkach"
+      }
+    }
   },
   "results": "Výsledky",
+  "resultsInfo": {
+    "detail": "Detail",
+    "noResults": "Nenašli sa žiadne výsledky"
+  },
   "modeDescriptions": {
     "multimodalTransport": "Multimodálna doprava",
     "publicTransport": "Verejná doprava",
     "bicycle": "Bicykel",
     "walk": "Chôdza"
+  },
+  "detail": "Detail trasy",
+  "detailInfo": {
+    "publicTransport": {
+      "otherDepartures": "Ďalšie odchody",
+      "moreDepartures": "Viac odchodov",
+      "stops": "Zastávky",
+      "arrivalAfterDeparture": "má odchod skôr ako je plánovaný príchod predchádzajúceho spoja.",
+      "nonContinuousDepartures": "Nie sú dostupné ďalšie odchody. Skúste zvoliť neskorší čas.",
+      "modes": {
+        "bus": "Autobus",
+        "tram": "Električka",
+        "trolleybus": "Trolejbus",
+        "rail": "Vlak",
+        "metro": "Metro",
+        "water": "Loď"
+      }
+    },
+    "bicycle": {
+      "lockTime": "na zamknutie bicykla",
+      "unlockTime": "na odomknutie bicykla"
+    }
   },
   "tooltips": {
     "controls": {
@@ -98,8 +143,7 @@
       "info": "O aplikácii",
       "map": {
         "zoomIn": "Priblížiť mapu",
-        "zoomOut": "Oddialiť mapu",
-        "mapScaleIndicator": "Aktuálna mierka mapy"
+        "zoomOut": "Oddialiť mapu"
       }
     },
     "inputForm": {
@@ -136,17 +180,53 @@
     "detail": {
       "detailPreview": {
         "previousRoute": "Predchádzajúca trasa",
-        "nextRoute": "Následujúca trasa",
-        "otherRouteDots": "Zvoliť detail inej trasy"
+        "nextRoute": "Nasledujúca trasa",
+        "otherRouteDots": "Zobraziť inú trasu"
+      },
+      "segment": {
+        "duration": "Trvanie",
+        "distance": "Vzdialenosť"
+      },
+      "publicTransport": {
+        "otherDepartures": "Zobraziť ďalšie odchody",
+        "closeOtherDepartures": "Skryť ďalšie odchody",
+        "stopsOnRoute": "Zobraziť zastávky na trase",
+        "closeStopsOnRoute": "Skryť zastávky na trase"
+      },
+      "bicycle": {
+        "lockTime": "Čas na zamknutie bicykla",
+        "unlockTime": "Čas na odomknutie bicykla"
       }
     },
     "settings": {
       "openSections": {
-        "openTransportPreferences": "Otvoriť preferencie dopravy",
-        "openCyclingPreferences": "Otvoriť preferencie pre vlastný bicykel",
-        "openBikesharingPreferences": "Otvoriť preferencie pre zdielané bicykle",
-        "openWalkingPreferences": "Otvoriť preferencie chôdze"
-      }
+        "openTransportPreferences": "Zobraziť nastavenia dopravy",
+        "openCyclingPreferences": "Zobraziť nastavenia cyklistiky",
+        "openBikesharingPreferences": "Zobraziť nastavenia zdieľanej cyklistiky",
+        "openWalkingPreferences": "Zobraziť nastavenia chôdze",
+        "closeTransportPreferences": "Skryť nastavenia dopravy",
+        "closeCyclingPreferences": "Skryť nastavenia cyklistiky",
+        "closeBikesharingPreferences": "Skryť nastavenia zdieľanej cyklistiky",
+        "closeWalkingPreferences": "Skryť nastavenia chôdze"
+      },
+      "increase": "Zvýšiť hodnotu",
+      "decrease": "Znížiť hodnotu",
+      "addMode": "Zahrnúť do plánovania trasy",
+      "removeMode": "Vylúčiť z plánovania trasy"
+    },
+    "map": {
+      "originBikeStation": "Počiatočná stanica bicyklov",
+      "destinationBikeStation": "Cieľová stanica bicyklov",
+      "alternativeOriginBikeStation": "Alternatívna počiatočná stanica",
+      "alternativeDestinationBikeStation": "Alternatívna cieľová stanica",
+      "marker": "Kliknutím zobrazíte informácie o zastávke",
+      "vehiclePosition": "Aktuálna poloha vozidla"
+    },
+    "info": {
+      "bus": "Autobus",
+      "foot": "Chôdza",
+      "bicycle": "Bicykel",
+      "sharedBicycle": "Zdieľaný bicykel"
     }
   }
 }

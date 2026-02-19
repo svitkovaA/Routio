@@ -8,10 +8,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import Section from './Section/Section';
+import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
 import "./ModePreferences.css";
 
 type ModePreferencesProps = {
     title: string;                                                      // Section title
+    openTooltip: string;                                                // Tooltip when section close
+    closeTooltip: string;                                               // Tooltip when section open
     speed: number;                                                      // Average speed value 
     setSpeed: (value: number | ((prev: number) => number)) => void;     // Setter for average speed value
     speedBounds: { min: number, max: number };                          // Bounds for speed value
@@ -25,6 +28,8 @@ type ModePreferencesProps = {
 
 function ModePreferences({ 
     title,
+    openTooltip,
+    closeTooltip,
     speed,
     setSpeed,
     speedBounds,
@@ -46,11 +51,13 @@ function ModePreferences({
             {/* Section toggle */}
             <div className="toggle-settings" onClick={() => setIsOpen(!isOpen)}>
                 <span>{title}</span>
-                <KeyboardArrowLeftIcon 
-                    fontSize="large" 
-                    className={isOpen ? "rotate90" : ""} 
-                    sx={{ color: 'var(--color-text-primary)' }}
-                />
+                <CustomTooltip title={isOpen ? closeTooltip : openTooltip}>
+                    <KeyboardArrowLeftIcon 
+                        fontSize="large" 
+                        className={isOpen ? "rotate90" : ""} 
+                        sx={{ color: 'var(--color-text-primary)' }}
+                    />
+                </CustomTooltip>
             </div>
             <div className={isOpen ? "settings-content" : "settings-content hidden"}>
                 <div className="preferences">

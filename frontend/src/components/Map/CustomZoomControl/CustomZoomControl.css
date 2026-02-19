@@ -1,0 +1,45 @@
+/**
+ * @file CustomZoomControl.css
+ * @brief Styles for the custom zoom control component
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.custom-zoom-control {
+    position: absolute;
+    bottom: 30px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    z-index: 1000;
+}
+
+.custom-zoom-button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--color-black-border);
+    border-radius: 6px;
+    background-color: var(--color-background);
+    color: var(--color-black-border);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-zoom-button > svg {
+    font-size: 20px;
+}
+
+.custom-zoom-button.dec {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+.custom-zoom-button.inc {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+/** End of file CustomZoomControl.css */

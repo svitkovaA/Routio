@@ -17,7 +17,7 @@ export const useLayers = () => {
     // Available base map layers
     const baseLayers = [
         {
-            name: t("map.standartMap"),
+            name: t("map.standardMap"),
             url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             attribution: t("map.attribution")
         },

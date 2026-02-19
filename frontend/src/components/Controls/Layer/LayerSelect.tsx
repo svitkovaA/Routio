@@ -39,7 +39,7 @@ function LayerSelect() {
         <div className={"controls-select " + (window.innerWidth < 768)}>
 
             {/* Button opening the layer selection dropdown */}
-            <CustomTooltip title={t("tooltips.controls.layer")}>
+            <CustomTooltip title={t("tooltips.controls.layer")} disableTooltip={open}>
                 <button
                     onBlur={() => setOpen(false)}
                     className={"controls-button controls-button-layer " + (open ? "open" : "")}

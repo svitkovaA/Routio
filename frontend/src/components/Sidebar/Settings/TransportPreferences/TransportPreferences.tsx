@@ -67,11 +67,13 @@ function TransportPreferences() {
             <div className="toggle-settings" onClick={() => setIsOpen(!isOpen)}>
                 <span>{t("settingsTab.transportPreferences")}</span>
                 <CustomTooltip title={t("tooltips.settings.openSections.openTransportPreferences")}>
-                    <KeyboardArrowLeftIcon 
-                        fontSize="large" 
-                        className={isOpen ? "rotate90" : ""} 
-                        sx={{ color: 'var(--color-text-primary)' }}
-                    />
+                    <CustomTooltip title={isOpen ? t("tooltips.settings.openSections.closeTransportPreferences") : t("tooltips.settings.openSections.openTransportPreferences")}>
+                        <KeyboardArrowLeftIcon
+                            fontSize="large" 
+                            className={isOpen ? "rotate90" : ""} 
+                            sx={{ color: 'var(--color-text-primary)' }}
+                        />
+                    </CustomTooltip>
                 </CustomTooltip>
             </div>
             <div className={isOpen ? "settings-content" : "settings-content hidden"}>
@@ -95,10 +97,12 @@ function TransportPreferences() {
                             <FormControlLabel
                                 key={mode.value}
                                 control={
-                                    <Checkbox
-                                        checked={selectedModes.includes(mode.value)}
-                                        onChange={handleModeSelection(mode.value)}
-                                    />
+                                    <CustomTooltip title={selectedModes.includes(mode.value) ? t("tooltips.settings.removeMode") : t("tooltips.settings.addMode")}>
+                                        <Checkbox
+                                            checked={selectedModes.includes(mode.value)}
+                                            onChange={handleModeSelection(mode.value)}
+                                        />
+                                    </CustomTooltip>
                                 }
                                 label={t(`settingsTab.transportPreferencesTab.${mode.labelKey}`)}
                             />

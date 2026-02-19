@@ -36,6 +36,9 @@ function TimeDate(){
     // Selects appropriate picker localization based on the language
     const currentPickerLocale = pickerLocaleMap[i18n.language] || enUS;
 
+    // English is selected
+    const isEnglish = i18n.language === "en";
+
     return (
         <LocalizationProvider 
             dateAdapter={AdapterDayjs} 
@@ -69,7 +72,7 @@ function TimeDate(){
                 <TimePicker
                     label={t("planning.time")}
                     value={time}
-                    ampm={false}
+                    ampm={isEnglish ? true : false}
                     onChange={(newValue) => {
                         if (newValue !== null) setTime(newValue)
                     }}

@@ -14,11 +14,12 @@ import Detail from "./Detail/Detail";
 import MoreDepartures from "./MoreDepartures/MoreDepartures";
 import { useResult } from "../../ResultContext";
 import { useRecalculatePattern } from "../../Routing/RecalculatePattern";
-import "./Results.css";
 import { useBackButtonClick } from './useBackButtonClick';
 import ResultLoading from './ResultLoading/ResultLoading';
+import "./Results.css";
 
 function Results() {
+    // Translation function
     const { t } = useTranslation();
 
     // Results context
@@ -52,7 +53,7 @@ function Results() {
                 <button className="back-button" onClick={backButtonClick}>
                     <KeyboardArrowLeftIcon fontSize="large" />
                 </button>
-                <span onClick={backButtonClick}>{showDetail ? showDepartures ? "Other departures" : "Details" : t("results")}</span>
+                <span onClick={backButtonClick}>{showDetail ? showDepartures ? t("detailInfo.publicTransport.otherDepartures") : t("detail") : t("results")}</span>
 
                 {/* Header content depends on current view */}
                 {!showDetail ? (
@@ -86,7 +87,9 @@ function Results() {
                 {loading ? (
                     <ResultLoading />
                 ) : result?.tripPatterns?.length === 0 ? (
-                    <>No results found</>
+                    <div className="no-results">
+                        {t("resultsInfo.noResults")}
+                    </div>
                 ) : !showDetail ? (
                     // List of available trip patterns
                     <ResultList />

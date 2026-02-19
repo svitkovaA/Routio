@@ -6,12 +6,23 @@
 
 import { Fragment, useEffect, useState } from "react";
 import { Marker, Popup, useMapEvent } from "react-leaflet";
+import { useTranslation } from "react-i18next";
 import { useResult } from "../../ResultContext";
 import { useChangeBikeStation } from "../../Routing/ChangeBikeStation";
 import { createBikeStationPin, createSmallBikeStationPin } from "../MapComponents";
+import CustomLeafletTooltip from "../../CustomTooltip/CustomLeafletTooltip";
 import "./BikeStations.css"
 
-function BikeStations() {
+type BikeStationsProps = {
+    tooltipHandler: (id: string) => L.LeafletEventHandlerFnMap;
+}
+
+function BikeStations({
+    tooltipHandler
+} : BikeStationsProps) {
+    //Translation function
+    const { t } = useTranslation();
+
     // Result context
     const {
         results,
@@ -35,7 +46,7 @@ function BikeStations() {
     useMapEvent("zoomend", (e) => {
         setZoom(e.target.getZoom());
     });
-    
+
     /**
      * Initializes bike station visibility flags when route changes
      */
@@ -77,7 +88,12 @@ function BikeStations() {
                         <Marker
                             position={[leg.bikeStationInfo.latitude, leg.bikeStationInfo.longitude]}
                             icon={createBikeStationPin(origin)}
+                            eventHandlers={tooltipHandler(`bike-main-${index}`)}
                         >
+                            <CustomLeafletTooltip>
+                                {origin ? t("tooltips.map.originBikeStation") : t("tooltips.map.destinationBikeStation")}
+                            </CustomLeafletTooltip>
+
                             <Popup autoPan={false}>
                                 <button
                                     onClick={() => invertBikeStationAtIndex(index)}
@@ -94,8 +110,13 @@ function BikeStations() {
                                 <Marker
                                     key={`${bikeStationIndex}`}
                                     position={[station.place.latitude, station.place.longitude]}
-                                    icon={createSmallBikeStationPin(origin)}  
+                                    icon={createSmallBikeStationPin(origin)}
+                                    eventHandlers={tooltipHandler(`bike-alternatives-${index}-${bikeStationIndex}`)}
                                 >
+                                    <CustomLeafletTooltip>
+                                        {origin ? t("tooltips.map.alternativeOriginBikeStation") : t("tooltips.map.alternativeDestinationBikeStation")}
+                                    </CustomLeafletTooltip>
+
                                     {/* Popup information */}
                                     <Popup autoPan={false}>
                                         Index: {bikeStationIndex} <br/>

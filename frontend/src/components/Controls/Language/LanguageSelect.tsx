@@ -55,7 +55,7 @@ function LanguageSelect() {
         <div className={"controls-select " + (window.innerWidth < 768)}>
             
             {/* Button opening the language selection dropdown */}
-            <CustomTooltip title={t("tooltips.controls.language")}>
+            <CustomTooltip title={t("tooltips.controls.language")} disableTooltip={open}>
                 <button
                     onBlur={() => setOpen(false)}
                     className={"controls-button " + (open ? "open" : "")}

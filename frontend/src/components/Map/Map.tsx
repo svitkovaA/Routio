@@ -14,12 +14,14 @@ import { useLayers } from '../Controls/Layer/Layers';
 import ShowRoute from './ShowRoute/ShowRoute';
 import FitBound from './FitBound/FitBound';
 import BikeStations from './BikeStations/BikeStations';
+import MapInfoPopup from './MapInfoPopup/MapInfoPopup';
+import CustomLeafletTooltip from '../CustomTooltip/CustomLeafletTooltip';
+import { createPinIcon, SetViewOnClick, createVehiclePositionIcon } from './MapComponents';
+import { timelineIcons } from '../Sidebar/Planning/Icons/Icons';
+import CustomZoomControl from './CustomZoomControl/CustomZoomControl';
 import { useInput } from '../InputContext';
 import { useSettings } from '../SettingsContext';
 import { useResult } from '../ResultContext';
-import MapInfoPopup from './MapInfoPopup/MapInfoPopup';
-import { createPinIcon, SetViewOnClick, createVehiclePositionIcon } from './MapComponents';
-import { timelineIcons } from '../Sidebar/Planning/Icons/Icons';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -28,38 +30,6 @@ L.Icon.Default.mergeOptions({
     iconUrl: require('leaflet/dist/images/marker-icon.png'),
     shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
-
-function MapControlTooltips() {
-    // Translation function
-    const { t } = useTranslation();
-
-    // Leaflet map instance
-    const map = useMap();
-
-    useEffect(() => {
-        map.whenReady(() => {
-            const container = map.getContainer();
-
-            const zoomIn = container.querySelector(".leaflet-control-zoom-in");
-            const zoomOut = container.querySelector(".leaflet-control-zoom-out");
-            const scale = container.querySelector(".leaflet-control-scale");
-
-            if (zoomIn) {
-                zoomIn.setAttribute("title", t("tooltips.controls.map.zoomIn"));
-            }
-
-            if (zoomOut) {
-                zoomOut.setAttribute("title", t("tooltips.controls.map.zoomOut"));
-            }
-
-            if (scale) {
-                scale.setAttribute("title", t("tooltips.controls.map.mapScaleIndicator"));
-            }
-        });
-    }, [map, t]);
-
-    return null;
-}
 
 type MapProps = {
     sidebarOpen: boolean;                           // Indicates whether the sidebar is currently open
@@ -109,6 +79,67 @@ function Map({
 
     // Reference to popup instance 
     const popupRefs = useRef<(L.Popup | null)[]>([]);
+
+    // Reference used to store tooltip opening timer
+    const tooltipTimers = useRef<Record<string, NodeJS.Timeout | null>>({});
+    const currentlyOpenTooltip = useRef<L.Marker | null>(null);
+
+    const tooltipHandler = (id: string): L.LeafletEventHandlerFnMap => ({
+        // Triggered when popup is open
+        popupopen: (e) => {
+            e.target._popupOpen = true;
+            e.target.getTooltip()?.setOpacity(0);
+        },
+
+        // Triggered when popup is closed
+        popupclose: (e) => {
+            e.target._popupOpen = false;
+        },
+
+        // Triggered when mouse enters marker area
+        mouseover: (e) => {
+            if (e.target._popupOpen) {
+                return;
+            }
+
+            // Starts delayed tooltip opening
+            tooltipTimers.current[id] = setTimeout(() => {
+                if (!e.target._popupOpen) {
+
+                    // Ensures only one tooltip at the time
+                    if (currentlyOpenTooltip.current && currentlyOpenTooltip.current !== e.target) {
+                        currentlyOpenTooltip.current.getTooltip()?.setOpacity(0);
+                        currentlyOpenTooltip.current.closeTooltip();
+                    }
+
+                    // Show and open tooltip
+                    e.target.getTooltip()?.setOpacity(1);
+                    e.target.openTooltip();
+
+                    currentlyOpenTooltip.current = e.target;
+                }
+            }, 800);
+        },
+
+        // Triggered when mouse leaves marker area
+        mouseout: (e) => {
+            const timer = tooltipTimers.current[id];
+
+            // Cancel pending tooltip delay
+            if (timer) {
+                clearTimeout(timer);
+                tooltipTimers.current[id] = null;
+            }
+
+            // Hide and close tooltip
+            e.target.getTooltip()?.setOpacity(0);
+            e.target.closeTooltip();
+
+            if (currentlyOpenTooltip.current === e.target) {
+                currentlyOpenTooltip.current = null;
+            }
+        }
+    });
 
     /**
      * Handles location selection on the map
@@ -198,13 +229,10 @@ function Map({
             />
 
             {/* Zoom handler */}
-            <ZoomControl position="bottomright"/>
+            <CustomZoomControl />
 
             {/* Scale indicator */}
             <ScaleControl position="bottomleft" imperial={false} />
-
-            {/* Custom tooltips for leaflet components */}
-            <MapControlTooltips />
 
             {/* Base map layer */}
             <TileLayer 
@@ -240,8 +268,13 @@ function Map({
                         key={i}
                         position={[w.lat, w.lon]}
                         icon={i === 0 ? startMarker : i !== waypoints.length - 1 ? createPinIcon(i.toString(), w.isPreview) : endMarker}
+                        eventHandlers={tooltipHandler(`waypoint-${i}`)}
                     >
-                        {/* Popup for waypoint markers */}
+                        <CustomLeafletTooltip>
+                            {t("tooltips.map.marker")}
+                        </CustomLeafletTooltip>
+
+                        {/* Popup for waypoint marker */}
                         <Popup
                             ref={el => {
                                 popupRefs.current[i] = el 
@@ -269,7 +302,9 @@ function Map({
             <ShowRoute />
 
             {/* Bicycle stations visualisation */}
-            <BikeStations />
+            <BikeStations
+                tooltipHandler={tooltipHandler}
+            />
 
             {/* Actual vehicle position visualisation */}
             {vehiclePositions.filter(p => p.lat > 0 && p.lon > 0).map((p, i) => (
@@ -277,7 +312,12 @@ function Map({
                     key={`${p.tripId}`}
                     position={[p.lat, p.lon]}
                     icon={createVehiclePositionIcon(p.publicCode, p.color)}
+                    eventHandlers={tooltipHandler(`vehicle-${p.tripId}`)}
                 >
+                    <CustomLeafletTooltip>
+                        {t("tooltips.map.vehiclePosition")}
+                    </CustomLeafletTooltip>
+
                     {/* Popup for vehicle position */}
                     <Popup>
                         <div className="vehicle-position-popup">

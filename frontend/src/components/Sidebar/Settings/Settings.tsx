@@ -52,6 +52,8 @@ function Settings() {
             {/* Cycling preferences */}
             <ModePreferences 
                 title={t("settingsTab.cyclingPreferences")}
+                openTooltip={t("tooltips.settings.openSections.openCyclingPreferences")}
+                closeTooltip={t("tooltips.settings.openSections.closeCyclingPreferences")}
                 speed={bikeAverageSpeed}
                 setSpeed={setBikeAverageSpeed}
                 speedBounds={{ min: 5, max: 40 }}
@@ -66,6 +68,8 @@ function Settings() {
             {/* Bikesharing preferences */}
             <ModePreferences 
                 title={t("settingsTab.bikesharingPreferences")}
+                openTooltip={t("tooltips.settings.openSections.openBikesharingPreferences")}
+                closeTooltip={t("tooltips.settings.openSections.closeBikesharingPreferences")}
                 speed={bikesharingAverageSpeed}
                 setSpeed={setBikesharingAverageSpeed}
                 speedBounds={{ min: 5, max: 30 }}
@@ -80,6 +84,8 @@ function Settings() {
             {/* Walking preferences */}
             <ModePreferences 
                 title={t("settingsTab.walkingPreferences")}
+                openTooltip={t("tooltips.settings.openSections.openWalkingPreferences")}
+                closeTooltip={t("tooltips.settings.openSections.closeWalkingPreferences")}
                 speed={walkAverageSpeed}
                 setSpeed={setWalkAverageSpeed}
                 speedBounds={{ min: 2, max: 15 }}

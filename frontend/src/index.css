@@ -18,6 +18,8 @@ body {
     --color-item-selected: #eeecec;
     --color-icons: #7e7e7e;
     --color-icons-darker: #484848;
+    --color-white-text: #ffffff;
+    --color-black-border: #000000;
 
     /* Pin icon */
     --color-pin-icon: red;
@@ -29,6 +31,9 @@ body {
     /* Bike stations */
     --color-origin-station: #2e7d32;
     --color-destination-station: #1565c0;
+
+    /** Tooltip */
+    --color-tooltip-bg: rgba(108, 108, 108, 0.95);
 
     --font-size-title: 40px;
     --font-size-text: 16px;

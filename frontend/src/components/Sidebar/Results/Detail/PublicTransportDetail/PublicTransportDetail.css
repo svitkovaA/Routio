@@ -39,10 +39,6 @@
     transform: translateX(-50%);
 }
 
-.exclamation {
-    color: red;
-}
-
 .public-transport-detail .timeline-icon {
     top: 35px;
     left: -40px;
@@ -104,6 +100,25 @@
 
 .delay-info.delayed {
     background-color: #ff0000;
+}
+
+.warning-departures {
+    display: flex;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 2px;
+    border: 1px solid #e7dbdb;
+    border-left: 4px solid red;
+}
+
+.exclamation {
+    color: red;
+    display: flex;
+    align-items: center;
+}
+
+.exclamation > svg {
+    font-size: 30px;
 }
 
 /** End of file PublicTransportDetail.css */
