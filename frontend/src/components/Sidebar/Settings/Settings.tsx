@@ -36,7 +36,7 @@ function Settings() {
         {/* Sidebar header with back navigation */}
         <div className="sidebar-header">
             <button className="back-button" onClick={() => setShowSettings(false)}>
-                <KeyboardArrowLeftIcon 
+                <KeyboardArrowLeftIcon
                     fontSize="large"
                 />
             </button>

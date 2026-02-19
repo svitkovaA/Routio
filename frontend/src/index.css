@@ -64,6 +64,10 @@ html, body, #root {
     min-height: 400px;
 }
 
+button {
+  color: black;
+}
+
 @media (min-width: 300px) and (min-height: 400px) {
     html, body, #root {
         overflow: hidden;
