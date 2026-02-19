@@ -18,13 +18,14 @@ function Controls({
 } : ControlsProps) {
     return (
         <div className="controls">
-            <div className="controls-right">
-                <LayerSelect />
-                <LanguageSelect />
+            <LayerSelect />
+            <LanguageSelect />
+            
+            <div className="controls-left">
+                <Information
+                    setShowInfo={setShowInfo}
+                />
             </div>
-            <Information
-                setShowInfo={setShowInfo}
-            />
         </div>
     );
 }

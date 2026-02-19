@@ -7,22 +7,22 @@
 .controls {
     position: absolute;
     top: 20px;
+    right: 20px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
+    gap: 10px;
     z-index: 4000;
     height: 40px;
-    left: 0;
-    right: 0;
-    padding: 0 20px;
-    flex-direction: row-reverse;
 }
 
-.controls-right {
+.controls-left {
+    position: fixed;
+    top: 20px;
+    left: 20px;
     display: flex;
     align-items: center;
     height: 40px;
-    gap: 10px;
 }
 
 .controls-select {
@@ -77,10 +77,9 @@
 }
 
 @media screen and (min-width: 768px) {
-    .controls {
-        flex-direction: row;
-        left: auto;
-        gap: 10px;
+    .controls-left {
+        position: static;
+        order: 3;
     }
 }
 
