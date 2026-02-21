@@ -11,7 +11,7 @@ Helper functions for trip planning logic, including:
 
 from copy import deepcopy
 from utils.geo import haversine_distance
-from models.types import TripPattern, WaypointGroup
+from models.route import TripPattern, WaypointGroup
 from models.route_data import LegPreferences, RouteData
 from utils.legs_processing import justify_time
 from typing import List, Tuple

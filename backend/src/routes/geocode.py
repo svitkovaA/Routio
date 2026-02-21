@@ -10,7 +10,7 @@ from typing import Any, Dict, List
 from fastapi import HTTPException, Query, APIRouter
 import httpx
 from config.external import NOMINATIM_URL, PHOTON_URL
-from models.types import Suggestion
+from models.suggestions import Suggestion
 from utils.geo import merge_close_results
 
 router = APIRouter(prefix="/geocode")

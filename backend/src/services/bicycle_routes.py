@@ -8,7 +8,7 @@ import asyncio
 from copy import deepcopy
 from typing import List
 from gql.client import AsyncClientSession
-from models.types import Leg, TripPattern
+from models.route import Leg, TripPattern
 from services.bicycle_service.rack_service import optimal_bike_rack_choice
 from services.otp_service import walk_bicycle_route
 

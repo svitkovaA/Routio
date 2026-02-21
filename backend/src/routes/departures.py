@@ -7,7 +7,7 @@ API endpoint for handling alternative public transport departures.
 from datetime import datetime, timedelta
 from typing import List
 from fastapi import APIRouter
-from models.types import VehiclePositions
+from models.route import VehiclePositions
 from models.departure_data import DepartureData
 from utils.legs_processing import justify_time
 

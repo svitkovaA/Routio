@@ -10,7 +10,7 @@ Processing trip legs, including:
 
 from copy import deepcopy
 from datetime import datetime, timedelta
-from models.types import Leg, ServiceJourney, TripPattern, VehiclePositions
+from models.route import Leg, ServiceJourney, TripPattern, VehiclePositions
 from typing import Optional, List
 
 # Default route colors based on transport mode (used when route colors are not provided either from Lissy nor GTFS)

@@ -12,7 +12,7 @@ from copy import deepcopy
 from types import CoroutineType
 from typing import Any, List
 from gql.client import AsyncClientSession
-from models.types import TripPattern
+from models.route import TripPattern
 from services.bicycle_service.rental_bike_route import rental_bike_route
 from services.bicycle_routes import group_walk_bicycle_route
 from services.otp_service import walk_bicycle_route

@@ -17,7 +17,8 @@ from typing import Any, Dict, List, Set, Tuple, cast
 from gql import gql
 from gql.client import AsyncClientSession
 import polyline                             # type: ignore[import-untyped]
-from models.types import BikeStationNodeWrapper, LissyShape, LissyShapes, OTPPublicQueryResponse, TripPattern
+from models.route import BikeStationNodeWrapper, OTPPublicQueryResponse, TripPattern
+from models.lissy import LissyShape, LissyShapes
 from services.gtfs_gbfs_service import get_color, get_departures_via
 from services.public_transport_service.lissy import get_delays, get_shape, get_shapes_cached, get_trip_id_by_time
 from utils.planner_utils import combine_pt

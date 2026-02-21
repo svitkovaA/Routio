@@ -18,7 +18,7 @@ import pandas as pd
 import requests
 from google.transit.gtfs_realtime_pb2 import FeedMessage        # type: ignore[import-untyped]
 from config.datasets import GTFSRT_URL, STATION_INFORMATION_URLS, GTFS_PATH, GTFS_URL
-from models.types import Departure, OtherDeparture, OtherOptions
+from models.route import Departure, OtherDeparture, OtherOptions
 
 calendar: pd.DataFrame
 calendar_dates: pd.DataFrame

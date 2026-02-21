@@ -13,7 +13,7 @@ from itertools import product
 from types import CoroutineType
 from typing import Any, List, Tuple
 from gql.client import AsyncClientSession
-from models.types import TripPattern, WaypointGroup
+from models.route import TripPattern, WaypointGroup
 from models.route_data import LegPreferences, RouteData
 from services.bicycle_public_route import bicycle_public_route
 from services.bicycle_service.rental_bike_route import rental_bike_route

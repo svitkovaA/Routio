@@ -10,7 +10,7 @@ from typing import List, Tuple
 import numpy as np
 from scipy.spatial.distance import cosine
 from gql.client import AsyncClientSession
-from models.types import BikeStationNode
+from models.route import BikeStationNode
 from services.otp_service import nearest_bike_stations
 from services.gtfs_gbfs_service import bike_station_capacities
 

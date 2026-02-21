@@ -11,7 +11,7 @@ a direct walking is enabled as a fallback.
 import asyncio
 from typing import List
 from gql.client import AsyncClientSession
-from models.types import TripPattern
+from models.route import TripPattern
 from services.otp_service import public_transport_route
 from utils.geo import haversine_distance
 from utils.planner_utils import combine_pt

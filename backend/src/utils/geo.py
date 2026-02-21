@@ -11,7 +11,7 @@ Helper functions for geographic computations, including:
 
 from math import radians, sin, cos, sqrt, atan2, acos, degrees
 from typing import List
-from models.types import Suggestion
+from models.suggestions import Suggestion
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """

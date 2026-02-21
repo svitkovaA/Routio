@@ -13,7 +13,7 @@ from collections import OrderedDict
 import httpx
 from dateutil.relativedelta import relativedelta
 from config.lissy_ben import DELAY_DATA_URL, DELAY_ROUTES_URL, DELAY_TRIPS_URL, LISSY_API_KEY, SHAPE_URL, SHAPES_URL
-from models.types import LissyAvailableRoute, LissyDelayTrips, LissyShape, LissyShapes, LissyTrips, RouteData
+from models.lissy import LissyAvailableRoute, LissyDelayTrips, LissyShape, LissyShapes, LissyTrips, LissyRouteData
 
 # Size of the cache window
 CACHE_DAYS = 7
@@ -22,7 +22,7 @@ CACHE_DAYS = 7
 MAX_SHAPE_CACHE_SIZE = 5000
 
 shapes_cache: Dict[str, Dict[str, LissyShapes]] = {}                    # Maps route_short_name to route_color and trips
-routes_cache: Dict[str, Dict[str, RouteData]] = {}                      # Maps route_short_name to route_data
+routes_cache: Dict[str, Dict[str, LissyRouteData]] = {}                      # Maps route_short_name to route_data
 shape_detail_cache: OrderedDict[int, LissyShape] = OrderedDict()        # Maps shape_id to shape_data (LRU)
 lissy_client = httpx.AsyncClient(timeout=10, headers={"Authorization": LISSY_API_KEY}) 
 
@@ -91,7 +91,7 @@ async def build_routes_map(routes_list: List[LissyAvailableRoute], cache_window:
     start_str = f"{start_date.year}-{start_date.month}-{start_date.day}"
     end_str = f"{end_date.year}-{end_date.month}-{end_date.day}"
 
-    async def fetch_route_data(route: LissyAvailableRoute) -> Tuple[str, Dict[str, RouteData]]:
+    async def fetch_route_data(route: LissyAvailableRoute) -> Tuple[str, Dict[str, LissyRouteData]]:
         """
         Fetch trip data for delay from Lissy API
         
@@ -112,7 +112,7 @@ async def build_routes_map(routes_list: List[LissyAvailableRoute], cache_window:
             r.raise_for_status()
             data: List[LissyDelayTrips] = r.json()
 
-            route_data: Dict[str, RouteData] = {}
+            route_data: Dict[str, LissyRouteData] = {}
             for shape in data:
                 shape_id = shape.get("shape_id")
                 stops_label = shape.get("stops") or f"shape_{shape_id}"

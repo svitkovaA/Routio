@@ -11,7 +11,7 @@ import asyncio
 from copy import deepcopy
 from typing import Dict, List
 from gql.client import AsyncClientSession
-from models.types import BikeStationNode, Leg, TripPattern
+from models.route import BikeStationNode, Leg, TripPattern
 from services.otp_service import walk_bicycle_route
 from services.bicycle_service.bike_station_service import optimal_destination_bike_station_choice, optimal_origin_bike_station_choice
 from utils.legs_processing import justify_time

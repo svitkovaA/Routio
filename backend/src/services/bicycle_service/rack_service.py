@@ -9,7 +9,7 @@ from typing import List
 import numpy as np
 from scipy.spatial.distance import cosine
 from database.db import create_conn
-from models.types import BikeRackNode
+from models.route import BikeRackNode
 
 # TODO unused function
 # import overpy   # type: ignore[import-untyped]
