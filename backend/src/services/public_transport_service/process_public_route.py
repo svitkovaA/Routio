@@ -13,7 +13,7 @@ from typing import List
 from gql.client import AsyncClientSession
 from models.route import TripPattern
 from services.otp_service import public_transport_route
-from utils.geo import haversine_distance
+from utils.geo import haversine_distance_km
 from utils.planner_utils import combine_pt
 
 async def process_public_route(
@@ -58,7 +58,7 @@ async def process_public_route(
             # While not all waypoints are processed or the distance to next is less than 1km
             while distance >= 1 and i > 0:
                 group.insert(0, waypoints[i])
-                distance = haversine_distance(*map(float, waypoints[i - 1].split(',')), *map(float, waypoints[i].split(',')))
+                distance = haversine_distance_km(*map(float, waypoints[i - 1].split(',')), *map(float, waypoints[i].split(',')))
                 i -= 1
 
             # Add first waypoint
@@ -118,7 +118,7 @@ async def process_public_route(
             # While not all waypoints are processed or the distance to next is less than 1km
             while distance >= 1 and i + 1 < len(waypoints):
                 group.append(waypoints[i])
-                distance = haversine_distance(*map(float, waypoints[i].split(',')), *map(float, waypoints[i + 1].split(',')))
+                distance = haversine_distance_km(*map(float, waypoints[i].split(',')), *map(float, waypoints[i + 1].split(',')))
                 i += 1
 
             # Add final waypoint

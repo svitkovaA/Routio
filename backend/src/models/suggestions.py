@@ -9,3 +9,5 @@ class Suggestion(TypedDict):
     street: str | None                          # Street name if available
     lat: float                                  # Latitude of the suggested location
     lon: float                                  # Longitude of the suggested location
+
+# End of file suggestions.py

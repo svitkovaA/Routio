@@ -13,7 +13,7 @@ from models.route import BikeRackNode
 
 # TODO unused function
 # import overpy   # type: ignore[import-untyped]
-# from utils.geo import haversine_distance
+# from utils.geo import haversine_distance_km
 # async def find_bike_rack(lat: float, lon: float, radius: int = 1000) -> List[BikeRackNode]:
 #     """
 #     Find bicycle parking racks near a given geographic location
@@ -48,7 +48,7 @@ from models.route import BikeRackNode
 #     for node in result.nodes:
 #         racks.append({
 #             # Distance from input location in meters
-#             "distance": haversine_distance(lat, lon, float(node.lat), float(node.lon)) * 1000,
+#             "distance": haversine_distance_km(lat, lon, float(node.lat), float(node.lon)) * 1000,
 #             "place": {
 #                 "latitude": float(node.lat),
 #                 "longitude": float(node.lon),

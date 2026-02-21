@@ -13,14 +13,10 @@ from datetime import datetime, timedelta
 from models.route import Leg, ServiceJourney, TripPattern, VehiclePositions
 from typing import Optional, List
 
-# Default route colors based on transport mode (used when route colors are not provided either from Lissy nor GTFS)
+# Default route colors based on transport mode
 COLORS = {
     "foot": "blue",
-    "bicycle": "red",
-    "bus": "purple",
-    "tram": "green",
-    "trolleybus": "yellow",
-    "rail": "orange",
+    "bicycle": "red"
 }
 
 def justify_time(pattern: TripPattern, time_to_depart: str, arrive_by: bool) -> None:
@@ -39,35 +35,31 @@ def justify_time(pattern: TripPattern, time_to_depart: str, arrive_by: bool) -> 
         None
     """
     print("function: justify_time")
+    
     legs = pattern["legs"]
 
     # Convert date in ISO format to datetime
     time_to_depart_dt = datetime.fromisoformat(time_to_depart)
+
     if arrive_by:
-        indecies = list(reversed(range(len(legs))))
-        second = "aimedStartTime"
-        first = "aimedEndTime"
+        leg_indices = reversed(range(len(legs)))
         pattern["aimedEndTime"] = time_to_depart_dt.isoformat()
     else:
-        indecies = list(range(len(legs)))
-        first = "aimedStartTime"
-        second = "aimedEndTime"
+        leg_indices = range(len(legs))
 
     # Process each leg and update times
-    i = 0
-    while i < len(indecies):
-        index = indecies[i]
-        
-        # Assign the current known time
-        legs[index][first] = time_to_depart_dt.isoformat()
+    for index in leg_indices:
+        leg = legs[index]
 
         # Shift time according to leg duration
         if arrive_by:
+            leg["aimedEndTime"] = time_to_depart_dt.isoformat()
             time_to_depart_dt -= timedelta(seconds=legs[index]["duration"])
+            leg["aimedStartTime"] = time_to_depart_dt.isoformat()
         else:
+            leg["aimedStartTime"] = time_to_depart_dt.isoformat()
             time_to_depart_dt += timedelta(seconds=legs[index]["duration"])
-        legs[index][second] = time_to_depart_dt.isoformat()
-        i += 1
+            leg["aimedEndTime"] = time_to_depart_dt.isoformat()
 
     # Shift the final aimed end time for departure planning
     if not arrive_by:
@@ -132,7 +124,7 @@ def merge_legs(leg1: Leg, leg2: Leg) -> Leg:
     }
 
     # Preserve data from the original legs
-    if "fromPace" in leg1:
+    if "fromPlace" in leg1:
         merged["fromPlace"] = leg1["fromPlace"]
     if "toPlace" in leg2:
         merged["toPlace"] = leg2["toPlace"]
@@ -179,7 +171,7 @@ def process_legs(pattern: TripPattern) -> None:
     for leg in legs:
         # Assign default color based on transport mode (used when route color is not provided from Lissy or GTFS)
         if not leg.get("color"):
-            leg["color"] = COLORS.get(leg["mode"], "gray")
+            leg["color"] = COLORS.get(leg["mode"], "black")
 
         # Append information necessary for vehicle position visualisation
         if "tripId" in leg and "line" in leg and "color" in leg and "otherOptions" in leg and leg["otherOptions"]["currentIndex"] is not None:

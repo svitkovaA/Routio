@@ -10,7 +10,7 @@ Helper functions for trip planning logic, including:
 """
 
 from copy import deepcopy
-from utils.geo import haversine_distance
+from utils.geo import haversine_distance_km
 from models.route import TripPattern, WaypointGroup
 from models.route_data import LegPreferences, RouteData
 from utils.legs_processing import justify_time
@@ -225,7 +225,7 @@ def at_waypoint(lat: float, lon: float, waypoint: str) -> bool:
     waypoint_lat, waypoint_lon = map(float, waypoint.split(','))
 
     # Compute distance in meters
-    distance_m = haversine_distance(lat, lon, waypoint_lat, waypoint_lon) * 1000
+    distance_m = haversine_distance_km(lat, lon, waypoint_lat, waypoint_lon) * 1000
 
     return distance_m < 50
 

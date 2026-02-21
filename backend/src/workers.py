@@ -19,10 +19,21 @@ def seconds_until_next(
     weekday: int | None = None
 ) -> float:
     """
-    Calculates the number of seconds until the next occurrence
-    of a given time.
+    Calculates seconds until the next occurrence of a given time
+
+    Args:
+        hour: Target hour
+        minute: Target minute
+        weekday: Optional target weekday, if not provided scheduled daily
+    
+    Returns:
+        Seconds until next occurrence
     """
+
+    # Determines current time
     now = datetime.now()
+
+    # Determines target time
     target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
     # Daily workers
@@ -33,6 +44,7 @@ def seconds_until_next(
     # Weekly workers
     else:
         days_ahead = (weekday - now.weekday()) % 7
+
         if days_ahead == 0 and target <= now:
             days_ahead = 7
 
@@ -42,20 +54,34 @@ def seconds_until_next(
 
 async def run_sync(fn: Callable[[], None]) -> None:
     """
-    Run a synchronous function without parameters in a thread.
+    Run a synchronous function without parameters in a thread
+
+    Args:
+        fn: Synchronous callable function
     """
     await asyncio.to_thread(fn)
 
 async def run_periodic(task: Callable[[], Awaitable[None]], delay_fn: Callable[[], float], initial_load: bool):
+    """
+    Periodically executes an asynchronous task
+
+    Args:
+        task: Asynchronous function to execute
+        delay_fn: Function returning delay before next execution
+        initial_load: If true, run task immediately on server start
+    """
     while True:
+        # Execute before wait
         if not initial_load:
             await asyncio.sleep(delay_fn())
 
+        # Task execution
         try:
             await task()
         except Exception:
             logging.exception(f"{task.__name__} failed")
 
+        # Wait after execution
         if initial_load:
             await asyncio.sleep(delay_fn())
 

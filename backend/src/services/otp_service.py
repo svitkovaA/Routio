@@ -1,7 +1,7 @@
 """
 file: otp_service.py
 
-Defines GraphQL queries for OpenTripPlanner (OTP) and provides functions for
+Defines GraphQL queries for OpenTripPlanner and provides functions for
 computing routes using public transport, bicycle, and walking modes. It handles
 trip planning requests, and transforms raw OTP responses into internal
 TripPattern structures. In addition to routing, it retrieves nearby

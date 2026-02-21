@@ -42,3 +42,5 @@ class LissyShapes(TypedDict):
     route_short_name: str                       # Short name, number of the route
     route_color: str                            # Hexadecimal color code of the route
     trips: List[LissyShapeTrips]                # List of shape trip mappings
+
+# End of file lissy.py

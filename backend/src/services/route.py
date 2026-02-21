@@ -21,7 +21,7 @@ from services.bicycle_routes import group_walk_bicycle_route
 from services.public_bicycle_route import public_bicycle_route
 from services.public_transport_service.process_public_route import process_public_route
 from utils.legs_processing import justify_time
-from utils.geo import get_borderline_distance, haversine_distance
+from utils.geo import get_borderline_distance, haversine_distance_km
 from utils.planner_utils import combine_pt, contains_sublist, create_waypoint_groups
 
 async def multimodal_route(
@@ -65,7 +65,7 @@ async def multimodal_route(
 
     # Compute total route distance
     while i + 1 < len(waypoints):
-        total_distance += haversine_distance(*map(float, waypoints[i].split(',')), *map(float, waypoints[i + 1].split(',')))
+        total_distance += haversine_distance_km(*map(float, waypoints[i].split(',')), *map(float, waypoints[i + 1].split(',')))
         i += 1
     
     i = 0
@@ -75,7 +75,7 @@ async def multimodal_route(
     # Determine possible modes per segment
     while i + 1 < len(waypoints):
         possible_modes.append([])
-        distance = haversine_distance(*map(float, waypoints[i].split(',')), *map(float, waypoints[i + 1].split(',')))
+        distance = haversine_distance_km(*map(float, waypoints[i].split(',')), *map(float, waypoints[i + 1].split(',')))
         
         # Walking is allowed if segment is within walk threshold
         if distance * 1.2 <= data.max_walk_distance:

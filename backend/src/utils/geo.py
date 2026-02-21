@@ -10,10 +10,15 @@ Helper functions for geographic computations, including:
 """
 
 from math import radians, sin, cos, sqrt, atan2, acos, degrees
-from typing import List
+from typing import List, Tuple
 from models.suggestions import Suggestion
 
-def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+def haversine_distance_km(
+    lat1: float,
+    lon1: float,
+    lat2: float,
+    lon2: float
+) -> float:
     """
     Calculate great-circle distance between two points on the Earth
     using Haversine formula
@@ -28,7 +33,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
         Distance between the two points in kilometers
     """
     # Earths radius in kilometers
-    R = 6371
+    EARTH_RADIUS_KM = 6371.0
 
     # Convert coordinate differences to radians
     dlat = radians(lat2 - lat1)
@@ -38,9 +43,15 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
-    return R * c
+    return EARTH_RADIUS_KM * c
 
-def interpolate_point(lat1: float, lon1: float, lat2: float, lon2: float, distance_from_start: float) -> tuple[float, float]:
+def interpolate_point(
+    lat1: float,
+    lon1: float,
+    lat2: float,
+    lon2: float,
+    distance_from_start: float
+) -> Tuple[float, float]:
     """
     Computes an interpolated point on the great-circle path between two coordinates
 
@@ -54,20 +65,37 @@ def interpolate_point(lat1: float, lon1: float, lat2: float, lon2: float, distan
     """
     print("function: interpolate_point")
     # Distance between to coordinates
-    total_distance = haversine_distance(lat1, lon1, lat2, lon2)
+    total_distance = haversine_distance_km(lat1, lon1, lat2, lon2)
+
+    # Prevents zero division
+    if total_distance == 0:
+        return lat1, lon1
 
     # Convert coordinates from degrees to radians
-    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+    lat1_rad = radians(lat1)
+    lon1_rad = radians(lon1)
+    lat2_rad = radians(lat2)
+    lon2_rad = radians(lon2)
 
     # Fraction of the total distance at which is need to interpolate
     f = distance_from_start / total_distance
 
+    # Clamp
+    f = max(0.0, min(1.0, f))
+
     # Convert points to 3D 
-    x1, y1, z1 = (cos(lat1) * cos(lon1), cos(lat1) * sin(lon1), sin(lat1))
-    x2, y2, z2 = (cos(lat2) * cos(lon2), cos(lat2) * sin(lon2), sin(lat2))
+    x1 = cos(lat1_rad) * cos(lon1_rad)
+    y1 = cos(lat1_rad) * sin(lon1_rad)
+    z1 = sin(lat1_rad)
+
+    x2 = cos(lat2_rad) * cos(lon2_rad)
+    y2 = cos(lat2_rad) * sin(lon2_rad)
+    z2 = sin(lat2_rad)
 
     # Compute the angle between two points on the sphere
-    omega = acos(x1 * x2 + y1 * y2 + z1 * z2)
+    dot = x1 * x2 + y1 * y2 + z1 * z2
+    dot = min(1.0, max(-1.0, dot))
+    omega = acos(dot)
 
     # Compute interpolation coefficients using spherical linear interpolation
     sin_omega = sin(omega)
@@ -100,38 +128,67 @@ def merge_close_results(results: List[Suggestion], max_distance: float=20) -> Li
     print("function: merge_close_results")
     merged: List[Suggestion] = []
     
-    for r in results:
-        is_close = False
-        for m in merged:
-            if (
-                r["name"] == m["name"] and
-                r.get("type") == m.get("type") and
-                r.get("country") == m.get("country") and
-                r.get("city") == m.get("city") and
-                (r.get("street") == m.get("street") or r.get("street") is None or m.get("street") is None) or
-                haversine_distance(r["lat"], r["lon"], m["lat"], m["lon"]) * 1000 < max_distance
-            ):
-                is_close = True
+    for candidate in results:
+        duplicate = False
+        for existing in merged:
+            same_name = (
+                candidate["name"] == existing["name"] and
+                candidate.get("type") == existing.get("type") and
+                candidate.get("country") == existing.get("country") and
+                candidate.get("city") == existing.get("city") and
+                (
+                    candidate.get("street") == existing.get("street") or
+                    candidate.get("street") is None or
+                    existing.get("street") is None
+                )
+            )
+
+            too_close = (
+                haversine_distance_km(
+                    candidate["lat"],
+                    candidate["lon"],
+                    existing["lat"],
+                    existing["lon"]
+                ) * 1000 < max_distance
+            )
+
+            if same_name or too_close:
+                duplicate = True
                 break
-        if not is_close:
-            merged.append(r)
+
+        if not duplicate:
+            merged.append(candidate)
+
     return merged
 
-def get_borderline_distance(bike_average_speed: float, walk_average_speed: float, bike_lock_time: int, bike_walk_distance: float) -> float:
+def get_borderline_distance(
+    bike_average_speed: float,
+    walk_average_speed: float,
+    bike_lock_time: int,
+    bike_walk_distance: float
+) -> float:
     """
     Calculate distance at which cycling becomes more time-efficient than walking
 
     Args:
         bike_average_speed: Average cycling speed in km/h
         walk_average_speed: Average walking speed in km/h
-        bike_lock_time: Required time to lock/unlock bike in seconds
-        bike_walk_distance: Additional distance for walking to/from bike station
+        bike_lock_time: Required time to lock/unlock bike in minutes
+        bike_walk_distance: Additional distance for walking to/from bike station in km
     
     Returns:
         The borderline distance when cycling equals to walking time in kilometers
     """
     print("function: get_borderline_distance")
-    distance = bike_walk_distance + ((bike_lock_time / 60) / (1 / walk_average_speed - 1 / bike_average_speed))
+
+    # Prevent computing when cycling speed is slower than walking speed
+    if bike_average_speed <= walk_average_speed:
+        return float("inf")
+    
+    bike_lock_time_hours = bike_lock_time / 60
+
+    distance = bike_walk_distance + ((bike_lock_time_hours) / (1 / walk_average_speed - 1 / bike_average_speed))
+    
     return distance
 
 # End of file geo.py

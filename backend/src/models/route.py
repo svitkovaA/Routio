@@ -157,4 +157,4 @@ class Results(TypedDict):
     tripPatterns: List[TripPattern]             # List of computed trip patterns
     active: bool                                # Indicates whether the routing result is active
 
-# End of file types.py
+# End of file route.py

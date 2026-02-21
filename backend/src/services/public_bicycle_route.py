@@ -17,7 +17,7 @@ from services.bicycle_service.rental_bike_route import rental_bike_route
 from services.bicycle_routes import group_walk_bicycle_route
 from services.otp_service import walk_bicycle_route
 from services.public_transport_service.process_public_route import process_public_route
-from utils.geo import haversine_distance, interpolate_point
+from utils.geo import haversine_distance_km, interpolate_point
 from utils.legs_processing import justify_time
 from utils.planner_utils import combine_pt
 
@@ -61,7 +61,7 @@ async def public_bicycle_route(
     # Create waypoint group to not exceed maximal allowed bicycle distance
     while i > 0 and distance * 1.2 <= max_bike_distance:
         bike_group.insert(0, waypoints[i])
-        distance += haversine_distance(*map(float, waypoints[i - 1].split(',')), *map(float, waypoints[i].split(',')))
+        distance += haversine_distance_km(*map(float, waypoints[i - 1].split(',')), *map(float, waypoints[i].split(',')))
         i -= 1
 
     trip_patterns: List[TripPattern] = []
@@ -75,7 +75,7 @@ async def public_bicycle_route(
         if len(bike_group) == 1:
             extra_distance = max_bike_distance
         else:
-            extra_distance = haversine_distance(*map(float, waypoints[i].split(',')), *map(float, waypoints[i + 1].split(','))) - distance_to_next    
+            extra_distance = haversine_distance_km(*map(float, waypoints[i].split(',')), *map(float, waypoints[i + 1].split(','))) - distance_to_next    
         
         # Very short adjustment, skip
         if len(bike_group) == 1 and extra_distance <= 1:
