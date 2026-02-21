@@ -1,6 +1,6 @@
 import asyncpg  # type: ignore[import-untyped]
 from contextlib import asynccontextmanager
-from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE
+from config.db import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE
 # from .osm import load_bike_racks, bike_racks_empty
 from .load_weather import load_weather
 from .load_station import stations

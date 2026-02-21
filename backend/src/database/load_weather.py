@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Tuple
 import httpx
 import asyncpg  # type: ignore[import-untyped]
-from config import LISSY_API_KEY, WEATHER_DATA_URL
+from config.lissy_ben import LISSY_API_KEY, WEATHER_DATA_URL
 
 WINDOW_MS = 48 * 60 * 60 * 1000  # 48 hours
 

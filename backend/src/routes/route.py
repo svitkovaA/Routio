@@ -13,7 +13,7 @@ from typing import List
 from fastapi import APIRouter
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
-from config import OTP_URL
+from config.external import OTP_URL
 from models.types import Leg, Results, TripPattern
 from models.route_data import LegPreferences, RouteData
 from models.bike_station_data import BikeStationData

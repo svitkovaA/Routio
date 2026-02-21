@@ -1,5 +1,5 @@
 import asyncpg  # type: ignore[import-untyped]
-from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE
+from config.db import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE
 
 async def create_database():
     conn: asyncpg.Connection = await asyncpg.connect(       # type: ignore

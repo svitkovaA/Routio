@@ -17,7 +17,7 @@ import httpx
 import pandas as pd
 import requests
 from google.transit.gtfs_realtime_pb2 import FeedMessage        # type: ignore[import-untyped]
-from config import GTFSRT_URL, STATION_INFORMATION_URLS, GTFS_PATH, GTFS_URL
+from config.datasets import GTFSRT_URL, STATION_INFORMATION_URLS, GTFS_PATH, GTFS_URL
 from models.types import Departure, OtherDeparture, OtherOptions
 
 calendar: pd.DataFrame
@@ -297,7 +297,7 @@ def get_departures_via(
     "currentIndex": current_index,
 }
 
-async def vehicle_position():
+async def vehicle_position() -> None:
     """
     Fetch and parse GTFS-Realtime vehicle position data
     """

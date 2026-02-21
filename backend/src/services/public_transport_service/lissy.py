@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Tuple
 from collections import OrderedDict
 import httpx
 from dateutil.relativedelta import relativedelta
-from config import DELAY_DATA_URL, DELAY_ROUTES_URL, DELAY_TRIPS_URL, LISSY_API_KEY, SHAPE_URL, SHAPES_URL
+from config.lissy_ben import DELAY_DATA_URL, DELAY_ROUTES_URL, DELAY_TRIPS_URL, LISSY_API_KEY, SHAPE_URL, SHAPES_URL
 from models.types import LissyAvailableRoute, LissyDelayTrips, LissyShape, LissyShapes, LissyTrips, RouteData
 
 # Size of the cache window

@@ -1,6 +1,6 @@
 from typing import Dict, List
 import httpx
-from config import LISSY_API_KEY, WEATHER_POSITIONS_URL
+from config.lissy_ben import LISSY_API_KEY, WEATHER_POSITIONS_URL
 import asyncpg  # type: ignore[import-untyped]
 
 async def weather_stations(conn: asyncpg.Connection) -> None:

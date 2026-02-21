@@ -3,7 +3,7 @@ import httpx
 import osmium
 import asyncpg
 from typing import Optional
-from config import OSM_PBF_PATH, OSM_PBF_URL
+from config.datasets import OSM_PBF_PATH, OSM_PBF_URL
 
 class BicycleRackHandler(osmium.SimpleHandler):
     def __init__(self, conn: asyncpg.Connection):

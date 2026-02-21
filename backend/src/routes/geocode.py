@@ -9,7 +9,7 @@ Geocoding API endpoints, including:
 from typing import Any, Dict, List
 from fastapi import HTTPException, Query, APIRouter
 import httpx
-from config import NOMINATIM_URL, PHOTON_URL
+from config.external import NOMINATIM_URL, PHOTON_URL
 from models.types import Suggestion
 from utils.geo import merge_close_results
 

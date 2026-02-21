@@ -1,7 +1,7 @@
 from typing import List, TypedDict
 from datetime import datetime, timezone
 import httpx
-from config import BEN_API_KEY, BICYCLE_PLACES_URL
+from config.lissy_ben import BEN_API_KEY, BICYCLE_PLACES_URL
 import asyncpg  # type: ignore[import-untyped]
 
 WINDOW_MS = 48 * 60 * 60 * 1000  # 48 hours
