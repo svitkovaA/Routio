@@ -47,7 +47,7 @@ function CustomTooltip({
             slotProps={{
                 popper: {
                     sx: {
-                        zIndex: 20500
+                        zIndex: 1200
                     },
                     modifiers: [
                         {

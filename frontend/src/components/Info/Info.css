@@ -6,7 +6,7 @@
 
 .info-wrapper {
     position: fixed;
-    z-index: 10002;
+    z-index: 1001;
     top: 0;
     left: 0;
     width: 100%;
@@ -23,7 +23,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 10003;
+    z-index: 1002;
     border: 2px solid var(--color-info);
     box-shadow: 0 3px 3px rgba(0, 0, 0, 0.3);
     background-color: var(--color-background);
@@ -86,7 +86,7 @@
     right: 0;
     background: white;
     border-top: 1px solid black;
-    z-index: 10101;
+    z-index: 1003;
 }
 
 .mobile-menu div {
@@ -111,6 +111,7 @@
         transform: translate(-50%, -50%);
         max-width: min(1200px, calc(100% - 150px));
         height: calc(100% - 150px);
+        border-radius: 10px;
     }
 
     .info .info-grid-wrapper {

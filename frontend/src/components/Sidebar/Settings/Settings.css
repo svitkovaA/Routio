@@ -20,7 +20,7 @@
     width: 100%;
     top: 20px;
     background-color: var(--color-background);
-    z-index: 10000;
+    z-index: 1100;
     border-top-left-radius: 6px;
 }
 

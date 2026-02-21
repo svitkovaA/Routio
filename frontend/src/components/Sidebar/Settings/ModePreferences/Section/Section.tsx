@@ -89,7 +89,33 @@ function Section({
         // Update state with the clamped value
         setRawValue(clampedValue.toString());
         setValue(clampedValue);
-    }
+    };
+
+    /**
+     * Handles keyboard interactions for the numeric input field
+     * 
+     * @param e Keyboard event
+     */
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            validate();
+            (e.target as HTMLInputElement).blur();
+        }
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            const newValue = Math.min(bounds.max, value + 1);
+            setValue(newValue);
+            setRawValue(newValue.toString());
+        }
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            const newValue = Math.max(bounds.min, value - 1);
+            setValue(newValue);
+            setRawValue(newValue.toString());
+        }
+    };
 
     return(
         <div className="section">
@@ -102,6 +128,7 @@ function Section({
                 value={rawValue}
                 onChange={handleChange}
                 onBlur={validate}
+                onKeyDown={handleKeyDown}
                 className="number-input"
                 autoComplete="off"
                 slotProps={{

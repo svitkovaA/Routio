@@ -11,7 +11,6 @@
 .dropdown.dropdown-layer {
     position: absolute;
     right: 0;
-    z-index: 100;
     width: 120px;
     border-top-left-radius: 6px;
 }

@@ -48,6 +48,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             {children}
 
             <Snackbar
+                className=""
                 open={open}
                 autoHideDuration={5000}
                 onClose={handleClose}
@@ -68,7 +69,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                         xs: "90px",
                         sm: "max(410px, calc(50% - 200px))"
                     },
-                    zIndex: 25000
+                    zIndex: 1300
                 }}
             >
                 <Alert

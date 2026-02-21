@@ -80,7 +80,7 @@
     font-weight: bold;
     color: var(--color-text-primary);
     transform: translate(-50%, -50%);
-    z-index: 20;
+    z-index: 600;
 }
 
 .start-end-marker .marker-inner {

@@ -32,11 +32,13 @@
     top: 0;
     z-index: 3;
 }
+
 .bicycle {
     left: 23px;
     top: 0;
     z-index: 2;
 }
+
 .walk {
     left: 40px;
     top: 0;
