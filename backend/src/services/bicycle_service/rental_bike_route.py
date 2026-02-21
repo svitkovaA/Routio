@@ -1,11 +1,20 @@
+"""
+file: rental_bike_route.py
+
+Implements routing using rental bicycles. It selects origin and destination
+bicycle stations with the highest weighted score and computes bicycle segment
+between them. The bicycle segment is conditionally enriched with the walking
+segment to or from bicycle station.
+"""
+
 import asyncio
 from copy import deepcopy
 from typing import Dict, List
+from gql.client import AsyncClientSession
 from models.types import BikeStationNode, Leg, TripPattern
 from services.otp_service import walk_bicycle_route
-from utils.legs_processing import justify_time
 from services.bicycle_service.bike_station_service import optimal_destination_bike_station_choice, optimal_origin_bike_station_choice
-from gql.client import AsyncClientSession
+from utils.legs_processing import justify_time
 
 async def rental_bike_route(
     waypoints: List[str], 
@@ -21,50 +30,100 @@ async def rental_bike_route(
     bicycle_public: bool = False, 
     use_semicircle: bool = False
 ) -> List[TripPattern]:
-    print("function: rental_bike_route")
-    numOfNodes = 1 if best_option_only else 2
+    """
+    Computes route using rental bike on the given route segment
 
+    Args:
+        waypoints: Ordered list of coordinates
+        time_to_depart: Departure time in ISO format
+        best_option_only: If True, only the best station combinations are evaluated
+        arrive_by: If True, routing is computed in arrive mode
+        bike_lock_time: Time in minutes required for locking or unlocking the bicycle
+        bike_speed: Cycling speed
+        walk_speed: Walking speed
+        session: Asynchronous GraphQL client session
+        maximum_distance: Maximum search radius for bike stations
+        public_bicycle: True, if the segment is being routed within public_bicycle mode
+        bicycle_public: True, if the segment is being routed within bicycle_public mode
+        use_semicircle: If True, restricts candidate stations to forward travel direction
+
+    Returns:
+        List of complete TripPattern objects representing rental bicycle routes
+    """
+    print("function: rental_bike_route")
+    # Determine how many station alternatives should be evaluated
+    num_of_nodes = 1 if best_option_only else 2
+
+    # Parse origin and destination coordinates
     origin_lat, origin_lon = map(float, waypoints[0].split(','))
     destination_lat, destination_lon = map(float, waypoints[-1].split(','))
 
+    # Parse first and last intermediate waypoints
     first_lat, first_lon = map(float, waypoints[1].split(','))
     last_lat, last_lon = map(float, waypoints[-2].split(','))
 
+    # Select optimal origin and destination stations
     tasks = [
         optimal_origin_bike_station_choice((origin_lat, origin_lon), (first_lat, first_lon), maximum_distance, public_bicycle, use_semicircle, session),
         optimal_destination_bike_station_choice((last_lat, last_lon), (destination_lat, destination_lon), maximum_distance, bicycle_public, use_semicircle, session)
     ]
     results = await asyncio.gather(*tasks)
-    sortedOriginNodes = results[0]
-    sortedDestinationNodes = results[1]
+    sorted_origin_nodes = results[0]
+    sorted_destination_nodes = results[1]
 
+    # Compute intermediate bicycle legs
     intermediate_tasks = [
         walk_bicycle_route(waypoints[i], waypoints[i + 1], time_to_depart, "bicycle", bike_speed, session)
         for i in range(1, len(waypoints) - 2)
     ]
     intermediate_results = await asyncio.gather(*intermediate_tasks)
-    intermediateLegs = [leg for res in intermediate_results for leg in res[0]["legs"]]
 
+    # Flatten intermediate legs
+    intermediate_legs = [
+        leg for res in intermediate_results for leg in res[0]["legs"]
+    ]
+
+    # Optional walking to origin station
     origin_to_first_map: Dict[str, List[TripPattern]] = {}
     if not public_bicycle:
         origin_to_first_tasks = {
-            origNode["place"]["id"]: walk_bicycle_route(waypoints[0], f"{origNode['place']['latitude']},{origNode['place']['longitude']}", time_to_depart, "foot", walk_speed, session)
-            for origNode in sortedOriginNodes[:numOfNodes]
+            orig_node["place"]["id"]: walk_bicycle_route(waypoints[0], f"{orig_node['place']['latitude']},{orig_node['place']['longitude']}", time_to_depart, "foot", walk_speed, session)
+            for orig_node in sorted_origin_nodes[:num_of_nodes]
         }
         origin_to_first_results = await asyncio.gather(*origin_to_first_tasks.values())
         origin_to_first_map = dict(zip(origin_to_first_tasks.keys(), origin_to_first_results))
 
+    # Optional walking from destination station
     last_to_dest_map: Dict[str, List[TripPattern]] = {}
     if not bicycle_public:
         last_to_dest_tasks = {
-            destNode["place"]["id"]: walk_bicycle_route(f"{destNode['place']['latitude']},{destNode['place']['longitude']}", waypoints[-1], time_to_depart, "foot", walk_speed, session)
-            for destNode in sortedDestinationNodes[:numOfNodes]
+            dest_node["place"]["id"]: walk_bicycle_route(f"{dest_node['place']['latitude']},{dest_node['place']['longitude']}", waypoints[-1], time_to_depart, "foot", walk_speed, session)
+            for dest_node in sorted_destination_nodes[:num_of_nodes]
         }
         last_to_dest_results = await asyncio.gather(*last_to_dest_tasks.values())
         last_to_dest_map = dict(zip(last_to_dest_tasks.keys(), last_to_dest_results))
 
+    # Build full trip pattern for each station combination
+    async def build_trip(
+        orig_node: BikeStationNode,
+        orig_index: int,
+        dest_node: BikeStationNode,
+        dest_index: int
+    ) -> TripPattern:
+        """
+        Constructs a single trip pattern for a given origin/destination bike station pair
 
-    async def build_trip(origNode: BikeStationNode, orig_index: int, destNode: BikeStationNode, dest_index: int) -> TripPattern:
+        Args:
+            orig_node: Origin bike station
+            orig_index: Index of selected origin bike station
+            dest_node: Destination bike station
+            dest_index: Index of selected destination bike station
+        
+        Returns:
+            Bike trip pattern between stations
+        """
+
+        # Template for wait leg for unlock/lock bicycle
         wait_leg: Leg = {
             "mode": "wait",
             "color": "black",
@@ -84,56 +143,69 @@ async def rental_bike_route(
                 "bikeStations": []
             }
         }
-        startingBikeStation = f"{origNode['place']['latitude']},{origNode['place']['longitude']}"
-        endBikeStation = f"{destNode['place']['latitude']},{destNode['place']['longitude']}"
+        starting_bike_station = f"{orig_node['place']['latitude']},{orig_node['place']['longitude']}"
+        end_bike_station = f"{dest_node['place']['latitude']},{dest_node['place']['longitude']}"
 
+        # Initialize trip pattern
         if public_bicycle:
-            tripPattern: TripPattern = {"legs": [], "aimedEndTime": ""}
+            trip_pattern: TripPattern = {"legs": [], "aimedEndTime": ""}
         else:
-            tripPattern: TripPattern = deepcopy(origin_to_first_map[origNode["place"]["id"]][0])
+            # Start with walking leg to origin station
+            trip_pattern: TripPattern = deepcopy(origin_to_first_map[orig_node["place"]["id"]][0])
         
 
+        # Compute first cycling segment
         if len(waypoints) > 2:
-            res = await walk_bicycle_route(startingBikeStation, waypoints[1], time_to_depart, "bicycle", bike_speed, session)
+            res = await walk_bicycle_route(starting_bike_station, waypoints[1], time_to_depart, "bicycle", bike_speed, session)
         else:
-            res = await walk_bicycle_route(startingBikeStation, endBikeStation, time_to_depart, "bicycle", bike_speed, session)
+            res = await walk_bicycle_route(starting_bike_station, end_bike_station, time_to_depart, "bicycle", bike_speed, session)
+       
+        # Insert bike unlock time
         origin_wait_leg = deepcopy(wait_leg)
         if "fromPlace" in res[0]["legs"][0]:
             origin_wait_leg["bikeStationInfo"]["latitude"] = res[0]["legs"][0]["fromPlace"]["latitude"]
             origin_wait_leg["bikeStationInfo"]["longitude"] = res[0]["legs"][0]["fromPlace"]["longitude"]
             origin_wait_leg["bikeStationInfo"]["selectedBikeStationIndex"] = orig_index
-            origin_wait_leg["bikeStationInfo"]["bikeStations"] = sortedOriginNodes
+            origin_wait_leg["bikeStationInfo"]["bikeStations"] = sorted_origin_nodes
             copy_leg = deepcopy(origin_wait_leg)
-            tripPattern["legs"].append(copy_leg)
+            trip_pattern["legs"].append(copy_leg)
 
-            tripPattern["legs"].extend(res[0]["legs"])
-            tripPattern["legs"].extend(intermediateLegs)
+            # Add cycling and intermediate legs
+            trip_pattern["legs"].extend(res[0]["legs"])
+            trip_pattern["legs"].extend(intermediate_legs)
 
+            # Add final cycling segment if needed
             if len(waypoints) > 2:
-                res = await walk_bicycle_route(waypoints[-2], endBikeStation, time_to_depart, "bicycle", bike_speed, session)
-                tripPattern["legs"].extend(res[0]["legs"])
+                res = await walk_bicycle_route(waypoints[-2], end_bike_station, time_to_depart, "bicycle", bike_speed, session)
+                trip_pattern["legs"].extend(res[0]["legs"])
 
+            # Insert bike lock time 
             if "toPlace" in res[0]["legs"][-1]:
                 destination_wait_leg = deepcopy(wait_leg)
                 destination_wait_leg["bikeStationInfo"]["latitude"] = res[0]["legs"][-1]["toPlace"]["latitude"]
                 destination_wait_leg["bikeStationInfo"]["longitude"] = res[0]["legs"][-1]["toPlace"]["longitude"]
                 destination_wait_leg["bikeStationInfo"]["origin"] = False
                 destination_wait_leg["bikeStationInfo"]["selectedBikeStationIndex"] = dest_index
-                destination_wait_leg["bikeStationInfo"]["bikeStations"] = sortedDestinationNodes
-                tripPattern["legs"].append(deepcopy(destination_wait_leg))
+                destination_wait_leg["bikeStationInfo"]["bikeStations"] = sorted_destination_nodes
+                trip_pattern["legs"].append(deepcopy(destination_wait_leg))
 
+                # Add final walking segment if needed
                 if not bicycle_public:
-                    tripPattern["legs"].extend(last_to_dest_map[destNode["place"]["id"]][0]["legs"])
+                    trip_pattern["legs"].extend(last_to_dest_map[dest_node["place"]["id"]][0]["legs"])
 
-                justify_time(tripPattern, time_to_depart, arrive_by)
-                tripPattern["aimedEndTime"] = tripPattern["legs"][-1]["aimedEndTime"]
-                tripPattern["bikeSegmentFound"] = True
-        return tripPattern
+                # Adjust trip timing
+                justify_time(trip_pattern, time_to_depart, arrive_by)
 
+                trip_pattern["aimedEndTime"] = trip_pattern["legs"][-1]["aimedEndTime"]
+                trip_pattern["bikeSegmentFound"] = True
+
+        return trip_pattern
+
+    # Evaluate all station combinations
     tasks = [
-        build_trip(origNode, origIndex, destNode, destIndex)
-        for origIndex, origNode in enumerate(sortedOriginNodes[:numOfNodes])
-        for destIndex, destNode in enumerate(sortedDestinationNodes[:numOfNodes])
+        build_trip(orig_node, orig_index, dest_node, dest_index)
+        for orig_index, orig_node in enumerate(sorted_origin_nodes[:num_of_nodes])
+        for dest_index, dest_node in enumerate(sorted_destination_nodes[:num_of_nodes])
     ]
     trip_patterns = await asyncio.gather(*tasks)
 

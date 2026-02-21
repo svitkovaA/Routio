@@ -1,7 +1,7 @@
 """
 file: status.py
 
-API endpoint for getting the status of the server
+API endpoint for getting the status of the server.
 """
 
 from fastapi import APIRouter

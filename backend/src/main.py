@@ -2,7 +2,7 @@
 file: main.py
 
 The main application entry point. Initializes the FastAPI application,
-configures CORS and loads required data
+configures CORS and loads required data.
 """
 
 import json
@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
     except Exception:
         logging.exception("Initial cache_lissy failed")
 
-    # Start background worker for vehicle position updates
+    # Start background worker for data updates
     tasks = [
         asyncio.create_task(vehicle_position_worker()),
         asyncio.create_task(gbfs_worker()),

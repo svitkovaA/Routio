@@ -2,16 +2,16 @@
 file: geocode.py
 
 Geocoding API endpoints, including:
-- geocoding of place names or addresses to geographic coordinates using Photon API
-- reverse geocoding of geographic coordinates to the addresses using Nominatim API
+- geocoding of place names or addresses to geographic coordinates using Photon API,
+- reverse geocoding of geographic coordinates to the addresses using Nominatim API.
 """
 
 from typing import Any, Dict, List
 from fastapi import HTTPException, Query, APIRouter
 import httpx
+from config import NOMINATIM_URL, PHOTON_URL
 from models.types import Suggestion
 from utils.geo import merge_close_results
-from config import NOMINATIM_URL, PHOTON_URL
 
 router = APIRouter(prefix="/geocode")
 

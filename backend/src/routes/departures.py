@@ -1,15 +1,15 @@
 """
 file: departures.py
 
-API endpoint for handling alternative public transport departures
+API endpoint for handling alternative public transport departures.
 """
 
+from datetime import datetime, timedelta
 from typing import List
 from fastapi import APIRouter
 from models.types import VehiclePositions
-from utils.legs_processing import justify_time
 from models.departure_data import DepartureData
-from datetime import datetime, timedelta
+from utils.legs_processing import justify_time
 
 router = APIRouter()
 

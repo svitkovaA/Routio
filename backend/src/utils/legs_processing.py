@@ -2,10 +2,10 @@
 file: legs_processing.py
 
 Processing trip legs, including:
-- adjusting start and end times of trip legs 
-- merging consecutive legs with the same transport mode
+- adjusting start and end times of trip legs, 
+- merging consecutive legs with the same transport mode,
 - inserting transfer legs between different public transport services,
-    computing accumulated parameters for visualisation
+    computing accumulated parameters for visualisation.
 """
 
 from copy import deepcopy

@@ -6,7 +6,7 @@ Helper functions for trip planning logic, including:
 - grouping waypoints based on transport modes,
 - filtering and sorting found trip patterns based on the user preferences,
 - detecting specific sequences of transport modes in waypoint groups,
-- checking proximity of a position to a waypoint
+- checking proximity of a position to a waypoint.
 """
 
 from copy import deepcopy

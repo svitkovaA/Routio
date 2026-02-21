@@ -6,7 +6,7 @@ Helper functions for geographic computations, including:
 - interpolation between coordinates,
 - merging spatially close and duplicate results,
 - estimating the distance threshold at which cycling becomes 
-  more time efficient than walking
+  more time efficient than walking.
 """
 
 from math import radians, sin, cos, sqrt, atan2, acos, degrees

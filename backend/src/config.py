@@ -2,10 +2,10 @@
 file: config.py
 
 Configuration file defining:
-- External API endpoints
-- URLs for downloading datasets
-- Local dataset storage paths
-- Loading API keys from environment variables
+- External API endpoints,
+- URLs for downloading datasets,
+- Local dataset storage paths,
+- Loading API keys from environment variables.
 """
 
 import os

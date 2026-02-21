@@ -1,8 +1,15 @@
+"""
+file: bike_station_service.py
+
+Implements PostGIS based rack discovery and a scoring model
+for selecting optimal bicycle rack near the destination.
+"""
+
 from typing import List
 import numpy as np
 from scipy.spatial.distance import cosine
-from models.types import BikeRackNode
 from database.db import create_conn
+from models.types import BikeRackNode
 
 # TODO unused function
 # import overpy   # type: ignore[import-untyped]
@@ -143,6 +150,7 @@ async def optimal_bike_rack_choice(combination: bool, origin: str, destination: 
 
     scored_racks: List[BikeRackNode] = []
 
+    # Iterate over all racks
     for rack in racks:  
         # Vector from destination to bicycle rack  
         vectorDestinationStation = np.asarray([float(rack["place"]["latitude"]), float(rack["place"]["longitude"])]) - np.asarray(destination_list)
@@ -163,6 +171,7 @@ async def optimal_bike_rack_choice(combination: bool, origin: str, destination: 
 
     # Sort racks by score and return top results
     sorted_racks = sorted(scored_racks, key=lambda x: x["score"], reverse=True)
+
     return sorted_racks[:10]
 
 # End of file rack_service.py

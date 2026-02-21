@@ -1,18 +1,19 @@
 """
 file: lissy.py
 
-Functions for caching and retrieving information about shapes and historical delays retrieved from Lissy API
+Implements integration with the Lissy API for retrieving and caching historical
+delays and public transport shape information. 
 """
 
 import asyncio
 from datetime import date as d, timedelta, datetime
 from types import CoroutineType
 from typing import Any, Dict, List, Tuple
-import httpx
 from collections import OrderedDict
+import httpx
 from dateutil.relativedelta import relativedelta
-from models.types import LissyAvailableRoute, LissyDelayTrips, LissyShape, LissyShapes, LissyTrips, RouteData
 from config import DELAY_DATA_URL, DELAY_ROUTES_URL, DELAY_TRIPS_URL, LISSY_API_KEY, SHAPE_URL, SHAPES_URL
+from models.types import LissyAvailableRoute, LissyDelayTrips, LissyShape, LissyShapes, LissyTrips, RouteData
 
 # Size of the cache window
 CACHE_DAYS = 7

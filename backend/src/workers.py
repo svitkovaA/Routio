@@ -1,3 +1,9 @@
+"""
+file: workers.py
+
+Background asynchronous workers for periodic data updates and maintenance tasks
+"""
+
 import asyncio
 import logging
 from services.public_transport_service.lissy import cache_lissy
@@ -6,6 +12,18 @@ from services.gtfs_gbfs_service import load_gbfs_data, load_gtfs_data, vehicle_p
 from datetime import datetime, timedelta
 
 def seconds_until_next_daily(hour: int, minute: int = 0) -> float:
+    """
+    Calculates the number of seconds until the next occurrence of a specific
+    time during the day
+
+    Args:
+        hour: Target hour
+        minute: Target minute
+
+    Returns:
+        Number of seconds from the current moment until the next occurrence
+        of the specified daily time
+    """
     now = datetime.now()
     target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
     if target <= now:
@@ -13,6 +31,19 @@ def seconds_until_next_daily(hour: int, minute: int = 0) -> float:
     return (target - now).total_seconds()
 
 def seconds_until_next_weekday(weekday: int, hour: int, minute: int = 0) -> float:
+    """
+    Calculates the number of seconds until the next occurrence of a specific
+    weekday and time
+
+    Args:
+        weekday: Target weekday
+        hour: Target hour
+        minute: Target minute
+
+    Returns:
+        Number of seconds from the current moment until the next occurrence
+        of the specified weekday and time
+    """
     now = datetime.now()
     target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
@@ -25,7 +56,8 @@ def seconds_until_next_weekday(weekday: int, hour: int, minute: int = 0) -> floa
 
 async def vehicle_position_worker():
     """
-    Background worker that periodically updates vehicle position data
+    Background worker that periodically updates vehicle position data,
+    runs every 10 seconds
     """
     while True:
         try:
@@ -38,6 +70,10 @@ async def vehicle_position_worker():
         await asyncio.sleep(10)
 
 async def database_worker():
+    """
+    Background task responsible for periodic database updates,
+    runs once a week, on Monday at 04:00
+    """
     while True:
         try:
             await database()
@@ -49,6 +85,10 @@ async def database_worker():
         await asyncio.sleep(delay) # 7 days interval
 
 async def gbfs_worker():
+    """
+    Background task that refreshes GBFS bike station data,
+    runs once a week, on Monday at 04:00
+    """
     while True:
         try:
             load_gbfs_data()
@@ -59,6 +99,10 @@ async def gbfs_worker():
         await asyncio.sleep(delay)
 
 async def gtfs_worker():
+    """
+    Background task that refreshes GTFS static timetable data,
+    runs once a week, on Monday at 04:00
+    """
     while True:
         try:
             delay = seconds_until_next_weekday(weekday=0, hour=4, minute=0)  # Monday 04:00
@@ -69,6 +113,10 @@ async def gtfs_worker():
             await asyncio.sleep(60)
 
 async def lissy_worker():
+    """
+    Background task that refreshes cached Lissy route shapes and delay data,
+    runs daily at 04:00
+    """
     while True:
         try:
             delay = seconds_until_next_daily(hour=4, minute=0)
@@ -77,3 +125,5 @@ async def lissy_worker():
         except Exception:
             logging.exception("cache_lissy failed")
             await asyncio.sleep(60)
+
+# End of file workers.py

@@ -1,8 +1,8 @@
 """
 file: vehicle_positions.py
 
-API endpoint for retrieving current vehicle positions
-based on a list of GTFS trip_ids
+API endpoint for retrieving current vehicle positions based on a list of GTFS
+trip_ids.
 """
 
 from typing import Dict, List

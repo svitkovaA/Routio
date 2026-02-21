@@ -1,8 +1,13 @@
 """
 file: otp_service.py
 
-Defines OTP queries and route trips using public transport, bicycle and walk
-The bikesharing stations are also searched in the OTP
+Defines GraphQL queries for OpenTripPlanner (OTP) and provides functions for
+computing routes using public transport, bicycle, and walking modes. It handles
+trip planning requests, and transforms raw OTP responses into internal
+TripPattern structures. In addition to routing, it retrieves nearby
+bike-sharing stations via OTP queries and enriches public transport legs with
+additional data such as route colors, alternative departures, delay
+information, and polyline-encoded geometries for map visualization.
 """
 
 import asyncio

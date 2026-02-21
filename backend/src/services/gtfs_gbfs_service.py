@@ -1,7 +1,9 @@
 """
 file: gtfs_gbfs_service.py
 
-Processing GTFS, GTFS-RT and GBFS files
+It integrates static GTFS data, real-time GTFS-RT data, and GBFS data for
+bike-sharing datasets into in-memory structures. It is used by the routing
+engine. It is responsible for both downloading and processing data sources.
 """
 
 from collections import defaultdict
@@ -10,14 +12,13 @@ import os
 import shutil
 from typing import Dict, List, Set, Tuple, cast
 import zipfile
+from zoneinfo import ZoneInfo
 import httpx
 import pandas as pd
-from zoneinfo import ZoneInfo
-
 import requests
-from models.types import Departure, OtherDeparture, Departures
 from google.transit.gtfs_realtime_pb2 import FeedMessage        # type: ignore[import-untyped]
 from config import GTFSRT_URL, STATION_INFORMATION_URLS, GTFS_PATH, GTFS_URL
+from models.types import Departure, OtherDeparture, OtherOptions
 
 calendar: pd.DataFrame
 calendar_dates: pd.DataFrame
@@ -158,7 +159,7 @@ def get_departures_via(
     aimed_start_time: str, 
     n_prev: int = 4, 
     n_next: int = 20
-) -> Departures:
+) -> OtherOptions:
     """
     Returns departures for the given route
     

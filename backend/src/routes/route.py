@@ -2,25 +2,25 @@
 file: route.py
 
 Route API endpoints, including:
-- recalculating route after changing bicycle station
-- processing user inputs and calculating optimal trip patterns
+- recalculating route after changing bicycle station,
+- processing user inputs and calculating optimal trip patterns.
 """
 
+import time as t
 from copy import deepcopy
 from datetime import datetime
 from typing import List
+from fastapi import APIRouter
 from gql import Client
+from gql.transport.aiohttp import AIOHTTPTransport
+from config import OTP_URL
 from models.types import Leg, Results, TripPattern
 from models.route_data import LegPreferences, RouteData
+from models.bike_station_data import BikeStationData
 from services.route import route
+from services.otp_service import walk_bicycle_route
 from utils.planner_utils import at_waypoint, create_waypoint_groups, filter_sort_trip_patterns
 from utils.legs_processing import justify_time, process_legs
-from services.otp_service import walk_bicycle_route
-from config import OTP_URL
-from models.bike_station_data import BikeStationData
-from fastapi import APIRouter
-from gql.transport.aiohttp import AIOHTTPTransport
-import time as t
 
 router = APIRouter()
 
