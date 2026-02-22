@@ -13,15 +13,15 @@ information, and polyline-encoded geometries for map visualization.
 import asyncio
 from copy import deepcopy
 from datetime import datetime
-from typing import Any, Dict, List, Set, Tuple, cast
+from typing import Any, Dict, List, Set, Tuple
 from gql import gql
 from gql.client import AsyncClientSession
 import polyline                             # type: ignore[import-untyped]
-from models.route import BikeStationNodeWrapper, OTPPublicQueryResponse, TripPattern
+from models.route import BikeStationNodeWrapper, Mode, OTPPublicQueryResponse, RoutingMode, TripPattern
 from models.lissy import LissyShape, LissyShapes
 from services.gtfs_gbfs_service import get_color, get_departures_via
 from services.public_transport_service.lissy import get_delays, get_shape, get_shapes_cached, get_trip_id_by_time
-from utils.planner_utils import combine_pt
+from utils.planner_utils import combine_patterns
 
 def public_transfer_max_number(count: int) -> int:
     """
@@ -46,8 +46,8 @@ def public_transfer_max_number(count: int) -> int:
 async def walk_bicycle_route(
     origin: str, 
     destination: str, 
-    time_to_depart: str, 
-    mode: str,
+    time_to_depart: datetime, 
+    mode: RoutingMode,
     mode_speed: float,
     session: AsyncClientSession
 ) -> List[TripPattern]:
@@ -120,7 +120,7 @@ async def walk_bicycle_route(
                 "longitude": destination_lon
             }
         },
-        "dateTime": time_to_depart,
+        "dateTime": time_to_depart.isoformat(),
         "modes": {
             "directMode": mode,
         },
@@ -128,21 +128,26 @@ async def walk_bicycle_route(
         "bikeSpeed": mode_speed / 3.6
     }
 
-    # Execute the query asynchronously
-    result = await session.execute(query, variable_values=variables)
+    try:
+        # Execute the query asynchronously
+        result = await session.execute(query, variable_values=variables)
+
+        parsed = OTPPublicQueryResponse.model_validate(result)
+    except:
+        return []
 
     # Mark the first returned trip pattern if bicycle segment was requested
-    if len(result["trip"]["tripPatterns"]) > 0:
-        result["trip"]["tripPatterns"][0]["bikeSegmentFound"] = mode == "bicycle"
+    if len(parsed.trip.tripPatterns) > 0:
+        parsed.trip.tripPatterns[0].bikeSegmentFound = mode == "bicycle"
 
-    return result['trip']["tripPatterns"]
+    return parsed.trip.tripPatterns
 
 async def public_transport_route(
     waypoints: List[str], 
-    time_to_depart: str, 
+    time_to_depart: datetime, 
     arrive_by: bool,
     max_transfers: int, 
-    modes: List[str], 
+    modes: List[Mode], 
     session: AsyncClientSession, 
     num_of_waypoints: int,
     walk_speed: float,
@@ -250,21 +255,26 @@ async def public_transport_route(
         variables["modes"]["directMode"] =  "foot"
 
     # Helper coroutine that executes a single public transport query
-    async def public_route(local_variables: Dict[str, Any], time_to_depart: str) -> List[TripPattern]:
-        local_variables["dateTime"] = time_to_depart
+    async def public_route(local_variables: Dict[str, Any], time_to_depart: datetime) -> List[TripPattern]:
+        local_variables["dateTime"] = time_to_depart.isoformat()
         attempt = 0
         trip_patterns = []
         
         # Number of retry if OTP returns no trip patterns
         while attempt < 10:
-            # Query execution
-            result = cast(OTPPublicQueryResponse, await session.execute(query, variable_values=local_variables))
+            try:
+                # Query execution
+                result = await session.execute(query, variable_values=local_variables)
+                
+                parsed = OTPPublicQueryResponse.model_validate(result)
+            except:
+                continue
 
-            trip_patterns = result["trip"]["tripPatterns"]
+            trip_patterns = parsed.trip.tripPatterns
 
             # Mark no trip patterns returned
             if len(trip_patterns) == 0:
-                local_variables["pageCursor"] = result["trip"]["nextPageCursor"]
+                local_variables["pageCursor"] = parsed.trip.nextPageCursor
                 attempt += 1
             else:
                 break
@@ -301,7 +311,10 @@ async def public_transport_route(
 
         # Create routing tasks
         tasks = [
-            public_route(local_variables, pattern["legs"][0]["aimedStartTime"] if arrive_by else pattern["aimedEndTime"])
+            public_route(
+                local_variables, 
+                pattern.legs[0].aimedStartTime if arrive_by else pattern.aimedEndTime
+            )
             for pattern in trip_patterns
         ]
 
@@ -319,11 +332,11 @@ async def public_transport_route(
             patterns: Dict[str, List[TripPattern]] = {}
             for pattern in res:
                 key = ""
-                for leg in pattern["legs"]:
-                    if leg["mode"] in ["foot", "bicycle"]:
-                        key += f"-{leg["mode"][0]}"
-                    elif "line" in leg:
-                        key += f"-{leg["line"]["publicCode"]}"
+                for leg in pattern.legs:
+                    if leg.mode in ["foot", "bicycle"]:
+                        key += f"-{leg.mode[0]}"
+                    elif leg.line:
+                        key += f"-{leg.line.publicCode}"
 
                 patterns.setdefault(key, []).append(pattern)
             
@@ -331,27 +344,35 @@ async def public_transport_route(
             new_trip_patterns: List[TripPattern] = []
             for item in patterns.values():
                 if arrive_by:
-                    best = max(item, key=lambda p: p["legs"][0]["aimedStartTime"])
+                    best = max(item, key=lambda p: p.legs[0].aimedStartTime)
                 else:
-                    best = min(item, key=lambda p: p["aimedEndTime"])
+                    best = min(item, key=lambda p: p.aimedEndTime)
                 new_trip_patterns.append(best)
             
             # Limit number of trip patterns to avoid combinatorial explosion
             truncated_trip_patterns = new_trip_patterns[:public_transfer_max_number(num_of_waypoints)]
 
             for pattern in truncated_trip_patterns:
-                for leg in pattern["legs"]:
-                    if leg["mode"] == "foot":
+                for leg in pattern.legs:
+                    if leg.mode == "foot":
                         continue
 
                     # Add alternative departure options to public transport legs
-                    if "fromPlace" in leg and "quay" in leg["fromPlace"] and "toPlace" in leg and "quay" in leg["toPlace"] and "line" in leg:
-                        departures = get_departures_via(leg["fromPlace"]["quay"]["id"].split(":", 1)[1], leg["toPlace"]["quay"]["id"].split(":", 1)[1], leg["line"]["publicCode"], leg["aimedStartTime"])
-                        leg["otherOptions"] = departures
+                    if (leg.fromPlace and leg.fromPlace.quay and 
+                        leg.toPlace and leg.toPlace.quay and 
+                        leg.line
+                    ):
+                        departures = get_departures_via(
+                            leg.fromPlace.quay.id.split(":", 1)[1], 
+                            leg.toPlace.quay.id.split(":", 1)[1], 
+                            leg.line.publicCode, 
+                            leg.aimedStartTime
+                        )
+                        leg.otherOptions = departures
                         
                         # Attach trip_id when a matching departure is found
-                        if departures["currentIndex"] and departures["currentIndex"] >= 0:
-                            leg["tripId"] = departures["departures"][departures["currentIndex"]]["tripId"]
+                        if departures.currentIndex and departures.currentIndex >= 0:
+                            leg.tripId = departures.departures[departures.currentIndex].tripId
             
             new_results.append(truncated_trip_patterns)
         
@@ -359,36 +380,41 @@ async def public_transport_route(
         if trip_patterns == [] and first_iteration:
             trip_patterns = new_results[0]
         else:
-            trip_patterns = combine_pt(trip_patterns, new_results, arrive_by, keep_base=False)
+            trip_patterns = combine_patterns(
+                trip_patterns, 
+                new_results, 
+                arrive_by, 
+                keep_without_connections=False
+            )
         
         first_iteration = False
     
     # Load cached route shapes for the given date
-    shape_by_route = await get_shapes_cached(datetime.fromisoformat(time_to_depart).date())
+    shape_by_route = await get_shapes_cached(time_to_depart.date())
 
     # Create list of the required shape ids
     needed_shape_ids: Set[int] = set()
     for pattern in trip_patterns:
-        for leg in pattern["legs"]:
+        for leg in pattern.legs:
             # For public transport modes
-            if leg["mode"] in ["bus", "tram", "rail", "metro", "water", "trolleybus"]:
+            if leg.mode in ["bus", "tram", "rail", "metro", "water", "trolleybus"]:
                 shape: LissyShapes | None = None
                 stops = ""
 
                 # Retrieve shape by public_code from cache
-                if "line" in leg:
-                    name = leg["line"]["publicCode"]
+                if leg.line:
+                    name = leg.line.publicCode
                     shape = shape_by_route.get(name)
 
                 # Create stop_label
-                if "serviceJourney" in leg:
-                    stops = f"{leg['serviceJourney']['quays'][0]['name']} -> {leg['serviceJourney']['quays'][-1]['name']}"
+                if leg.serviceJourney:
+                    stops = f"{leg.serviceJourney.quays[0].name} -> {leg.serviceJourney.quays[-1].name}"
                 
                 # Add shape_id to list of the required shape ids
                 if shape:
-                    for trip in shape["trips"]:
-                        if trip["stops"] == stops:
-                            needed_shape_ids.add(trip["shape_id"])
+                    for trip in shape.trips:
+                        if trip.stops == stops:
+                            needed_shape_ids.add(trip.shape_id)
 
     # Shape_id to shape_data map
     shape_id_to_data: Dict[int, LissyShape] = {}
@@ -408,42 +434,47 @@ async def public_transport_route(
 
     # Get delays, shapes and route color for public transport legs
     for pattern in trip_patterns:
-        for leg in pattern["legs"]:
+        for leg in pattern.legs:
             # For public transport
-            if leg["mode"] in ["bus", "tram", "rail", "metro", "water", "trolleybus"]:
-                if "line" in leg and "serviceJourney" in leg and "fromPlace" in leg and "toPlace" in leg:
-                    name = leg["line"]["publicCode"]
-                    stops = f"{leg['serviceJourney']['quays'][0]['name']} -> {leg['serviceJourney']['quays'][-1]['name']}"
+            if leg.mode in ["bus", "tram", "rail", "metro", "water", "trolleybus"]:
+                if leg.line and leg.serviceJourney and leg.fromPlace and leg.toPlace:
+                    name = leg.line.publicCode
+                    stops = f"{leg.serviceJourney.quays[0].name} -> {leg.serviceJourney.quays[-1].name}"
                     shape = shape_by_route.get(name)
-                    leg["serviceJourney"]["direction"] = leg["serviceJourney"]["quays"][-1]["name"]
+                    leg.serviceJourney.direction = leg.serviceJourney.quays[-1].name
                     
                     # Build stop_name to index map
-                    quay_index_map = {quay["name"]: i for i, quay in enumerate(leg['serviceJourney']['quays'])}
+                    quay_index_map = {quay.name: i for i, quay in enumerate(leg.serviceJourney.quays)}
 
                     # Find leg start and stop stop_name indexes
-                    start_index = quay_index_map.get(leg["fromPlace"].get("name", ""), -1)
-                    stop_index = quay_index_map.get(leg["toPlace"].get("name", ""), -1)
+                    start_index = quay_index_map.get(leg.fromPlace.name if leg.fromPlace.name else "", -1)
+                    stop_index = quay_index_map.get(leg.toPlace.name if leg.toPlace.name else "", -1)
 
                     # Valid indexes found
                     if start_index != -1 and stop_index != -1 and start_index <= stop_index:
-                        leg["serviceJourney"]["quays"] = leg["serviceJourney"]["quays"][start_index + 1:stop_index]
+                        leg.serviceJourney.quays = leg.serviceJourney.quays[start_index + 1:stop_index]
                         # Search trip id in cache, if delays available
-                        trip_id = get_trip_id_by_time(name, stops, leg["serviceJourney"]["passingTimes"][0]["departure"]["time"])
+                        trip_id = get_trip_id_by_time(
+                            name, 
+                            stops, 
+                            leg.serviceJourney.passingTimes[0]["departure"].time
+                        )
+
                         if trip_id:
                             delays = await get_delays(trip_id, start_index)
                             if delays:
-                                leg["delays"] = delays
+                                leg.delays = delays
 
                     # Get route color from GTFS files if shape is not available
                     if shape is None:
                         color = get_color(name)
                         if color:
-                            leg["color"] = color
+                            leg.color = color
                         continue
-                    leg["color"] = f"#{shape['route_color']}"
+                    leg.color = f"#{shape.route_color}"
 
                     # Find shape_id for given stops
-                    shapeID = next((trip["shape_id"] for trip in shape["trips"] if trip["stops"] == stops), None)
+                    shapeID = next((trip.shape_id for trip in shape.trips if trip.stops == stops), None)
                     if shapeID is None:
                         continue
 
@@ -453,19 +484,19 @@ async def public_transport_route(
                         continue
 
                     # Find start and stop indexes in shape_data
-                    stop_index_map: Dict[str, int] = {stop["stop_name"]: i for i, stop in enumerate(shape_by_ID["stops"])}
-                    from_idx = stop_index_map.get(leg["fromPlace"].get("name", ""), -1)
-                    to_idx = stop_index_map.get(leg["toPlace"].get("name", ""), -1)
+                    stop_index_map: Dict[str, int] = {stop.stop_name: i for i, stop in enumerate(shape_by_ID.stops)}
+                    from_idx = stop_index_map.get(leg.fromPlace.name if leg.fromPlace.name else "", -1)
+                    to_idx = stop_index_map.get(leg.toPlace.name if leg.toPlace.name else "", -1)
                     if from_idx == -1 or to_idx == -1 or from_idx > to_idx:
                         continue
 
                     # Concat shapes in given stop range
                     coords: List[Tuple[float, float]] = []
                     for i in range(from_idx, to_idx):
-                        coords.extend(shape_by_ID["coords"][i])
+                        coords.extend(shape_by_ID.coords[i])
 
                     # Encode coordinates to polyline
-                    leg["pointsOnLink"]["points"] = polyline.encode(coords)
+                    leg.pointsOnLink.points = polyline.encode(coords)
 
     return trip_patterns
 
@@ -525,9 +556,17 @@ async def nearest_bike_stations(
         "maximum_distance": maximum_distance
     }
 
-    # Execute the query asynchronously
-    result = await session.execute(query, variable_values=variables)
+    try:
+        # Execute the query asynchronously
+        result = await session.execute(query, variable_values=variables)
 
-    return result["nearest"]["edges"]
+        parsed = [
+            BikeStationNodeWrapper.model_validate(node)
+            for node in result["nearest"]["edges"]
+        ]
+    except:
+        return []
+    
+    return parsed
 
 # End of file otp_service.py

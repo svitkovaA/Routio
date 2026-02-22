@@ -78,15 +78,15 @@ async def geocode_name(
         lon, lat = coords[0], coords[1]
         props = feature["properties"]
 
-        suggestions.append({
-            "name": props.get("name"),
-            "type": props.get("type"),
-            "country": props.get("country"),
-            "city": props.get("city"),
-            "street": props.get("street"),
-            "lat": lat,
-            "lon": lon
-        })
+        suggestions.append(Suggestion(
+            name=props.get("name"),
+            type=props.get("type"),
+            country=props.get("country"),
+            city=props.get("city"),
+            street=props.get("street"),
+            lat=lat,
+            lon=lon
+        ))
 
     # Remove spatially close or duplicate suggestions and limit results
     filtered_suggestions = merge_close_results(suggestions)[:limit]

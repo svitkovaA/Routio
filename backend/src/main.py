@@ -48,7 +48,7 @@ async def lifespan(app: FastAPI):
     tasks = [
         asyncio.create_task(gtfs_worker()),
         asyncio.create_task(gbfs_worker()),
-        asyncio.create_task(database_worker()),
+        # asyncio.create_task(database_worker()),
         asyncio.create_task(lissy_worker()),
         asyncio.create_task(vehicle_position_worker()),
     ]

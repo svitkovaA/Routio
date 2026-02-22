@@ -72,7 +72,7 @@ export function useChangeBikeStation() {
             arrive_by: arriveBy,
             leg_preferences: [],
             use_own_bike: useOwnBike,
-            mode: "",
+            mode: "transit,bicycle,walk", // Dummy value
             max_transfers: maxTransfers,
             selected_modes: selectedModes,
             max_bike_distance: maxBikeDistance,

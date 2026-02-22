@@ -6,8 +6,8 @@ API endpoint for handling alternative public transport departures.
 
 from datetime import datetime, timedelta
 from typing import List
-from fastapi import APIRouter
-from models.route import VehiclePositions
+from fastapi import APIRouter, HTTPException
+from models.route import TripPattern, VehiclePositions
 from models.departure_data import DepartureData
 from utils.legs_processing import justify_time
 
@@ -26,96 +26,112 @@ async def other_departures(data: DepartureData):
     """
     print("endpoint: other_departures")
     index = data.public_leg_index
-    legs = data.trip_pattern["originalLegs"]
+    legs = data.trip_pattern.originalLegs
+    leg = legs[index]
     
     # Check if the legs before the selected index contains public transport mode
     without_public_transport = True
     for i in range(index - 1):
-        if legs[i]["mode"] not in ["bicycle", "foot", "wait", "transfer"]:
+        if legs[i].mode not in ["bicycle", "foot", "wait", "transfer"]:
             without_public_transport = False
 
+    if not leg.otherOptions or not leg.serviceJourney:
+        raise HTTPException(
+            status_code = 400,
+            detail = "Missing serviceJourney or otherOptions"
+        )
+
     # Update selected public transport leg
-    chosen_dep = legs[index]["otherOptions"]["departures"][data.selected_index]
-    legs[index]["aimedStartTime"] = chosen_dep["departureTime"]
-    legs[index]["otherOptions"]["currentIndex"] = data.selected_index
-    legs[index]["serviceJourney"]["direction"] = chosen_dep["direction"]
-    legs[index]["tripId"] = chosen_dep["tripId"]
+    chosen_dep = leg.otherOptions.departures[data.selected_index]
+    leg.aimedStartTime = chosen_dep.departureTime
+    leg.otherOptions.currentIndex = data.selected_index
+    leg.serviceJourney.direction = chosen_dep.direction
+    leg.tripId = chosen_dep.tripId
 
     # Compute end time of the selected leg
-    start_dt = datetime.fromisoformat(legs[index]["aimedStartTime"])
-    legs[index]["aimedEndTime"] = (start_dt + timedelta(seconds=legs[index]["duration"])).isoformat()
+    leg.aimedEndTime = leg.aimedStartTime + timedelta(seconds=leg.duration)
 
     # Validate arrival/departure continuity
-    legs[index]["arrivalAfterDeparture"] = False
+    leg.arrivalAfterDeparture = False
 
     # Propagate timing backwards if no public transport precedes this leg
     if without_public_transport:
-        justify_time({"legs": legs[:index], "aimedEndTime": ""}, legs[index]["aimedStartTime"], True)
+        justify_time(
+            TripPattern(
+                legs=legs[:index],
+                aimedEndTime=datetime.min
+            ),
+            leg.aimedStartTime, 
+            True
+        )
     else:
         # Detection of arrival later than selected departure
-        if legs[index - 1]["aimedEndTime"] > legs[index]["aimedStartTime"]:
-            legs[index]["arrivalAfterDeparture"] = True
+        if legs[index - 1].aimedEndTime > legs[index].aimedStartTime:
+            legs[index].arrivalAfterDeparture = True
     index += 1
 
     # Shift all next legs
     while index < len(legs):
-        # Get the aimed end time of the previous leg
-        prev_end_dt = datetime.fromisoformat(legs[index - 1]["aimedEndTime"])
+        leg = legs[index]
 
         # If the current leg is not public transport, set the aimed start time to previous leg end time
-        if legs[index]["mode"] in ["foot", "bicycle", "wait", "transfer"]:
-            legs[index]["aimedStartTime"] = prev_end_dt.isoformat()
+        if leg.mode in ["foot", "bicycle", "wait", "transfer"]:
+            leg.aimedStartTime = legs[index - 1].aimedEndTime
         else:
             # Get other possible departures of the selected public transport service
-            deps = legs[index].get("otherOptions", {}).get("departures", [])
+            deps = leg.otherOptions.departures if leg.otherOptions else []
+
+            if not leg.otherOptions or not leg.serviceJourney:
+                raise HTTPException(
+                    status_code = 400,
+                    detail = "Missing serviceJourney or otherOptions"
+                )
 
             # Select the first valid departure after previous leg end
             picked_i = None
             for i, departure in enumerate(deps):
-                dep_dt = datetime.fromisoformat(departure["departureTime"])
-                if dep_dt >= prev_end_dt:
+                if departure.departureTime >= legs[index - 1].aimedEndTime:
                     picked_i = i
-                    legs[index]["aimedStartTime"] = departure["departureTime"]
-                    legs[index]["otherOptions"]["currentIndex"] = i
-                    legs[index]["serviceJourney"]["direction"] = departure["direction"]
-                    legs[index]["tripId"] = departure["tripId"]
+                    leg.aimedStartTime = departure.departureTime
+                    leg.otherOptions.currentIndex = i
+                    leg.serviceJourney.direction = departure.direction
+                    leg.tripId = departure.tripId
                     break
 
-            legs[index]["arrivalAfterDeparture"] = False
-            legs[index]["nonContinuousDepartures"] = False
+            leg.arrivalAfterDeparture = False
+            leg.nonContinuousDepartures = False
 
             # If no valid departure is found, select the last available one
             if picked_i is None and deps:
                 last = deps[-1]
-                legs[index]["aimedStartTime"] = last["departureTime"]
-                legs[index]["otherOptions"]["currentIndex"] = len(deps) - 1
-                legs[index]["serviceJourney"]["direction"] = last["direction"]
-                legs[index]["nonContinuousDepartures"] = True
+                leg.aimedStartTime = last.departureTime
+                leg.otherOptions.currentIndex = len(deps) - 1
+                leg.serviceJourney.direction = last.direction
+                leg.nonContinuousDepartures = True
 
         # Compute end time of the current leg 
-        start_dt = datetime.fromisoformat(legs[index]["aimedStartTime"])
-        legs[index]["aimedEndTime"] = (start_dt + timedelta(seconds=legs[index]["duration"])).isoformat()
+        leg.aimedEndTime = leg.aimedStartTime + timedelta(seconds=leg.duration)
 
         index += 1
 
     # Store information about vehicle position for visualisation
     vehicle_positions: List[VehiclePositions] = []
-    for leg in data.trip_pattern["originalLegs"]:
-        if "tripId" in leg and "line" in leg and "color" in leg and "otherOptions" in leg and leg["otherOptions"]["currentIndex"] is not None:
-                vehicle_positions.append({
-                    "tripId": leg["tripId"], 
-                    "publicCode": leg["line"]["publicCode"],
-                    "color": leg["color"],
-                    "mode": leg["mode"],
-                    "lat": -1,
-                    "lon": -1,
-                    "direction": leg["otherOptions"]["departures"][leg["otherOptions"]["currentIndex"]]["direction"]
-                })
+    for leg in data.trip_pattern.originalLegs:
+        if leg.tripId and leg.line and leg.color and leg.otherOptions and leg.otherOptions.currentIndex is not None:
+                vehicle_positions.append(VehiclePositions(
+                    tripId=leg.tripId,
+                    publicCode=leg.line.publicCode,
+                    color=leg.color,
+                    mode=leg.mode,
+                    lat=-1,
+                    lon=-1,
+                    direction=leg.otherOptions.departures[leg.otherOptions.currentIndex].direction
+                ))
 
-    data.trip_pattern["vehiclePositions"] = vehicle_positions
+    data.trip_pattern.vehiclePositions = vehicle_positions
 
     # Update final trip end time
-    data.trip_pattern["aimedEndTime"] = legs[-1]["aimedEndTime"]
+    data.trip_pattern.aimedEndTime = legs[-1].aimedEndTime
 
     return data.trip_pattern
 

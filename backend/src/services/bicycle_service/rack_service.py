@@ -9,7 +9,7 @@ from typing import List
 import numpy as np
 from scipy.spatial.distance import cosine
 from database.db import create_conn
-from models.route import BikeRackNode
+from models.route import BikeRackNode, BikeRackPlace, RackRow
 
 # TODO unused function
 # import overpy   # type: ignore[import-untyped]
@@ -99,23 +99,32 @@ async def find_bike_rack(lat: float, lon: float, radius: int = 1000) -> List[Bik
 
     racks: List[BikeRackNode] = []
 
-    for row in rows:    # type: ignore
-        racks.append({
-            # Distance from input location in meters
-            "distance": row["distance"],
-            "place": {
-                "latitude": row["lat"],
-                "longitude": row["lon"],
-                "name": "Bike rack",
-                # Default capacity is used if not specified in OSM tags
-                "capacity": row["capacity"] if row["capacity"] is not None else 5,
-            },
-            "score": 0
-        })
+    for raw_row in rows:    # type: ignore
+        try:
+            row = RackRow.model_validate(dict(raw_row))
+        except:
+            continue
+
+        racks.append(
+            BikeRackNode(
+                distance=row.distance,
+                place=BikeRackPlace(
+                    latitude=row.lat,
+                    longitude=row.lon,
+                    name="Bike rack",
+                    capacity=row.capacity if row.capacity is not None else 5
+                )
+            )
+        )
 
     return racks
 
-async def optimal_bike_rack_choice(combination: bool, origin: str, destination: str, max_distance: float = 1000) -> List[BikeRackNode]:
+async def optimal_bike_rack_choice(
+    combination: bool, 
+    origin: str, 
+    destination: str, 
+    max_distance: float = 1000
+) -> List[BikeRackNode]:
     """
     Select optimal bicycle parking racks based on direction and distance
 
@@ -153,7 +162,10 @@ async def optimal_bike_rack_choice(combination: bool, origin: str, destination: 
     # Iterate over all racks
     for rack in racks:  
         # Vector from destination to bicycle rack  
-        vectorDestinationStation = np.asarray([float(rack["place"]["latitude"]), float(rack["place"]["longitude"])]) - np.asarray(destination_list)
+        vectorDestinationStation = np.asarray([
+            rack.place.latitude, 
+            rack.place.longitude
+        ]) - np.asarray(destination_list)
         
         # Skip racks in the opposite direction of travel
         if combination and np.dot(vectorDestinationOrigin, vectorDestinationStation) <= 0:
@@ -164,13 +176,12 @@ async def optimal_bike_rack_choice(combination: bool, origin: str, destination: 
         normalizedAngle = (angle + 1) * 0.5
 
         # Final rack score combining direction and distance
-        score: float = angleW * normalizedAngle + distanceW * (max_distance - rack["distance"]) / max_distance
+        rack.score = angleW * normalizedAngle + distanceW * (max_distance - rack.distance) / max_distance
     
-        rack["score"] = score
         scored_racks.append(rack)
 
     # Sort racks by score and return top results
-    sorted_racks = sorted(scored_racks, key=lambda x: x["score"], reverse=True)
+    sorted_racks = sorted(scored_racks, key=lambda x: x.score, reverse=True)
 
     return sorted_racks[:10]
 

@@ -65,14 +65,17 @@ async def optimal_origin_bike_station_choice(
     # Iterate over all nodes
     for node in nodes:
         in_semicircle = True
-        node = node["node"]
+        node = node.node
 
         # Skip stations with no available bicycles
-        if node["place"].get("bikesAvailable", 0) == 0:
+        if (node.place.bikesAvailable if node.place.bikesAvailable else 0) == 0:
             continue
 
         # Create vector from origin to current station
-        vectorOriginStation = np.asarray([node["place"]["latitude"], node["place"]["longitude"]], dtype=np.float64) - np.asarray(origin, dtype=np.float64)
+        vectorOriginStation = np.asarray([
+            node.place.latitude, 
+            node.place.longitude
+        ], dtype=np.float64) - np.asarray(origin, dtype=np.float64)
 
         # Keep only stations that lie in the forward direction
         if use_semicircle and combination and np.dot(vectorOriginDestination, vectorOriginStation) <= 0:
@@ -84,10 +87,16 @@ async def optimal_origin_bike_station_choice(
         normalizedAngle = (angle + 1) * 0.5
 
         # Compute final weighted score
-        score: float = angleW * normalizedAngle + bikesAvailableW * np.clip(node["place"].get("bikesAvailable", 0), 0, 5) * 0.2 + distanceW * (max_distance - node["distance"]) / max_distance
+        node.score = (
+            angleW * normalizedAngle + 
+            bikesAvailableW * np.clip(
+                node.place.bikesAvailable if node.place.bikesAvailable else 0,
+                0, 
+                5
+            ) * 0.2 + 
+            distanceW * (max_distance - node.distance) / max_distance
+        )
 
-        # Store score
-        node["score"] = score
         if not in_semicircle:
             trashed_nodes.append(node)
         else:
@@ -98,7 +107,7 @@ async def optimal_origin_bike_station_choice(
         scoredNodes = trashed_nodes
 
     # Sort stations by descending score
-    sortedNodes = sorted(scoredNodes, key=lambda x: x["score"], reverse=True)
+    sortedNodes = sorted(scoredNodes, key=lambda x: x.score, reverse=True)
 
     return sortedNodes[:10]
 
@@ -153,13 +162,13 @@ async def optimal_destination_bike_station_choice(
     # Iterate over all nodes
     for node in nodes:
         in_semicircle = True
-        node = node["node"]
+        node = node.node
 
         # Default available space ratio
         spacesAvailable = 1
     
         # Station id is required to retrieve capacity
-        id = node["place"].get("id")
+        id = node.place.id
         if not id:
             continue
 
@@ -168,14 +177,21 @@ async def optimal_destination_bike_station_choice(
 
         # Compute normalized free docking space ratio
         if capacity is not None:
-            spacesAvailable = (capacity - node["place"].get("bikesAvailable", 0)) / capacity
+            spacesAvailable = (
+                (
+                    capacity - node.place.bikesAvailable if node.place.bikesAvailable else 0
+                ) / capacity
+            )
 
         # Skip stations with no free docking space
         if spacesAvailable == 0:
             continue
         
         # Create vector from destination to current station
-        vectorDestinationStation = np.asarray([node["place"]["latitude"], node["place"]["longitude"]]) - np.asarray(destination)
+        vectorDestinationStation = np.asarray([
+            node.place.latitude, 
+            node.place.longitude
+        ]) - np.asarray(destination)
         
         # Keep only stations in the forward direction
         if use_semicircle and combination and np.dot(vectorDestinationOrigin, vectorDestinationStation) <= 0:
@@ -187,10 +203,12 @@ async def optimal_destination_bike_station_choice(
         normalizedAngle = (angle + 1) * 0.5
 
         # Compute final weighted score
-        score: float = angleW * normalizedAngle + spacesAvailableW * spacesAvailable + distanceW * (max_distance - node["distance"]) / max_distance
+        node.score = (
+            angleW * normalizedAngle + 
+            spacesAvailableW * spacesAvailable + 
+            distanceW * (max_distance - node.distance) / max_distance
+        )
     
-        # Store score
-        node["score"] = score
         if not in_semicircle:
             trashed_nodes.append(node)
         else:
@@ -201,7 +219,7 @@ async def optimal_destination_bike_station_choice(
         scoredNodes = trashed_nodes
 
     # Sort stations by descending score
-    sortedNodes = sorted(scoredNodes, key=lambda x: x["score"], reverse=True)
+    sortedNodes = sorted(scoredNodes, key=lambda x: x.score, reverse=True)
 
     return sortedNodes[:10]
 

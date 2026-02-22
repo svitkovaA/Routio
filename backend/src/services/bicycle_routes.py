@@ -6,16 +6,17 @@ Implements walking and bicycle routing logic for grouped waypoint segments.
 
 import asyncio
 from copy import deepcopy
+from datetime import datetime
 from typing import List
 from gql.client import AsyncClientSession
-from models.route import Leg, TripPattern
+from models.route import BikeStationInfo, Leg, PointOnLink, RoutingMode, TripPattern
 from services.bicycle_service.rack_service import optimal_bike_rack_choice
 from services.otp_service import walk_bicycle_route
 
 async def group_walk_bicycle_route(
     waypoint_group: List[str], 
-    time_to_depart: str, 
-    mode: str, 
+    time_to_depart: datetime, 
+    mode: RoutingMode,
     bike_speed: float,
     walk_speed: float,
     session: AsyncClientSession, 
@@ -44,13 +45,28 @@ async def group_walk_bicycle_route(
 
     # Delegate to bicycle function
     if mode == "bicycle" and use_bike_rack:
-        return await bicycle_route(waypoint_group, time_to_depart, bike_speed, walk_speed, session, bicycle_public, bike_lock_time * 60)
+        return await bicycle_route(
+            waypoint_group, 
+            time_to_depart, 
+            bike_speed, 
+            walk_speed, 
+            session, 
+            bicycle_public, 
+            bike_lock_time * 60
+        )
 
     trip_patterns = []
 
     # Routing using bicycle/foot
     tasks = [
-        walk_bicycle_route(waypoint_group[k], waypoint_group[k + 1], time_to_depart, mode, walk_speed if mode == "foot" else bike_speed, session)
+        walk_bicycle_route(
+            waypoint_group[k], 
+            waypoint_group[k + 1], 
+            time_to_depart, 
+            mode, 
+            walk_speed if mode == "foot" else bike_speed, 
+            session
+        )
         for k in range(len(waypoint_group) - 1)
     ]
 
@@ -62,13 +78,13 @@ async def group_walk_bicycle_route(
             trip_patterns = res
         else:
             for pattern in trip_patterns:
-                pattern["legs"].extend(res[0]["legs"])
+                pattern.legs.extend(res[0].legs)
 
     return trip_patterns
 
 async def bicycle_route(
     waypoint_group: List[str], 
-    time_to_depart: str,
+    time_to_depart: datetime,
     bike_speed: float,
     walk_speed: float,
     session: AsyncClientSession, 
@@ -100,7 +116,15 @@ async def bicycle_route(
         return []
 
     # Compute bicycle route excluding final waypoint
-    base_trip_patterns = await group_walk_bicycle_route(waypoint_group[:-1], time_to_depart, "bicycle", bike_speed, walk_speed, session, use_bike_rack=False)
+    base_trip_patterns = await group_walk_bicycle_route(
+        waypoint_group[:-1], 
+        time_to_depart, 
+        "bicycle", 
+        bike_speed, 
+        walk_speed, 
+        session, 
+        use_bike_rack=False
+    )
         
     # Only best rack is used
     rack = sorted_racks[0]
@@ -109,46 +133,67 @@ async def bicycle_route(
     if len(base_trip_patterns) > 0:
         trip_pattern = deepcopy(base_trip_patterns[0])
 
-        if "toPlace" not in trip_pattern["legs"][-1]:
+        if not trip_pattern.legs[-1].toPlace:
             return []
         
         # Extend cycling route from last segment endpoint to rack
-        bike_route = await walk_bicycle_route(f"{trip_pattern["legs"][-1]["toPlace"]["latitude"]}, {trip_pattern["legs"][-1]["toPlace"]["longitude"]}", f"{rack["place"]["latitude"]}, {rack["place"]["longitude"]}", time_to_depart, "bicycle", bike_speed, session)
-        trip_pattern["legs"].extend(bike_route[0]["legs"])
+        bike_route = await walk_bicycle_route(
+            f"{trip_pattern.legs[-1].toPlace.latitude}, {trip_pattern.legs[-1].toPlace.longitude}", 
+            f"{rack.place.latitude}, {rack.place.longitude}", 
+            time_to_depart, 
+            "bicycle", 
+            bike_speed, 
+            session
+        )
+        trip_pattern.legs.extend(bike_route[0].legs)
     
     # Routing between 2 waypoints
     else:
-        bike_route = await walk_bicycle_route(waypoint_group[0], f"{rack["place"]["latitude"]}, {rack["place"]["longitude"]}", time_to_depart, "bicycle", bike_speed, session)
+        bike_route = await walk_bicycle_route(
+            waypoint_group[0], 
+            f"{rack.place.latitude}, {rack.place.longitude}", 
+            time_to_depart, 
+            "bicycle", 
+            bike_speed, 
+            session
+        )
         trip_pattern = bike_route[0]
 
     # Prepare lock time leg
-    wait_leg: Leg = {
-        "mode": "wait",
-        "color": "black",
-        "distance": 0,
-        "duration": bike_lock_time,
-        "aimedStartTime": "",
-        "aimedEndTime": "",
-        "pointsOnLink": {
-            "points": []
-        },
-        "bikeStationInfo": {
-            "rack": True,
-            "latitude": rack["place"]["latitude"],
-            "longitude": rack["place"]["longitude"],
-            "origin": False,
-            "selectedBikeStationIndex": 0,
-            "bikeStations": sorted_racks
-        }
-    }
+    wait_leg = Leg(
+        mode="wait",
+        color="black",
+        distance=0,
+        duration=bike_lock_time,
+        aimedStartTime=datetime.min,    # Dummy value
+        aimedEndTime=datetime.min,      # Dummy value
+        pointsOnLink=PointOnLink(
+            points=[]
+        ),
+        bikeStationInfo=BikeStationInfo(
+            rack=True,
+            latitude=rack.place.latitude,
+            longitude=rack.place.longitude,
+            origin=False,
+            selectedBikeStationIndex=0,
+            bikeStations=sorted_racks
+        )
+    )
 
     # Insert lock time leg
-    trip_pattern["legs"].append(wait_leg)
+    trip_pattern.legs.append(wait_leg)
 
     # Optional walking segment to destination
     if not bicycle_public:
-        walk_route = await walk_bicycle_route(f"{rack["place"]["latitude"]}, {rack["place"]["longitude"]}", waypoint_group[-1], time_to_depart, "foot", walk_speed, session)
-        trip_pattern["legs"].extend(walk_route[0]["legs"])
+        walk_route = await walk_bicycle_route(
+            f"{rack.place.latitude}, {rack.place.longitude}", 
+            waypoint_group[-1], 
+            time_to_depart, 
+            "foot", 
+            walk_speed, 
+            session
+        )
+        trip_pattern.legs.extend(walk_route[0].legs)
 
     return [trip_pattern]
 

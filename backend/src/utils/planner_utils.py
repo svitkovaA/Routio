@@ -2,7 +2,7 @@
 file: planner_utils.py
 
 Helper functions for trip planning logic, including:
-- combining base trip patterns with the new results,
+- combining base trip patterns with the new connecting_patterns,
 - grouping waypoints based on transport modes,
 - filtering and sorting found trip patterns based on the user preferences,
 - detecting specific sequences of transport modes in waypoint groups,
@@ -10,76 +10,101 @@ Helper functions for trip planning logic, including:
 """
 
 from copy import deepcopy
+from datetime import datetime
 from utils.geo import haversine_distance_km
-from models.route import TripPattern, WaypointGroup
+from models.route import RoutingMode, TripPattern, WaypointGroup
 from models.route_data import LegPreferences, RouteData
 from utils.legs_processing import justify_time
 from typing import List, Tuple
+from zoneinfo import ZoneInfo
 
-def combine_pt(
-    base_patterns: List[TripPattern],
-    results: List[List[TripPattern]],
+TZ = ZoneInfo("Europe/Bratislava")  # alebo UTC, ale buď konzistentná
+
+def ensure_aware(dt: datetime) -> datetime:
+    # ak je naive -> považuj ho za lokálny čas a priraď tzinfo
+    if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
+        return dt.replace(tzinfo=TZ)
+    # ak je aware -> skonvertuj do rovnakej zóny
+    return dt.astimezone(TZ)
+
+def combine_patterns(
+    partial_patterns: List[TripPattern],
+    connecting_patterns: List[List[TripPattern]],
     arrive_by: bool,
-    first_pt: bool=False,
-    keep_base: bool = True,
-    validity: List[bool] | None = None,
-    combination: bool = False
+    partial_without_pt: bool = False,
+    keep_without_connections: bool = True,
+    patterns_validity: List[bool] | None = None,
+    public_bicycle: bool = False
 ) -> List[TripPattern]:
     """
-    Combines base trip patterns with the new results
+    Combines partial trip patterns with the following connecting patterns
 
     Args:
-        base_patterns: List of base trip patterns to be extended
-        results: List of lists containing new patterns corresponding to each base pattern
-        arrive_by: Indicates if the planning is arrival or departure based
-        first_pt: Indicates whether the public transport is the first part of the trip
-        keep_base: If true, base patterns are kept when no new results are available
-        validity: List indicating validity of the individual results
-        combination: Parameter indicating routing public_bicycle transport
+        partial_patterns: List of already constructed trip patterns
+        connecting_patterns: List of lists containing new patterns corresponding to each partial pattern
+        arrive_by: If true, the planning is arrival based, if false, departure based
+        partial_without_pt: If true, partial patterns do not contain public transport, therefore time can be adjusted
+        keep_without_connections: If true, partial patterns are kept when no new connecting patterns are available
+        patterns_validity: Mask for filtering partial_patterns
+        public_bicycle: Parameter indicating routing public_bicycle transport
 
     Returns:
         List of combined trip patterns
     """
-    print("function: combine_pt")
+    print("function: combine_patterns")
     trip_patterns: List[TripPattern] = []
 
-    # Iterates over pattern pairs
-    for i, (base, new_patterns) in enumerate(zip(base_patterns, results)):
+    # Iterates over all pattern pairs
+    for i, (partial_pattern, connections) in enumerate(zip(partial_patterns, connecting_patterns)):
         # Ignore invalid patterns
-        if validity is not None and not validity[i]:
+        if patterns_validity is not None and not patterns_validity[i]:
             continue
 
-        # Keep base patterns without results
-        if len(new_patterns) == 0 and keep_base:
-            trip_patterns.append(base)
+        # Keep only partial patterns if there are no new connecting patterns and it is allowed
+        if len(connections) == 0 and keep_without_connections:
+            trip_patterns.append(partial_pattern)
         else:
-            for np in new_patterns:
-                combined = deepcopy(base)
-                if arrive_by:
-                    new_legs = deepcopy(np["legs"])
-                    new_modes = deepcopy(np.get("modes", []))
-                    # Justify pattern times when only one public transport pattern present
-                    if first_pt:
-                        # Shift shared bike times to public transport end time
-                        if combination:
-                            justify_time(combined, new_legs[-1]["aimedEndTime"], False)
-                        else:
-                            justify_time({"aimedEndTime": "", "legs": new_legs}, base["legs"][0]["aimedStartTime"], True)
-                    
-                    # Attach new legs before base legs
-                    new_legs.extend(deepcopy(combined["legs"]))
-                    new_modes.extend(deepcopy(combined.get("modes", [])))
-                    combined["legs"] = new_legs
-                    combined["modes"] = new_modes
-                else:
-                    # Justify pattern times when only one public transport pattern present
-                    if first_pt:
-                        justify_time(combined, np["legs"][0]["aimedStartTime"], True)
+            # For each possible connection pattern corresponding to the current partial pattern, create a combined result
+            for connection in connections:
+                combined = deepcopy(partial_pattern)
 
-                    # Attach new legs after base legs
-                    combined["legs"].extend(np["legs"])
-                    combined["aimedEndTime"] = np["aimedEndTime"]
-                    combined["modes"] = combined.get("modes", []) + np.get("modes", [])
+                # Arrival based routing
+                if arrive_by:
+                    new_legs = deepcopy(connection.legs)
+                    new_modes = deepcopy(connection.modes)
+
+                    # Justify pattern times when public transport is used in first route segment
+                    if partial_without_pt:
+                        if public_bicycle:
+                            # Shift the partial pattern in time so that its start aligns with the end of the connecting pattern
+                            justify_time(combined, new_legs[-1].aimedEndTime, False)
+                        else:
+                            # Shift the connecting pattern in time so that its end aligns with the start of the partial pattern
+                            justify_time(
+                                TripPattern(
+                                    aimedEndTime=datetime.min,   # Dummy value
+                                    legs=new_legs
+                                ),
+                                partial_pattern.legs[0].aimedStartTime,
+                                True
+                            )
+                    
+                    # Attach connection legs before existing partial legs
+                    new_legs.extend(deepcopy(combined.legs))
+                    new_modes.extend(deepcopy(combined.modes))
+
+                    combined.legs = new_legs
+                    combined.modes = new_modes
+                # Departure based routing
+                else:
+                    # Justify pattern times when public transport is used in first route segment
+                    if partial_without_pt:
+                        justify_time(combined, connection.legs[0].aimedStartTime, True)
+
+                    # Attach new legs after partial_pattern legs
+                    combined.legs.extend(connection.legs)
+                    combined.aimedEndTime = connection.aimedEndTime
+                    combined.modes = combined.modes + connection.modes
                 trip_patterns.append(combined)
     return trip_patterns
 
@@ -87,7 +112,7 @@ def create_waypoint_groups(
     waypoints: List[str],
     pref: List[LegPreferences],
     multimodal: bool = True,
-    mode: str = ""
+    mode: RoutingMode | None = None
 ) -> Tuple[List[WaypointGroup], bool]:
     """
     The function splits a sequence of waypoints into consecutive groups
@@ -105,7 +130,14 @@ def create_waypoint_groups(
     print("function: create_waypoint_groups")
     # Unimodal routing
     if not multimodal:
-        return [{"group": waypoints, "mode": mode, "tripPatterns": []}], False
+        if not mode:
+            raise RuntimeError("Mode not defined unimodal route")
+        return [
+            WaypointGroup(
+                group=waypoints,
+                mode=mode
+            )
+        ], False
 
     # Multimodal routing
     groups: List[WaypointGroup] = []
@@ -116,7 +148,7 @@ def create_waypoint_groups(
     while i < len(waypoints) - 1:
         # Get the waypoint pair and mode on trip segment
         group = [waypoints[i], waypoints[i + 1]]
-        mode = pref[i].mode if i < len(pref) else ""
+        mode = pref[i].mode if i < len(pref) else None
         j = i
 
         # Set the bicycle segment found
@@ -127,7 +159,13 @@ def create_waypoint_groups(
         while j < len(pref) - 1 and pref[j + 1].mode == mode:
             group.append(waypoints[j + 2])
             j += 1
-        groups.append({"group": group, "mode": mode})
+
+        groups.append(
+            WaypointGroup(
+                group=group,
+                mode=mode
+            )
+        )
         i = j + 1
 
     return groups, bike_segment_found
@@ -155,37 +193,37 @@ def filter_sort_trip_patterns(trip_patterns: List[TripPattern], data: RouteData)
     # Filter trip patterns based on the user preferences
     for pattern in trip_patterns:
         # Check the maximal number of transfers
-        if pattern.get("numOfTransfers", 0) > data.max_transfers:
+        if pattern.numOfTransfers and pattern.numOfTransfers > data.max_transfers:
             continue
 
         # Check the maximal walk distance
-        if "walkDistance" in pattern and pattern["walkDistance"] > data.max_walk_distance * 1000 + 50:
+        if pattern.walkDistance and pattern.walkDistance > data.max_walk_distance * 1000 + 50:
             # If the foot leg is set by user, set flag the walk distance is too long to the trip pattern 
             if foot_in_pref:
-                pattern["tooLongWalkDistance"] = True  
+                pattern.tooLongWalkDistance = True  
             # The trip pattern will not be shown
             else:
                 continue
         # Check the maximal bicycle distance and set the flag for pattern
-        if "bikeDistance" in pattern and pattern["bikeDistance"] > max_bike_distance * 1000 + 50:
-            pattern["tooLongBikeDistance"] = True
+        if pattern.bikeDistance and pattern.bikeDistance > max_bike_distance * 1000 + 50:
+            pattern.tooLongBikeDistance = True
 
         new_patterns.append(pattern)
 
     # Sort trip patterns based on the user preferences, the shortest trip patterns
     if data.route_preference == "shortest":
-        sorted_patterns = sorted(new_patterns, key=lambda tp: tp.get("totalDistance", float("inf")))
+        sorted_patterns = sorted(new_patterns, key=lambda tp: tp.totalDistance if tp.totalDistance else float("inf"))
     # Sort trip patterns based on the user preferences, the minimum number of transfers
     elif data.route_preference == "transfers":
-        sorted_patterns = sorted(new_patterns, key=lambda tp: ("numOfTransfers" in tp, tp.get("numOfTransfers", 0)))
+        sorted_patterns = sorted(new_patterns, key=lambda tp: (tp.numOfTransfers is not None, tp.numOfTransfers if tp.numOfTransfers else 0))
     # Sort trip patterns based on the user preferences, the shortest trip patterns, the time preference
     else:
         # The latest possible departure
         if data.arrive_by:
-            sorted_patterns = sorted(new_patterns, key=lambda tp: tp["legs"][0]["aimedStartTime"], reverse=True)
+            sorted_patterns = sorted(new_patterns, key=lambda tp: ensure_aware(tp.legs[0].aimedStartTime), reverse=True)
         # The soonest possible arrival
         else:
-            sorted_patterns = sorted(new_patterns, key=lambda tp: tp["aimedEndTime"])
+            sorted_patterns = sorted(new_patterns, key=lambda tp: ensure_aware(tp.aimedEndTime))
     
     # Return max 10 trip patterns
     return sorted_patterns[:10]
@@ -205,7 +243,7 @@ def contains_sublist(list: List[WaypointGroup], sublist: List[str]) -> bool:
     # Iterates over the list with the sliding window
     for i in range(len(list) - len(sublist) + 1):
         # Compare modes of the current window with the target sublist
-        if [group["mode"] for group in list[i:i+len(sublist)]] == sublist:
+        if [group.mode for group in list[i:i+len(sublist)]] == sublist:
             return True
     return False
 

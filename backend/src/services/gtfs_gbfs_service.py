@@ -10,7 +10,7 @@ from collections import defaultdict
 from datetime import date, datetime
 import os
 import shutil
-from typing import Dict, List, Set, Tuple, cast
+from typing import Dict, List, Set, Tuple
 import zipfile
 from zoneinfo import ZoneInfo
 import httpx
@@ -24,10 +24,10 @@ calendar: pd.DataFrame
 calendar_dates: pd.DataFrame
 routes_dict = {}                                                # Maps route_short_name to route_id
 trips_dict = {}                                                 # Maps trip_id to {route_id, service_id, headsign}
-stop_to_trips_dict: defaultdict[str, List[Tuple[str, str]]] = defaultdict(list)    # Maps stop_id to list of (trip_id, departure_time)
+stop_to_trips_dict: defaultdict[str, List[Tuple[int, str]]] = defaultdict(list)    # Maps stop_id to list of (trip_id, departure_time)
 colors_dict: Dict[str, str | None] = {}                         # Maps route_id to route_color, used in case lissy is unavailable
 services_cache: Dict[date, Set[str]] = {}                       # Maps ref_date to set(service_id)
-vehicle_position_map: Dict[str, Tuple[float, float]] = {}       # Maps trip_id to (latitude, longitude)
+vehicle_position_map: Dict[int, Tuple[float, float]] = {}       # Maps trip_id to (latitude, longitude)
 
 def load_gtfs_data():
     """
@@ -68,7 +68,7 @@ def load_gtfs_data():
 
     # Map trip_id to {route_id, service_id, headsign}
     trips_dict = {
-        row["trip_id"]: {
+        int(row["trip_id"]): {
             "route_id": row["route_id"],
             "service_id": row["service_id"],
             "headsign": row.get("trip_headsign", "")
@@ -78,7 +78,7 @@ def load_gtfs_data():
 
     # Map stop_id to list of (trip_id, departure_time)
     for _, row in stop_times.iterrows():
-        stop_to_trips_dict[row["stop_id"]].append((row["trip_id"], row["departure_time"]))
+        stop_to_trips_dict[row["stop_id"]].append((int(row["trip_id"]), row["departure_time"]))
 
     # Map route_id to route_color, used in case lissy is unavailable
     for _, row in routes.iterrows():
@@ -156,7 +156,7 @@ def get_departures_via(
     from_stop_id: str, 
     to_stop_id: str, 
     route_short_name: str, 
-    aimed_start_time: str, 
+    aimed_start_time: datetime, 
     n_prev: int = 4, 
     n_next: int = 20
 ) -> OtherOptions:
@@ -178,16 +178,15 @@ def get_departures_via(
 
     # Parse and normalize time to local timezone
     time_zone = ZoneInfo("Europe/Bratislava")
-    ref_dt = datetime.fromisoformat(aimed_start_time)
-    ref_dt_local = ref_dt.astimezone(time_zone) if ref_dt.tzinfo else ref_dt.replace(tzinfo=time_zone)
-    ref_date = ref_dt.date()
+    ref_dt_local = aimed_start_time.astimezone(time_zone) if aimed_start_time.tzinfo else aimed_start_time.replace(tzinfo=time_zone)
+    ref_date = aimed_start_time.date()
     previous_date = ref_date - pd.Timedelta(days=1)
     next_date = ref_date + pd.Timedelta(days=1)
 
     # Get route_id from route_short_name
     route_id = routes_dict.get(route_short_name)
     if not route_id:
-        return {"departures": [], "currentIndex": None}
+        return OtherOptions()
 
     # Get valid services for the given date
     valid_services_previous = valid_services_for_date(previous_date)
@@ -217,12 +216,15 @@ def get_departures_via(
             if trip_id not in trips_with_dest:
                 continue
 
-            departures.append({
-                "trip_id": trip_id,
-                "departure_time": departure_time,
-                "direction": trip_info["headsign"],
-                "departure_dt": datetime.min
-            })
+            departures.append(
+                OtherDeparture(
+                    trip_id=trip_id,
+                    departure_time=datetime.min,        # Dummy value
+                    direction=trip_info["headsign"],
+                    departure_time_str=departure_time
+                )
+            )
+
         return departures
 
     # Collect departures for previous, current and next day
@@ -231,17 +233,16 @@ def get_departures_via(
         departures = collect_departures_for_date(services)
         for departure in departures:
             # Converts GTFS time HH:MM:SS to YYYY-MM-DDTHH:MM:SStime_zone
-            td = pd.to_timedelta(departure["departure_time"])                           # type: ignore[type-arg]
+            td = pd.to_timedelta(departure.departure_time_str)                           # type: ignore[type-arg]
             dt = datetime.combine(date, datetime.min.time(), tzinfo=time_zone) + td
-            departure["departure_dt"] = dt
-            departure["departure_time"] = dt.isoformat()
+            departure.departure_time = dt
         all_departures.extend(departures)
 
     # Sort departures by datetime
-    all_departures.sort(key=lambda x: x["departure_dt"])
+    all_departures.sort(key=lambda x: x.departure_time)
 
     # Find the first departure at or after reference time
-    index = next((i for i, dep in enumerate(all_departures) if dep["departure_dt"] >= ref_dt_local), 0)
+    index = next((i for i, dep in enumerate(all_departures) if dep.departure_time >= ref_dt_local), 0)
 
     MAX_GAP = pd.Timedelta(hours=2)
 
@@ -253,7 +254,7 @@ def get_departures_via(
         if not previous:
             previous.append(current)
             continue
-        gap = previous[-1]["departure_dt"] - current["departure_dt"]
+        gap = previous[-1].departure_time - current.departure_time
         # Time gap is bigger than maximal allowed, rest is truncated
         if gap > MAX_GAP:
             break
@@ -271,7 +272,7 @@ def get_departures_via(
         if not nexts:
             nexts.append(current)
             continue
-        gap = current["departure_dt"] - nexts[-1]["departure_dt"]
+        gap = current.departure_time - nexts[-1].departure_time
         # Time gap is bigger than maximal allowed, rest is truncated
         if gap > MAX_GAP:
             break
@@ -285,17 +286,17 @@ def get_departures_via(
     current_index = len(previous) if nexts else len(previous) - 1
 
     # Return departures with additional information
-    return {
-    "departures": [
-        cast(Departure, {
-            "departureTime": dep["departure_time"],
-            "direction": dep["direction"],
-            "tripId": dep["trip_id"],
-        })
-        for dep in final_departures
-    ],
-    "currentIndex": current_index,
-}
+    return OtherOptions(
+        departures=[
+            Departure(
+                departureTime=dep.departure_time,
+                direction=dep.direction,
+                tripId=int(dep.trip_id)
+            )
+            for dep in final_departures
+        ],
+        currentIndex=current_index
+    )
 
 async def vehicle_position() -> None:
     """
@@ -326,7 +327,7 @@ async def vehicle_position() -> None:
             if not (v.HasField("trip") and v.trip.trip_id):
                 continue
             
-            trip_id = v.trip.trip_id
+            trip_id = int(v.trip.trip_id)
             
             # Skip entities without valid position data
             if not (v.HasField("position") and v.position.latitude and v.position.longitude):
@@ -346,7 +347,7 @@ def get_vehicle_position(trip_id: int) -> Tuple[float, float] | None:
         Tuple(latitude, longitude) if position is available, otherwise None
     """
     global vehicle_position_map
-    return vehicle_position_map.get(str(trip_id))
+    return vehicle_position_map.get(trip_id)
 
 # Maps station_id to capacity
 bike_station_capacities: defaultdict[str, int | None] = defaultdict(lambda: None)

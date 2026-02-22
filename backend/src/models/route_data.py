@@ -1,10 +1,11 @@
 from typing import List
 from pydantic import BaseModel
 from datetime import time, date
+from models.route import Mode, RoutingMode
 
 class LegPreferences(BaseModel):
     """ User preference for a specific route segment """
-    mode: str                                   # Preferred transport mode for the segment
+    mode: RoutingMode                           # Preferred transport mode for the segment
     wait: int                                   # Wait time in minutes before departure
 
 class RouteData(BaseModel):
@@ -15,9 +16,9 @@ class RouteData(BaseModel):
     arrive_by: bool                             # If true, compute route to arrive by selected time, if false to depart by selected time
     leg_preferences: List[LegPreferences]       # Preferences applied to individual route segments
     use_own_bike: bool                          # If true, user wants to use own bike, if false the share bicycles are being considered
-    mode: str                                   # Global routing mode, if all route segments use the same mode, this specifies the mode, otherwise the multimodal mode is set
+    mode: RoutingMode                           # Global routing mode, if all route segments use the same mode, this specifies the mode, otherwise the multimodal mode is set
     max_transfers: int                          # Maximum allowed number of public transport transfers
-    selected_modes: List[str]                   # List of allowed public transport modes
+    selected_modes: List[Mode]                  # List of allowed public transport modes
     max_bike_distance:float                     # Maximal allowed distance with own bicycle
     bike_average_speed: float                   # Average speed using own bicycle
     max_bikesharing_distance: float             # Maximal allowed distance with shared bicycle

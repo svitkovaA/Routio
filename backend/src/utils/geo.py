@@ -132,23 +132,23 @@ def merge_close_results(results: List[Suggestion], max_distance: float=20) -> Li
         duplicate = False
         for existing in merged:
             same_name = (
-                candidate["name"] == existing["name"] and
-                candidate.get("type") == existing.get("type") and
-                candidate.get("country") == existing.get("country") and
-                candidate.get("city") == existing.get("city") and
+                candidate.name == existing.name and
+                candidate.type == existing.type and
+                candidate.country == existing.country and
+                candidate.city == existing.city and
                 (
-                    candidate.get("street") == existing.get("street") or
-                    candidate.get("street") is None or
-                    existing.get("street") is None
+                    candidate.street == existing.street or
+                    candidate.street is None or
+                    existing.street is None
                 )
             )
 
             too_close = (
                 haversine_distance_km(
-                    candidate["lat"],
-                    candidate["lon"],
-                    existing["lat"],
-                    existing["lon"]
+                    candidate.lat,
+                    candidate.lon,
+                    existing.lat,
+                    existing.lon
                 ) * 1000 < max_distance
             )
 

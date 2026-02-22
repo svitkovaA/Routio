@@ -1,6 +1,6 @@
-from typing import TypedDict
+from pydantic import BaseModel
 
-class Suggestion(TypedDict):
+class Suggestion(BaseModel):
     """ Search suggestion result """
     name: str                                   # Location name
     type: str                                   # Type of location

@@ -9,19 +9,20 @@ a direct walking is enabled as a fallback.
 """
 
 import asyncio
+from datetime import datetime
 from typing import List
 from gql.client import AsyncClientSession
-from models.route import TripPattern
+from models.route import Mode, TripPattern
 from services.otp_service import public_transport_route
 from utils.geo import haversine_distance_km
-from utils.planner_utils import combine_pt
+from utils.planner_utils import combine_patterns
 
 async def process_public_route(
     waypoints: List[str],
-    time_to_depart: str,
+    time_to_depart: datetime,
     arrive_by: bool,
     max_transfers: int,
-    modes: List[str],
+    modes: List[Mode],
     walk_speed: float,
     session: AsyncClientSession
 ) -> List[TripPattern]:
@@ -58,7 +59,10 @@ async def process_public_route(
             # While not all waypoints are processed or the distance to next is less than 1km
             while distance >= 1 and i > 0:
                 group.insert(0, waypoints[i])
-                distance = haversine_distance_km(*map(float, waypoints[i - 1].split(',')), *map(float, waypoints[i].split(',')))
+                distance = haversine_distance_km(
+                    *map(float, waypoints[i - 1].split(',')), 
+                    *map(float, waypoints[i].split(','))
+                )
                 i -= 1
 
             # Add first waypoint
@@ -70,13 +74,31 @@ async def process_public_route(
             if len(group) > 1:
                 # Route using public transport
                 tasks = [
-                    public_transport_route(group, pattern["legs"][0]["aimedStartTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed)
+                    public_transport_route(
+                        group, 
+                        pattern.legs[0].aimedStartTime, 
+                        arrive_by,
+                        max_transfers, 
+                        modes, 
+                        session, 
+                        num_of_waypoints, 
+                        walk_speed
+                    )
                     for pattern in trip_patterns
                 ]
 
                 # Routing first part
                 if tasks == []:
-                    tasks.append(public_transport_route(group, time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed))
+                    tasks.append(public_transport_route(
+                        group, 
+                        time_to_depart, 
+                        arrive_by, 
+                        max_transfers, 
+                        modes, 
+                        session, 
+                        num_of_waypoints, 
+                        walk_speed
+                    ))
                 
                 results = await asyncio.gather(*tasks)
 
@@ -84,19 +106,43 @@ async def process_public_route(
                 if trip_patterns == []:
                     trip_patterns = results[0]
                 else:
-                    trip_patterns = combine_pt(trip_patterns, results, arrive_by, keep_base=False) 
+                    trip_patterns = combine_patterns(
+                        trip_patterns, 
+                        results, 
+                        arrive_by, 
+                        keep_without_connections=False
+                    ) 
             
             # Segments shorter than 1km found
             if i >= 0:
                 # Route using public transport with direct mode enabled
                 tasks = [
-                    public_transport_route([waypoints[i], group[0]], pattern["legs"][0]["aimedStartTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed, add_direct_mode=True)
+                    public_transport_route(
+                        [waypoints[i], group[0]], 
+                        pattern.legs[0].aimedStartTime, 
+                        arrive_by, 
+                        max_transfers, 
+                        modes, session, 
+                        num_of_waypoints,
+                        walk_speed, 
+                        add_direct_mode=True
+                    )
                     for pattern in trip_patterns
                 ]
 
                 # Routing first part
                 if tasks == []:
-                    tasks.append(public_transport_route([waypoints[i], group[0]], time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed, add_direct_mode=True))
+                    tasks.append(public_transport_route(
+                        [waypoints[i], group[0]], 
+                        time_to_depart, 
+                        arrive_by, 
+                        max_transfers, 
+                        modes, 
+                        session,
+                        num_of_waypoints,
+                        walk_speed, 
+                        add_direct_mode=True
+                    ))
                 
                 results = await asyncio.gather(*tasks)
 
@@ -104,7 +150,12 @@ async def process_public_route(
                 if trip_patterns == []:
                     trip_patterns = results[0]
                 else:
-                    trip_patterns = combine_pt(trip_patterns, results, arrive_by, keep_base=False)
+                    trip_patterns = combine_patterns(
+                        trip_patterns, 
+                        results, 
+                        arrive_by, 
+                        keep_without_connections=False
+                    )
     # Departure mode
     else:
         i = 0
@@ -118,7 +169,10 @@ async def process_public_route(
             # While not all waypoints are processed or the distance to next is less than 1km
             while distance >= 1 and i + 1 < len(waypoints):
                 group.append(waypoints[i])
-                distance = haversine_distance_km(*map(float, waypoints[i].split(',')), *map(float, waypoints[i + 1].split(',')))
+                distance = haversine_distance_km(
+                    *map(float, waypoints[i].split(',')), 
+                    *map(float, waypoints[i + 1].split(','))
+                )
                 i += 1
 
             # Add final waypoint
@@ -130,13 +184,31 @@ async def process_public_route(
             if len(group) > 1:
                 # Route using public transport
                 tasks = [
-                    public_transport_route(group, pattern["aimedEndTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed)
+                    public_transport_route(
+                        group, 
+                        pattern.aimedEndTime,
+                        arrive_by, 
+                        max_transfers, 
+                        modes, 
+                        session, 
+                        num_of_waypoints, 
+                        walk_speed
+                    )
                     for pattern in trip_patterns
                 ]
 
                 # Routing first part
                 if tasks == []:
-                    tasks.append(public_transport_route(group, time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed))
+                    tasks.append(public_transport_route(
+                        group, 
+                        time_to_depart, 
+                        arrive_by, 
+                        max_transfers, 
+                        modes, 
+                        session, 
+                        num_of_waypoints, 
+                        walk_speed
+                    ))
                 
                 results = await asyncio.gather(*tasks)
 
@@ -144,19 +216,44 @@ async def process_public_route(
                 if trip_patterns == [] and first_iteration:
                     trip_patterns = results[0]
                 else:
-                    trip_patterns = combine_pt(trip_patterns, results, arrive_by, keep_base=False)
+                    trip_patterns = combine_patterns(
+                        trip_patterns, 
+                        results, 
+                        arrive_by, 
+                        keep_without_connections=False
+                    )
             
             # Segments shorter than 1km found
             if i < len(waypoints):
                 # Route using public transport with direct mode enabled
                 tasks = [
-                    public_transport_route([group[-1], waypoints[i]], pattern["aimedEndTime"], arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed, add_direct_mode=True)
+                    public_transport_route(
+                        [group[-1], waypoints[i]], 
+                        pattern.aimedEndTime, 
+                        arrive_by, 
+                        max_transfers,
+                        modes, 
+                        session, 
+                        num_of_waypoints, 
+                        walk_speed, 
+                        add_direct_mode=True
+                    )
                     for pattern in trip_patterns
                 ]
 
                 # Routing first part
                 if tasks == []:
-                    tasks.append(public_transport_route([group[-1], waypoints[i]], time_to_depart, arrive_by, max_transfers, modes, session, num_of_waypoints, walk_speed, add_direct_mode=True))
+                    tasks.append(public_transport_route(
+                        [group[-1], waypoints[i]], 
+                        time_to_depart, 
+                        arrive_by, 
+                        max_transfers, 
+                        modes, 
+                        session, 
+                        num_of_waypoints, 
+                        walk_speed, 
+                        add_direct_mode=True
+                    ))
                 
                 results = await asyncio.gather(*tasks)
 
@@ -164,7 +261,12 @@ async def process_public_route(
                 if trip_patterns == []:
                     trip_patterns = results[0]
                 else:
-                    trip_patterns = combine_pt(trip_patterns, results, arrive_by, keep_base=False)
+                    trip_patterns = combine_patterns(
+                        trip_patterns, 
+                        results, 
+                        arrive_by, 
+                        keep_without_connections=False
+                    )
 
         first_iteration = False
 

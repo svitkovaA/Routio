@@ -7,13 +7,12 @@ delays and public transport shape information.
 
 import asyncio
 from datetime import date as d, timedelta, datetime
-from types import CoroutineType
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List, Tuple
 from collections import OrderedDict
 import httpx
 from dateutil.relativedelta import relativedelta
 from config.lissy_ben import DELAY_DATA_URL, DELAY_ROUTES_URL, DELAY_TRIPS_URL, LISSY_API_KEY, SHAPE_URL, SHAPES_URL
-from models.lissy import LissyAvailableRoute, LissyDelayTrips, LissyShape, LissyShapes, LissyTrips, LissyRouteData
+from models.lissy import LissyAvailableRoute, LissyDelayTrips, LissyShape, LissyShapes, LissyRouteData
 
 # Size of the cache window
 CACHE_DAYS = 7
@@ -21,12 +20,11 @@ CACHE_DAYS = 7
 # The maximum number of shape information in LRU cache
 MAX_SHAPE_CACHE_SIZE = 5000
 
-shapes_cache: Dict[str, Dict[str, LissyShapes]] = {}                    # Maps route_short_name to route_color and trips
-routes_cache: Dict[str, Dict[str, LissyRouteData]] = {}                      # Maps route_short_name to route_data
+shapes_cache: Dict[d, Dict[str, LissyShapes]] = {}                    # Maps route_short_name to route_color and trips
+routes_cache: Dict[str, Dict[str, LissyRouteData]] = {}                 # Maps route_short_name to route_data
 shape_detail_cache: OrderedDict[int, LissyShape] = OrderedDict()        # Maps shape_id to shape_data (LRU)
 lissy_client = httpx.AsyncClient(timeout=10, headers={"Authorization": LISSY_API_KEY}) 
 
-# Caching functions
 async def lissy_status(date: d) -> bool:
     print("function: lissy_status")
     try:
@@ -39,7 +37,8 @@ async def lissy_status(date: d) -> bool:
         return False
     return True
 
-def get_cache_window(today: d) -> List[str]:
+# Caching functions
+def get_cache_window(today: d) -> List[d]:
     """
     Docstring for get_cache_window
     
@@ -51,9 +50,9 @@ def get_cache_window(today: d) -> List[str]:
 
     """
     print("function: get_cache_window")
-    return [ (today - timedelta(days=i)).isoformat() for i in range(CACHE_DAYS) ]
+    return [ (today - timedelta(days=i)) for i in range(CACHE_DAYS) ]
 
-async def get_shapes(date: d) -> list[LissyShapes] | None:
+async def get_shapes(date: d) -> List[LissyShapes] | None:
     """
     Fetches route shapes for the given date
     
@@ -69,12 +68,15 @@ async def get_shapes(date: d) -> list[LissyShapes] | None:
         api_date = f"{date.year}-{date.month - 1}-{date.day}"
         r = await lissy_client.get(url, params={"date": api_date})
         r.raise_for_status()
-        data: List[LissyShapes] = r.json()
+        data = [
+            LissyShapes.model_validate(obj)
+            for obj in r.json()
+        ]
     except Exception:
         return None
     return data
  
-async def build_routes_map(routes_list: List[LissyAvailableRoute], cache_window: list[str]):
+async def build_routes_map(routes_list: List[LissyAvailableRoute], cache_window: List[d]):
     """
     Builds and caches stop_label to shape_id, stopOrder and trips_by_time map
 
@@ -86,8 +88,8 @@ async def build_routes_map(routes_list: List[LissyAvailableRoute], cache_window:
     global routes_cache
 
     # Build date range required for the delay API
-    start_date = (datetime.fromisoformat(cache_window[3]) - relativedelta(months=1))
-    end_date = (datetime.fromisoformat(cache_window[1]) - relativedelta(months=1))
+    start_date = cache_window[3] - relativedelta(months=1)
+    end_date = cache_window[1] - relativedelta(months=1)
     start_str = f"{start_date.year}-{start_date.month}-{start_date.day}"
     end_str = f"{end_date.year}-{end_date.month}-{end_date.day}"
 
@@ -101,39 +103,49 @@ async def build_routes_map(routes_list: List[LissyAvailableRoute], cache_window:
         Returns:
             A tuple, including route_short_name and route_data
         """
-        route_id = route["id"]
-        short_name = route["route_short_name"]
+        route_id = route.id
+        short_name = route.route_short_name
 
         # Fetch available trips for the selected date range
         try:
             # Returns shape id, stops and trips
             url = DELAY_TRIPS_URL
-            r = await lissy_client.get(url, params={ "dates": f'[["{start_str}","{end_str}"]]', "route_id": route_id, "fullStopOrder": True})
+            r = await lissy_client.get(
+                url, 
+                params={ 
+                    "dates": f'[["{start_str}","{end_str}"]]', 
+                    "route_id": route_id, 
+                    "fullStopOrder": True
+                }
+            )
             r.raise_for_status()
-            data: List[LissyDelayTrips] = r.json()
+            data = [
+                LissyDelayTrips.model_validate(obj)
+                for obj in r.json()
+            ]
 
             route_data: Dict[str, LissyRouteData] = {}
             for shape in data:
-                shape_id = shape.get("shape_id")
-                stops_label = shape.get("stops") or f"shape_{shape_id}"
-                stop_order = shape.get("stopOrder", [])
-                trips: List[LissyTrips] = shape.get("trips", [])
+                shape_id = shape.shape_id
+                stops_label = shape.stops or f"shape_{shape_id}"
+                stop_order = shape.stopOrder
+                trips = shape.trips
 
                 # Maps departure time to trip_id
                 trips_by_time: dict[str, int] = {}
                 for trip in trips:
-                    dep_time = trip.get("dep_time")
-                    trip_id = trip.get("id")
+                    dep_time = trip.dep_time
+                    trip_id = trip.id
 
                     if dep_time is not None and trip_id is not None:
                         trips_by_time[dep_time] = trip_id
 
                 # From stop label get information
-                route_data[stops_label] = {
-                    "shape_id": shape_id,
-                    "stopOrder": stop_order,
-                    "trips_by_time": trips_by_time,
-                }
+                route_data[stops_label] = LissyRouteData(
+                    shape_id=shape_id,
+                    stopOrder=stop_order,
+                    trips_by_time=trips_by_time
+                )
 
             return short_name, route_data
 
@@ -158,25 +170,25 @@ async def cache_lissy() -> None:
     # Determine the date window to cache
     cache_window = get_cache_window(d.today())
 
-    # Prepare async tasks for fetching shapes for each date
-    tasks: List[CoroutineType[Any, Any, list[LissyShapes] | None]] = []
-    for day_str in cache_window:
-        day = datetime.fromisoformat(day_str).date()
-        tasks.append(get_shapes(day))
+    # Prepare async tasks for fetching shapes for each date    
+    tasks = [
+        get_shapes(day) 
+        for day in cache_window
+    ]
 
     # Execute shape requests concurrently
     results = await asyncio.gather(*tasks)
 
     # Store shapes in cache indexed by date
-    for day_str, shapes in zip(cache_window, results):
+    for day, shapes in zip(cache_window, results):
         if shapes:
             # Maps route short name to route_color and trips
-            shapes_cache[day_str] = {shape["route_short_name"]: shape for shape in shapes}
+            shapes_cache[day] = {shape.route_short_name: shape for shape in shapes}
 
     # Months in lissy are in format 0-11
     cache_window_minus_month: List[str] = []
-    for date_str in cache_window:
-        dt = datetime.fromisoformat(date_str) - relativedelta(months=1)
+    for date in cache_window:
+        dt = date - relativedelta(months=1)
         cache_window_minus_month.append(f"{dt.year}-{dt.month}-{dt.day}")
 
     # Try to fetch routes for which the delays are available
@@ -186,11 +198,16 @@ async def cache_lissy() -> None:
         url = DELAY_ROUTES_URL
         r = await lissy_client.get(url, params={"dates": dates_param})
         r.raise_for_status()
+        parsed = [
+            LissyAvailableRoute.model_validate(obj)
+            for obj in r.json()
+        ]
+        
     except Exception:
         return
-
+    
     # Cache and build stop_label to shape_id, stopOrder and trips_by_time map
-    await build_routes_map(r.json(), cache_window)
+    await build_routes_map(parsed, cache_window)
 
 # Retrieving information about delays
 def get_trip_id_by_time(route_short_name: str, stops_label: str, dep_time: str) -> int | None:
@@ -222,7 +239,7 @@ def get_trip_id_by_time(route_short_name: str, stops_label: str, dep_time: str) 
     if not shape_data:
         return None
 
-    trips_by_time = shape_data.get("trips_by_time", {})
+    trips_by_time = shape_data.trips_by_time
     if not trips_by_time:
         return None
 
@@ -266,8 +283,8 @@ async def get_delays(trip_id: int, index: int) -> Dict[str, int] | None:
 
     # Create a cache window in the format required by Lissy API
     cache_window_minus_month: List[str] = []
-    for date_str in get_cache_window(d.today()):
-        dt = datetime.fromisoformat(date_str) - relativedelta(months=1)
+    for date in get_cache_window(d.today()):
+        dt = date - relativedelta(months=1)
         cache_window_minus_month.append(f"{dt.year}-{dt.month}-{dt.day}")
 
     dates_param = f'[["{cache_window_minus_month[3]}","{cache_window_minus_month[1]}"]]'
@@ -278,7 +295,7 @@ async def get_delays(trip_id: int, index: int) -> Dict[str, int] | None:
         r = await lissy_client.get(url, params={"dates": dates_param, "trip_id": trip_id})
         r.raise_for_status()
         data: Dict[str, Dict[str, Dict[str, int]]] = r.json()
-        delays: dict[str, int] = {}
+        delays: Dict[str, int] = {}
         for date, delay in data.items():
             delay_data = delay[str(index)]
             value = list(delay_data.values())[0]
@@ -320,7 +337,6 @@ async def get_shapes_cached(date: d) -> Dict[str, LissyShapes]:
 
     # Normalize date to fit into cache window
     date = get_date(today, date)
-    date_str = date.isoformat()
 
     # Determine currently valid cache dates
     valid_dates = get_cache_window(today)
@@ -331,15 +347,16 @@ async def get_shapes_cached(date: d) -> Dict[str, LissyShapes]:
             shapes_cache.pop(key)
 
     # Return cached shapes if available
-    if date_str in shapes_cache:
-        return shapes_cache[date_str]
+    if date in shapes_cache:
+        return shapes_cache[date]
     
     # Fetch and cache data if not already present
     shapes = await get_shapes(date)
     if shapes:
-        shapes_cache[date_str] = {shape["route_short_name"]: shape for shape in shapes}
+        shapes_cache[date] = {shape.route_short_name: shape for shape in shapes}
+        return shapes_cache[date]
 
-    return shapes_cache.get(date_str, {})
+    return {}
 
 async def get_shape(shape_id: int) -> LissyShape | None:
     """
@@ -363,7 +380,7 @@ async def get_shape(shape_id: int) -> LissyShape | None:
         url = SHAPE_URL
         r = await lissy_client.get(url, params={"shape_id": shape_id})
         r.raise_for_status()
-        data: LissyShape = r.json()
+        data = LissyShape.model_validate(r.json())
     except Exception:
         return None
         
