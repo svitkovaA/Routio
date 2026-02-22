@@ -55,8 +55,8 @@ class VehiclePositions(BaseModel):
     publicCode: str                             # Public line number
     mode: Mode                                  # Transport mode
     color: str                                  # Line color used for visualization
-    lat: float                                  # Current vehicle latitude
-    lon: float                                  # Current vehicle longitude
+    lat: float = -1                             # Current vehicle latitude
+    lon: float = -1                             # Current vehicle longitude
     direction: str                              # Direction, headsign of the vehicle
 
 class Departure(BaseModel):

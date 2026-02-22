@@ -18,13 +18,11 @@ from utils.legs_processing import justify_time
 from typing import List, Tuple
 from zoneinfo import ZoneInfo
 
-TZ = ZoneInfo("Europe/Bratislava")  # alebo UTC, ale buď konzistentná
+TZ = ZoneInfo("Europe/Bratislava")
 
 def ensure_aware(dt: datetime) -> datetime:
-    # ak je naive -> považuj ho za lokálny čas a priraď tzinfo
     if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
         return dt.replace(tzinfo=TZ)
-    # ak je aware -> skonvertuj do rovnakej zóny
     return dt.astimezone(TZ)
 
 def combine_patterns(

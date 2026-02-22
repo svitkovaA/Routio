@@ -11,56 +11,6 @@ from scipy.spatial.distance import cosine
 from database.db import create_conn
 from models.route import BikeRackNode, BikeRackPlace, RackRow
 
-# TODO unused function
-# import overpy   # type: ignore[import-untyped]
-# from utils.geo import haversine_distance_km
-# async def find_bike_rack(lat: float, lon: float, radius: int = 1000) -> List[BikeRackNode]:
-#     """
-#     Find bicycle parking racks near a given geographic location
-
-#     Args:
-#         lat: Latitude of the search center
-#         lon: Longitude of the search center
-#         radius: Search radius in meters
-
-#     Returns:
-#         List of nearby bicycle racks
-#     """
-#     print("function: find_bike_rack")
-
-#     api = overpy.Overpass()
-
-#     # Overpass query for bicycle parking nodes within a radius
-#     query = f"""
-#         [out:json][timeout:25];
-#         (
-#         node["amenity"="bicycle_parking"](around:{radius},{lat},{lon});
-#         );
-#         out center;
-#     """
-#     try:
-#         result = api.query(query)
-#     except Exception:
-#         return []
-
-#     racks: List[BikeRackNode] = []
-
-#     for node in result.nodes:
-#         racks.append({
-#             # Distance from input location in meters
-#             "distance": haversine_distance_km(lat, lon, float(node.lat), float(node.lon)) * 1000,
-#             "place": {
-#                 "latitude": float(node.lat),
-#                 "longitude": float(node.lon),
-#                 "name": "Bike rack",
-#                 # Default capacity is used if not specified in OSM tags
-#                 "capacity": node.tags.get("capacity", 5),
-#             },
-#             "score": 0
-#         })
-
-#     return racks
-
 async def find_bike_rack(lat: float, lon: float, radius: int = 1000) -> List[BikeRackNode]:
     """
     Find bicycle parking racks near a given geographic location

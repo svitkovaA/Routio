@@ -11,7 +11,7 @@ Processing trip legs, including:
 from copy import deepcopy
 from datetime import datetime, timedelta
 from models.route import Leg, Mode, PointOnLink, Quay, ServiceJourney, TripPattern, VehiclePositions
-from typing import Optional, List
+from typing import Literal, Optional, List
 
 # Default route colors based on transport mode
 COLORS = {
@@ -147,7 +147,7 @@ def process_legs(pattern: TripPattern) -> None:
     num_of_transfers = None
 
     mode_index = 0
-    mode: Mode = "transfer"     # Dummy value
+    mode: Mode | Literal[""] = ""
     public_code = ""
     new_legs: List[Leg] = []
     prev_leg = None
@@ -167,8 +167,6 @@ def process_legs(pattern: TripPattern) -> None:
                     publicCode=leg.line.publicCode,
                     color=leg.color,
                     mode=leg.mode,
-                    lat=-1, # Dummy value
-                    lon=-1, # Dummy value
                     direction=leg.otherOptions.departures[leg.otherOptions.currentIndex].direction
                 )
             )
