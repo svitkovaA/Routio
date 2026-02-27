@@ -76,7 +76,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
 
     // Transport mode preferences per leg between waypoints
     const [legPreferences, setLegPreferences] = useState<LegPreference[]>([{
-        mode: "transit,bicycle,walk",
+        mode: "multimodal",
         wait: dayjs().startOf("day"),
         open: false
     }]);
@@ -145,7 +145,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             // Restore default if only one preference remains
             if (newPrefs.length === 1) {
                 return [{
-                    mode: "transit,bicycle,walk",
+                    mode: "multimodal",
                     wait: dayjs().startOf("day"),
                     open: false
                 }];
@@ -190,7 +190,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         // Insert default leg preference for the newly added segment
         const newLegPreferences = [...legPreferences];
         newLegPreferences.splice(index + 1, 0, {
-            mode: "transit,bicycle,walk",
+            mode: "multimodal",
             wait: dayjs().startOf("day"),
             open: false
         });

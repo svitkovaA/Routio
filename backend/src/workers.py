@@ -7,9 +7,11 @@ Background asynchronous workers for periodic data updates and maintenance tasks
 import asyncio
 import logging
 from typing import Awaitable, Callable
-from services.public_transport_service.lissy import cache_lissy
+from service.gtfs_rt_service import GTFSRTService
+from service.gbfs_service import GBFSService
+from service.lissy_service import LissyService
+from service.gtfs_service import GTFSService
 from database.db import database
-from services.gtfs_gbfs_service import load_gbfs_data, load_gtfs_data, vehicle_position
 from datetime import datetime, timedelta
 from config.worker import *
 
@@ -52,15 +54,6 @@ def seconds_until_next(
 
     return (target - now).total_seconds()
 
-async def run_sync(fn: Callable[[], None]) -> None:
-    """
-    Run a synchronous function without parameters in a thread
-
-    Args:
-        fn: Synchronous callable function
-    """
-    await asyncio.to_thread(fn)
-
 async def run_periodic(task: Callable[[], Awaitable[None]], delay_fn: Callable[[], float], initial_load: bool):
     """
     Periodically executes an asynchronous task
@@ -90,7 +83,7 @@ async def gtfs_worker():
     Background task that refreshes GTFS static timetable data
     """
     await run_periodic(
-        lambda: run_sync(load_gtfs_data),
+        GTFSService.get_instance().reload,
         lambda: seconds_until_next(**GTFS_INTERVAL),
         initial_load=False
     )
@@ -100,7 +93,7 @@ async def gbfs_worker():
     Background task that refreshes GBFS bike station data
     """
     await run_periodic(
-        lambda: run_sync(load_gbfs_data),
+        GBFSService.get_instance().reload,
         lambda: seconds_until_next(**GBFS_INTERVAL),
         initial_load=False
     )
@@ -120,17 +113,17 @@ async def lissy_worker():
     Background task that refreshes cached Lissy route shapes and delay data
     """
     await run_periodic(
-        cache_lissy,
+        LissyService.get_instance().reload,
         lambda: seconds_until_next(**LISSY_INTERVAL),
         initial_load=False
-    ) 
+    )
 
 async def vehicle_position_worker():
     """
     Background worker that periodically updates vehicle position data
     """
     await run_periodic(
-        vehicle_position,
+        GTFSRTService.get_instance().reload,
         lambda: VEHICLE_POSITION_INTERVAL,
         initial_load=True
     )

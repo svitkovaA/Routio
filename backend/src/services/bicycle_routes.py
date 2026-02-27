@@ -22,7 +22,8 @@ async def group_walk_bicycle_route(
     session: AsyncClientSession, 
     bicycle_public: bool = False, 
     use_bike_rack: bool = True, 
-    bike_lock_time: int = 2
+    bike_lock_time: int = 2,
+    arrive_by: bool = False
 ) -> List[TripPattern]:
     """
     Builds trip patterns for a group of waypoints using either walking or bicycle routing
@@ -65,7 +66,8 @@ async def group_walk_bicycle_route(
             time_to_depart, 
             mode, 
             walk_speed if mode == "foot" else bike_speed, 
-            session
+            session,
+            arrive_by=arrive_by
         )
         for k in range(len(waypoint_group) - 1)
     ]

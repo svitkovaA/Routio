@@ -357,11 +357,15 @@ def load_gbfs_data() -> None:
     Loads and preprocess GBFS data file station_information.json
     """
     print("function: load_gbfs_data")
-    global STATION_INFORMATION_URLS, bike_station_capacities
+    global bike_station_capacities
+
+    headers = {
+        "User-Agent": "Routio/1.0 (academic project)"
+    }
 
     # Get station information
     for url in STATION_INFORMATION_URLS:
-        response = httpx.get(url, timeout=10)
+        response = httpx.get(url, headers=headers, timeout=10)
         response_data = response.json()
         stations = response_data.get("data", {}).get("stations", [])
         

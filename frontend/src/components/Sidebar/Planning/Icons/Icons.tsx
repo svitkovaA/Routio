@@ -46,7 +46,7 @@ export function MultimodalIcon({
  */
 export const modeIcons: {html: JSX.Element, value: Mode}[] = [{
         html: <MultimodalIcon />, 
-        value: "transit,bicycle,walk"
+        value: "multimodal"
     }, {
         html: 
             <div className="circle">

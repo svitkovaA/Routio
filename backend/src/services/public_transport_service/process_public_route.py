@@ -125,7 +125,7 @@ async def process_public_route(
                         modes, session, 
                         num_of_waypoints,
                         walk_speed, 
-                        add_direct_mode=True
+                        allow_direct_foot=True
                     )
                     for pattern in trip_patterns
                 ]
@@ -141,7 +141,7 @@ async def process_public_route(
                         session,
                         num_of_waypoints,
                         walk_speed, 
-                        add_direct_mode=True
+                        allow_direct_foot=True
                     ))
                 
                 results = await asyncio.gather(*tasks)
@@ -236,7 +236,7 @@ async def process_public_route(
                         session, 
                         num_of_waypoints, 
                         walk_speed, 
-                        add_direct_mode=True
+                        allow_direct_foot=True
                     )
                     for pattern in trip_patterns
                 ]
@@ -252,7 +252,7 @@ async def process_public_route(
                         session, 
                         num_of_waypoints, 
                         walk_speed, 
-                        add_direct_mode=True
+                        allow_direct_foot=True
                     ))
                 
                 results = await asyncio.gather(*tasks)

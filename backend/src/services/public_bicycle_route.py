@@ -231,7 +231,6 @@ async def public_bicycle_route(
                     # No public transport results found
                     if len(pt_result) == 0:
                         continue
-                        # TODO changed -> trip_patterns.append(pattern)
                     
                     # Process result
                     for pt_pattern in pt_result:

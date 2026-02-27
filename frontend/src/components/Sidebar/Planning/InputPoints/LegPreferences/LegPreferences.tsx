@@ -52,13 +52,13 @@ function LegPreferences({
             {!legPreferences[index].open ? (
                 <CustomTooltip title={t("tooltips.inputForm.modeTimePrefs")}>
                     <div
-                        className={"leg-preferences-button " + (legPreferences[index].mode === "transit,bicycle,walk" ? "multimodal" : "")}
+                        className={"leg-preferences-button " + (legPreferences[index].mode === "multimodal" ? "multimodal" : "")}
                         onClick={() => setLegPreference(true)}
                     >
                         {modeIcons.map((mode) => 
                             mode.value === legPreferences[index].mode ? mode.html : null
                         )}
-                        <div className={"leg-preferences-time " + (legPreferences[index].mode !== "transit,bicycle,walk" ? "short" : "")}>
+                        <div className={"leg-preferences-time " + (legPreferences[index].mode !== "multimodal" ? "short" : "")}>
                             {legPreferences[index].wait.hour()*60+legPreferences[index].wait.minute()} min
                         </div>
                     </div>

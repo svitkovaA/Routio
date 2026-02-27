@@ -225,7 +225,7 @@
       "vehiclePosition": "Current vehicle position"
     },
     "info": {
-      "bus": "Bus",
+      "bus": "Public Transport",
       "foot": "Walking",
       "bicycle": "Bicycle",
       "sharedBicycle": "Shared bicycle"

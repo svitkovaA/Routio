@@ -49,7 +49,8 @@ async def walk_bicycle_route(
     time_to_depart: datetime, 
     mode: RoutingMode,
     mode_speed: float,
-    session: AsyncClientSession
+    session: AsyncClientSession,
+    arrive_by: bool = False
 ) -> List[TripPattern]:
     """
     Compute walking or cycling route between two geographic points
@@ -72,7 +73,7 @@ async def walk_bicycle_route(
 
     # Define GraphQL query for retrieving walking or cycling trips
     query = gql("""
-        query trip($from: Location!, $to: Location!, $dateTime: DateTime, $modes: Modes, $walkSpeed: Float, $bikeSpeed: Float) {
+        query trip($from: Location!, $to: Location!, $dateTime: DateTime, $modes: Modes, $walkSpeed: Float, $bikeSpeed: Float, $arriveBy: Boolean) {
             trip(
                 from: $from
                 to: $to
@@ -80,6 +81,7 @@ async def walk_bicycle_route(
                 modes: $modes
                 walkSpeed: $walkSpeed
                 bikeSpeed: $bikeSpeed
+                arriveBy: $arriveBy
             ) {
                 tripPatterns {
                     aimedEndTime
@@ -125,7 +127,8 @@ async def walk_bicycle_route(
             "directMode": mode,
         },
         "walkSpeed": mode_speed / 3.6,
-        "bikeSpeed": mode_speed / 3.6
+        "bikeSpeed": mode_speed / 3.6,
+        "arriveBy": arrive_by
     }
 
     try:
@@ -151,7 +154,7 @@ async def public_transport_route(
     session: AsyncClientSession, 
     num_of_waypoints: int,
     walk_speed: float,
-    add_direct_mode: bool = False
+    allow_direct_foot: bool = False
 ) -> List[TripPattern]:
     """
     Computes public transport routes between multiple waypoints
@@ -165,7 +168,7 @@ async def public_transport_route(
         session: Asynchronous GraphQL client session
         num_of_waypoints: Total number of waypoints in the route
         walk_speed: Walking speed in km/h
-        add_direct_mode: If True, allows direct walking between waypoints as a fallback
+        allow_direct_foot: If True, allows direct walking between waypoints as a fallback
     
     Returns:
         A list of trip patterns with information about delays and shapes
@@ -251,7 +254,7 @@ async def public_transport_route(
     }
 
     # Optionally allow a direct walking fallback between waypoints
-    if add_direct_mode:
+    if allow_direct_foot:
         variables["modes"]["directMode"] =  "foot"
 
     # Helper coroutine that executes a single public transport query

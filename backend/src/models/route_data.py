@@ -24,7 +24,7 @@ class RouteData(BaseModel):
     max_bikesharing_distance: float             # Maximal allowed distance with shared bicycle
     bikesharing_average_speed: float            # Average speed using shared bicycle
     max_walk_distance: float                    # Maximal walking allowed distance
-    walk_average_speed: float                   # Average walk speed
+    walk_speed: float                   # Average walk speed
     bikesharing_lock_time: int                  # Time required to unlock/lock a shared bicycle
     bike_lock_time: int                         # Time required to lock an own bicycle
     route_preference: str                       # Route optimization preference, e.g. fastest, shortest, maximum transfers

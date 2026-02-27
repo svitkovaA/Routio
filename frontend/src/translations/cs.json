@@ -225,7 +225,7 @@
       "vehiclePosition": "Aktuální poloha vozidla"
     },
     "info": {
-      "bus": "Autobus",
+      "bus": "Veřejná doprava",
       "foot": "Chůze",
       "bicycle": "Kolo",
       "sharedBicycle": "Sdílené kolo"

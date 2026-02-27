@@ -163,7 +163,7 @@ def merge_close_results(results: List[Suggestion], max_distance: float=20) -> Li
 
 def get_borderline_distance(
     bike_average_speed: float,
-    walk_average_speed: float,
+    walk_speed: float,
     bike_lock_time: int,
     bike_walk_distance: float
 ) -> float:
@@ -172,7 +172,7 @@ def get_borderline_distance(
 
     Args:
         bike_average_speed: Average cycling speed in km/h
-        walk_average_speed: Average walking speed in km/h
+        walk_speed: Average walking speed in km/h
         bike_lock_time: Required time to lock/unlock bike in minutes
         bike_walk_distance: Additional distance for walking to/from bike station in km
     
@@ -182,12 +182,12 @@ def get_borderline_distance(
     print("function: get_borderline_distance")
 
     # Prevent computing when cycling speed is slower than walking speed
-    if bike_average_speed <= walk_average_speed:
+    if bike_average_speed <= walk_speed:
         return float("inf")
     
     bike_lock_time_hours = bike_lock_time / 60
 
-    distance = bike_walk_distance + ((bike_lock_time_hours) / (1 / walk_average_speed - 1 / bike_average_speed))
+    distance = bike_walk_distance + ((bike_lock_time_hours) / (1 / walk_speed - 1 / bike_average_speed))
     
     return distance
 

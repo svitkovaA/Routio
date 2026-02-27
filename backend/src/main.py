@@ -9,10 +9,15 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from api.geocoding import geocode
+from api.departures import departures
+from api.route import route
+from service.gtfs_rt_service import GTFSRTService
+from service.gbfs_service import GBFSService
+from service.lissy_service import LissyService
+from service.gtfs_service import GTFSService
 from workers import database_worker, gbfs_worker, gtfs_worker, lissy_worker, vehicle_position_worker
-from services.public_transport_service.lissy import cache_lissy
-from services.gtfs_gbfs_service import load_gbfs_data, load_gtfs_data
-from routes import geocode, route, status, departures, vehicle_positions
+from api import status, vehicle_positions
 import asyncio
 import logging
 from database.db import init_pool, close_pool
@@ -26,23 +31,32 @@ async def lifespan(app: FastAPI):
     # Postgres database connection
     await init_pool()
 
+    # TODO run start up tasks with asyncio.gather
+
     # Load General Transit Feed Specification data (public transport schedules for IDS JMK)
     try:
-        load_gtfs_data()
+        # TODO safe create of all cache object
+        await GTFSService.get_instance().reload()
     except Exception:
         logging.exception("Initial load_gtfs_data failed")
 
     # Load General Bike Feed Specification data (bikesharing stations capacities)
     try:
-        load_gbfs_data()
+        await GBFSService.get_instance().reload()
     except Exception:
         logging.exception("Initial load_gbfs_data failed")
 
     # Cache data from Lissy (delays and route shapes)
     try:
-        await cache_lissy()
+        await LissyService.get_instance().reload()
     except Exception:
         logging.exception("Initial cache_lissy failed")
+
+    # Vehicle positions
+    try:
+        await GTFSRTService.get_instance().reload()
+    except Exception:
+        logging.exception("Initial gtfs_rt_service failed")
 
     # Start background workers for data updates
     tasks = [

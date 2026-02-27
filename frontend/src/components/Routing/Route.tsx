@@ -84,7 +84,7 @@ export function useRoute() {
             // Prepare leg preference configuration
             let legPreferencesArray = [];
             const firstPref = legPreferences[0].mode;
-            let equalPrefs = firstPref !== "transit,bicycle,walk";
+            let equalPrefs = firstPref !== "multimodal";
             for (let i = 0; i < legPreferences.length; i++) {
                 if (legPreferences[i].mode !== firstPref) {
                     equalPrefs = false;
@@ -100,7 +100,7 @@ export function useRoute() {
             if (!firstRouting && equalPrefs) {
                 legPreferencesArray = Array.from(
                     { length: legPreferences.length },
-                    () => ({ mode: "transit,bicycle,walk", wait: 0 })
+                    () => ({ mode: "multimodal", wait: 0 })
                 );
                 equalPrefs = false;
             }
@@ -123,7 +123,7 @@ export function useRoute() {
             abortRef.current = controller;
 
             // Determine routing mode string expected by backend
-            const mode: Mode = resultIndex === 0 ? "transit,bicycle,walk" : 
+            const mode: Mode = resultIndex === 0 ? "multimodal" : 
                 resultIndex === 1 ? "walk_transit" :
                 resultIndex === 2 ? "bicycle" : "foot";
 
@@ -150,7 +150,7 @@ export function useRoute() {
                         max_bikesharing_distance: maxBikesharingDistance,
                         bikesharing_average_speed: bikesharingAverageSpeed,
                         max_walk_distance: maxWalkDistance,
-                        walk_average_speed: walkAverageSpeed,
+                        walk_speed: walkAverageSpeed,
                         bikesharing_lock_time: bikesharingLockTime,
                         bike_lock_time: bikeLockTime,
                         route_preference: preference

@@ -42,7 +42,7 @@ export type StoredWaypoint = {
 /**
  * Supported transportation modes
  */
-export type Mode = "foot" | "bicycle" | "walk_transit" | "transit,bicycle,walk";
+export type Mode = "foot" | "bicycle" | "walk_transit" | "multimodal";
 
 /**
  * Represents user preference configuration for single leg

@@ -186,7 +186,7 @@ def filter_sort_trip_patterns(trip_patterns: List[TripPattern], data: RouteData)
     max_bike_distance = data.max_bike_distance if data.use_own_bike else data.max_bikesharing_distance
 
     # The foot segment set in user preferences in multimodal routing or foot selected for unimodal routing
-    foot_in_pref = (any(lp.mode == "foot" for lp in data.leg_preferences) and data.mode == "transit,bicycle,walk") or data.mode == "foot"
+    foot_in_pref = (any(lp.mode == "foot" for lp in data.leg_preferences) and data.mode == "multimodal") or data.mode == "foot"
     
     # Filter trip patterns based on the user preferences
     for pattern in trip_patterns:

@@ -1,13 +1,19 @@
 from __future__ import annotations
-from typing import Dict, List, Any, Literal
+from typing import Dict, List, Any, Literal, Tuple
 from datetime import datetime
 from pydantic import BaseModel
+
+# Transport modes for a single leg
+TIME_INDEPENDENT_MODES = ["bicycle", "foot"]
+
+# Transport modes for a single leg
+TIME_DEPENDENT_MODES = ["bus", "tram", "rail", "trolleybus", "metro", "water"]
 
 # Represents the transport mode of a single leg
 Mode = Literal["bus", "tram", "rail", "trolleybus", "metro", "water", "foot", "bicycle", "wait", "transfer"]
 
 # Represents high level routing configuration for routing engine
-RoutingMode = Literal["bicycle", "foot", "walk_transit", "walk_transit_bicycle", "bicycle_walk_transit", "transit,bicycle,walk"]
+RoutingMode = Literal["bicycle", "foot", "walk_transit", "public_bicycle", "bicycle_public", "multimodal"]
 
 class Quay(BaseModel):
     """ Represents a public transport stop """
@@ -80,9 +86,9 @@ class BikeStationInfo(PlaceBase):
 class Leg(BaseModel):
     """ Leg containing public transport, bicycle or visualization data """
     mode: Mode                                  # Transport mode
-    aimedStartTime: datetime                    # Scheduled start time
-    aimedEndTime: datetime                      # Scheduled end time
-    distance: float                             # Distance in meters
+    aimedStartTime: datetime = datetime.min     # Scheduled start time
+    aimedEndTime: datetime = datetime.min       # Scheduled end time
+    distance: float = 0                         # Distance in meters
     duration: int                               # Duration in seconds
     pointsOnLink: PointOnLink                   # Route geography
     fromPlace: Place | None = None              # Starting location of the leg
@@ -103,7 +109,7 @@ class Leg(BaseModel):
 class TripPattern(BaseModel):
     """ Represents a complete trip consisting of multiple legs """
     legs: List[Leg]                             # List of legs in trip pattern
-    aimedEndTime: datetime                      # Scheduled end time of the trip pattern
+    aimedEndTime: datetime = datetime.min       # Scheduled end time of the trip pattern
     modes: List[RoutingMode] = []               # Modes used per segment
     polyInfo: List[Any] = []                    # Polyline info
     totalDuration: float | None = None          # Total duration
@@ -119,9 +125,22 @@ class TripPattern(BaseModel):
 
 class WaypointGroup(BaseModel):
     """ Grouping of consecutive waypoints that share the same transport mode """
-    group: List[str]                            # Ordered list of waypoint coordinates
+    group: List[str]                            # Ordered list of waypoint coordinates  TODO rename to waypoints
     mode: RoutingMode                           # Assigned transport mode for this waypoint group
-    tripPatterns: List[TripPattern] = []        # Precomputed routing results for this group
+    tripPatterns: List[TripPattern] = []        # Precomputed routing results for this group    TODO possibly not used
+
+    def get_key(
+        self,
+        timestamp: datetime
+    ) -> Tuple[Tuple[str, ...], RoutingMode, datetime | None]:
+        # Key for time independent modes
+        if self.mode in TIME_INDEPENDENT_MODES:
+            return (tuple(self.group), self.mode, None)
+
+        # Key for time dependent modes
+        time_key = timestamp.replace(second=0, microsecond=0)
+        return (tuple(self.group), self.mode, time_key)
+            
 
 class OtherDeparture(BaseModel):
     """ Used for processing GTFS data when searching for other departure options """

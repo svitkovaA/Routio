@@ -13,13 +13,15 @@ from typing import List, Literal
 from fastapi import APIRouter, HTTPException
 from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
+from api.route.station_changer import StationChanger
+from routing_engine.routing_engine import RoutingEngine
 from config.external import OTP_URL
 from models.route import BikeStationInfo, Leg, Mode, PointOnLink, Results, RoutingMode, TripPattern
 from models.route_data import LegPreferences, RouteData
 from models.bike_station_data import BikeStationData
 from services.route import route
 from services.otp_service import walk_bicycle_route
-from utils.planner_utils import at_waypoint, create_waypoint_groups, filter_sort_trip_patterns
+from utils.planner_utils import at_waypoint, create_waypoint_groups
 from utils.legs_processing import justify_time, process_legs
 
 router = APIRouter()
@@ -38,6 +40,13 @@ async def change_bike_station(data: BikeStationData):
         bike station applied
     """
     print("endpoint: change_bike_station")
+
+    transport = AIOHTTPTransport(url=OTP_URL)
+    async with Client(transport=transport) as session:
+        station_changer = StationChanger(data, session)
+        return await station_changer.change_bike_station()
+
+    # TODO unused
     route_data = data.route_data
     legs = data.original_legs
     new_legs: List[Leg] = []
@@ -172,7 +181,7 @@ async def change_bike_station(data: BikeStationData):
                         f"{place.latitude}, {place.longitude}", 
                         time_to_depart, 
                         "foot", 
-                        route_data.walk_average_speed, 
+                        route_data.walk_speed, 
                         session
                     )
                     new_legs[:0] = walk_pattern[0].legs
@@ -180,9 +189,9 @@ async def change_bike_station(data: BikeStationData):
                     waypoint_group.append(f"{fromPlace.latitude} ,{fromPlace.longitude}")
                     routing_modes.append("walk_transit")
                 
-                # Remove walk_transit_bicycle from routing modes
+                # Remove public_bicycle from routing modes
                 routing_modes: List[RoutingMode] = [
-                    mode if mode != "walk_transit_bicycle" else "walk_transit" 
+                    mode if mode != "public_bicycle" else "walk_transit" 
                     for mode in routing_modes
                 ]
                 
@@ -260,7 +269,7 @@ async def change_bike_station(data: BikeStationData):
                     f"{toPlace.latitude}, {toPlace.longitude}", 
                     time_to_depart, 
                     "foot", 
-                    route_data.walk_average_speed, 
+                    route_data.walk_speed, 
                     session
                 )
                 
@@ -361,8 +370,8 @@ async def change_bike_station(data: BikeStationData):
                         waypoint_group.append(f"{place.latitude}, {place.longitude}")
                         routing_modes.append("walk_transit")
                     
-                    # Replace walk_transit_bicycle for walk_transit in modes
-                    routing_modes = [mode if mode != "walk_transit_bicycle" else "walk_transit" for mode in routing_modes]
+                    # Replace public_bicycle for walk_transit in modes
+                    routing_modes = [mode if mode != "public_bicycle" else "walk_transit" for mode in routing_modes]
                     
                     # Create new waypoint groups and calculated necessary route
                     waypoint_groups, _ = create_waypoint_groups(
@@ -435,7 +444,7 @@ async def change_bike_station(data: BikeStationData):
                     f"{fromPlace.latitude} ,{fromPlace.longitude}",
                     time_to_depart, 
                     "foot", 
-                    route_data.walk_average_speed, 
+                    route_data.walk_speed, 
                     session
                 )
                 
@@ -542,8 +551,8 @@ async def change_bike_station(data: BikeStationData):
                         waypoint_group.insert(0, f"{place.latitude}, {place.longitude}")
                         routing_modes.insert(0, "walk_transit")
                     
-                    # Remove bicycle_walk_transit from modes
-                    routing_modes = [mode if mode != "bicycle_walk_transit" else "walk_transit" for mode in routing_modes]
+                    # Remove bicycle_public from modes
+                    routing_modes = [mode if mode != "bicycle_public" else "walk_transit" for mode in routing_modes]
                     
                     # Create new waypoint groups and calculated necessary route
                     waypoint_groups, _ = create_waypoint_groups(
@@ -664,7 +673,7 @@ async def change_bike_station(data: BikeStationData):
                             f"{place.latitude}, {place.longitude}", 
                             time_to_depart, 
                             "foot", 
-                            route_data.walk_average_speed, 
+                            route_data.walk_speed, 
                             session
                         )
                         new_legs.extend(walk_pattern[0].legs)
@@ -673,8 +682,8 @@ async def change_bike_station(data: BikeStationData):
                         waypoint_group.insert(0, f"{new_legs[-1].bikeStationInfo.latitude}, {new_legs[-1].bikeStationInfo.longitude}")
                         routing_modes.insert(0, "walk_transit")
 
-                # Remove bicycle_walk_transit from modes
-                routing_modes = [mode if mode != "bicycle_walk_transit" else "walk_transit" for mode in routing_modes]
+                # Remove bicycle_public from modes
+                routing_modes = [mode if mode != "bicycle_public" else "walk_transit" for mode in routing_modes]
                 
                 # Adjust times in legs to eliminate gaps
                 justify_time(
@@ -739,40 +748,17 @@ async def get_route(data: RouteData):
     # Start measuring request processing time
     start = t.perf_counter()
 
-    # Initialize response structure
-    results = Results(
-        tripPatterns=[],
-        active=True
-    )
-
-    # Combine selected date and time into ISO-formatted datetime
-    time_to_depart = datetime.combine(data.date, data.time)
-
-    # Determine whether multimodal routing is enabled
-    multimodal = data.mode == "transit,bicycle,walk"
-    
-    # Split waypoints into groups based on transport mode preferences
-    waypoint_groups, bike_segment_found = create_waypoint_groups(data.waypoints, data.leg_preferences, multimodal, data.mode)
-    
     # Query OpenTripPlanner
     transport = AIOHTTPTransport(url=OTP_URL)
     async with Client(transport=transport, execute_timeout=20) as session:
-        results.tripPatterns = await route(
-            waypoint_groups, 
-            time_to_depart, 
-            session, multimodal, 
-            data, 
-            bike_segment_found, 
-            True
-        )
-    
-    # Post-processing of the returned trip patterns
-    for pattern in results.tripPatterns:
-        process_legs(pattern)
+        engine = RoutingEngine(data, session)
 
-    # Filter and sort trip patterns based on the user preferences
-    results.tripPatterns = filter_sort_trip_patterns(results.tripPatterns, data)
-    
+        # Initialize response structure
+        results = Results(
+            tripPatterns=await engine.plan_route(),
+            active=True
+        )
+
     # Log request processing duration
     end = t.perf_counter()
     print(f"Duration: {end - start:.4f} sec")
