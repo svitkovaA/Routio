@@ -45,7 +45,8 @@ export function useRoute() {
         maxWalkDistance,
         walkAverageSpeed,
         bikesharingLockTime,
-        bikeLockTime
+        bikeLockTime,
+        useHistoricalDelays
     } = useSettings();
 
     // Results context
@@ -153,7 +154,8 @@ export function useRoute() {
                         walk_speed: walkAverageSpeed,
                         bikesharing_lock_time: bikesharingLockTime,
                         bike_lock_time: bikeLockTime,
-                        route_preference: preference
+                        route_preference: preference,
+                        use_historical_delays: useHistoricalDelays
                     })
                 });
 
@@ -197,7 +199,7 @@ export function useRoute() {
     }, [waypoints, legPreferences, arriveBy, useOwnBike, preference, date, time, maxTransfers, selectedModes,
         maxBikeDistance,bikeAverageSpeed, maxBikesharingDistance, bikesharingAverageSpeed, maxWalkDistance, 
         walkAverageSpeed, bikesharingLockTime, bikeLockTime, results, abortRef, setLoading, setResultActiveIndex,
-        setResults, setShowResults, showNotification
+        setResults, setShowResults, showNotification, useHistoricalDelays
     ]);
     return route;
 }

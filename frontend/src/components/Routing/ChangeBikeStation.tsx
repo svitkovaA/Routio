@@ -33,7 +33,8 @@ export function useChangeBikeStation() {
         maxWalkDistance,
         walkAverageSpeed,
         bikesharingLockTime,
-        bikeLockTime
+        bikeLockTime,
+        useHistoricalDelays
     } = useSettings();
 
     // Result context
@@ -83,7 +84,8 @@ export function useChangeBikeStation() {
             walk_speed: walkAverageSpeed,
             bikesharing_lock_time: bikesharingLockTime,
             bike_lock_time: bikeLockTime,
-            route_preference: preference
+            route_preference: preference,
+            use_historical_delays: useHistoricalDelays
         }
 
         // Send request to backend for route recalculation

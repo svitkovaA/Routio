@@ -42,9 +42,11 @@ function ShowRoute() {
         // Decode polyline coordinates for each leg
         const polyInfoTemp = legs.map(leg => {
             const coords = Array.isArray(leg.pointsOnLink.points) ? leg.pointsOnLink.points.flatMap(p => polyline.decode(p)) : polyline.decode(leg.pointsOnLink.points);
+            const inactiveCoords = leg.pointsOnLink.inactivePoints.map(p => polyline.decode(p));
             
             return {
                 coords: coords,
+                inactiveCoords: inactiveCoords,
                 mode: leg.mode || 'unknown',
                 color: leg.color || '#000000',
                 pathOptions: leg.mode === "foot" || leg.mode === "bicycle" ? {dashArray: "5px, 5px"} : {}
@@ -78,12 +80,38 @@ function ShowRoute() {
     return (
         <>
             {polyInfo.map((info, index) => (
-                <Polyline
-                    key={`${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${forceUpdate}`}
-                    positions={info.coords}
-                    color={info.color}
-                    pathOptions={info.pathOptions}
-                />
+                <>
+                    <Polyline
+                        key={`outline-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${forceUpdate}`}
+                        positions={info.coords}
+                        color="rgba(255,255,255,0.7)"
+                        pathOptions={{
+                            ...info.pathOptions,
+                            weight: info.pathOptions?.dashArray === "5px, 5px" ? 2 : 6
+                        }}
+                    />
+                    <Polyline
+                        key={`main-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${forceUpdate}`}
+                        positions={info.coords}
+                        color={info.color}
+                        pathOptions={{
+                            ...info.pathOptions,
+                            weight: 4
+                        }}
+                    />
+                    {info.inactiveCoords.map((c, i) => (
+                         <Polyline
+                            key={`${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${forceUpdate}-inactive-${i}`}
+                            positions={c}
+                            color={info.color}
+                            pathOptions={{
+                                ...info.pathOptions,
+                                opacity: 0.6,
+                                weight: 2,
+                            }}
+                        />
+                    ))}
+                </>
             ))}
         </>
     );

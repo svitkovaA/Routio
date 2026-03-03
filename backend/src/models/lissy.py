@@ -1,3 +1,9 @@
+"""
+file: lissy.py
+
+Defines data models for Lissy delays and shapes API integration.
+"""
+
 from typing import Dict, List, Tuple
 from pydantic import BaseModel
 
@@ -8,9 +14,8 @@ class LissyTrips(BaseModel):
 
 class LissyDelayTrips(BaseModel):
     """ Represents delay information for trips grouped by shape """
-    shape_id: str                               # Identifier of the route shape
+    shape_id: int                               # Identifier of the route shape
     stops: str                                  # Stop sequence
-    stopOrder: List[str] = []                   # Ordered list of stop identifiers
     trips: List[LissyTrips]                     # List of trips associated with this shape
 
 class LissyAvailableRoute(BaseModel):
@@ -18,15 +23,15 @@ class LissyAvailableRoute(BaseModel):
     route_short_name: str                       # Short name, number of the route
     id: int                                     # Route identifier
 
-class LissyRouteData(BaseModel):
+class LissyDelayRoutes(BaseModel):
     """ Represents processed route data grouped by shape """
-    shape_id: str                               # Identifier of the route shape
-    stopOrder: List[str]                        # Ordered list of stop identifiers
+    shape_id: int                               # Identifier of the route shape
     trips_by_time: Dict[str, int] = {}          # Maps departure time to trip id
 
 class LissyShapeStop(BaseModel):
     """ Represents a stop belonging to a specific shape """
     stop_name: str                              # Name of the stop
+    zone_id: int                                # Number of zone id
 
 class LissyShape(BaseModel):
     """ Represents geometric shape data of a route """
@@ -38,7 +43,7 @@ class LissyShapeTrips(BaseModel):
     shape_id: int                               # Identifier of the route shape
     stops: str                                  # Stop sequence
 
-class LissyShapes(BaseModel):
+class LissyShapesRoutes(BaseModel):
     """ Represents shape definitions grouped by route """
     route_short_name: str                       # Short name, number of the route
     route_color: str                            # Hexadecimal color code of the route

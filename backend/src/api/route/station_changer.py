@@ -1,3 +1,10 @@
+"""
+file: station_changer.py
+
+Contains logic for recalculating a trip pattern after a user changes the
+selected bicycle station or bike rack.
+"""
+
 from copy import deepcopy
 from datetime import datetime
 from typing import List, Literal, Tuple
@@ -11,34 +18,77 @@ from models.route_data import LegPreferences
 from shared.pattern_utils import PatternUtils
 from shared.geo_math import GeoMath
 from shared.leg_utils import LegUtils
-from models.route import TIME_INDEPENDENT_MODES, BikeStationInfo, Leg, Mode, PointOnLink, RoutingMode, TripPattern
+from models.route import (
+    TIME_INDEPENDENT_MODES,
+    BikeStationInfo,
+    Leg,
+    Mode,
+    PointOnLink,
+    RoutingMode,
+    TripPattern
+)
 from routing_engine.routing_context import RoutingContext
 from models.bike_station_data import BikeStationData
 
 class StationChanger():
+    """
+    Handles recalculation of trip pattern after bicycle station change.
+    """
     def __init__(self, data: BikeStationData,  session: AsyncClientSession):
+        """
+        Initializes StationChanger with routing context and OTP clients.
+
+        Args:
+            data: Request payload
+            session: GraphQL session used for OTP queries
+        """
+        # Routing configuration context
         self.__routing_ctx = RoutingContext(data.route_data, session)
+
+        # Internal station change context
         self.__ctx = StationChangerContext(data)
+
+        # Bicycle OTP client
         self.__otp_bicycle_client = OTPBicycle(self.__routing_ctx)
+
+        # Foot OTP client
         self.__otp_foot_client = OTPFoot(self.__routing_ctx)
 
     async def change_bike_station(self) -> TripPattern:
+        """
+        Rebuilds trip pattern after bike station selection change.
+
+        Returns:
+            Rebuild trip pattern with recalculated legs
+        """
+        # Routing backwards in arrival mode
         if self.__routing_ctx.data.arrive_by:
             return await self.__rebuild_pattern_arrival()
+        
+        # Routing forward in departure mode
         else:
             return await self.__rebuild_pattern_departure()
 
     async def __rebuild_pattern_departure(self) -> TripPattern:
+        """
+        Rebuilds trip pattern after bike station change
+
+        Returns:
+            Updated TripPattern with recalculated prefix and timing.
+        """
         legs = self.__ctx.data.original_legs
 
+        # Identify where route needs rebuilding
         leg_index, waypoint_count = self.__find_affected_segment_departure()
 
-        # Preserve unaffected prefix of the original route
+        # Preserve unaffected suffix of the original route
         base_legs = deepcopy(legs[:leg_index+1])
         leg_index = len(base_legs)
 
+        # Build updated station prefix
         new_legs = await self.__build_station_prefix(leg_index)
 
+        # Prepare routing data
         if self.__ctx.data.origin_bike_station:
             waypoint_group, routing_modes = await self.__prepare_waypoint_connection_origin_departure(
                 new_legs,
@@ -54,14 +104,17 @@ class StationChanger():
 
         normalized_routing_modes = self.__normalize_modes(routing_modes)
 
+        # Adjust times in legs to eliminate gaps
         self.__justify_segment(new_legs)
 
+        # Recalculate affected part using routing engine
         rerouted_prefix_pattern = await self.__route_changed_part(
             normalized_routing_modes,
             waypoint_group,
             new_legs[-1].aimedEndTime
         )
 
+        # Merge preserved base with rebuilt prefix
         return self.__merge_with_base_departure(
             rerouted_prefix_pattern,
             new_legs,
@@ -69,16 +122,25 @@ class StationChanger():
         )
 
     async def __rebuild_pattern_arrival(self) -> TripPattern:
+        """
+        Rebuilds trip pattern after bike station change
+
+        Returns:
+            Updated TripPattern with recalculated suffix and timing.
+        """
         legs = self.__ctx.data.original_legs
 
+         # Identify where route needs rebuilding
         leg_index, waypoint_count = self.__find_affected_segment_arrival()
 
         # Preserve unaffected suffix of the original route
         base_legs = deepcopy(legs[leg_index + 1:])
         leg_index = len(legs) - len(base_legs) - 1
 
+        # Build updated station suffix
         new_legs = await self.__build_station_suffix(leg_index)
 
+         # Prepare routing data
         if self.__ctx.data.origin_bike_station:
             waypoint_group, routing_modes = await self.__prepare_waypoint_connection_origin_arrival(
                 new_legs,
@@ -94,14 +156,17 @@ class StationChanger():
 
         normalized_routing_modes = self.__normalize_modes(routing_modes)
 
+        # Adjust times in legs to eliminate gaps
         self.__justify_segment(new_legs)
 
+        # Recalculate affected part using routing engine
         rerouted_prefix_pattern = await self.__route_changed_part(
             normalized_routing_modes,
             waypoint_group,
             new_legs[0].aimedStartTime
         )
 
+        # Merge preserved base with rebuilt prefix
         return self.__merge_with_base_arrival(
             rerouted_prefix_pattern,
             new_legs,
@@ -110,28 +175,42 @@ class StationChanger():
 
     def __merge_with_base_arrival(
         self,
-        routed_prefix_pattern: TripPattern | None,
+        routed_suffix_pattern: TripPattern | None,
         new_legs: List[Leg],
         base_legs: List[Leg]
     ) -> TripPattern:
+        """
+        Merges rerouted suffix with new legs and preserved base legs.
+
+        Args:
+            routed_suffix_pattern: Result of rerouted suffix
+            new_legs: Newly constructed legs caused by bike station change
+            base_legs: Unaffected prefix of original trip pattern
+
+        Returns:
+            Newly constructed TripPattern with merged legs and updated routing modes
+        """
+        # Construct merged leg and mode sequence
         new_pattern = TripPattern(
             legs=(
                 (
-                   routed_prefix_pattern.legs
-                   if routed_prefix_pattern
+                   routed_suffix_pattern.legs
+                   if routed_suffix_pattern
                    else [] 
                 ) + new_legs + base_legs
             ),
             modes=(
                 (
-                    routed_prefix_pattern.modes
-                    if routed_prefix_pattern
+                    routed_suffix_pattern.modes
+                    if routed_suffix_pattern
                     else []
                 ) + self.__ctx.data.modes
             )
         )
+        # Set final aimed end time based on last leg
         new_pattern.aimedEndTime = new_pattern.legs[-1].aimedEndTime
 
+        # Legs post-processing
         LegUtils.process_legs(new_pattern)
 
         return new_pattern
@@ -142,6 +221,18 @@ class StationChanger():
         new_legs: List[Leg],
         base_legs: List[Leg]
     ) -> TripPattern:
+        """
+        Merges rerouted prefix with new legs and preserved base legs.
+
+        Args:
+            routed_prefix_pattern: Result of rerouted prefix
+            new_legs: Newly constructed legs caused by bike station change
+            base_legs: Unaffected suffix of original trip pattern
+
+        Returns:
+            Newly constructed TripPattern with merged legs and updated routing modes
+        """
+        # Construct merged leg and mode sequence
         new_pattern = TripPattern(
             legs=(
                 base_legs + new_legs + (
@@ -159,8 +250,10 @@ class StationChanger():
             )
         )
 
+        # Set final aimed end time based on last leg
         new_pattern.aimedEndTime = new_pattern.legs[-1].aimedEndTime
 
+        # Legs post-processing
         LegUtils.process_legs(new_pattern)
 
         return new_pattern
@@ -169,6 +262,13 @@ class StationChanger():
         self,
         new_legs: List[Leg]
     ) -> None:
+        """
+        Adjusts timing of rebuilt segment.
+
+        Args:
+            new_legs: List of legs forming modified segment
+        """
+        # Normalize timing of segment based on time cursor and routing direction
         PatternUtils.justify_time(
             TripPattern(legs=new_legs),
             self.__ctx.time_cursor,
@@ -181,8 +281,21 @@ class StationChanger():
         leg_index: int,
         waypoint_count: int
     ) -> Tuple[List[str], List[RoutingMode]]:
+        """
+        Reconnects modified destination station
+        to original waypoint structure.
+
+        Args:
+            new_legs: Newly built legs for modified segment
+            leg_index: Index where rebuild begins
+            waypoint_count: Number of waypoints affected by modification
+
+        Returns:
+            Tuple (waypoints to be rerouted, routing modes for affected segment)
+        """
         legs = self.__ctx.data.original_legs
 
+        # Reconnect modified route to original waypoints
         reconnect_leg_index = leg_index - 2
         from_place = legs[reconnect_leg_index].fromPlace
         to_place = self.__ctx.place
@@ -193,6 +306,7 @@ class StationChanger():
                 detail = "FromPlace missing in data"
             )
 
+        # Compute bicycle segment from previous waypoint to new destination station
         bike_pattern = await self.__otp_bicycle_client.execute(
             (from_place.latitude, from_place.longitude),
             (to_place.latitude, to_place.longitude),
@@ -210,6 +324,7 @@ class StationChanger():
         # Skip the bicycle leg
         reconnect_leg_index -= 1
 
+        # Reinsert remaining bicycle legs until foot segment is reached
         while reconnect_leg_index > 0 and legs[reconnect_leg_index].mode != "foot":
             # Adjusts waypoint count
             if legs[reconnect_leg_index].mode == "bicycle":
@@ -226,9 +341,12 @@ class StationChanger():
                 detail = "FromPlace missing in data"
             )
 
+        # Determine affected waypoints
         waypoint_group = self.__routing_ctx.data.waypoints[:waypoint_count]
+        # Get routing modes
         routing_modes = self.__ctx.data.modes[:waypoint_count - 1]
 
+        # Determine if waypoint was reached
         if reconnect_leg_index > 0:
             found_waypoint = self.__at_waypoint(
                 from_place.latitude,
@@ -236,8 +354,10 @@ class StationChanger():
                 waypoint_group[-1]
             )
         
+        # Append leg if it leads to waypoint
         if found_waypoint:
             new_legs.insert(0, deepcopy(legs[reconnect_leg_index]))
+        # Add artificial waypoint when waypoint was not reached
         else:
             to_place = legs[reconnect_leg_index].toPlace
             if not to_place:
@@ -256,8 +376,21 @@ class StationChanger():
         leg_index: int,
         waypoint_count: int
     ) -> Tuple[List[str], List[RoutingMode]]:
-        reconnect_leg_index = leg_index + 2
+        """
+        Reconnects modified destination station.
+
+        Args:
+            new_legs: Newly built legs
+            leg_index: Index where rebuild begins
+            waypoint_count: Number of affected waypoints
+
+        Returns:
+            Tuple (waypoints to be rerouted, routing modes for affected segment)
+        """
         legs = self.__ctx.data.original_legs
+
+        # Reconnect modified route to original waypoints
+        reconnect_leg_index = leg_index + 2
 
         # Get affected waypoints
         waypoint_group = self.__routing_ctx.data.waypoints[-waypoint_count:]
@@ -274,6 +407,7 @@ class StationChanger():
             )
 
         waypoint_found = True
+        # Determine if waypoint was reached
         if waypoint_group and to_place:
             waypoint_found = self.__at_waypoint(
                 to_place.latitude,
@@ -281,6 +415,7 @@ class StationChanger():
                 waypoint_group[0]
             )
 
+        # Compute foot route new bike station to next waypoint
         if waypoint_found:
             walk_patterns = await self.__otp_foot_client.execute(
                 (from_place.latitude, from_place.longitude),
@@ -292,6 +427,7 @@ class StationChanger():
                     detail = "Foot pattern not found"
                 )
             new_legs.extend(walk_patterns[0].legs)
+        # Add artificial waypoint when waypoint was not reached
         else:
             waypoint_group.insert(0, f"{from_place.latitude},{from_place.longitude}")
             routing_modes.insert(0, "walk_transit")
@@ -304,15 +440,29 @@ class StationChanger():
         leg_index: int,
         waypoint_count: int
     ) -> Tuple[List[str], List[RoutingMode]]:
+        """
+        Reconnects modified origin station.
+
+        Args:
+            new_legs: Newly built legs
+            leg_index: Index where rebuild begins
+            waypoint_count: Number of affected waypoints
+
+        Returns:
+            Tuple (waypoints to be rerouted, routing modes for affected segment)
+        """
+        # Get affected waypoints
         waypoint_group = self.__routing_ctx.data.waypoints[:waypoint_count]
+        # Get routing modes
         routing_modes = self.__ctx.data.modes[:waypoint_count - 1]
 
+        # Reconnect modified route to original waypoints
         reconnect_leg_index = leg_index - 2
         from_place = self.__ctx.place
         to_place = self.__ctx.data.original_legs[reconnect_leg_index].fromPlace
 
         waypoint_found = True
-
+        # Determine if waypoint was reached
         if waypoint_group and to_place:
             waypoint_found = self.__at_waypoint(
                 to_place.latitude,
@@ -320,6 +470,7 @@ class StationChanger():
                 waypoint_group[-1]
             )
 
+        # Add walking connection to waypoint from bike station
         if waypoint_found and to_place:
             walk_patterns = await self.__otp_foot_client.execute(
                 (from_place.latitude, from_place.longitude),
@@ -330,7 +481,9 @@ class StationChanger():
                     status_code = 400,
                     detail = "Foot pattern not found"
                 )
+            # Append foot legs before original legs
             new_legs[:0] = walk_patterns[0].legs
+        # Add artificial waypoint when waypoint was not reached
         else:
             waypoint_group.append(f"{from_place.latitude},{from_place.longitude}")
             routing_modes.append("walk_transit")
@@ -343,8 +496,21 @@ class StationChanger():
         leg_index: int,
         waypoint_count: int
     ) -> Tuple[List[str], List[RoutingMode]]:
-        reconnect_leg_index = leg_index + 2
+        """
+        Reconnects modified origin segment.
+
+        Args:
+            new_legs: Newly built legs
+            leg_index: Index where rebuild begins
+            waypoint_count: Number of affected waypoints
+
+        Returns:
+            Tuple (waypoints to be rerouted, routing modes for affected segment)
+        """
         legs = self.__ctx.data.original_legs
+
+        # Reconnect modified route to original waypoints
+        reconnect_leg_index = leg_index + 2
         from_place = self.__ctx.place
         to_place = legs[reconnect_leg_index].toPlace
 
@@ -354,6 +520,7 @@ class StationChanger():
                 detail = "ToPlace missing in data"
             )
     
+        # Compute route from new origin station to next point
         bike_pattern = await self.__otp_bicycle_client.execute(
             (from_place.latitude, from_place.longitude),
             (to_place.latitude, to_place.longitude),
@@ -365,19 +532,22 @@ class StationChanger():
                 detail = "Bike pattern not found"
             )
     
+        # Add new legs
         new_legs.extend(bike_pattern[0].legs)
 
         # Skip the bicycle leg
         reconnect_leg_index += 1
 
+        # Add bicycle remaining legs
         while reconnect_leg_index < len(legs) and legs[reconnect_leg_index].mode != "foot":
+            # Adjusts waypoint count
             if legs[reconnect_leg_index].mode == "bicycle":
                 waypoint_count -= 1
             new_legs.append(deepcopy(legs[reconnect_leg_index]))
             reconnect_leg_index += 1
 
-        # Determine if waypoint was reached
         found_waypoint = True
+        # Determine if waypoint was reached
         if reconnect_leg_index < len(legs):
             to_place = legs[reconnect_leg_index].toPlace
 
@@ -396,15 +566,17 @@ class StationChanger():
         # Get waypoint for which routing is required
         waypoint_group = self.__routing_ctx.data.waypoints[-waypoint_count:]
 
-        # Get routing modes for part of trip to recalculate
+        # Get routing modes
         routing_modes = (
             self.__ctx.data.modes[-waypoint_count + 1:]
             if waypoint_count > 1 
             else []
         )
 
+        # Append leg if it leads to waypoint
         if found_waypoint:
             new_legs.append(deepcopy(legs[reconnect_leg_index]))
+        # Insert artificial waypoint when waypoint was not reached
         else:
             from_place = legs[reconnect_leg_index].fromPlace
 
@@ -423,6 +595,16 @@ class StationChanger():
         self,
         leg_index: int
     ) -> List[Leg]:
+        """
+        Builds suffix segment connecting modified bike station
+        to the next original leg.
+
+        Args:
+            leg_index: Index of leg in original route used for reconnection
+
+        Returns:
+            List of newly computed legs including wait segment.
+        """
         from_place = self.__ctx.place
         to_place = self.__ctx.data.original_legs[leg_index].toPlace
 
@@ -432,12 +614,14 @@ class StationChanger():
                 detail="ToPlace missing in data"
             )
 
+        # Select OTP client
         otp_client = (
             self.__otp_bicycle_client
             if self.__ctx.data.origin_bike_station
             else self.__otp_foot_client
         )
         
+        # Compute route between station and reconnection point
         # Bike pattern if origin station, foot pattern if destination station
         pattern = await otp_client.execute(
             (from_place.latitude, from_place.longitude),
@@ -453,7 +637,7 @@ class StationChanger():
         # Initialize new legs
         new_legs = pattern[0].legs
 
-        # Insert wait leg (bike lock)
+        # Insert wait leg
         new_legs.insert(0, self.__prepare_wait_leg())
 
         return new_legs
@@ -462,6 +646,16 @@ class StationChanger():
         self,
         leg_index: int
     ) -> List[Leg]:
+        """
+        Builds prefix segment connecting previous original leg
+        to modified bike station.
+
+        Args:
+            leg_index: Index of leg in original route used for reconnection
+
+        Returns:
+            List of newly computed legs including wait segment.
+        """
         from_place = self.__ctx.data.original_legs[leg_index].fromPlace
         to_place = self.__ctx.place
 
@@ -471,12 +665,14 @@ class StationChanger():
                 detail="FromPlace missing in data"
             )
         
+        # Select OTP client
         otp_client = (
             self.__otp_foot_client
             if self.__ctx.data.origin_bike_station
             else self.__otp_bicycle_client
         )
 
+        # Compute route between reconnection point and station
         # Foot pattern if origin station, bike pattern if destination station
         pattern = await otp_client.execute(
             (from_place.latitude, from_place.longitude),
@@ -492,12 +688,18 @@ class StationChanger():
         # Initialize new legs
         new_legs = pattern[0].legs
 
-        # Insert wait leg (bike lock)
+        # Append wait leg
         new_legs.append(self.__prepare_wait_leg())
 
         return new_legs
 
     def __prepare_wait_leg(self) -> Leg:
+        """
+        Creates artificial wait leg representing bike lock/unlock time.
+
+        Returns:
+            Leg instance with mode "wait" and bike station metadata.
+        """
         return Leg(
             mode="wait",
             color="black",
@@ -516,16 +718,34 @@ class StationChanger():
         )
     
     def __find_affected_segment_arrival(self) -> Tuple[int, int]:
+        """
+        Identifies affected segment when rebuilding route.
+
+        Returns:
+            Tuple (Index of first leg after affected segment, number of 
+            consecutive time-independent segments)
+        """
+        # Original route legs
         legs = self.__ctx.data.original_legs
+
+        # Mode compressed legs
         compressed_legs = self.__ctx.compressed_legs
 
+        # Start from first leg
         i = 0
+
+        # Start from first compressed leg
         compressed_index = 0
+
+        # Count consecutive independent segments
         waypoint_count = 1
+
+        # Track previous mode
         mode: Mode | Literal[""] = ""
 
-        # Find the first leg affected by the bike station change
+        # Traverse legs forward
         while i < len(legs) - 1 and compressed_index < len(compressed_legs) - 1:
+            # Match compressed segment with original leg
             if legs[i].mode == compressed_legs[compressed_index].mode:
                 compressed_index += 1
             
@@ -539,15 +759,34 @@ class StationChanger():
         return i, waypoint_count
 
     def __find_affected_segment_departure(self) -> Tuple[int, int]:
+        """
+        Identifies affected segment when rebuilding route.
+
+        Returns:
+            Tuple (index of last unaffected leg, number of consecutive time
+            independent segments)
+        """
+        # Original route legs
         legs = self.__ctx.data.original_legs
+
+        # Mode compressed legs
         compressed_legs = self.__ctx.compressed_legs
 
+        # Start from last leg
         i = len(legs) - 1
+
+        # Start from last compressed leg
         compressed_index = len(compressed_legs) - 1
+
+        # Count consecutive independent segments
         waypoint_count = 1
+
+        # Track previous mode
         mode: Mode | Literal[""] = ""
 
+        # Traverse legs backwards
         while i >= 0 and compressed_index >= 0:
+            # Match compressed segment with original leg
             if legs[i].mode == compressed_legs[compressed_index].mode:
                 compressed_index -= 1
             
@@ -566,6 +805,19 @@ class StationChanger():
         waypoint_group: List[str],
         time_cursor: datetime
     ) -> TripPattern | None:
+        """
+        Re-routes modified segment of trip after bike station change.
+
+        Args:
+            routing_modes: Transport modes for affected segment
+            waypoint_group: Waypoints defining affected part to recompute
+            time_cursor: Reference time for rerouting
+
+        Returns:
+            First TripPattern returned by routing engine,
+            or None if no route was found.
+        """
+        # Create modified RouteData for partial rerouting
         new_route_data = self.__routing_ctx.data.model_copy(
             update={
                 "leg_preferences": [
@@ -578,9 +830,13 @@ class StationChanger():
             }
         )
 
+        # Initialize routing engine with updated data
         engine = RoutingEngine(new_route_data, self.__routing_ctx.session)
+
+        # Execute routing
         trip_patterns = await engine.plan_route()
         
+        # Return first pattern if available
         return trip_patterns[0] if trip_patterns else None
 
     @staticmethod
@@ -605,7 +861,20 @@ class StationChanger():
         return distance_m < 50
 
     def __normalize_modes(self, modes: List[RoutingMode]) -> List[RoutingMode]:
+        """
+        Normalizes routing modes for partial rerouting.
+
+        Ensures hybrid modes are converted to walk_transit
+        depending on routing direction.
+
+        Args:
+            modes: Original routing modes for affected segment
+
+        Returns:
+            List of normalized routing modes.
+        """
         if self.__routing_ctx.data.arrive_by:
+            # Remove public_bicycle from routing modes
             return [
                 mode 
                 if mode != "public_bicycle" 
@@ -613,6 +882,7 @@ class StationChanger():
                 for mode in modes
             ]
         else:
+            # Remove bicycle_public from routing modes
             return [
                 mode 
                 if mode != "bicycle_public" 
@@ -620,3 +890,4 @@ class StationChanger():
                 for mode in modes
             ]
        
+# End of file station_changer.py

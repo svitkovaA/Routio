@@ -1,3 +1,10 @@
+"""
+file: mode_router.py
+
+Provides a routing dispatcher that delegates routing logic to concrete
+transport mode routers.
+"""
+
 from datetime import datetime
 from typing import Dict, List
 from routers.router import Router
@@ -11,7 +18,16 @@ from routers.public_transport.public_transport_router import PublicTransportRout
 from routers.public_bicycle.public_bicycle_router import PublicBicycleRouter
 
 class ModeRouter():
+    """
+    Routing dispatcher responsible for delegating route computation.
+    """
     def __init__(self, context: RoutingContext):
+        """
+        Initializes mode router with available transport routers.
+
+        Args:
+            context: Shared RoutingContext used by all mode routers
+        """
         self.__ctx = context
 
         # Initialize available transport routers mapped to routing modes
@@ -28,14 +44,25 @@ class ModeRouter():
         group: WaypointGroup,
         time_cursor: datetime
     ) -> List[TripPattern]:
+        """
+        Routes a single waypoint group using the appropriate transport router.
+
+        Args:
+            group: Waypoint group to be routed
+            time_cursor: Current temporal reference for routing
+
+        Returns:
+            List of TripPattern objects generated for the given group
+        """
         # Return empty result if routing mode is not supported
         if group.mode not in self.__routers:
             return []
 
-        # Delegate routing to the corresponding transport router
+        # Delegate routing to the corresponding transport mode router
         else:
             return await self.__routers[group.mode].route_group(PlanningContext(
-                waypoints=group.group,
+                waypoints=group.waypoints,
                 time_cursor=time_cursor
             ))
-    
+
+# End of file mode_grouper.py

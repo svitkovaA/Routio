@@ -1,3 +1,12 @@
+"""
+file: datasets.py
+
+Defines dataset sources and local storage paths, includes:
+- GTFS and GTFS-RT data
+- OSM extract
+- GBFS station information feeds
+"""
+
 # GTFS-RealTime data used for current vehicle position visualisation
 GTFSRT_URL = "https://kordis-jmk.cz/gtfs/gtfsReal.dat"
 
@@ -13,9 +22,14 @@ OSM_PBF_URL = "https://download.geofabrik.de/europe/czech-republic-latest.osm.pb
 # Local storage path for OSM PBF file
 OSM_PBF_PATH = "../datasets/osm/czech-republic-latest.osm.pbf"
 
+# Local storage path for Lissy historical delays
+LISSY_DELAY_CACHE_PATH = "../datasets/lissy_cache"
+
 # GBFS station information URLS
 STATION_INFORMATION_URLS = {
     "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_te/cs/station_information.json",   # Brno
     "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nh/cs/station_information.json",   # Hodonin
     # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_oc/cs/station_information.json"    # Kahan
 }
+
+# End of file datasets.py

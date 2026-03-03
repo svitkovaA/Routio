@@ -1,11 +1,26 @@
+"""
+file: lissy_ben.py
+
+Defines external API endpoints for Lissy Api:
+- Route shapes
+- Historical delay data
+- Weather data
+
+Also defines API endpoints for Ben API:
+- Historical bicycle station data
+- Shared bicycle stations 
+
+API keys are loaded from environment variables via .env file.
+"""
+
 import os
 from dotenv import load_dotenv
 
 # Lissy API used to render route shapes and retrieve historical delay data
 LISSY_URL = "https://dexter.fit.vutbr.cz/lissy/api/"
 
-# Available shapes endpoint
-SHAPES_URL = LISSY_URL + "shapes/getShapes"
+# Available shapes grouped by route endpoint
+SHAPES_ROUTES_URL = LISSY_URL + "shapes/getShapes"
 
 # Specific shape geometry endpoint
 SHAPE_URL = LISSY_URL + "shapes/getShape"
@@ -39,3 +54,5 @@ load_dotenv()
 
 LISSY_API_KEY = os.environ.get("LISSY_API_KEY", "")
 BEN_API_KEY = os.environ.get("BEN_API_KEY", "")
+
+# End of file lissy_ben.py

@@ -1,3 +1,11 @@
+"""
+file: shared_bicycle_router.py
+
+Shared bicycle router implementation. This file implements routing logic for
+routes using sharing bicycles. It combines station selection, walking segments,
+cycling segments, and station wait times into complete trip patterns.
+"""
+
 import asyncio
 from copy import deepcopy
 from dataclasses import dataclass
@@ -11,6 +19,9 @@ from models.planning_context import PlanningContext
 
 @dataclass
 class TripContext:
+    """
+    Aggregated context required to construct a single sharing bicycle trip variant.
+    """
     context: PlanningContext
     origin_node: BikeStationNode
     origin_index: int
@@ -23,55 +34,78 @@ class TripContext:
     destination_nodes: List[BikeStationNode]
 
 class SharedBicycleRouter(BicycleRouterBase):
+    """
+    Concrete bicycle router for routes using shared bicycle.
+    """
     def __init__(self, context: RoutingContext):
+        """
+        Initializes shared bicycle router.
+
+        Args:
+            context: Global routing context with configuration
+        """
+        # Initialize base router context
         super().__init__(context)
+
+        # Station selector used to rank candidate bicycle stations
         self.__bike_station_selector = BikeStationSelector(self._ctx)
 
     async def route_bike_group(self, context: PlanningContext) -> List[TripPattern]:
+        """
+        Main entry point for shared bicycle routing. Selects station
+        alternatives, computes walking and cycling segments, and builds all
+        valid trip combinations.
+
+        Args:
+            context: Planning context containing waypoints
+
+        Returns:
+            List of valid trip patterns
+        """
         # Determine number of station alternatives to evaluate
         num_of_nodes = 1 if self._ctx.data.mode == "multimodal" else 2
 
         # Retrieve best origin and destination bike stations
         sorted_origin_nodes, sorted_destination_nodes = await asyncio.gather(
             self.__bike_station_selector.select_origin_stations(
-                self._parse_coordinates(context.waypoints[0]),
-                self._parse_coordinates(context.waypoints[1]),
+                self._parse_coordinates(context.waypoints[0]),  # Trip start
+                self._parse_coordinates(context.waypoints[1]),  # Next waypoint
                 context
             ),
             self.__bike_station_selector.select_destination_stations(
-                self._parse_coordinates(context.waypoints[-2]),
-                self._parse_coordinates(context.waypoints[-1]),
+                self._parse_coordinates(context.waypoints[-2]), # Previous waypoint
+                self._parse_coordinates(context.waypoints[-1]), # Trip end
                 context
             )
         )
 
-        # Abort if no station alternatives found
+        # Abort early if no viable station alternatives were found
         if not sorted_origin_nodes or not sorted_destination_nodes:
             return []
 
         # Compute intermediate cycling and walking segments
         intermediate_patterns, walk_to_origin_map, walk_from_destination_map = await asyncio.gather(
-            self._route_bicycle_segments(context.waypoints[1:-1]),
+            self._route_bicycle_segments(context.waypoints[1:-1]),  # Middle cycling segments
             self.__route_walk_to_origin_stations(
-                sorted_origin_nodes[:num_of_nodes],
-                self._parse_coordinates(context.waypoints[0]),
+                sorted_origin_nodes[:num_of_nodes],                 # Candidate origin stations
+                self._parse_coordinates(context.waypoints[0]),      # Trip origin
                 context
             ),
             self.__route_walk_from_destination_stations(
-                sorted_destination_nodes[:num_of_nodes],
-                self._parse_coordinates(context.waypoints[-1]),
+                sorted_destination_nodes[:num_of_nodes],            # Candidate destination stations
+                self._parse_coordinates(context.waypoints[-1]),     # Trip destination
                 context
             ),
         )
         
-        # Flatten intermediate cycling legs
+        # Flatten intermediate cycling patterns into a single leg list
         intermediate_legs = [
             leg 
             for pattern in intermediate_patterns
             for leg in pattern.legs
         ]
         
-        # Build trip combinations for each origin destination station pair
+        # Create asynchronous build tasks for each station combination
         trip_tasks = [
             self.__build_trip(TripContext(
                 context=context,
@@ -104,6 +138,17 @@ class SharedBicycleRouter(BicycleRouterBase):
         origin: Tuple[float, float],
         context: PlanningContext
     ) -> Dict[str, List[TripPattern]]:
+        """
+        Routes walking segments from trip origin to candidate bike stations.
+
+        Args:
+            nodes: List of candidate origin bike station nodes to evaluate
+            origin: Geographic coordinates of the trip start
+            context: Planning context containing
+
+        Returns:
+            Mapping station_id to walking trip patterns
+        """
         # Skip walking segment for public_bicycle mode
         if context.public_bicycle:
             return {}
@@ -111,23 +156,34 @@ class SharedBicycleRouter(BicycleRouterBase):
             # Build walking tasks to origin stations
             tasks = {
                 node.place.id: self._otp_foot_client.execute(
-                    origin,
-                    (node.place.latitude, node.place.longitude)
+                    origin,                                     # Trip origin
+                    (node.place.latitude, node.place.longitude) # Station location
                 )
                 for node in nodes
             }
 
             results = await asyncio.gather(*tasks.values())
 
-            # Map station id to walking patterns
+            # Maps station id to walking patterns
             return dict(zip(tasks.keys(), results))
-        
+
     async def __route_walk_from_destination_stations(
         self,
         nodes: List[BikeStationNode],
         destination: Tuple[float, float],
         context: PlanningContext
     ) -> Dict[str, List[TripPattern]]:
+        """
+        Routes walking segments from candidate bike stations to final destination
+
+        Args:
+            nodes: List of candidate destination bike station nodes to evaluate
+            destination: Geographic coordinates of the trip end
+            context: Planning context containing
+
+        Returns:
+            Mapping station_id to walking trip patterns
+        """
         # Skip walking segment for bicycle_public mode
         if context.bicycle_public:
             return {}
@@ -135,21 +191,30 @@ class SharedBicycleRouter(BicycleRouterBase):
             # Build walking tasks from destination stations
             tasks = {
                 node.place.id: self._otp_foot_client.execute(
-                    (node.place.latitude, node.place.longitude),
-                    destination
+                    (node.place.latitude, node.place.longitude),    # Station location
+                    destination                                     # Final destination
                 )
                 for node in nodes
             }
 
             results = await asyncio.gather(*tasks.values())
 
-            # Map station id to walking patterns
+            # Maps station_id to walking patterns
             return dict(zip(tasks.keys(), results))
 
     async def __build_trip(
         self,
         trip_context: TripContext
     ) -> TripPattern | None:
+        """
+        Builds a single shared bicycle trip variant.
+
+        Args:
+            trip_context: Aggregated context containing
+
+        Returns:
+            Fully computed trip pattern
+        """
         # Prepare station coordinates
         origin_bike_station = self.__station_coordinates_str(trip_context.origin_node)
         destination_bike_station = self.__station_coordinates_str(trip_context.destination_node)
@@ -160,9 +225,11 @@ class SharedBicycleRouter(BicycleRouterBase):
         else:
             # Start with walking leg to origin station
             walk_patterns = trip_context.walk_to_origin_map[trip_context.origin_node.place.id]
+            # Abort if walking route not available
             if not walk_patterns:
                 return None
             
+            # Start trip with walking leg
             trip_pattern = deepcopy(walk_patterns[0])
         
         # Compute first cycling segment
@@ -197,16 +264,18 @@ class SharedBicycleRouter(BicycleRouterBase):
         trip_pattern.legs.extend(result[0].legs)
         trip_pattern.legs.extend(trip_context.intermediate_legs)
 
-        # Compute final cycling segment if needed
+        # Compute final cycling segment if multiple waypoints exist
         if len(trip_context.context.waypoints) > 2:
             result = await self._route_bicycle_segments([
                 trip_context.context.waypoints[-2],
                 destination_bike_station
             ])
 
+            # Abort if final cycling route failed
             if not result:
                 return None
 
+            # Append final cycling legs
             trip_pattern.legs.extend(result[0].legs)
         
         # Validate final cycling leg
@@ -221,11 +290,14 @@ class SharedBicycleRouter(BicycleRouterBase):
             trip_context.destination_nodes
         ))
 
-        # Append final walking segment if needed
+        # Append final walking segment from destination station if needed
         if not trip_context.context.bicycle_public:
             walk_patterns = trip_context.walk_from_destination_map[trip_context.destination_node.place.id]
+
+            # Abort if walking route not available
             if not walk_patterns:
                 return None
+                 
             trip_pattern.legs.extend(walk_patterns[0].legs)
 
         # Adjust trip timing
@@ -235,12 +307,21 @@ class SharedBicycleRouter(BicycleRouterBase):
             self._ctx.data.arrive_by
         )
 
-        # Set final aimed end time
+        # Set final aimed end time on last leg
         trip_pattern.aimedEndTime = trip_pattern.legs[-1].aimedEndTime
+
         return trip_pattern
     
     def __station_coordinates_str(self, node: BikeStationNode) -> str:
-        # Convert station coordinates to string format
+        """
+        Converts bike station coordinates into string format.
+
+        Args:
+            node: Bike station node
+
+        Returns:
+            String formatted as latitude, longitude
+        """
         return f"{node.place.latitude}, {node.place.longitude}"
 
     def __create_station_wait_leg(
@@ -250,6 +331,18 @@ class SharedBicycleRouter(BicycleRouterBase):
         selected_index: int,
         stations: List[BikeStationNode],
     ) -> Leg:
+        """
+        Creates a wait leg representing bike unlock or lock time.
+
+        Args:
+            place: Station location where wait occurs
+            origin: True if unlock, origin station, false if lock, destination
+            selected_index: Index of selected station in ranked list
+            stations: Full list of ranked stations
+
+        Returns:
+            Wait leg object
+        """
         # Create wait leg for bike unlock/lock time
         leg = self.__prepare_wait_leg()
 
@@ -264,6 +357,12 @@ class SharedBicycleRouter(BicycleRouterBase):
         return leg
 
     def __prepare_wait_leg(self):
+        """
+        Prepares base wait leg template with default bike station information.
+
+        Returns:
+            Leg as wait segment with default values
+        """
         return Leg(
             mode="wait",
             color="black",
@@ -280,3 +379,5 @@ class SharedBicycleRouter(BicycleRouterBase):
                 bikeStations=[]
             )
         )
+
+# End of file shared_bicycle_router.py

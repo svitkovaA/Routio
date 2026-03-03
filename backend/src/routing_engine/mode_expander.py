@@ -1,3 +1,9 @@
+"""
+file: mode_expander.py
+
+Implements multimodal expansion logic for routing.
+"""
+
 from itertools import product
 from typing import List
 from models.route_data import LegPreferences
@@ -7,12 +13,25 @@ from routing_engine.waypoint_grouper import WaypointGrouper
 from shared.geo_math import GeoMath
 
 class ModeExpander():
+    """
+    Expands multimodal waypoint groups into concrete routing mode combinations.
+    """
     def __init__(self, context: RoutingContext):
+        """
+        Initializes multimodal expander with routing context.
+
+        Args:
+            context: Shared RoutingContext with route configuration
+        """
         self.__ctx = context
+
+        # Detects if bicycle was explicitly requested in preferences
         self.__contains_bike = any(
             preference.mode == "bicycle" 
             for preference in self.__ctx.data.leg_preferences
         )
+
+        # Precompute borderline distance where bike becomes faster than walking
         self.__borderline_distance = self.__get___borderline_distance()
     
     def expand_multimodal_group(
@@ -21,24 +40,35 @@ class ModeExpander():
         is_first_segment: bool,
         was_bike_used: bool
     ) -> List[List[WaypointGroup]]:
+        """
+        Expands a multimodal group into all possible transport mode combinations
+
+        Args:
+            group: Multimodal waypoint group
+            is_first_segment: Indicates, whether this is the first segment of the route
+            was_bike_used: Indicates, whether bicycle has already been used earlier
+
+        Returns:
+            List of possible grouped waypoint sequences
+        """
         # Stores possible transport modes per segment
         possible_modes: List[List[RoutingMode]] = []
 
-        # Total group distance
-        total_distance = self.__total_distance_km(group.group)
+        # Computes group distance
+        total_distance = self.__total_distance_km(group.waypoints)
 
         i = 0
-        while i + 1 < len(group.group):
-            # Create empty list of modes for current segment
+        while i + 1 < len(group.waypoints):
+            # Initialize possible modes list for this segment
             possible_modes.append([])
             
             # Compute distance between two consecutive waypoints
             distance = GeoMath.haversine_distance_km(
-                *map(float, group.group[i].split(',')), 
-                *map(float, group.group[i + 1].split(','))
+                *map(float, group.waypoints[i].split(',')), 
+                *map(float, group.waypoints[i + 1].split(','))
             )
             
-            # Allow walking if distance within max walk threshold
+            # Allow walking within threshold
             if distance * 1.2 <= self.__ctx.data.max_walk_distance:
                 possible_modes[i].append("foot")
             
@@ -46,18 +76,21 @@ class ModeExpander():
             if distance >= 0.5:
                 possible_modes[i].append("walk_transit")
             
-            # Bicycle allowed only if not already used and own bicycle only on first route segment
-            if not self.__contains_bike and not was_bike_used and (is_first_segment or not self.__ctx.data.use_own_bike):
-
-                # Bicycle segment
+            # Bicycle in general allowed only if not already used and own bicycle allowed only on first route segment
+            if (
+                not self.__contains_bike and
+                not was_bike_used and
+                (is_first_segment or not self.__ctx.data.use_own_bike)
+            ):
+                # Allow direct bicycle segment
                 if self.__borderline_distance <= distance and distance * 1.2 <= self.__ctx.max_bike_distance:
                     possible_modes[i].append("bicycle")
                 
-                # Combination modes bicycle_public and public_bicycle if distance is too long for bicycle
+                # Allow Combination modes bicycle_public and public_bicycle if distance is too long for bicycle
                 if total_distance * 1.2 > self.__ctx.max_bike_distance:
                     possible_modes[i].append("bicycle_public")
 
-                    # Add reverse combination, public_bicycle, just for shared bicycle
+                    # Add reverse combination, public_bicycle, considered just for shared bicycle
                     if not self.__ctx.data.use_own_bike:
                         possible_modes[i].append("public_bicycle")
 
@@ -65,15 +98,15 @@ class ModeExpander():
             is_first_segment = False        
             i += 1
 
-        # Make Cartesian product of all segment mode possibilities
+        # Cartesian product of all segment mode possibilities
         possible_mode_combinations = list(product(*possible_modes))
 
         possible_groups: List[List[WaypointGroup]] = []
 
-        # Convert mode combination into grouped waypoint segments
+        # Convert each mode combination into grouped segments
         for combination in possible_mode_combinations:
             groups = WaypointGrouper.group(
-                group.group,
+                group.waypoints,
                 [
                     LegPreferences(
                         mode=mode,
@@ -83,11 +116,11 @@ class ModeExpander():
                 ]
             )
 
-            # Keep only logically valid group combinations
+            # Keep only logically valid combinations
             if self.__is_valid_group_sequence(groups):
                 possible_groups.append(groups)
         
-        # Reverse conditionally to plan from the end of the route
+        # Reverse group order if planning on arrival
         if self.__ctx.data.arrive_by:
             for i in range(len(possible_groups)):
                 possible_groups[i] = list(reversed(possible_groups[i]))
@@ -95,7 +128,13 @@ class ModeExpander():
         return possible_groups
 
     def __get___borderline_distance(self) -> float:
-        # If bicycle is slower than walking, bicycle is newer faster option
+        """
+        Computes distance where bicycle becomes faster than walking.
+
+        Returns:
+            Distance threshold in kilometers
+        """
+        # If bicycle is slower than walking, never prefer it
         if self.__ctx.bike_speed <= self.__ctx.data.walk_speed:
             return float("inf")
         
@@ -103,7 +142,7 @@ class ModeExpander():
         bike_lock_time_hours = self.__ctx.bike_lock_time / 60
         bike_walk_distance = 0.25
 
-        # # Shared bicycles require locking twice and the distance is usually longer
+        # Shared bicycles require double locking time and walking distance
         if not self.__ctx.data.use_own_bike:
             bike_lock_time_hours *= 2
             bike_walk_distance *= 2
@@ -118,6 +157,12 @@ class ModeExpander():
     
     @staticmethod
     def __is_valid_group_sequence(groups: List[WaypointGroup]) -> bool:
+        """
+        Validates logical correctness of a sequence of waypoint groups.
+
+        Returns:
+            True, if the group sequence is logically valid, false otherwise
+        """
         # Count bicycle segments
         bike_count = sum(
             group.mode in ["bicycle", "bicycle_public", "public_bicycle"] 
@@ -142,7 +187,7 @@ class ModeExpander():
     ) -> bool:
         """
         Check whether a list of waypoint groups contains a given contiguous 
-        subsequence of transport modes
+        subsequence of transport modes.
 
         Args:
             group: List of waypoint groups
@@ -153,6 +198,7 @@ class ModeExpander():
         """
         # Iterates over the list with the sliding window
         for i in range(len(group) - len(mode_sequence) + 1):
+
             # Compare modes of the current window with the target mode sequence
             if [group.mode for group in group[i:i+len(mode_sequence)]] == mode_sequence:
                 return True
@@ -161,6 +207,15 @@ class ModeExpander():
 
     @staticmethod
     def __total_distance_km(waypoints: List[str]) -> float:
+        """
+        Computes total distance between consecutive waypoints.
+
+        Args:
+            waypoints: The waypoints the distance should be computed between
+        
+        Returns:
+            Total distance in kilometers
+        """
         total_distance = 0
         i = 0
 
@@ -173,3 +228,5 @@ class ModeExpander():
             i += 1
         
         return total_distance
+
+# End of file mode_expander.py

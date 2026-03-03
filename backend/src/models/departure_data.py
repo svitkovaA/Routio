@@ -1,3 +1,10 @@
+"""
+file: departure_data.py
+
+Defines request model used when a user selects a different departure option
+for a public transport leg.
+"""
+
 from pydantic import BaseModel
 from models.route import TripPattern
 

@@ -1,11 +1,25 @@
+"""
+file_ service_base.py
+
+This file defines the abstract base class for all application services.
+"""
+
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, ClassVar, Dict, Generic, TypeVar, Type, cast, final
 
+# Type variable representing concrete ServiceBase subclass
 T = TypeVar("T", bound="ServiceBase[Any]")
+
+# Type variable representing internal state type
 S = TypeVar("S")
 
 class ServiceBase(ABC, Generic[S]):
+    """
+    Abstract base class for singleton services.
+    """
+    
+    # Stores singleton instances per concrete service class
     __instances: ClassVar[Dict[Type["ServiceBase[Any]"], object]] = {}
 
     def __init__(self):
@@ -17,22 +31,31 @@ class ServiceBase(ABC, Generic[S]):
     @classmethod
     @final
     def get_instance(cls: Type[T]) -> T:
+        # Return existing singleton instance if available
         instance = ServiceBase.__instances.get(cls)
+
+        # Create an instance
         if instance is None:
             instance = cls()
             ServiceBase.__instances[cls] = instance
+
         return cast(T, instance)
     
     @final
     def _get_state(self) -> S:
+        # Ensure state has been initialized
         if self.__state is None:
             raise RuntimeError(f"{type(self).__name__} state not initialized")
         return self.__state
     
     @final
     def _set_state(self, state: S) -> None:
+        # Atomically replace internal state
         self.__state = state
     
     @abstractmethod
     async def reload(self) -> None:
+        # Reload internal state
         pass
+
+# End of file service_base.py

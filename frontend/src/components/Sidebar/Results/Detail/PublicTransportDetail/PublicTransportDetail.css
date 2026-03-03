@@ -44,8 +44,12 @@
     left: -40px;
 }
 
-.detail-direction, .detail-departures, .detail-stops {
+.detail-direction, .detail-departures, .detail-historical-delays {
     gap: 5px;
+}
+
+.detail-stops {
+    gap: 8px;
 }
 
 .detail-public-code {
@@ -119,6 +123,35 @@
 
 .exclamation > svg {
     font-size: 30px;
+}
+
+.historical-delays-box {
+    padding: 0 20px;
+}
+
+.historical-delay-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid lightgray;
+}
+
+.historical-delay-row:last-child {
+    border-bottom: none;
+}
+
+.historical-date {
+    font-weight: 500;
+}
+
+.historical-delay {
+    text-align: right;
+    color: #098007;
+}
+
+.historical-delay.delayed {
+    color: #d32f2f;
+    font-weight: 600;
 }
 
 /** End of file PublicTransportDetail.css */

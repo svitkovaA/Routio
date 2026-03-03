@@ -1,3 +1,9 @@
+"""
+file: foot_router.py
+
+Implements routing using foot as a mode.
+"""
+
 import asyncio
 from typing import List
 from routers.router import Router
@@ -9,11 +15,31 @@ from routing_engine.routing_context import RoutingContext
 from shared.pattern_utils import PatternUtils
 
 class FootRouter(RouterBase, Router):
+    """
+    Router responsible for routing walk.
+    """
     def __init__(self, context: RoutingContext):
+        """
+        Initializes the foot router.
+
+        Args:
+            context: Global routing context
+        """
         super().__init__(context)
+
+        # OTP client for routing foot
         self.__otp_client = OTPFoot(self._ctx)
 
     async def route_group(self, context: PlanningContext) -> List[TripPattern]:
+        """
+        Routes a sequence of waypoints using walking mode only.
+
+        Args:
+            context: Planning context containing waypoints and time reference
+
+        Returns:
+            List of merged trip patterns
+        """
         # Create OTP routing tasks for each consecutive segment
         tasks = [
             self.__otp_client.execute(
@@ -46,3 +72,5 @@ class FootRouter(RouterBase, Router):
             )
 
         return trip_patterns
+
+# End of file foot_router.py

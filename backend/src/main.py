@@ -2,74 +2,53 @@
 file: main.py
 
 The main application entry point. Initializes the FastAPI application,
-configures CORS and loads required data.
+configures CORS middleware, loads initial data and manages background
+workers lifecycle.
 """
 
-import uvicorn
+import uvicorn, asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
+from api import status
 from api.geocoding import geocode
 from api.departures import departures
 from api.route import route
-from service.gtfs_rt_service import GTFSRTService
-from service.gbfs_service import GBFSService
-from service.lissy_service import LissyService
-from service.gtfs_service import GTFSService
-from workers import database_worker, gbfs_worker, gtfs_worker, lissy_worker, vehicle_position_worker
-from api import status, vehicle_positions
-import asyncio
-import logging
+from api import vehicle_realtime_data
 from database.db import init_pool, close_pool
+from service.workers import (
+    database_worker,
+    gtfs_worker,
+    gbfs_worker, 
+    lissy_worker,
+    load_initial_data,
+    gtfs_rt_worker
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Loads and cache data required by the application during startup
-    and starts background worker
+    Initializes database connection pool, loads required data during
+    application startup and starts background workers.
     """
-    # Postgres database connection
+    # Initialize PostgreSQL connection pool
     await init_pool()
 
-    # TODO run start up tasks with asyncio.gather
-
-    # Load General Transit Feed Specification data (public transport schedules for IDS JMK)
-    try:
-        # TODO safe create of all cache object
-        await GTFSService.get_instance().reload()
-    except Exception:
-        logging.exception("Initial load_gtfs_data failed")
-
-    # Load General Bike Feed Specification data (bikesharing stations capacities)
-    try:
-        await GBFSService.get_instance().reload()
-    except Exception:
-        logging.exception("Initial load_gbfs_data failed")
-
-    # Cache data from Lissy (delays and route shapes)
-    try:
-        await LissyService.get_instance().reload()
-    except Exception:
-        logging.exception("Initial cache_lissy failed")
-
-    # Vehicle positions
-    try:
-        await GTFSRTService.get_instance().reload()
-    except Exception:
-        logging.exception("Initial gtfs_rt_service failed")
+    # Load required datasets before serving requests
+    await load_initial_data()
 
     # Start background workers for data updates
     tasks = [
         asyncio.create_task(gtfs_worker()),
         asyncio.create_task(gbfs_worker()),
-        # asyncio.create_task(database_worker()),
+        asyncio.create_task(database_worker()),
         asyncio.create_task(lissy_worker()),
-        asyncio.create_task(vehicle_position_worker()),
+        asyncio.create_task(gtfs_rt_worker()),
     ]
 
     yield
 
-    # Close postgres database connection
+    # Close database connection
     await close_pool()
 
     # Gracefully shut down background workers
@@ -84,7 +63,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# Enable Cross-Origin Resource Sharing allowing requests from any origin
+# Enable CORS for all origins (for development)
 app.add_middleware(
     CORSMiddleware, 
     allow_origins=["*"], 
@@ -93,12 +72,12 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# Routers to handle different API endpoint groups
+# Register API routers
 app.include_router(geocode.router)
 app.include_router(route.router)
 app.include_router(status.router)
 app.include_router(departures.router)
-app.include_router(vehicle_positions.router)
+app.include_router(vehicle_realtime_data.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", port=8000, host="0.0.0.0", reload=True)

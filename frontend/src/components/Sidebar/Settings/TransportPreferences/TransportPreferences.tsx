@@ -27,7 +27,9 @@ function TransportPreferences() {
         maxTransfers,
         setMaxTransfers,
         selectedModes,
-        setSelectedModes
+        setSelectedModes,
+        useHistoricalDelays,
+        setUseHistoricalDelays
     } = useSettings();
 
     // List of supported public transport modes
@@ -108,6 +110,22 @@ function TransportPreferences() {
                             />
                         ))}
                     </FormGroup>
+                </div>
+                <div className="section transport-delays">
+                    <FormControlLabel
+                        control={
+                            <CustomTooltip title={useHistoricalDelays 
+                                ? t("tooltips.settings.disableHistoricalDelays")
+                                : t("tooltips.settings.enableHistoricalDelays") 
+                            }>
+                                <Checkbox
+                                    checked={useHistoricalDelays}
+                                    onChange={(e) => setUseHistoricalDelays(e.target.checked)}
+                                />
+                            </CustomTooltip>
+                        }
+                        label={t("settingsTab.useHistoricalDelays")}
+                    />
                 </div>
             </div>
         </div>

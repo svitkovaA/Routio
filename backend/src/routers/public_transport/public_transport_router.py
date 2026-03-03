@@ -1,3 +1,9 @@
+"""
+file: public_transport_router.py
+
+Implements the public transport routing layer.
+"""
+
 import asyncio
 from datetime import datetime
 from typing import Dict, List, Tuple
@@ -12,47 +18,56 @@ from otp.public_transport import OTPPublicTransport
 from routing_engine.routing_context import RoutingContext
 from shared.pattern_utils import PatternUtils
 from shared.geo_math import GeoMath
-# from services.public_transport_service.process_public_route import process_public_route
 
 class PublicTransportRouter(RouterBase, Router):
+    """
+    Public transport routing coordinator.
+    """
     def __init__(self, context: RoutingContext):
+        """
+        Initializes the public transport router.
+
+        Args:
+            context: Routing context containing configuration
+        """
         super().__init__(context)
+
+        # OTP public transport client
         self.__otp_client = OTPPublicTransport(self._ctx)
 
         # Register enrichers applied after routing
         self.__enrichers: List[EnricherBase] = [
             GTFSEnricher(),
-            LissyEnricher()
+            LissyEnricher(self._ctx.data.use_historical_delays)
         ]
 
     async def route_group(self, context: PlanningContext) -> List[TripPattern]:
-        # return await process_public_route(
-        #     context.waypoints,
-        #     context.time_cursor,
-        #     self._ctx.data.arrive_by,
-        #     self._ctx.data.max_transfers,
-        #     self._ctx.data.selected_modes,
-        #     self._ctx.data.walk_speed,
-        #     self._ctx.session
-        # )
+        """
+        Routes a sequence of waypoints using public transport.
 
+        Args:
+            context: Planning context with waypoints and time information
+
+        Returns:
+            List of computed and enriched trip patterns
+        """
         trip_patterns: List[TripPattern] = []
         num_of_waypoints = len(context.waypoints)
         is_first_part = True
 
-        # Return empty if less than two waypoints
+        # Not enough waypoints to build a route
         if num_of_waypoints < 2:
             return []
         
         if self._ctx.data.arrive_by:
-            # Start from last waypoint in arrive_by mode
+            # Start from last waypoint in arrival mode
             i = num_of_waypoints - 1
 
             while i > 0:
-                # Build next logical group of waypoints
+                # Build next logical waypoint group
                 group, i, short_source = self.__build_next_group_arrive(context.waypoints, i)
 
-                # Route longer public transport segment (direct foot is not allowed)
+                # Route longer public transport segment, direct foot is not allowed
                 if len(group) > 1:
                     trip_patterns = await self.__route_group_and_combine(
                         group,
@@ -78,10 +93,10 @@ class PublicTransportRouter(RouterBase, Router):
             i = 0
 
             while i + 1 < num_of_waypoints:
-                # Build next logical group of waypoints
+                # Build next logical waypoint group
                 group, i, short_target = self.__build_next_group_depart(context.waypoints, i)
 
-                # Route longer public transport segment (direct foot is not allowed)
+                # Route longer public transport segment, direct foot is not allowed
                 if len(group) > 1:
                     trip_patterns = await self.__route_group_and_combine(
                         group,
@@ -113,7 +128,12 @@ class PublicTransportRouter(RouterBase, Router):
         return trip_patterns
     
     async def __enrich_pattern(self, trip_pattern: TripPattern) -> None:
-        # Sequentially apply all enrichers to pattern
+        """
+        Applies all enrichers sequentially to a trip pattern.
+
+        Args:
+            trip_pattern: Trip pattern to enrich
+        """
         for enricher in self.__enrichers:
             await enricher.enrich(trip_pattern)
 
@@ -126,7 +146,22 @@ class PublicTransportRouter(RouterBase, Router):
         is_first_part: bool,
         allow_direct_foot: bool = False
     ) -> List[TripPattern]:
-        # Build routing tasks based on existing partial patterns
+        """
+        Routes a group of waypoints and combines results with existing partial
+        patterns.
+
+        Args:
+            waypoints: Waypoints in the current group
+            total_num_of_pt_waypoints: Total waypoint count in original request
+            trip_patterns: Previously computed partial patterns
+            time_cursor: Reference time for routing
+            is_first_part: Indicates, whether this is the first routed group
+            allow_direct_foot: Indicates, whether direct foot routing is allowed
+
+        Returns:
+            Combined list of trip patterns
+        """
+        # Build routing tasks depending on existing partial patterns
         if trip_patterns:
             tasks = [
                 self.__route_group_segments(
@@ -158,7 +193,7 @@ class PublicTransportRouter(RouterBase, Router):
         if not trip_patterns and is_first_part:
             return results[0]
     
-        # Combine partial and new results
+        # Combine new results with partial ones
         return PatternUtils.combine(
             trip_patterns,
             results,
@@ -171,8 +206,15 @@ class PublicTransportRouter(RouterBase, Router):
         i: int,
         threshold_km: float = 1.0
     ) -> Tuple[List[str], int, str | None]:
+        """
+        Builds next logical waypoint group in departure mode. Groups waypoints
+        until distance threshold is violated.
+
+        Returns:
+            Tuple (group, new_index, short_target)
+        """
         group: List[str] = []
-        distance = 10.0    # Dummy value bigger than threshold
+        distance = 10.0         # Dummy value bigger than threshold
 
         # Collect consecutive waypoints beyond distance threshold
         while distance >= threshold_km and i + 1 < len(waypoints):
@@ -195,8 +237,15 @@ class PublicTransportRouter(RouterBase, Router):
         i: int,
         threshold_km: float = 1.0
     ) -> Tuple[List[str], int, str | None]:
+        """
+        Builds next logical waypoint group in arrival mode. Groups waypoints
+        in reverse order until threshold is violated.
+
+        Returns:
+            Tuple (group, new_index, short_source)
+        """
         group: List[str] = []
-        distance = 10.0     # Dummy value bigger than threshold
+        distance = 10.0         # Dummy value bigger than threshold
 
         # Collect consecutive waypoints beyond distance threshold in reverse direction
         while distance >= threshold_km and i > 0:
@@ -215,7 +264,16 @@ class PublicTransportRouter(RouterBase, Router):
     
     @staticmethod
     def __compute_distance_km(a: str, b: str) -> float:
-        # Compute haversine distance between two coordinates
+        """
+        Computes haversine distance between two coordinate strings.
+
+        Args:
+            a: Coordinate string in format lat,lon
+            b: Coordinate string in format lat,lon
+
+        Returns:
+            Distance in kilometers
+        """
         return GeoMath.haversine_distance_km(
             *PublicTransportRouter._parse_coordinates(a),
             *PublicTransportRouter._parse_coordinates(b)
@@ -228,17 +286,30 @@ class PublicTransportRouter(RouterBase, Router):
         time_cursor: datetime,
         allow_direct_foot: bool
     ) -> List[TripPattern]:
-        # Determine routing order based on mode
+        """
+        Routes all consecutive waypoint segments within a single waypoint group.
+
+        Args:
+            waypoints: Waypoints of the current group
+            total_num_of_pt_waypoints: Total waypoint count in the original request
+            time_cursor: Reference time
+            allow_direct_foot: Indicates, whether direct foot routing is allowed for this group
+
+        Returns:
+            List of trip patterns representing computed routes for this group
+        """
+        # Determine segment routing order based on mode
         indices = (
             list(reversed(range(len(waypoints) - 1)))
             if self._ctx.data.arrive_by
             else range(len(waypoints) - 1)
         )
 
+        # Track whether the first segment of this group is being routed
         is_first_part = True
         trip_patterns = []
 
-        # Route each segment within group
+        # Route each consecutive segment and extend partial patterns
         for index in indices:
             trip_patterns = await self.__route_segment(
                 self._parse_coordinates(waypoints[index]),
@@ -249,6 +320,8 @@ class PublicTransportRouter(RouterBase, Router):
                 is_first_part,
                 allow_direct_foot
             )
+
+            # After the first segment, subsequent segments must combine results
             is_first_part = False
 
         return trip_patterns
@@ -263,7 +336,22 @@ class PublicTransportRouter(RouterBase, Router):
         is_first_part: bool,
         allow_direct_foot: bool
     ) -> List[TripPattern]:
-        # Build OTP routing tasks based on partial patterns
+        """
+        Routes a single segment using OTP and merges result.
+
+        Args:
+            origin: Segment origin coordinates in format lat, lon
+            destination: Segment destination coordinates in format lat, lon
+            total_num_of_pt_waypoints: Total waypoint count in the original request
+            time_cursor: Reference time
+            partial_patterns: Already built partial trip patterns to extend
+            is_first_part: Indicates, whether this is the first routed segment in the group
+            allow_direct_foot: Indicates, whether direct foot routing is allowed for this segment
+
+        Returns:
+            Updated list of trip patterns after adding this segment
+        """
+        # Build OTP routing tasks based on existing partial patterns
         if partial_patterns:
             tasks = [
                 self.__otp_client.execute(
@@ -278,7 +366,7 @@ class PublicTransportRouter(RouterBase, Router):
                 )
                 for pattern in partial_patterns
             ]
-        # Initial OTP routing
+        # Initial OTP request for first segment
         else:
             tasks = [
                 self.__otp_client.execute(
@@ -291,7 +379,7 @@ class PublicTransportRouter(RouterBase, Router):
 
         results = await asyncio.gather(*tasks)
 
-        # Postprocess each OTP result
+        # Reduce OTP alternatives by signature and select best timing per signature
         selected_patterns = [
             self.__select_best_patterns(
                 trip_patterns,
@@ -300,11 +388,11 @@ class PublicTransportRouter(RouterBase, Router):
             for trip_patterns in results
         ]
 
-        # Return first segment result directly
+        # First segment produces patterns directly without combining
         if not partial_patterns and is_first_part:
             return selected_patterns[0]
         
-        # Combine partial and new results
+        # Combine newly routed segment patterns with previous partial patterns
         return PatternUtils.combine(
             partial_patterns,
             selected_patterns,
@@ -316,10 +404,21 @@ class PublicTransportRouter(RouterBase, Router):
         trip_patterns: List[TripPattern],
         total_num_of_pt_waypoints: int
     ) -> List[TripPattern]:
+        """
+        Selects a reduced set of trip patterns from OTP results.
+
+        Args:
+            trip_patterns: Trip patterns for a single segment
+            total_num_of_pt_waypoints: Total waypoint count in the original request
+
+        Returns:
+            Reduced list of selected trip patterns
+        """
         # Group patterns by line/mode signature to eliminate results differentiated only in time
         patterns_map: Dict[str, List[TripPattern]] = {}
 
         for pattern in trip_patterns:
+            # Build signature describing the used modes/lines
             key = ""
             for leg in pattern.legs:
                 if leg.mode in ["foot", "bicycle"]:
@@ -327,26 +426,41 @@ class PublicTransportRouter(RouterBase, Router):
                 elif leg.line:
                     key += f"-{leg.line.publicCode}"
 
+            # Append pattern under its signature
             patterns_map.setdefault(key, []).append(pattern)
 
         # Select best pattern per signature based on routing direction
         new_trip_patterns: List[TripPattern] = []
         for item in patterns_map.values():
             if self._ctx.data.arrive_by:
+                # Prefer latest departure while still arriving by the target time
                 best = max(item, key=lambda p: p.legs[0].aimedStartTime)
             else:
+                # Prefer earliest arrival in departure planning
                 best = min(item, key=lambda p: p.aimedEndTime)
+
             new_trip_patterns.append(best)
 
-        # Limit number of trip patterns to avoid combinatorial explosion
+        # Limit number of trip patterns to avoid extreme growth
         return new_trip_patterns[:self.__max_patterns_limit(total_num_of_pt_waypoints)]
 
     @staticmethod
     def __max_patterns_limit(count: int) -> int:
-        # Define max number of PT results per total waypoint count
+        """
+        Defines maximal number of public transport trip patterns per total
+        waypoint count.
+
+        Args:
+            count: Total number of public transport waypoints
+
+        Returns:
+            Maximum allowed trip pattern count
+        """
         pt_number_th = [0, 0, 5, 3, 2]
 
         if count >= len(pt_number_th):
             return pt_number_th[-1]
         
         return pt_number_th[count]
+
+# End of file public_transport_router.py

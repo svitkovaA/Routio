@@ -1,12 +1,13 @@
 """
 file: workers.py
 
-Background asynchronous workers for periodic data updates and maintenance tasks
+Background asynchronous workers for periodic data updates and maintenance tasks.
 """
 
 import asyncio
 import logging
-from typing import Awaitable, Callable
+from typing import Any, Awaitable, Callable, Type
+from service.service_base import ServiceBase
 from service.gtfs_rt_service import GTFSRTService
 from service.gbfs_service import GBFSService
 from service.lissy_service import LissyService
@@ -15,13 +16,33 @@ from database.db import database
 from datetime import datetime, timedelta
 from config.worker import *
 
+async def _safe_reload(service: Type[ServiceBase[Any]]):
+    """
+    Reload a service instance with error handling.
+    """
+    try:
+        await service.get_instance().reload()
+    except Exception:
+        logging.exception(f"Initial {service.__name__} failed")
+
+async def load_initial_data():
+    """
+    Load all core services concurrently on application startup.
+    """
+    await asyncio.gather(
+        _safe_reload(GTFSService),
+        _safe_reload(GBFSService),
+        _safe_reload(LissyService),
+    )
+    await _safe_reload(GTFSRTService)
+
 def seconds_until_next(
     hour: int,
     minute: int = 0,
     weekday: int | None = None
 ) -> float:
     """
-    Calculates seconds until the next occurrence of a given time
+    Calculate seconds until the next scheduled occurrence.
 
     Args:
         hour: Target hour
@@ -38,16 +59,18 @@ def seconds_until_next(
     # Determines target time
     target = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
-    # Daily workers
+    # Daily scheduling
     if weekday is None:
         if target <= now:
+            # Move to next day
             target += timedelta(days=1)
 
-    # Weekly workers
+    # Weekly scheduling
     else:
         days_ahead = (weekday - now.weekday()) % 7
 
         if days_ahead == 0 and target <= now:
+            # Move to next week
             days_ahead = 7
 
         target += timedelta(days=days_ahead)
@@ -56,7 +79,7 @@ def seconds_until_next(
 
 async def run_periodic(task: Callable[[], Awaitable[None]], delay_fn: Callable[[], float], initial_load: bool):
     """
-    Periodically executes an asynchronous task
+    Execute an asynchronous task periodically.
 
     Args:
         task: Asynchronous function to execute
@@ -64,23 +87,23 @@ async def run_periodic(task: Callable[[], Awaitable[None]], delay_fn: Callable[[
         initial_load: If true, run task immediately on server start
     """
     while True:
-        # Execute before wait
+        # Wait before execution if not initial load
         if not initial_load:
             await asyncio.sleep(delay_fn())
 
-        # Task execution
+        # Execute scheduled task
         try:
             await task()
         except Exception:
             logging.exception(f"{task.__name__} failed")
 
-        # Wait after execution
+        # Wait after execution if initial load was done
         if initial_load:
             await asyncio.sleep(delay_fn())
 
 async def gtfs_worker():
     """
-    Background task that refreshes GTFS static timetable data
+    Periodic worker for updating GTFS data
     """
     await run_periodic(
         GTFSService.get_instance().reload,
@@ -90,7 +113,7 @@ async def gtfs_worker():
 
 async def gbfs_worker():
     """
-    Background task that refreshes GBFS bike station data
+    Periodic worker for updating GBFS data
     """
     await run_periodic(
         GBFSService.get_instance().reload,
@@ -100,7 +123,7 @@ async def gbfs_worker():
 
 async def database_worker():
     """
-    Background task responsible for periodic database updates
+    Periodic worker for updating database
     """
     await run_periodic(
         database,
@@ -110,7 +133,7 @@ async def database_worker():
 
 async def lissy_worker():
     """
-    Background task that refreshes cached Lissy route shapes and delay data
+    Periodic worker for updating data retrieved from Lissy
     """
     await run_periodic(
         LissyService.get_instance().reload,
@@ -118,9 +141,9 @@ async def lissy_worker():
         initial_load=False
     )
 
-async def vehicle_position_worker():
+async def gtfs_rt_worker():
     """
-    Background worker that periodically updates vehicle position data
+    Periodic worker for updating GTFS-RT data
     """
     await run_periodic(
         GTFSRTService.get_instance().reload,

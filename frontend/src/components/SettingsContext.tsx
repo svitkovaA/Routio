@@ -29,6 +29,8 @@ type SettingsContextType = {
     setBikeLockTime: (value: number | ((prev: number) => number)) => void;
     selectedLayerIndex: number;
     setSelectedLayerIndex: (layer: number) => void;
+    useHistoricalDelays: boolean;
+    setUseHistoricalDelays: (value: boolean) => void;
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -61,6 +63,7 @@ export function SettingsProvider({ children } : {children: React.ReactNode}) {
     const [maxTransfers, setMaxTransfers] = useSettingsFromLocalStorage("maxTransfers", 10);
     const defaultModes = ["bus", "tram", "rail", "trolleybus", "metro", "water"]
     const [selectedModes, setSelectedModes] = useSettingsFromLocalStorage<string[]>("selectedModes", defaultModes);
+    const [useHistoricalDelays, setUseHistoricalDelays] = useSettingsFromLocalStorage("historicalDelays", false);
     
     // Cycling preferences
     const [maxBikeDistance, setMaxBikeDistance] = useSettingsFromLocalStorage("maxBikeDistance", 5);
@@ -89,7 +92,8 @@ export function SettingsProvider({ children } : {children: React.ReactNode}) {
         walkAverageSpeed, setWalkAverageSpeed,
         bikesharingLockTime, setBikesharingLockTime,
         bikeLockTime, setBikeLockTime,
-        selectedLayerIndex, setSelectedLayerIndex
+        selectedLayerIndex, setSelectedLayerIndex,
+        useHistoricalDelays, setUseHistoricalDelays
     }), [
         maxTransfers,
         selectedModes,
@@ -101,7 +105,8 @@ export function SettingsProvider({ children } : {children: React.ReactNode}) {
         walkAverageSpeed,
         bikesharingLockTime,
         bikeLockTime,
-        selectedLayerIndex
+        selectedLayerIndex,
+        useHistoricalDelays
     ]);
     
     return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

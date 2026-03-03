@@ -59,6 +59,7 @@
       "subway": "Metro",
       "boat": "Loď"
     },
+    "useHistoricalDelays": "Historické meškania",
     "cyclingPreferences": "Preferencie cyklistiky",
     "bikesharingPreferences": "Preferencie zdieľaných bicyklov",
     "walkingPreferences": "Preferencie chôdze",
@@ -122,6 +123,8 @@
       "otherDepartures": "Ďalšie odchody",
       "moreDepartures": "Viac odchodov",
       "stops": "Zastávky",
+      "historicalDelays": "Historické meškania",
+      "historicalDelaysOnTime": "Včas",
       "arrivalAfterDeparture": "má odchod skôr ako je plánovaný príchod predchádzajúceho spoja.",
       "nonContinuousDepartures": "Nie sú dostupné ďalšie odchody. Skúste zvoliť neskorší čas.",
       "modes": {
@@ -214,7 +217,9 @@
       "increase": "Zvýšiť hodnotu",
       "decrease": "Znížiť hodnotu",
       "addMode": "Zahrnúť do plánovania trasy",
-      "removeMode": "Vylúčiť z plánovania trasy"
+      "removeMode": "Vylúčiť z plánovania trasy",
+      "enableHistoricalDelays": "Povoliť zobrazenie historických meškaní",
+      "disableHistoricalDelays": "Nepovoliť zobrazenie historických meškaní"
     },
     "map": {
       "originBikeStation": "Počiatočná stanica bicyklov",

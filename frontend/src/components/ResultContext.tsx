@@ -26,7 +26,7 @@ type ResultContextType = {
     setShowSettings: (value: boolean) => void;
     loading: boolean;
     setLoading: (value: boolean) => void;
-    vehiclePositions: VehiclePosition[];
+    vehicleRealtimeData: VehiclePosition[];
     publicLegIndex: number;
     setPublicLegIndex: (value: number) => void;
     closeResults: () => void;
@@ -64,7 +64,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     const [loading, setLoading] = useState<boolean>(false);
 
     // Current vehicle positions
-    const [vehiclePositions, setVehiclePositions] = useState<VehiclePosition[]>([]);
+    const [vehicleRealtimeData, setVehiclePositions] = useState<VehiclePosition[]>([]);
 
     // Index of public transport leg being recalculated
     const [publicLegIndex, setPublicLegIndex] = useState<number>(-1);
@@ -128,7 +128,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         showDepartures,
         showSettings, setShowSettings,
         loading, setLoading,
-        vehiclePositions,
+        vehicleRealtimeData,
         publicLegIndex, setPublicLegIndex,
         closeResults,
         abortRef,
@@ -142,7 +142,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         showDepartures,
         showSettings,
         loading,
-        vehiclePositions,
+        vehicleRealtimeData,
         publicLegIndex,
         closeResults,
         mobileSidebarHeight
@@ -219,7 +219,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
      * Extracts trip ids for which vehicle positions data should be requested
      */
     const tripIds = useMemo(
-        () => pattern?.vehiclePositions?.map(p => p.tripId) ?? [],
+        () => pattern?.vehicleRealtimeData?.map(p => p.tripId) ?? [],
         [pattern]
     );
 
@@ -232,17 +232,17 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         }
 
         // Request with trip ids
-        const res = await fetch(`${API_BASE_URL}/vehiclePositions`, {
+        const res = await fetch(`${API_BASE_URL}/vehicleRealtimeData`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(tripIds)
         });
 
-        const realtime: Record<number, { lat: number; lon: number }> = await res.json();
+        const realtime: Record<number, { lat: number; lon: number, delay?: number }> = await res.json();
 
         // Build next position map
         const nextMap: Record<number, VehiclePosition> = {};
-        for (const v of pattern.vehiclePositions) {
+        for (const v of pattern.vehicleRealtimeData) {
             const pos = realtime[v.tripId];
 
             // Skip if no dat available for this trip
@@ -253,7 +253,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             nextMap[v.tripId] = {
                 ...v,
                 lat: pos.lat,
-                lon: pos.lon
+                lon: pos.lon,
+                delay: pos?.delay
             };
         }
 
@@ -266,9 +267,28 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             animatePositions(prevPositionsRef.current, nextMap);
         }
 
+        if (resultActiveIndex >= 0 && selectedTripPatternIndex >= 0) {
+            setResults(prev => {
+                const newResults = [...prev];
+                for (const leg of newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex].originalLegs) {
+                    if (!leg.tripId) {
+                        continue;
+                    }
+
+                    const pos = realtime[leg.tripId];
+                    if (!pos) {
+                        continue;
+                    }
+
+                    leg.delay = pos.delay;
+                }
+                return newResults;
+            });
+        }
+
         // Store current positions for next animation cycle
         prevPositionsRef.current = nextMap;
-    }, [pattern, tripIds, animatePositions]);
+    }, [pattern, tripIds, animatePositions, resultActiveIndex, selectedTripPatternIndex]);
 
     /**
      * Initializes and manages periodic polling of vehicle positions data

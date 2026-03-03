@@ -1,3 +1,9 @@
+"""
+file: bike_station_selector.py
+
+Bike station selection and ranking logic.
+"""
+
 from typing import List, Literal, Tuple
 import numpy as np
 from service.gbfs_service import GBFSService
@@ -8,6 +14,9 @@ from otp.bicycle_stations import OTPBicycleStations
 from routing_engine.routing_context import RoutingContext
 
 class BikeStationSelector(SelectorBase):
+    """
+    Selects and ranks bike stations for shared bicycle routing.
+    """
     def __init__(self, context: RoutingContext):
         super().__init__()
         self.__bicycle_stations_otp_client = OTPBicycleStations(context)
@@ -20,16 +29,12 @@ class BikeStationSelector(SelectorBase):
         context: PlanningContext
     ) -> List[BikeStationNode]:
         """
-        Selects and ranks optimal origin bike stations based on a weighted scoring model.
-        The function evaluates nearby bike stations relative to the provided coordinates. 
-        Each station is scored using a combination of:
-            - Angle between coordinates
-            - Number of available bikes in station
-            - Distance from the origin
+        Selects and ranks candidate origin bicycle stations.
 
         Args:
             origin: Latitude and longitude of the first waypoint
             destination: Latitude and longitude of the second waypoint
+            context: Planning context affecting scoring weights
 
         Returns:
             Top 10 highest ranked bicycle stations sorted by score in descending order
@@ -43,9 +48,10 @@ class BikeStationSelector(SelectorBase):
         # Create vector from origin to destination
         base_vector = self._direction_vector(origin, destination)
 
-        # Get weights
+        # Get scoring weights for origin selection
         angle_weight, availability_weight, distance_weight = self.__origin_weights(context)
 
+        # Rank the candidates
         return self.__score_and_rank(
             nodes,
             origin,
@@ -64,16 +70,12 @@ class BikeStationSelector(SelectorBase):
         context: PlanningContext
     ) -> List[BikeStationNode]:
         """
-        Selects and ranks optimal destination bike stations based on a weighted scoring model.
-        The function evaluates nearby bike stations relative to the provided coordinates. 
-        Each station is scored based on:
-            - Angle between coordinates
-            - Available docking spaces
-            - Distance from the destination
+        Selects and ranks candidate destination bicycle stations .
 
         Args:
             origin: Latitude and longitude of the first waypoint
             destination: Latitude and longitude of the second waypoint
+            context: Planning context affecting scoring weights
         
         Returns:
             Top 10 highest ranked bicycle stations sorted by score in descending order
@@ -87,9 +89,10 @@ class BikeStationSelector(SelectorBase):
         # Create vector from destination to origin
         base_vector = self._direction_vector(destination, origin)
 
-        # Get weights
+        # Get scoring weights for destination selection
         angle_weight, availability_weight, distance_weight = self.__destination_weights(context)
 
+        # Rank the candidates
         return self.__score_and_rank(
             nodes,
             destination,
@@ -112,25 +115,43 @@ class BikeStationSelector(SelectorBase):
         distance_weight: float,
         scoring_type: Literal["origin", "destination"]
     ) -> List[BikeStationNode]:
+        """
+        Computes weighted score for each station and returns ranked list.
+
+        Args:
+            nodes: List of nearby bike station
+            reference_point: Geographic reference in format lat, lon
+            base_vector: Direction vector representing intended travel direction
+            context: Planning context containing routing flags
+            angle_weight: Weight coefficient for angular alignment component
+            availability_weight: Weight coefficient for availability component
+            distance_weight: Weight coefficient for distance component
+            scoring_type: Determines scoring behavior
+
+        Returns:
+            List of best bike stations objects sorted by descending score
+        """
         scored_nodes: List[BikeStationNode] = []
         discarded_nodes: List[BikeStationNode] = []
 
-        # Iterate over all nodes
+        # Evaluate each candidate station
         for wrapper in nodes:
             node = wrapper.node
             
-            # Skip stations with no available bicycles or docks
+            # Compute normalized availability score
             station_availability = self.__compute_availability(node, scoring_type)
+
+            # Skip stations with no available bicycles or docks
             if station_availability is None:
                 continue
 
-            # Create vector from reference point to current station
+            # Create vector from reference point to station
             candidate_vector = self._direction_vector(
                 reference_point,
                 (node.place.latitude, node.place.longitude)
             )
 
-            # Keep only stations that lie in the forward direction
+            # Determine whether station lies in forward direction
             in_forward = (
                 not (
                     context.public_bicycle 
@@ -142,7 +163,7 @@ class BikeStationSelector(SelectorBase):
                 )
             )
 
-            # Compute cosine similarity between direction vectors
+            # Compute normalized angular similarity
             normalized_angle = self._compute_normalized_angle(
                 base_vector,
                 candidate_vector
@@ -155,11 +176,13 @@ class BikeStationSelector(SelectorBase):
                 distance_weight * (self._max_distance - node.distance) / self._max_distance
             )
 
+            # Separate forward and non forward stations
             if in_forward:
                 scored_nodes.append(node)
             else:
                 discarded_nodes.append(node)
 
+        # Sort and limit result set
         return self._sort_and_limit(scored_nodes, discarded_nodes)
     
     def __compute_availability(
@@ -167,25 +190,47 @@ class BikeStationSelector(SelectorBase):
         node: BikeStationNode,
         scoring_type: Literal["origin", "destination"]
     ) -> float | None:
-        # Origin bike stations
+        """
+        Computes normalized availability score for a bike station. The meaning
+        of availability depends on scoring type.
+
+        Args:
+            node: Bike station node containing data
+            scoring_type: Defines scoring mode, origin, evaluate available
+                bicycles, destination, evaluate free docking capacity
+
+        Returns:
+            Normalized value in range (0,1)
+        """
+        # Origin station scoring
         if scoring_type == "origin":
             bikes = node.place.bikesAvailable or 0
+
+            # Skip station if no bicycles are available
             if bikes == 0:
                 return None
+            
+            # Normalize bicycle count
             return np.clip(bikes, 0, 5) / 5
         
-        # Destination bike stations
+        # Destination station scoring
         station_id = node.place.id
+
+        # Skip station if identifier is missing
         if not station_id:
             return None
 
+        # Retrieve station capacity from GBFS cache
         capacity = self.__gbfs_service.get_capacity(station_id)
+
+        # If capacity is unknown, assume fully usable
         if capacity is None:
             return 1.0
 
         bikes = node.place.bikesAvailable or 0
         free_ratio = (capacity - bikes) / capacity
 
+        # Skip station if no free docking slots available
         if free_ratio <= 0:
             return None
 
@@ -193,12 +238,40 @@ class BikeStationSelector(SelectorBase):
 
     @staticmethod
     def __origin_weights(context: PlanningContext) -> Tuple[float, float, float]:
+        """
+        Returns scoring weights for origin station selection. Weights
+        correspond to: (angle_weight, availability_weight, distance_weight)
+
+        Args:
+            context: Planning context influencing scoring behavior
+
+        Returns:
+            Tuple of three weight coefficients
+        """
+        # In public bicycle mode, emphasize direction alignment
         if context.public_bicycle:
             return 0.4, 0.3, 0.3
+
+        # Otherwise emphasize distance and availability
         return 0.1, 0.4, 0.5
     
     @staticmethod
     def __destination_weights(context: PlanningContext) -> Tuple[float, float, float]:
+        """
+        Returns scoring weights for destination station selection. Weights
+        correspond to: (angle_weight, availability_weight, distance_weight)
+
+        Args:
+            context: Planning context influencing scoring behavior
+
+        Returns:
+            Tuple of three weight coefficients
+        """
+        # In bicycle_public mode, emphasize direction alignment
         if context.bicycle_public:
             return 0.4, 0.3, 0.3
+
+        # Otherwise emphasize distance and availability
         return 0.3, 0.3, 0.4
+
+# End of file bike_station_selector.py

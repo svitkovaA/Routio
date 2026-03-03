@@ -50,7 +50,7 @@ function Map({
     // Contexts
     const {
         showResults,
-        vehiclePositions,
+        vehicleRealtimeData,
         closeResults,
         loading 
     } = useResult();
@@ -321,7 +321,7 @@ function Map({
             />
 
             {/* Actual vehicle position visualisation */}
-            {vehiclePositions.filter(p => p.lat > 0 && p.lon > 0).map((p, i) => (
+            {vehicleRealtimeData.filter(p => p.lat > 0 && p.lon > 0).map((p, i) => (
                 <Marker
                     key={`${p.tripId}`}
                     position={[p.lat, p.lon]}
@@ -337,7 +337,7 @@ function Map({
                         <div className="vehicle-position-popup">
                             {timelineIcons[p.mode]}
                             <div className="vehicle-position-popup-direction">
-                                {p.direction}
+                                {p.direction}, {p.delay}
                             </div>
                         </div>
                     </Popup>

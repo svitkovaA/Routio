@@ -59,6 +59,7 @@
       "subway": "Subway",
       "boat": "Boat"
     },
+    "useHistoricalDelays": "Historical delays",
     "bikesharingPreferences": "Bikesharing preferences",
     "cyclingPreferences": "Cycling preferences",
     "walkingPreferences": "Walking preferences",
@@ -122,6 +123,8 @@
       "otherDepartures": "Other departures",
       "moreDepartures": "More departures",
       "stops": "Stops",
+      "historicalDelays": "Historical delays",
+      "historicalDelaysOnTime": "On time",
       "arrivalAfterDeparture": "departure is before planned arrival.",
       "nonContinuousDepartures": "No more departures available. Please reroute with a later time.",
       "modes": {
@@ -214,7 +217,9 @@
       "increase": "Increase value",
       "decrease": "Decrease value",
       "addMode": "Include in route planning",
-      "removeMode": "Exclude from route planning"
+      "removeMode": "Exclude from route planning",
+      "enableHistoricalDelays": "Enable showing historical delays",
+      "disableHistoricalDelays": "Disable showing historical delays"
     },
     "map": {
       "originBikeStation": "Origin bicycle station",

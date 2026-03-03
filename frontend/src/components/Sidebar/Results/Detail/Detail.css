@@ -40,7 +40,7 @@
     position: relative;
 }
 
-.detail-time, .detail-distance, .detail-lock, .detail-direction, .detail-departures, .detail-stops {
+.detail-time, .detail-distance, .detail-lock, .detail-direction, .detail-departures, .detail-stops, .detail-historical-delays {
     display: flex;
     align-items: center;
     padding: 5px 0;

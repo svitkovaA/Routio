@@ -1,3 +1,9 @@
+"""
+file route_data.py
+
+Defines routing configuration models representing user input and preferences.
+"""
+
 from typing import List
 from pydantic import BaseModel
 from datetime import time, date
@@ -9,7 +15,7 @@ class LegPreferences(BaseModel):
     wait: int                                   # Wait time in minutes before departure
 
 class RouteData(BaseModel):
-    """ Main routing configuration model including user preferences """
+    """ Main routing configuration model including user preferences and constraints """
     waypoints: List[str]                        # Ordered list of waypoint coordinates
     time: time                                  # Selected departure or arrival time
     date: date                                  # Selected routing date
@@ -24,9 +30,10 @@ class RouteData(BaseModel):
     max_bikesharing_distance: float             # Maximal allowed distance with shared bicycle
     bikesharing_average_speed: float            # Average speed using shared bicycle
     max_walk_distance: float                    # Maximal walking allowed distance
-    walk_speed: float                   # Average walk speed
+    walk_speed: float                           # Average walk speed
     bikesharing_lock_time: int                  # Time required to unlock/lock a shared bicycle
     bike_lock_time: int                         # Time required to lock an own bicycle
     route_preference: str                       # Route optimization preference, e.g. fastest, shortest, maximum transfers
+    use_historical_delays: bool                 # Whether historical delay data should be retrieved during routing
 
 # End of file route_data.py

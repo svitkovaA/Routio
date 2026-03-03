@@ -1,3 +1,9 @@
+"""
+file: foot_bicycle_base.py
+
+Shared OpenTripPlanner client base for direct foot and bicycle routing.
+"""
+
 from abc import ABC
 from gql import gql
 from typing import Any, Dict, List, Literal, Tuple, final
@@ -6,6 +12,9 @@ from models.route import OTPPublicQueryResponse
 from otp.otp_base import OTPBase
 
 class OTPFootBicycleBase(OTPBase, ABC):
+    """
+    Abstract base class for direct foot and bicycle OTP routing.
+    """
     QUERY = gql("""
         query trip($from: Location!, $to: Location!, $modes: Modes, $walkSpeed: Float, $bikeSpeed: Float, $arriveBy: Boolean) {
             trip(
@@ -49,6 +58,19 @@ class OTPFootBicycleBase(OTPBase, ABC):
         mode: Literal["foot", "bicycle"],
         mode_speed: float
     ) -> List[TripPattern]:
+        """
+        Executes direct routing query for foot or bicycle mode.
+
+        Args:
+            origin: Coordinates in format lat, lon of starting point
+            destination: Coordinates in format lat, lon of destination
+            mode: Transport mode
+            mode_speed: Speed for selected mode
+
+        Returns:
+            List of trip patterns
+        """
+        # Prepare GraphQL variables for direct routing
         variables = self.__prepare_variables(
             origin,
             destination,
@@ -56,6 +78,7 @@ class OTPFootBicycleBase(OTPBase, ABC):
             mode_speed
         )
 
+        # Execute query using shared OTPBase executor
         parsed =  await self._execute_query(
             self.QUERY,
             variables,
@@ -63,6 +86,7 @@ class OTPFootBicycleBase(OTPBase, ABC):
             fallback=None
         )
 
+        # Return empty list if parsing failed
         if not parsed:
             return []
         
@@ -75,6 +99,9 @@ class OTPFootBicycleBase(OTPBase, ABC):
         mode: Literal["foot", "bicycle"],
         mode_speed: float
     ) -> Dict[str, Any]:
+        """
+        
+        """
         return {
             "from": {
                 "coordinates": {
@@ -95,3 +122,5 @@ class OTPFootBicycleBase(OTPBase, ABC):
             "bikeSpeed": mode_speed / 3.6,
             "arriveBy": self._ctx.data.arrive_by
         }
+
+# End of file foot_bicycle_base.py

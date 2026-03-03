@@ -11,12 +11,14 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import DepartureBoardIcon from '@mui/icons-material/DepartureBoard';
+import HistoryIcon from '@mui/icons-material/History';
 import { Leg, VerticalTimeline } from "../../../../types/types";
 import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
 import { timelineIcons } from '../../../Planning/Icons/Icons';
 import Waystop from '../Waystop/Waystop';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
+import { useSettings } from "../../../../SettingsContext";
 import "./PublicTransportDetail.css";
 
 type PublicTransportDetailProps = {
@@ -39,19 +41,8 @@ function PublicTransportDetail({
 
     const [stopsOpen, setStopsOpen] = useState<boolean>(false);
     const [departuresOpen, setDeparturesOpen] = useState<boolean>(false);
+    const [historicalDelaysOpen, setHistoricalDelaysOpen] = useState<boolean>(false);
     const publicTransportDetailRef = useRef<HTMLDivElement>(null);
-
-    const averageDelay = () => {
-        if (!leg.delays) return null;
-
-        const values = Object.values(leg.delays);
-        if (values.length === 0) return null;
-
-        const total = values.reduce((sum, v) => sum + v, 0);
-        return Math.round(total / values.length);
-    }
-
-    const averageDelayValue = averageDelay();
 
     useVerticalTimeLineHandle(
         publicTransportDetailRef,
@@ -61,7 +52,10 @@ function PublicTransportDetail({
         -30
     );
 
+    const { useHistoricalDelays } = useSettings();
+
     useEffect(() => setStopsOpen(false), [leg]);
+    useEffect(() => setHistoricalDelaysOpen(false), [leg]);
 
     const currentIndex = leg.otherOptions?.currentIndex;
     const departures = leg?.otherOptions?.departures;
@@ -84,12 +78,19 @@ function PublicTransportDetail({
                     <ArrowForwardIcon sx={{ fontSize: '18px' }}/> 
                     {leg.serviceJourney?.direction}
                 </div>
-                {averageDelayValue !== null && (
-                    <div className={"delay-info " + (averageDelayValue !== 0 ? "delayed" : "")}>
-                        +{averageDelayValue} min
+                {leg.delay !== undefined && (
+                    <div className={"delay-info " + (leg.delay > 0 ? "delayed" : "")}>
+                        {leg.delay <= 0 ? (
+                            t("detailInfo.publicTransport.historicalDelaysOnTime")
+                        ) : (
+                            `+${leg.delay} min`
+                        )}
                     </div>
                 )}
             </div>
+            {leg.zone_ids && leg.zone_ids.map((zone_id) => (
+                zone_id
+            ))}
             <div>
                 {leg.nonContinuousDepartures ? (
                     <div className="warning-departures">
@@ -186,6 +187,43 @@ function PublicTransportDetail({
                     ))}
                 </div>
             </div>
+            {useHistoricalDelays && leg?.delays && Object.keys(leg.delays).length > 0 && (
+                <>
+                    <div
+                        onClick={() => setHistoricalDelaysOpen(!historicalDelaysOpen)}
+                        className="detail-historical-delays"
+                    >
+                        <KeyboardArrowDownIcon className={historicalDelaysOpen ? "" : "rotate90"}/>
+                        <HistoryIcon 
+                            className="historical-delays"
+                        />
+                        {t("detailInfo.publicTransport.historicalDelays")}
+                    </div>
+
+                    {historicalDelaysOpen && (
+                        <div className="historical-delays-box">
+                            {Object.entries(leg.delays!).map(([date, delay]) => (
+                                <div 
+                                    key={date}
+                                    className="historical-delay-row"
+                                >
+                                    <span className="historical-date">
+                                        {new Date(date).toLocaleDateString("sk-SK", {
+                                            day: "2-digit",
+                                            month: "2-digit"
+                                        })}
+                                    </span>
+
+                                    <span className={"historical-delay " + (delay > 0 ? "delayed" : "")}>
+                                        {delay <= 0 ? t("detailInfo.publicTransport.historicalDelaysOnTime") : `+${delay} min`}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
+            )}
+
             <div className="detail-time-distance">
                 <CustomTooltip title={t("tooltips.detail.segment.duration")}>
                     <div className="detail-time">

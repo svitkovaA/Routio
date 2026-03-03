@@ -59,6 +59,7 @@
       "subway": "Metro",
       "boat": "Loď"
     },
+    "useHistoricalDelays": "Historická zpoždění",
     "cyclingPreferences": "Preference cyklistiky",
     "bikesharingPreferences": "Preference sdílené cyklistiky",
     "walkingPreferences": "Preference chůze",
@@ -122,6 +123,8 @@
       "otherDepartures": "Další odjezdy",
       "moreDepartures": "Více odjezdů",
       "stops": "Zastávky",
+      "historicalDelays": "Historická zpoždění",
+      "historicalDelaysOnTime": "Bez zpoždění",
       "arrivalAfterDeparture": "má odjezd dříve než je plánovaný příjezd předchozího spoje.",
       "nonContinuousDepartures": "Nejsou dostupné další odjezdy. Zvolte pozdější čas.",
       "modes": {
@@ -214,7 +217,9 @@
       "increase": "Zvýšit hodnotu",
       "decrease": "Snížit hodnotu",
       "addMode": "Zahrnout do plánování trasy",
-      "removeMode": "Vyloučit z plánování trasy"
+      "removeMode": "Vyloučit z plánování trasy",
+      "enableHistoricalDelays": "Povoliť zobrazení historických zpoždění",
+      "disableHistoricalDelays": "Nepovoliť zobrazení historických zpoždění"
     },
     "map": {
       "originBikeStation": "Výchozí stanice kol",

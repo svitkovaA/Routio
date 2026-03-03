@@ -1,3 +1,10 @@
+"""
+file: bike_station_data.py
+
+Defines request model used when recalculating a route after a user changes the
+selected bicycle station or rack.
+"""
+
 from typing import List
 from pydantic import BaseModel
 from models.route import BikeRackNode, BikeStationNode, Leg, RoutingMode

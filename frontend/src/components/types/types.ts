@@ -67,7 +67,11 @@ export type Leg = {
     walkMode?: boolean;                     // Indicates whether the leg represents an explicit walking segment
     pointsOnLink: {
         points: string | string[];          // Encoded polyline or list of polylines representing the geometry of this leg
+        inactivePoints: string[];           // Encoded polylines representing an inactive route segments
     };
+    tripId?: number;                        // GTFS trip identifier
+    delay?: number;                         // Real time vehicle delay
+    zone_ids?: number[];                    // List of faze zone identifiers
 
     /**
      * Information about related bike stations, present only in bike related legs
@@ -172,6 +176,7 @@ export type VehiclePosition = {
     color: string;                          // Display color associated with the line
     lat: number;                            // Current latitude of the vehicle
     lon: number;                            // Current longitude of the vehicle
+    delay?: number;                         // Current vehicle delay
     direction: string;                      // Direction of the vehicle, final stop name
 };
 
@@ -190,7 +195,7 @@ export type TripPattern = {
     bounds?: L.LatLngBounds;                // Geographical bounds of the trip used to fit map view
     tooLongWalkDistance?: boolean;          // Indicates that walking distance exceeds threshold defined by user
     tooLongBikeDistance?: boolean;          // Indicates that cycling distance exceeds threshold defined by user
-    vehiclePositions: VehiclePosition[];    // Real-time positions of vehicles associated with this trip
+    vehicleRealtimeData: VehiclePosition[];    // Real-time positions of vehicles associated with this trip
 };
 
 /**
@@ -206,6 +211,7 @@ export type ResultsType = {
  */
 export type PolyInfo = {
     coords: [number, number][];             // Ordered list of coordinates [latitude, longitude]
+    inactiveCoords: [number, number][][];
     mode: string;                           // Transport mode associated with this polyline segment
     color: string;                          // Color used for rendering the polyline
     pathOptions: {
