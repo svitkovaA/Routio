@@ -11,7 +11,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import {CSS} from '@dnd-kit/utilities';
 import InputField from "./InputField/InputField";
 import Suggestions from "./Suggestions/Suggestions";
-import { useInput } from "../../../InputContext";
+import { useInput } from "../../../Contexts/InputContext";
 import { useSuggestionHandle } from "./Suggestions/SuggestionsHandle";
 import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
 

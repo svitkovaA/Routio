@@ -7,7 +7,8 @@
 import { useState } from "react";
 import { Popup, useMapEvent } from "react-leaflet";
 import { Waypoint } from "../../types/types";
-import { useResult } from "../../ResultContext";
+import { useResult } from "../../Contexts/ResultContext";
+import { useTranslation } from "react-i18next";
 
 type MapInfoPopupProps = {
     waypoints: Waypoint[];                                                      // List of currently defined waypoints
@@ -18,6 +19,9 @@ function MapInfoPopup({
     waypoints,
     handleMapSelection
 } : MapInfoPopupProps) {
+    // Translation function
+    const { t } = useTranslation();
+
     // Position state of the menu popup
     const [position, setPosition] = useState<[number, number] | null>(null);
 
@@ -63,14 +67,15 @@ function MapInfoPopup({
             eventHandlers={{ remove: () => setPosition(null) }}
             closeButton={true}
         >
-            <div className="map-popup">
+            <div className="map-popup selection">
+                <strong>{t("map.selectPosition")}</strong>
                 {waypoints.map((_, i) => (
                     <button
-                        className="map-popup-button"
+                        className="popup-button"
                         key={i}
                         onClick={(e) => handleSetWaypoint(i, e)}
                     >
-                        {i === 0 ? "Set as origin" : i === waypoints.length - 1 ? "Set as destination" : `Set waypoint ${i}`}
+                        {i === 0 ? t("map.setAsOrigin") : i === waypoints.length - 1 ? t("map.setAsDestination") : `${t("map.setAsWaypoint")} ${i}`}
                     </button>
                 ))}
             </div>

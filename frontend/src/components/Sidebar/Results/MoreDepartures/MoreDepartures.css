@@ -1,3 +1,9 @@
+/**
+ * @file MoreDepartures.css
+ * @brief Styles for displaying alternative departures for a public transport leg
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 .more-departure-detail {
     padding: 5px 15px;
 }
@@ -39,3 +45,5 @@
     display: flex;
     align-items: center;
 }
+
+/** End of file MoreDepartures.css */

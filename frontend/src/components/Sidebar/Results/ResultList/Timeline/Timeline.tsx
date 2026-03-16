@@ -1,6 +1,6 @@
 /**
  * @file Timeline.tsx
- * @brief Displays a horizontal timeline
+ * @brief Displays a horizontal timeline representing trip legs
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -10,26 +10,36 @@ import { timelineIcons } from "../../../Planning/Icons/Icons";
 import "./Timeline.css"
 
 type TimelineProps = {
-    totalDuration: number;
-    legs: Leg[];
+    totalDuration: number;      // Total duration of the trip
+    legs: Leg[];                // List of trip legs
 }
 
 function Timeline({
     totalDuration,
     legs
 } : TimelineProps) {
+    // Reference to the timeline container element
     const timelineRef = useRef<HTMLDivElement>(null);
+
+    // Current width of the timeline container
     const [width, setWidth] = useState(0);
 
+    /**
+     * Observes timeline container size change
+     */
     useEffect(() => {
-        if (!timelineRef.current) return;
+        if (!timelineRef.current) {
+            return;
+        }
 
+        // Create ResizeObserver to detect changes in container size
         const observer = new ResizeObserver((entries) => {
             for (let entry of entries) {
+                // Update component state with the new container width
                 setWidth(entry.contentRect.width);
             }
         });
-
+        // Start observing the timeline container
         observer.observe(timelineRef.current);
 
         return () => observer.disconnect();
@@ -41,7 +51,10 @@ function Timeline({
             className="timeline"
         >
             {legs.map((leg, index) => {
+                // Calculate width of the leg segment relative to the total trip duration
                 const legWidth = leg.duration / totalDuration * width;
+
+                // Calculate horizontal offset of the leg based on accumulated trip duration
                 const left = leg.accumulatedDuration / totalDuration * width;
 
                 return (

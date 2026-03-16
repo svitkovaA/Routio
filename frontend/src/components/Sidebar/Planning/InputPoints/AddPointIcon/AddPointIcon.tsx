@@ -32,6 +32,7 @@ function AddPointIcon({
         <div className="line">
             <CustomTooltip title={t("tooltips.inputForm.addWaypoint")}>
                 <IconButton
+                    className="add-point-icon"
                     aria-label="Add intermediate waypoint"
                     onClick={onClick}
                     size="small"

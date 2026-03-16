@@ -8,20 +8,23 @@ import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import PedalBikeIcon from '@mui/icons-material/PedalBike';
 import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import { MultimodalIcon } from "../../Planning/Icons/Icons";
-import { useResult } from "../../../ResultContext";
+import { useResult } from "../../../Contexts/ResultContext";
 import { useRoute } from '../../../Routing/Route';
 import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
 import { useTranslation } from 'react-i18next';
 import "./ResultTabs.css";
 
-function ResultTabs() { 
+function ResultTabs() {
+    // Translation function
     const { t } = useTranslation();
+
     // Result context 
     const {
         setSelectedTripPatternIndex,
         resultActiveIndex ,setResultActiveIndex
     } = useResult();
 
+    // Hook for triggering route computation
     const route = useRoute();
 
     return (
@@ -55,7 +58,7 @@ function ResultTabs() {
                 </div>
             </CustomTooltip>
 
-            {/* Bicycle transport tab */}
+            {/* Bicycle tab */}
             <CustomTooltip title={t("tooltips.results.resultTabs.bicycle")}>
                 <div 
                     className={"result-mode " + (resultActiveIndex === 2 ? "selected" : "")}
@@ -70,7 +73,7 @@ function ResultTabs() {
                 </div>
             </CustomTooltip>
 
-            {/* Walking transport tab */}
+            {/* Walking tab */}
             <CustomTooltip title={t("tooltips.results.resultTabs.foot")}>
                 <div 
                     className={"result-mode " + (resultActiveIndex === 3 ? "selected" : "")}

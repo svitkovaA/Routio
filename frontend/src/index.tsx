@@ -8,9 +8,9 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import "./i18n";
 import App from './App';
-import { SettingsProvider } from './components/SettingsContext';
-import { InputProvider } from './components/InputContext';
-import { ResultProvider } from './components/ResultContext';
+import { SettingsProvider } from './components/Contexts/SettingsContext';
+import { InputProvider } from './components/Contexts/InputContext';
+import { ResultProvider } from './components/Contexts/ResultContext';
 import './index.css';
 
 const root = ReactDOM.createRoot(

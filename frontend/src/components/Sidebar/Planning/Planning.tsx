@@ -11,10 +11,10 @@ import TimeDate from "./TimeDate/TimeDate";
 import ArrivalDeparture from "./ArrivalDeparture/ArrivalDeparture";
 import Options from "./Options/Options";
 import FindButton from "./FindButton/FindButton";
-import { useResult } from "../../ResultContext";
+import { useResult } from "../../Contexts/ResultContext";
 import { useRoute } from "../../Routing/Route";
 import Preferences from "./Preferences/Preferences";
-import { useInput } from "../../InputContext";
+import { useInput } from "../../Contexts/InputContext";
 import "./Planning.css"
 
 type PlanningProps = {

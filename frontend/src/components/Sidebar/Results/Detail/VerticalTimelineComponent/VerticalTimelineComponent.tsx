@@ -8,11 +8,13 @@ import { VerticalTimeline } from "../../../../types/types";
 import "./VerticalTimelineComponent.css";
 
 type VerticalTimelineComponentProps = {
-    verticalTimeline: VerticalTimeline[];
+    verticalTimeline: VerticalTimeline[];   // Array of timeline segments corresponding to trip legs
 }
 
 function VerticalTimelineComponent({ verticalTimeline } : VerticalTimelineComponentProps) {
+    // Filter out waiting segments
     const nonWaitLegs = verticalTimeline.filter((i) => i.mode !== "wait");
+    
     return (
         <div className="vertical-timeline">
             {nonWaitLegs.map((item, index) => (
@@ -22,7 +24,7 @@ function VerticalTimelineComponent({ verticalTimeline } : VerticalTimelineCompon
                     style={{
                         borderColor: item.color,
                         height: item.length,
-                        borderStyle: (item.mode === "foot" || item.mode === "bicycle") ? 'dashed' : 'solid'
+                        borderStyle: (item.mode === "foot" || item.mode === "bicycle" || item.mode === "transfer") ? 'dashed' : 'solid'
                     }}
                 >
                     <div className="timeline-dot" />

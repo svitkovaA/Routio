@@ -9,9 +9,34 @@
     "markers": {
       "start": "START",
       "end": "CÍL"
-    }
+    },
+    "ptWithoutDelay": "Aktuálně bez zpoždění",
+    "ptCurrentDelay": "Aktuální zpoždění",
+    "clearWaypoint": "Vymazat bod",
+    "removeWaypoint": "Odstranit bod",
+    "selectPosition": "Vybrat polohu",
+    "setAsOrigin": "Nastavit jako začátek",
+    "setAsDestination": "Nastavit jako cíl",
+    "setAsWaypoint": "Nastavit jako mezibod",
+    "hideBikeStations": "Skrýt stanice kol",
+    "showBikeStations": "Zobrazit stanice kol",
+    "hideBikeRacks": "Skrýt stojany na kola",
+    "showBikeRacks": "Zobrazit stojany na kola",
+    "bike_one": "kolo",
+    "bike_few": "kola",
+    "bike_other": "kol",
+    "lat": "Lat",
+    "lon": "Lon",
+    "score": "Skóre",
+    "now": "Nyní",
+    "predicted": "Predikce",
+    "capacity": "Kapacita",
+    "setAsOriginStation": "Nastavit jako výchozí stanici kol",
+    "setAsDestinationStation": "Nastavit jako cílovou stanici kol",
+    "setAsDestinationRack": "Nastavit jako cílový stojan na kola"
   },
   "planning": {
+    "position": "Vaše poloha",
     "origin": "Výchozí bod",
     "destination": "Cíl",
     "intermediatePoint": "Mezibod {{index}}",
@@ -33,14 +58,14 @@
     },
     "routePreferences": "Preference trasy",
     "routePreference": {
-      "fastestRoute": "Nejrychlejší trasa",
-      "shortestRoute": "Nejkratší trasa",
-      "minimizeTransfers": "Minimalizovat přestupy"
+      "fastestRoute": "Nejrychlejší",
+      "shortestRoute": "Nejkratší",
+      "minimizeTransfers": "Nejméně přestupů"
     },
     "bikeOptions": "Možnosti kola",
     "bikeOption": {
-      "ownBike": "Použít vlastní kolo",
-      "sharedBike": "Použít sdílené kolo"
+      "ownBike": "Vlastní kolo",
+      "sharedBike": "Sdílené kolo"
     },
     "find": "Najít",
     "invalidAddress": "Neplatná adresa",
@@ -71,8 +96,8 @@
   },
   "informationTab": {
     "overview": "O aplikaci",
-    "howToUse": "Jak začít",
-    "features": "Další funkce"
+    "howToUse": "Plánovaní trasy",
+    "features": "Výběr stanice"
   },
   "info": {
     "overview": {
@@ -109,7 +134,9 @@
   "results": "Výsledky",
   "resultsInfo": {
     "detail": "Detail",
-    "noResults": "Nebyly nalezeny žádné výsledky"
+    "noResults": "Nebyly nalezeny žádné výsledky",
+    "warningFoot": "Vzdálenost chůze překračuje maximální povolený limit",
+    "warningBicycle": "Vzdálenost jízdy na kole překračuje maximální povolený limit"
   },
   "modeDescriptions": {
     "multimodalTransport": "Multimodální doprava",
@@ -124,7 +151,7 @@
       "moreDepartures": "Více odjezdů",
       "stops": "Zastávky",
       "historicalDelays": "Historická zpoždění",
-      "historicalDelaysOnTime": "Bez zpoždění",
+      "historicalDelaysOnTime": "Včas",
       "arrivalAfterDeparture": "má odjezd dříve než je plánovaný příjezd předchozího spoje.",
       "nonContinuousDepartures": "Nejsou dostupné další odjezdy. Zvolte pozdější čas.",
       "modes": {
@@ -134,7 +161,11 @@
         "rail": "Vlak",
         "metro": "Metro",
         "water": "Loď"
-      }
+      },
+      "transfer": "Přestup",
+      "zone": "Zóna",
+      "zones": "Zóny",
+      "elevation": "Výškový profil"
     },
     "bicycle": {
       "lockTime": "na zamknutí kola",
@@ -152,6 +183,7 @@
       }
     },
     "inputForm": {
+      "currentPosition": "Použít aktuální polohu",
       "clearField": "Vymazat toto pole",
       "mapSelect": "Vybrat polohu z mapy",
       "removeWaypoint": "Odstranit tento bod",
@@ -196,7 +228,12 @@
         "otherDepartures": "Zobrazit další odjezdy",
         "closeOtherDepartures": "Skrýt další odjezdy",
         "stopsOnRoute": "Zobrazit zastávky na trase",
-        "closeStopsOnRoute": "Skrýt zastávky na trase"
+        "closeStopsOnRoute": "Skrýt zastávky na trase",
+        "historicalDelays": "Zobrazit historická zpoždění spoje",
+        "closeHistoricalDelays": "Skrýt historická zpoždění spoje",
+        "currentDelay": "Aktuální zpoždění",
+        "elevationProfile": "Zobrazit výškový profil úseku",
+        "closeElevationProfile": "Skrýt výškový profil úseku"
       },
       "bicycle": {
         "lockTime": "Čas na uzamčení kola",
@@ -242,6 +279,7 @@
     "photon": "Služba Photon neodpovídá. Vyberte polohu na mapě."
   },
   "errors": {
-    "serverOffline": "Server je momentálně nedostupný. Zkuste to prosím později."
+    "serverOffline": "Server je momentálně nedostupný. Zkuste to prosím později.",
+    "routingFailed": "Došlo k chybě při výpočtu trasy. Zkuste to prosím znovu."
   }
 }

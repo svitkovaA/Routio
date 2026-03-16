@@ -4,25 +4,33 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import Bicycle from "./Bicycle/Bicycle";
-import Foot from "./Walk/Walk";
 import ResultListItem from "./ResultListItem/ResultListItem";
-import { useResult } from "../../../ResultContext";
+import { useResult } from "../../../Contexts/ResultContext";
+import Detail from "../Detail/Detail";
 
-function ResultList() {
+type ResultListProps = {
+    recalculatePattern: (selectedIndex: number, legIndex: number) => void;  // Function used to recalculate a trip pattern after selecting a different leg
+}
+
+function ResultList({
+    recalculatePattern
+} : ResultListProps) {
+    // Result context
     const {
         result,
         selectedTripPatternIndex, setSelectedTripPatternIndex,
         setShowDetail,
-        resultActiveIndex
+        resultActiveIndex,
+        pattern
     } = useResult();
 
+    // Displays list of trip patterns for multimodal transport, public transport and shared bicycle
     if ([0,1].includes(resultActiveIndex) || (resultActiveIndex === 2 && result.tripPatterns.length > 1)) {
         return (
             <>
                 {result.tripPatterns?.map((pattern, index) => (
                     <ResultListItem 
-                        key={`${index}`}
+                        key={`${pattern.aimedEndTime}-${index}`}
                         pattern={pattern}
                         selected={index === selectedTripPatternIndex}
                         onClick={() => setSelectedTripPatternIndex(index)}
@@ -32,14 +40,14 @@ function ResultList() {
             </>
         );
     }
+    // If only one pattern is available display directly the detail view
+    setSelectedTripPatternIndex(0);
+    
     return (
-        <>
-            {resultActiveIndex === 2 ? (
-                <Bicycle />
-            ) : (
-                <Foot />
-            )}
-        </>
+        <Detail
+            tripPattern={pattern}
+            recalculatePattern={recalculatePattern}
+        />  
     );
 }
 

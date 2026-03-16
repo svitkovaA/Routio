@@ -44,7 +44,7 @@
     left: -40px;
 }
 
-.detail-direction, .detail-departures, .detail-historical-delays {
+.detail-direction, .detail-departures, .detail-historical-delays, .elevation-profile {
     gap: 5px;
 }
 
@@ -84,8 +84,15 @@
 
 .departure-button {
     display: block;
-    margin: 5px auto;
+    margin: 0 auto;
     background-color: transparent;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+
+.departure-button:hover {
+    background-color:  rgba(5,127,115,0.2);
+    cursor: pointer;
 }
 
 .detail-trip-info {
@@ -152,6 +159,10 @@
 .historical-delay.delayed {
     color: #d32f2f;
     font-weight: 600;
+}
+
+.detail-zones {
+    padding: 5px 0;
 }
 
 /** End of file PublicTransportDetail.css */

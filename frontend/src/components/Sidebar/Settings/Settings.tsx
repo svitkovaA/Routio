@@ -8,8 +8,8 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { useTranslation } from "react-i18next";
 import TransportPreferences from "./TransportPreferences/TransportPreferences";
 import ModePreferences from "./ModePreferences/ModePreferences";
-import { useSettings } from "../../SettingsContext";
-import { useResult } from '../../ResultContext';
+import { useSettings } from "../../Contexts/SettingsContext";
+import { useResult } from '../../Contexts/ResultContext';
 import "./Settings.css";
 
 function Settings() {

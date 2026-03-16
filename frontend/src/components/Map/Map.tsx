@@ -20,10 +20,10 @@ import CustomLeafletTooltip from '../CustomTooltip/CustomLeafletTooltip';
 import { createPinIcon, SetViewOnClick, createVehiclePositionIcon } from './MapComponents';
 import { timelineIcons } from '../Sidebar/Planning/Icons/Icons';
 import CustomZoomControl from './CustomZoomControl/CustomZoomControl';
-import { useInput } from '../InputContext';
-import { useSettings } from '../SettingsContext';
-import { useResult } from '../ResultContext';
-import { useNotification } from '../NotificationContext';
+import { useInput } from '../Contexts/InputContext';
+import { useSettings } from '../Contexts/SettingsContext';
+import { useResult } from '../Contexts/ResultContext';
+import { useNotification } from '../Contexts/NotificationContext';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -204,7 +204,7 @@ function Map({
             })
             .catch((err) => {
                 // Fallback to use coordinates if reverse geocoding fails
-                showNotification(t("warnings.nominatim"), "warning");
+                // showNotification(t("warnings.nominatim"), "warning");
                 const displayName = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
                 updateWaypoints(displayName);
             });
@@ -294,9 +294,11 @@ function Map({
                                 popupRefs.current[i] = el 
                             }}
                         >
-                            {w.displayName} <br/>
-                            Lat: {w.lat.toFixed(5)} <br/>
-                            Lon: {w.lon.toFixed(5)} <br/>
+                            <strong>{w.displayName}</strong> <br/>
+                            <div className="map-lat-lon">
+                                Lat: {w.lat.toFixed(5)} <br/>
+                                Lon: {w.lon.toFixed(5)} <br/>
+                            </div>
                             <button 
                                 className="popup-button"
                                 onClick={() => {
@@ -305,7 +307,7 @@ function Map({
                                 }}
                                 disabled={loading}
                             >
-                                {waypoints.length === 2 ? "Clear waypoint" : "Remove waypoint"}
+                                {waypoints.length === 2 ? t("map.clearWaypoint") : t("map.removeWaypoint")}
                             </button>
                         </Popup>
                     </Marker>
@@ -335,9 +337,24 @@ function Map({
                     {/* Popup for vehicle position */}
                     <Popup>
                         <div className="vehicle-position-popup">
-                            {timelineIcons[p.mode]}
-                            <div className="vehicle-position-popup-direction">
-                                {p.direction}, {p.delay}
+                            <div className="vehicle-position-popup-left">
+                                <div
+                                    className="vehicle-position-popup-public-code"
+                                    style={{ backgroundColor: p.color }}
+                                >
+                                    {p.publicCode}
+                                </div>
+                                <div className="vehicle-position-popup-icon">
+                                    {timelineIcons[p.mode]}
+                                </div>
+                            </div>
+                            <div className="vehicle-position-popup-right">
+                                <div>
+                                    <strong>{p.direction}</strong>
+                                </div>
+                                <div>
+                                    {p.delay && p.delay > 0 ? `${t("map.ptCurrentDelay")}: ${p.delay} min` : t("map.ptWithoutDelay")}
+                                </div>
                             </div>
                         </div>
                     </Popup>

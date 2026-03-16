@@ -6,7 +6,7 @@
 
 import TuneIcon from '@mui/icons-material/Tune';
 import { useTranslation } from 'react-i18next';
-import { useResult } from '../../../ResultContext';
+import { useResult } from '../../../Contexts/ResultContext';
 import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
 import "./Preferences.css";
 

@@ -5,7 +5,7 @@
  */
 
 import { API_BASE_URL } from "../config/config";
-import { useResult } from "../ResultContext";
+import { useResult } from "../Contexts/ResultContext";
 
 /**
  * Hook handling trip pattern computation

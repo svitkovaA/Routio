@@ -5,7 +5,7 @@
  */
 
 .leg-preferences-wrapper {
-    width: 100%;
+    width: fit-content;
 }
 
 .leg-preferences-button{
@@ -13,6 +13,8 @@
     position: relative;
     top: 1px;
     cursor: pointer;
+    width: 40px;
+    height: 20px;
 }
 
 .leg-preferences-button .bicycle {
@@ -41,23 +43,11 @@
     top: 0px;
 }
 
-.leg-preferences-time {
-    position: relative;
-    left: 50px;
-    bottom: 5px;
-    width: 100px;
-}
-
-.leg-preferences-time.short{
-    left: 30px;
-}
-
 .leg-preferences-select-wrapper {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 20px;
-    padding-right: 20px;
 }
 
 .select-wrapper {

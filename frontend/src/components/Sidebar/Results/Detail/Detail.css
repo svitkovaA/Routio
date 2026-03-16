@@ -40,11 +40,15 @@
     position: relative;
 }
 
-.detail-time, .detail-distance, .detail-lock, .detail-direction, .detail-departures, .detail-stops, .detail-historical-delays {
+.detail-time, .detail-distance, .detail-lock, .detail-direction, .detail-departures, .detail-stops, .detail-historical-delays, .elevation-profile {
     display: flex;
     align-items: center;
     padding: 5px 0;
     font-size: var(--font-size-detail);
+}
+
+.detail-time, .detail-distance, .detail-lock {
+    gap: 2px;
 }
 
 .bicycle-detail {

@@ -13,7 +13,7 @@ import { restrictToVerticalAxis, restrictToParentElement} from '@dnd-kit/modifie
 import AddPointIcon from "./AddPointIcon/AddPointIcon";
 import SortableItem from "./SortableItem";
 import LegPreferences from "./LegPreferences/LegPreferences";
-import { useInput } from "../../../InputContext";
+import { useInput } from "../../../Contexts/InputContext";
 import CustomTooltip from "../../../CustomTooltip/CustomTooltip";
 import "./InputPoints.css";
 

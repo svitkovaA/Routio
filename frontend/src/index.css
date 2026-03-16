@@ -27,6 +27,8 @@ body {
 
     /* Info headers */
     --color-info: #057f73;
+    --color-info-opac: rgba(5,127,115,0.6);
+    --color-info-opac-hover: rgba(5,127,115,0.8);
 
     /* Bike stations */
     --color-origin-station: #2e7d32;

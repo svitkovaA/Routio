@@ -12,11 +12,13 @@ import { Leg, VerticalTimeline } from "../../../../types/types";
 import { useVerticalTimeLineHandle } from "../VerticalTimelineComponent/VerticalTimeLineHandle";
 import { timelineIcons } from '../../../Planning/Icons/Icons';
 import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
+import ElevationProfile from "../Elevation/ElevationProfile";
+import { useResult } from "../../../../Contexts/ResultContext";
 
 type WalkDetailProps = {
-    leg: Leg;
-    setVerticalTimeline: (value: VerticalTimeline[] | ((prev: VerticalTimeline[]) => VerticalTimeline[])) => void;
-    index: number;
+    leg: Leg;       // Walking leg
+    setVerticalTimeline: (value: VerticalTimeline[] | ((prev: VerticalTimeline[]) => VerticalTimeline[])) => void;  // Setter used to update the vertical timeline segments
+    index: number;  // Index of the leg within the trip pattern
 }
 
 function WalkDetail({
@@ -27,8 +29,10 @@ function WalkDetail({
     // Translation function
     const { t } = useTranslation();
 
+    // Reference to the walking detail element
     const walkDetailRef = useRef<HTMLDivElement>(null);
 
+    // Hook responsible for synchronizing the vertical timeline with the height of the walking detail component
     useVerticalTimeLineHandle(
         walkDetailRef,
         leg,
@@ -37,20 +41,37 @@ function WalkDetail({
         30
     );
 
+    // Polyline elevation data
+    const {
+        polyInfo,
+        openElevation
+    } = useResult();
+
+    // Polyline information for the current leg
+    const concPolyInfo = polyInfo[index];
+
     return (
         <div
             ref={walkDetailRef}
         >
             <div className="detail-time-distance">
+                {/* Walking mode icon */}
                 {timelineIcons["foot"]}
 
+                {/* Walking duration */}
                 <CustomTooltip title={t("tooltips.detail.segment.duration")}>
                     <div className="detail-time">
                         <AccessTimeIcon />
-                        {(leg.duration / 60).toFixed(0)} min
+                        {(() => {
+                            const totalMinutes = Math.round(leg.duration / 60);
+                            const h = Math.floor(totalMinutes / 60);
+                            const m = totalMinutes % 60;
+                            return h > 0 ? `${h}:${m.toString().padStart(2, "0")}` : `${m} min`;
+                        })()}
                     </div>
                 </CustomTooltip>
 
+                {/* Walking distance */}
                 <CustomTooltip title={t("tooltips.detail.segment.distance")}>
                     <div className="detail-distance">
                         <RouteIcon />
@@ -58,6 +79,13 @@ function WalkDetail({
                     </div>
                 </CustomTooltip>
             </div>
+
+            {/* Elevation profile of the walking segment */}
+            <ElevationProfile
+                polyInfo={concPolyInfo}
+                legIndex={index}
+                openElevation={(value: boolean) => openElevation(index, value)}
+            />
         </div>
     );
 }

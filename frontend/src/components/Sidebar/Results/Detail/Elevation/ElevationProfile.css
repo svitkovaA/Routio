@@ -1,0 +1,49 @@
+/**
+ * @file ElevationProfile.css
+ * @brief Styles for displaying an elevation profile chart
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.elevation-tooltip {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 3px 6px;
+    border: 1px solid black;
+    border-radius: 6px;
+}
+
+.apexcharts-tooltip {
+    margin-left: -3px;
+}
+
+.asc-desc {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 5px;
+    margin-bottom: -10px;
+    font-size: var(--font-size-detail);
+}
+
+.asc-desc-divs {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.elevation-fixed-tooltip {
+    position: absolute;
+    right: 0px;
+    display: flex;
+    flex-direction: row;
+    bottom: 80px;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    line-height: 1.2;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+/** End of file ElevationProfile.css */

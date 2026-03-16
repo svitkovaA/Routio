@@ -18,15 +18,15 @@ import { timelineIcons } from '../../../Planning/Icons/Icons';
 import Waystop from '../Waystop/Waystop';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
-import { useSettings } from "../../../../SettingsContext";
+import { useSettings } from "../../../../Contexts/SettingsContext";
 import "./PublicTransportDetail.css";
 
 type PublicTransportDetailProps = {
-    leg: Leg;
-    setVerticalTimeline: (value: VerticalTimeline[] | ((prev: VerticalTimeline[]) => VerticalTimeline[])) => void;
-    index: number;
-    moreDeparturesClick: () => void;
-    recalculatePattern: (selectedIndex: number) => void;
+    leg: Leg;                                               // Public transport leg displayed in the detail
+    setVerticalTimeline: (value: VerticalTimeline[] | ((prev: VerticalTimeline[]) => VerticalTimeline[])) => void;  // Setter used to update vertical timeline segments
+    index: number;                                          // Index of the leg within the trip pattern
+    moreDeparturesClick: () => void;                        // Opens extended departure options
+    recalculatePattern: (selectedIndex: number) => void;    // Recalculates trip pattern for a selected departure
 }
 
 function PublicTransportDetail({
@@ -39,11 +39,15 @@ function PublicTransportDetail({
     // Translation function
     const { t } = useTranslation();
 
+    // State controlling collapsible sections
     const [stopsOpen, setStopsOpen] = useState<boolean>(false);
     const [departuresOpen, setDeparturesOpen] = useState<boolean>(false);
     const [historicalDelaysOpen, setHistoricalDelaysOpen] = useState<boolean>(false);
+
+    // Reference to the element used for timeline height synchronization
     const publicTransportDetailRef = useRef<HTMLDivElement>(null);
 
+    // Synchronizes vertical timeline segment length with the height of this detail component
     useVerticalTimeLineHandle(
         publicTransportDetailRef,
         leg,
@@ -52,14 +56,26 @@ function PublicTransportDetail({
         -30
     );
 
+    // Settings context
     const { useHistoricalDelays } = useSettings();
 
+    // Collapse stops list when a different leg is rendered
     useEffect(() => setStopsOpen(false), [leg]);
+
+    // Collapse historical delays when a different leg is rendered
     useEffect(() => setHistoricalDelaysOpen(false), [leg]);
 
+    // Currently selected departure index
     const currentIndex = leg.otherOptions?.currentIndex;
+
+    // Available departure alternatives
     const departures = leg?.otherOptions?.departures;
-    const moreResults = departures && currentIndex !== undefined && (currentIndex - 1 > 0 || currentIndex + 2 < departures.length - 1);
+
+    // Determines whether additional departures exist outside the currently displayed range
+    const moreResults = (
+        departures && currentIndex !== undefined &&
+        (currentIndex - 1 > 0 || currentIndex + 2 < departures.length - 1)
+    );
 
     return (
         <div
@@ -71,6 +87,8 @@ function PublicTransportDetail({
             />
             {timelineIcons[leg.mode]}
             <div className="detail-trip-info">
+
+                {/* Route direction and line information */}
                 <div className="detail-direction">
                     <div className="detail-public-code" style={{ backgroundColor: leg.color}}>
                         {leg.line?.publicCode}
@@ -78,20 +96,34 @@ function PublicTransportDetail({
                     <ArrowForwardIcon sx={{ fontSize: '18px' }}/> 
                     {leg.serviceJourney?.direction}
                 </div>
+
+                {/* Current delay indicator */}
                 {leg.delay !== undefined && (
-                    <div className={"delay-info " + (leg.delay > 0 ? "delayed" : "")}>
-                        {leg.delay <= 0 ? (
-                            t("detailInfo.publicTransport.historicalDelaysOnTime")
-                        ) : (
-                            `+${leg.delay} min`
-                        )}
-                    </div>
+                    <CustomTooltip title={t("tooltips.detail.publicTransport.currentDelay")}>
+                        <div className={"delay-info " + (leg.delay > 0 ? "delayed" : "")}>
+                            {leg.delay <= 0 ? (
+                                t("detailInfo.publicTransport.historicalDelaysOnTime")
+                            ) : (
+                                `+${leg.delay} min`
+                            )}
+                        </div>
+                    </CustomTooltip>
                 )}
             </div>
-            {leg.zone_ids && leg.zone_ids.map((zone_id) => (
-                zone_id
-            ))}
+            {/* Fare zones on this segment */}
+            {leg.zone_ids && leg.zone_ids.length > 0 && (
+                <div className="detail-zones">
+                    {leg.zone_ids.length === 1 ? (
+                        `${t("detailInfo.publicTransport.zone")}: ${leg.zone_ids[0]}`
+                    ) : leg.zone_ids.length === 2 ? (
+                        `${t("detailInfo.publicTransport.zones")}: ${leg.zone_ids.join(" + ")}`
+                    ) : 
+                        `${t("detailInfo.publicTransport.zones")}: ${leg.zone_ids.join(", ")}`
+                    }
+                </div>
+            )}
             <div>
+                {/* Warning messages */}
                 {leg.nonContinuousDepartures ? (
                     <div className="warning-departures">
                         <span className="exclamation">
@@ -111,6 +143,8 @@ function PublicTransportDetail({
                         </span>
                     </div>
                 ) : (<></>)}
+
+                {/* Toggle list of alternative departures */}
                 <div 
                     onClick={() => setDeparturesOpen(!departuresOpen)}
                     className="detail-departures"
@@ -123,7 +157,7 @@ function PublicTransportDetail({
                         className="departure-icon" 
                         />
                     {t("detailInfo.publicTransport.otherDepartures")}
-                </div>
+                </div>        
                 <div className={departuresOpen ? "departure-box" : ""}>
                     {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => {
                         if (currentIndex === undefined) {
@@ -149,11 +183,10 @@ function PublicTransportDetail({
                             </div>
                         );
                     })}
-                    {departuresOpen && (
+                    {departuresOpen && moreResults && (
                         <button
                             className="departure-button"
                             onClick={moreDeparturesClick}
-                            disabled={!moreResults}
                         >
                             {t("detailInfo.publicTransport.moreDepartures")}
                         </button>
@@ -161,6 +194,7 @@ function PublicTransportDetail({
                 </div>
             </div>
             <div>
+                {/* Expandable list of stops served by the vehicle */}
                 <div 
                     onClick={() => setStopsOpen(!stopsOpen)}
                     className="detail-stops"
@@ -187,13 +221,18 @@ function PublicTransportDetail({
                     ))}
                 </div>
             </div>
+
+            {/* Historical delay statistics for this service */}
             {useHistoricalDelays && leg?.delays && Object.keys(leg.delays).length > 0 && (
                 <>
                     <div
                         onClick={() => setHistoricalDelaysOpen(!historicalDelaysOpen)}
                         className="detail-historical-delays"
                     >
-                        <KeyboardArrowDownIcon className={historicalDelaysOpen ? "" : "rotate90"}/>
+                        <CustomTooltip title={historicalDelaysOpen ? t("tooltips.detail.publicTransport.closeHistoricalDelays") : t("tooltips.detail.publicTransport.historicalDelays")}>
+                            <KeyboardArrowDownIcon className={historicalDelaysOpen ? "" : "rotate90"}/>
+                        </CustomTooltip>
+
                         <HistoryIcon 
                             className="historical-delays"
                         />
@@ -215,7 +254,7 @@ function PublicTransportDetail({
                                     </span>
 
                                     <span className={"historical-delay " + (delay > 0 ? "delayed" : "")}>
-                                        {delay <= 0 ? t("detailInfo.publicTransport.historicalDelaysOnTime") : `+${delay} min`}
+                                        + {delay} min
                                     </span>
                                 </div>
                             ))}
@@ -224,11 +263,17 @@ function PublicTransportDetail({
                 </>
             )}
 
+            {/* Duration and distance of the segment */}
             <div className="detail-time-distance">
                 <CustomTooltip title={t("tooltips.detail.segment.duration")}>
                     <div className="detail-time">
                         <AccessTimeIcon />
-                        {(leg.duration / 60).toFixed(0)} min
+                        {(() => {
+                            const totalMinutes = Math.round(leg.duration / 60);
+                            const h = Math.floor(totalMinutes / 60);
+                            const m = totalMinutes % 60;
+                            return h > 0 ? `${h}:${m.toString().padStart(2, "0")}` : `${m} min`;
+                        })()}
                     </div>
                 </CustomTooltip>
 
@@ -239,6 +284,8 @@ function PublicTransportDetail({
                     </div>
                 </CustomTooltip>
             </div>
+
+            {/* Waystop */}
             <Waystop
                 time={new Date(leg.aimedEndTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 name={leg.toPlace?.name}

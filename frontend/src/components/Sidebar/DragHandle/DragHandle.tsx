@@ -5,7 +5,7 @@
  */
 
 import { PointerEventHandler, useEffect, useRef } from "react";
-import { useResult } from "../../ResultContext";
+import { useResult } from "../../Contexts/ResultContext";
 import { useBackButtonClick } from "../Results/useBackButtonClick";
 import "./DragHandle.css";
 

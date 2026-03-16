@@ -7,7 +7,7 @@
 import MenuItem from '@mui/material/MenuItem';
 import { useTranslation } from "react-i18next";
 import { RoutePreference } from "../../../types/types";
-import { useInput } from '../../../InputContext';
+import { useInput } from '../../../Contexts/InputContext';
 import OptionSelect from './OptionSelect';
 
 /**

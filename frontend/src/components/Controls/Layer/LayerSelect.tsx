@@ -9,7 +9,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LayersIcon from '@mui/icons-material/Layers';
 import { useTranslation } from "react-i18next";
 import CustomTooltip from "../../CustomTooltip/CustomTooltip";
-import { useSettings } from "../../SettingsContext";
+import { useSettings } from "../../Contexts/SettingsContext";
 import { useLayers } from "./Layers";
 import "./LayerSelect.css";
 

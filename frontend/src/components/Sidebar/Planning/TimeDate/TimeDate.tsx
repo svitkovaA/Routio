@@ -9,7 +9,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { csCZ, enUS, skSK } from '@mui/x-date-pickers/locales';
-import { useInput } from '../../../InputContext';
+import { useInput } from '../../../Contexts/InputContext';
 import { useTranslation } from "react-i18next";
 import "dayjs/locale/cs"; 
 import "dayjs/locale/en"; 

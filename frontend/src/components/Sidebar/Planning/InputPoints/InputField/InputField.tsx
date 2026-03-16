@@ -4,15 +4,17 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { memo, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import TextField from "@mui/material/TextField";
 import { InputText, Waypoint } from "../../../../types/types";
 import LocationDot from "./LocationDot";
 import ClearInputField from "./ClearInputField";
 import RemoveInputField from "./RemoveInputField";
-import { useInput } from "../../../../InputContext";
+import Geolocation from "./Geolocation";
+import { useInput } from "../../../../Contexts/InputContext";
 import "./InputField.css";
+import { useNotification } from "../../../../Contexts/NotificationContext";
 
 type InputFieldProps = {
     index: number;                                  // Index of waypoint in array
@@ -34,6 +36,18 @@ type InputFieldProps = {
     closeSidebar: () => void;                       // Closes sidebar
 }
 
+function parseCoordinates(input: string) {
+    const parts = input.split(/[,;\s]+/);
+    const lat = parseFloat(parts[0]);
+    const lon = parseFloat(parts[1]);
+
+    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+        return { lat, lon };
+    }
+
+    return null;
+}
+
 function InputField({
     index,
     lastIndex,
@@ -48,7 +62,7 @@ function InputField({
     closeSidebar
 } : InputFieldProps) {
     // Translation function
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     // Reference to the underlying input element
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -60,8 +74,12 @@ function InputField({
         removeWaypoint,
         setMapSelectionIndex,
         setWaypoints,
-        fieldErrors, setFieldErrors
+        fieldErrors, setFieldErrors,
+        waypoints
     } = useInput();
+
+    // Notification context
+    const { showNotification } = useNotification();
 
     // Returns label based on waypoint position
     const label = () => {
@@ -94,6 +112,80 @@ function InputField({
     // Indicate whether required error occurred
     const isInvalidAddress = !isFocused && waypoint.displayName.trim() !== "" && (waypoint.lat === 0 || waypoint.lon === 0);
 
+    // Stores the previously active language
+    const previousLanguage = useRef(i18n.language);
+
+    useEffect(() => {
+        // Language before the change
+        const oldLanguage = previousLanguage.current;
+
+        // Update waypoints after language change
+        setWaypoints(prev => {
+            const updated = [...prev];
+
+            // Rerender string when language changes
+            updated.forEach((wp, i) => {
+                if (wp.displayName === t("planning.position", { lng: oldLanguage })) {
+                    updated[i] = {
+                        ...wp,
+                        displayName: t("planning.position")
+                    };
+                }
+            });
+
+            return updated;
+        });
+
+        // Store current language for the next change detection
+        previousLanguage.current = i18n.language;
+    }, [i18n.language]);
+
+    // Detects the users current geographic position
+    const detectCurrentPosition = () => {
+        // Check if the browser supports the Geolocation API
+        if (!navigator.geolocation) {
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                // Extract latitude and longitude from the detected position
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                // Update the waypoint list
+                setWaypoints(prev => {
+                    const updated = [...prev];
+
+                    updated[index] = {
+                        ...updated[index],
+                        isPreview: false,
+                        isActive: true,
+                        displayName: t("planning.position"),
+                        lat,
+                        lon
+                    };
+
+                    return updated;
+                });
+            },
+            () => {
+                // If location detection fails
+                showNotification("Unable to detect current position.", "error");
+            },
+            {
+                enableHighAccuracy: true
+            }
+        );
+    };
+
+    // Updates error on coordinates change
+    useEffect(() => {
+        if (waypoint.lat !== 0 && waypoint.lon !== 0) {
+            setFieldErrors(prev => prev.filter(i => i !== index));
+        }
+    }, [waypoint.lat, waypoint.lon]);
+
     return (
         <TextField
             required
@@ -106,12 +198,13 @@ function InputField({
             value={waypoint.displayName}
             sx={{
                 position: "relative",
-
+                zIndex: 1,
+                backgroundColor: "var(--color-background)",
                 "& .MuiFormHelperText-root": {
-                position: "absolute",
-                bottom: "-18px",
-                right: 0,
-                margin: 0
+                    position: "absolute",
+                    bottom: "-18px",
+                    right: 0,
+                    margin: 0
                 },
             }}
             onChange={(e) => {
@@ -138,11 +231,41 @@ function InputField({
                     setWaypoints(prev => {
                         // No suggestion selected
                         if (!suggestion) {
-                            prev[index] = {
-                                ...prev[index],
-                                isPreview: false,
-                                lat: 0,
-                                lon: 0
+                            // Regex for coordinates
+                            const coordsRegex = /^\s*-?\d+(\.\d+)?\s*[,;\s]\s*-?\d+(\.\d+)?\s*$/;
+
+                            // Input field contains geographic coordinates
+                            if (coordsRegex.test(waypoint.displayName)) {
+                                const parsed = parseCoordinates(waypoint.displayName)
+                                // Not possible to parse coordinates, set invalid field
+                                if (!parsed) {
+                                    prev[index] = {
+                                        ...prev[index],
+                                        isPreview: false,
+                                        lat: 0,
+                                        lon: 0
+                                    }
+                                }
+                                // Possible to parse coordinates, set it as input
+                                else {
+                                    prev[index] = {
+                                        ...prev[index],
+                                        isPreview: false,
+                                        isActive: true,
+                                        displayName: `${parsed.lat.toFixed(5)}, ${parsed.lon.toFixed(5)}`,
+                                        lat: parsed.lat,
+                                        lon: parsed.lon
+                                    }
+                                }
+                            }
+                            // No matching regex, set invalid field
+                            else {
+                                prev[index] = {
+                                    ...prev[index],
+                                    isPreview: false,
+                                    lat: 0,
+                                    lon: 0
+                                }
                             }
                         }
                         // Apply selected suggestion
@@ -181,7 +304,14 @@ function InputField({
                             clearWaypoint={() => clearWaypoint(index, true)}
                             render={index === activeField && waypoint.displayName.length > 0}
                         />
-                        
+
+                        {index === 0 && !waypoints.some(w => w.displayName === t("planning.position")) && (
+                            <Geolocation
+                                onClick={detectCurrentPosition}
+                                render={index !== activeField || waypoint.displayName.length <= 0}
+                            />
+                        )}
+                                            
                         <LocationDot 
                             onClick={() => {
                                 setMapSelectionIndex(index);

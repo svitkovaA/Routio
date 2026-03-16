@@ -13,4 +13,8 @@
     margin-top: 10px;
 }
 
+.section .MuiFormControlLabel-root {
+    margin-left: 0;
+}
+
 /** End of file TransportPreferences.css */

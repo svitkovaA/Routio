@@ -7,12 +7,12 @@
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config/config";
-import { useInput } from "../InputContext";
-import { useResult } from "../ResultContext";
-import { useSettings } from "../SettingsContext";
+import { useInput } from "../Contexts/InputContext";
+import { useResult } from "../Contexts/ResultContext";
+import { useSettings } from "../Contexts/SettingsContext";
 import { storeWaypoints } from "../Sidebar/Planning/InputPoints/WaypointStorage";
 import { Mode } from "../types/types";
-import { useNotification } from "../NotificationContext";
+import { useNotification } from "../Contexts/NotificationContext";
 
 /**
  * Hook for computing a route based on current application state
@@ -128,7 +128,22 @@ export function useRoute() {
                 resultIndex === 1 ? "walk_transit" :
                 resultIndex === 2 ? "bicycle" : "foot";
 
+            // Check server status
             try {
+                try {
+                    const status = await fetch(`${API_BASE_URL}/serverStatus`);
+                    
+                    if (!status.ok) {
+                        throw new Error("Server offline");
+                    }
+                }
+                catch (error: any) {
+                    showNotification(t("errors.serverOffline"), "error");
+                    throw error;
+                }
+
+                setShowResults(true)
+
                 // Send routing request to backend
                 const result = await fetch(`${API_BASE_URL}/route`, {
                     method: 'POST',
@@ -160,15 +175,14 @@ export function useRoute() {
                 });
 
                 if (!result.ok) {
+                    showNotification(t("errors.routingFailed"), "error");
                     throw new Error("Server error");
                 }
 
-                setShowResults(true);
-            
                 const newResult = await result.json();
     
                 // Save waypoints to LocalStorage
-                storeWaypoints(waypoints);
+                storeWaypoints(waypoints, t("planning.position"));
     
                 // Store routing result
                 setResults(prev => 
@@ -184,8 +198,6 @@ export function useRoute() {
                 if (error.name === "AbortError") {
                     return;
                 }
-                
-                showNotification(t("errors.serverOffline"), "error");
                 console.error(error);
             }
             finally {
@@ -199,7 +211,7 @@ export function useRoute() {
     }, [waypoints, legPreferences, arriveBy, useOwnBike, preference, date, time, maxTransfers, selectedModes,
         maxBikeDistance,bikeAverageSpeed, maxBikesharingDistance, bikesharingAverageSpeed, maxWalkDistance, 
         walkAverageSpeed, bikesharingLockTime, bikeLockTime, results, abortRef, setLoading, setResultActiveIndex,
-        setResults, setShowResults, showNotification, useHistoricalDelays
+        setResults, setShowResults, showNotification, useHistoricalDelays, t
     ]);
     return route;
 }

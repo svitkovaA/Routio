@@ -4,6 +4,10 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+.add-point-icon {
+    z-index: 1;
+}
+
 .line {
     position: relative;
     display: inline-block;
@@ -28,7 +32,7 @@
 
 .leg-preferences-open .line::before {
     top: -13px;
-    height: 20px;
+    height: 22px;
 }
 
 .line::after {

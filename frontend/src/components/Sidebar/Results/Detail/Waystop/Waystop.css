@@ -1,3 +1,9 @@
+/**
+ * @file Waystop.css
+ * @brief Styles for displaying a stop in the trip detail
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 .waystop {
     height: 30px;
     border-bottom: 1px solid black;
@@ -15,3 +21,5 @@
     gap: 10px;
     height: 30px;
 }
+
+/** End of file Waystop.css */

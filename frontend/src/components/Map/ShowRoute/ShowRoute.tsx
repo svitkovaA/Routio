@@ -4,116 +4,197 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useEffect, useState } from "react";
-import { Polyline } from "react-leaflet";
-import polyline from '@mapbox/polyline';
-import { useResult } from "../../ResultContext";
+import { useMemo } from "react";
+import { Polyline, useMap } from "react-leaflet";
+import { useResult } from "../../Contexts/ResultContext";
+import React from "react";
+import { CircleMarker } from "react-leaflet";
+import { useMapEvents } from "react-leaflet";
 
 function ShowRoute() {
     // Result context
     const {
         resultActiveIndex, 
-        results,
         selectedTripPatternIndex,
-        showResults, setResults,
-        result,
-        pattern
+        showResults,
+        vehicleRealtimeData,
+        polyInfo,
+        polylineForceUpdate,
+        hoveredProfileIndex,
+        elevationLegIndex,
+        setElevationLegIndex,
+        setHoveredProfileIndex,
+        showBikeStations
     } = useResult();
 
-    // State for force rerender after polyline computation
-    const [forceUpdate, setForceUpdate] = useState(0);
-    
     /**
-     * Computes and stores decoded polyline data for the active trip pattern
+     * Creates a map tripId -> vehicle realtime data
      */
-    useEffect(() => {
-        // Validate required state
-        if (resultActiveIndex === -1 || !result?.active || !pattern?.legs) {
-            return;
-        }
-        
-        // Do not recompute if polyline data already exists
-        if (pattern.polyInfo.length !== 0) {
-            return;
-        }
-        
-        const legs = pattern.legs;
-
-        // Decode polyline coordinates for each leg
-        const polyInfoTemp = legs.map(leg => {
-            const coords = Array.isArray(leg.pointsOnLink.points) ? leg.pointsOnLink.points.flatMap(p => polyline.decode(p)) : polyline.decode(leg.pointsOnLink.points);
-            const inactiveCoords = leg.pointsOnLink.inactivePoints.map(p => polyline.decode(p));
-            
-            return {
-                coords: coords,
-                inactiveCoords: inactiveCoords,
-                mode: leg.mode || 'unknown',
-                color: leg.color || '#000000',
-                pathOptions: leg.mode === "foot" || leg.mode === "bicycle" ? {dashArray: "5px, 5px"} : {}
-            };
+    const vehicleMap = useMemo(() => {
+        const map = new Map();
+        vehicleRealtimeData.forEach(v => {
+            map.set(v.tripId, v);
         });
-        
-        // Store computed polyline information in results context
-        const newResults = [...results];
-        newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex].polyInfo = polyInfoTemp;
-        setResults(newResults);
-        
-        // Force rerender to update displayed polylines
-        setForceUpdate(prev => prev + 1);
-    }, [results, resultActiveIndex, selectedTripPatternIndex, pattern, setResults, result?.active]);
+        return map;
+    }, [vehicleRealtimeData]);
+
+    // Determines whether bike stations are closed
+    const stationsClosed = showBikeStations.every(s => !s);
+
+    const map = useMap();
+    const zoom = map.getZoom();
+
+    // Pixel distance threshold for detecting nearest elevation point
+    let hoverThresholdPx = 30;
+
+    if (zoom <= 9) hoverThresholdPx = 30;
+    else if (zoom === 10) hoverThresholdPx = 24;
+    else if (zoom === 11) hoverThresholdPx = 18;
+    else if (zoom === 12) hoverThresholdPx = 12;
+    else if (zoom <= 14) hoverThresholdPx = 10;
+    else if (zoom <=18) hoverThresholdPx = 45;
+    else hoverThresholdPx = 10;
+
+    useMapEvents({
+        mousemove(e) {
+            // Disable elevation hover when bike stations are visible
+            if (!stationsClosed) {
+                return;
+            }
+
+            let bestLeg = null;
+            let bestIndex = 0;
+            let bestDist = Infinity;
+
+            // Convert mouse position to pixel coordinates
+            const mousePoint = map.latLngToLayerPoint(e.latlng);
+
+            // Iterate through all route legs and their elevation points to find
+            // the closest point to the cursor
+            polyInfo.forEach((leg, legIndex) => {
+                if (!leg.elevationProfile) {
+                    return;
+                }
+
+                leg.elevationProfile.forEach((p, pointIndex) => {
+                    // Converts coordinates from geographic coordinates to pixels
+                    const point = map.latLngToLayerPoint([p.lat, p.lon]);
+
+                    // Computes distance between  a mouse cursor and the elevation point
+                    const dx = point.x - mousePoint.x;
+                    const dy = point.y - mousePoint.y;
+
+                    const d = dx * dx + dy * dy;
+
+                    if (d < bestDist) {
+                        bestDist = d;
+                        bestIndex = pointIndex;
+                        bestLeg = legIndex;
+                    }
+
+                });
+
+            });
+
+            // Update hovered elevation point if it is within threshold distance
+            if (bestLeg !== null && bestDist < hoverThresholdPx * hoverThresholdPx) {
+                setElevationLegIndex(bestLeg);
+                setHoveredProfileIndex(bestIndex);
+            } 
+            else {
+                setElevationLegIndex(null);
+                setHoveredProfileIndex(null);
+            }
+        }
+    });
     
-    // Do not render if results are not available
-    if (!showResults || 
-        resultActiveIndex === -1 || 
-        !result?.active || 
-        !pattern?.legs) {
+    // Do not render if there are no results
+    if (!showResults || polyInfo.length === 0) {
         return null;
     }
-    
-    const polyInfo = pattern.polyInfo || [];
-    
-    // Do not render if no polyline data is available
-    if (polyInfo.length === 0) {
-        return null;
+
+    let elevationLeg = null;
+    let markerPosition = null;
+
+    // Determine marker position for hovered elevation point
+    if (elevationLegIndex !== null && stationsClosed) {
+        elevationLeg = polyInfo[elevationLegIndex] ?? null;
+        
+        if (
+            hoveredProfileIndex !== null &&
+            elevationLeg?.elevationProfile &&
+            hoveredProfileIndex < elevationLeg.elevationProfile.length &&
+            elevationLeg.elevationOpen
+        ) {
+            markerPosition = hoveredProfileIndex !== null &&
+                elevationLeg?.elevationProfile &&
+                elevationLeg.elevationProfile[hoveredProfileIndex]
+                    ? [
+                        elevationLeg.elevationProfile[hoveredProfileIndex].lat,
+                        elevationLeg.elevationProfile[hoveredProfileIndex].lon
+                    ]
+                    : null;
+        }
     }
-    
+
     return (
-        <>
-            {polyInfo.map((info, index) => (
-                <>
-                    <Polyline
-                        key={`outline-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${forceUpdate}`}
-                        positions={info.coords}
-                        color="rgba(255,255,255,0.7)"
-                        pathOptions={{
-                            ...info.pathOptions,
-                            weight: info.pathOptions?.dashArray === "5px, 5px" ? 2 : 6
-                        }}
-                    />
-                    <Polyline
-                        key={`main-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${forceUpdate}`}
-                        positions={info.coords}
-                        color={info.color}
-                        pathOptions={{
-                            ...info.pathOptions,
-                            weight: 4
-                        }}
-                    />
-                    {info.inactiveCoords.map((c, i) => (
-                         <Polyline
-                            key={`${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${forceUpdate}-inactive-${i}`}
-                            positions={c}
+        <React.Fragment key={`${resultActiveIndex}-${selectedTripPatternIndex}-${polylineForceUpdate}`}>
+            {/* Render route polylines for each leg of the trip */}
+            {polyInfo.map((info, index) => {
+                const vehiclePosition = vehicleMap.get(info.tripId);
+
+                // Determines whether realtime vehicle data are present and the inactive coordinates will be displayed
+                const displayInactiveCoords = vehiclePosition !== undefined && vehiclePosition.lat !== -1 && vehiclePosition.lon !== -1;
+                
+                return (
+                    <React.Fragment key={`route-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${polylineForceUpdate}`} >
+                        {/* White outline polyline for active coordinates */}
+                        <Polyline
+                            key={`outline-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${polylineForceUpdate}-${info.color}`}
+                            positions={info.coords}
+                            color="rgba(255,255,255,0.7)"
+                            pathOptions={{
+                                ...info.pathOptions,
+                                weight: info.pathOptions?.dashArray === "5px, 5px" ? 2 : 6
+                            }}
+                        />
+                        {/* Main polyline for active coordinates */}
+                        <Polyline
+                            key={`main-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${polylineForceUpdate}-${info.color}`}
+                            positions={info.coords}
                             color={info.color}
                             pathOptions={{
                                 ...info.pathOptions,
-                                opacity: 0.6,
-                                weight: 2,
+                                weight: 4
                             }}
                         />
-                    ))}
-                </>
-            ))}
-        </>
+
+                        {/* Render inactive route segments when realtime vehicle position is available */}
+                        {displayInactiveCoords && info.inactiveCoords.map((c, i) => (
+                            <Polyline
+                                key={`${resultActiveIndex}-${selectedTripPatternIndex}-${index}-inactive-${i}-${polylineForceUpdate}`}
+                                positions={c}
+                                color={info.color}
+                                pathOptions={{
+                                    ...info.pathOptions,
+                                    opacity: 0.6,
+                                    weight: 2,
+                                }}
+                            />
+                        ))}
+                    </React.Fragment>
+                );
+            })}
+
+            {/* Marker showing the hovered elevation point on the map */}
+            {markerPosition && (
+                <CircleMarker
+                    center={markerPosition as [number, number]}
+                    radius={6}
+                    pathOptions={{ color: "var(--color-info)", fillColor: "white", fillOpacity: 1 }}
+                />
+            )}
+        </React.Fragment>
     );
 }
 

@@ -9,7 +9,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { IconButton } from "@mui/material";
-import { useResult } from "../../../ResultContext";
+import { useResult } from "../../../Contexts/ResultContext";
 import { useTranslation } from 'react-i18next';
 import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
 import "./DetailSwitch.css"
@@ -21,10 +21,14 @@ type DetailSwitchProps = {
 function DetailSwitch({
     numOfPatterns,
 }: DetailSwitchProps) {
+    // Translation function
     const { t } = useTranslation();
 
     // Result context
-    const { selectedTripPatternIndex, setSelectedTripPatternIndex } = useResult();
+    const {
+        selectedTripPatternIndex,
+        setSelectedTripPatternIndex
+    } = useResult();
 
     return (
         <div className="detail-switch">

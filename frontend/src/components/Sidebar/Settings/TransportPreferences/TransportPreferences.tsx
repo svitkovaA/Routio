@@ -12,8 +12,9 @@ import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
 import Section from '../ModePreferences/Section/Section';
 import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
-import { useSettings } from '../../../SettingsContext';
+import { useSettings } from '../../../Contexts/SettingsContext';
 import "./TransportPreferences.css";
+import Switch from '@mui/material/Switch';
 
 function TransportPreferences() {
     // Translation function
@@ -111,20 +112,23 @@ function TransportPreferences() {
                         ))}
                     </FormGroup>
                 </div>
+                {/* Historical delays */}
                 <div className="section transport-delays">
                     <FormControlLabel
+                        className="section"
+                        label={t("settingsTab.useHistoricalDelays")}
+                        labelPlacement="start"
                         control={
                             <CustomTooltip title={useHistoricalDelays 
                                 ? t("tooltips.settings.disableHistoricalDelays")
                                 : t("tooltips.settings.enableHistoricalDelays") 
                             }>
-                                <Checkbox
+                                <Switch
                                     checked={useHistoricalDelays}
                                     onChange={(e) => setUseHistoricalDelays(e.target.checked)}
                                 />
                             </CustomTooltip>
                         }
-                        label={t("settingsTab.useHistoricalDelays")}
                     />
                 </div>
             </div>

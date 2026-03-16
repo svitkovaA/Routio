@@ -9,9 +9,33 @@
     "markers": {
       "start": "START",
       "end": "END"
-    }
+    },
+    "ptWithoutDelay": "Currently without delay",
+    "ptCurrentDelay": "Current delay",
+    "clearWaypoint": "Clear waypoint",
+    "removeWaypoint": "Remove waypoint",
+    "selectPosition": "Select position",
+    "setAsOrigin": "Set as origin",
+    "setAsDestination": "Set as destination",
+    "setAsWaypoint": "Set as waypoint",
+    "hideBikeStations": "Hide bike stations",
+    "showBikeStations": "Show bike stations",
+    "hideBikeRacks": "Hide bike racks",
+    "showBikeRacks": "Show bike racks",
+    "bike_one": "bike",
+    "bike_other": "bikes",
+    "lat": "Lat",
+    "lon": "Lon",
+    "score": "Score",
+    "now": "Now",
+    "predicted": "Prediction",
+    "capacity": "Capacity",
+    "setAsOriginStation": "Set as origin bike station",
+    "setAsDestinationStation": "Set as destination bike station",
+    "setAsDestinationRack": "Set as destination bike rack"
   },
   "planning": {
+    "position": "Your position",
     "origin": "Origin",
     "destination": "Destination",
     "intermediatePoint": "Intermediate point {{index}}",
@@ -33,14 +57,14 @@
     },
     "routePreferences": "Route preferences",
     "routePreference": {
-      "fastestRoute": "Fastest route",
-      "shortestRoute": "Shortest route",
-      "minimizeTransfers": "Minimize transfers"
+      "fastestRoute": "Fastest",
+      "shortestRoute": "Shortest",
+      "minimizeTransfers": "Min transfers"
     },
     "bikeOptions": "Bike options",
     "bikeOption": {
-      "ownBike": "Use own bike",
-      "sharedBike": "Use shared bike"
+      "ownBike": "Own bike",
+      "sharedBike": "Shared bike"
     },
     "find": "Find",
     "invalidAddress": "Invalid address",
@@ -71,8 +95,8 @@
   },
   "informationTab": {
     "overview": "Overview",
-    "howToUse": "Getting started",
-    "features": "Advanced features"
+    "howToUse": "Route Planning",
+    "features": "Station Selection"
   },
   "info": {
     "overview": {
@@ -109,7 +133,9 @@
   "results": "Results",
   "resultsInfo": {
     "detail": "Detail",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "warningFoot": "Walking distance exceeds the maximum allowed limit",
+    "warningBicycle": "Cycling distance exceeds the maximum allowed limit"
   },
   "modeDescriptions": {
     "multimodalTransport": "All means of transport",
@@ -134,7 +160,11 @@
         "rail": "Train",
         "metro": "Metro",
         "water": "Boat"
-      }
+      },
+      "transfer": "Transfer",
+      "zone": "Zone",
+      "zones": "Zones",
+      "elevation": "Elevation profile"
     },
     "bicycle": {
       "lockTime": "lock time",
@@ -152,6 +182,7 @@
       }
     },
     "inputForm": {
+      "currentPosition": "Use current position",
       "clearField": "Clear this field",
       "mapSelect": "Pick a location from the map",
       "removeWaypoint": "Remove this stop",
@@ -196,7 +227,12 @@
         "otherDepartures": "Show other departures",
         "closeOtherDepartures": "Hide other departures",
         "stopsOnRoute": "Show stops on route",
-        "closeStopsOnRoute": "Hide stops on route"
+        "closeStopsOnRoute": "Hide stops on route",
+        "historicalDelays": "Show historical delays of the connection",
+        "closeHistoricalDelays": "Hide historical delays of the connection",
+        "currentDelay": "Current delay",
+        "elevationProfile": "Show elevation profile",
+        "closeElevationProfile": "Hide elevation profile"
       },
       "bicycle": {
         "lockTime": "Time to lock the bike",
@@ -242,6 +278,7 @@
     "photon": "Photon is not responding. Please select a location on the map."
   },
   "errors": {
-    "serverOffline": "The server is currently unavailable. Please try again later."
+    "serverOffline": "The server is currently unavailable. Please try again later.",
+    "routingFailed": "An error occurred while calculating the route. Please try again."
   }
 }

@@ -1,6 +1,6 @@
 /**
  * @file DetailButton.tsx
- * @brief Button component for showing detailed information about the trip
+ * @brief Button component for displaying information about the trip
  * @author Andrea Svitkova (xsvitka00)
  */
 

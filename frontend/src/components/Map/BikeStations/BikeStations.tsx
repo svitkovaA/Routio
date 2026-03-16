@@ -7,7 +7,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { Marker, Popup, useMapEvent } from "react-leaflet";
 import { useTranslation } from "react-i18next";
-import { useResult } from "../../ResultContext";
+import { useResult } from "../../Contexts/ResultContext";
 import { useChangeBikeStation } from "../../Routing/ChangeBikeStation";
 import { createBikeStationPin, createSmallBikeStationPin } from "../MapComponents";
 import CustomLeafletTooltip from "../../CustomTooltip/CustomLeafletTooltip";
@@ -25,19 +25,15 @@ function BikeStations({
 
     // Result context
     const {
-        results,
         showResults,
-        resultActiveIndex,
-        selectedTripPatternIndex,
         pattern,
-        loading
+        loading,
+        showBikeStations,
+        setShowBikeStations
     } = useResult();
 
     // State handling map zoom level
     const [zoom, setZoom] = useState<number>(0);
-
-    // State handling visibility flags for alternative bike stations
-    const [showBikeStations, setShowBikeStations] = useState<boolean[]>([]);
 
     // Handler for changing selected bike station
     const changeBikeStation = useChangeBikeStation();
@@ -51,11 +47,11 @@ function BikeStations({
      * Initializes bike station visibility flags when route changes
      */
     useEffect(() => {
-        const currentLegs = pattern?.legs ?? [];
+        const currentLegs = pattern?.originalLegs ?? [];
         if (currentLegs.length > 0) {
             setShowBikeStations(currentLegs.map(() => false));
         }
-    }, [results, resultActiveIndex, selectedTripPatternIndex, pattern?.legs]);
+    }, [pattern?.originalLegs]);
 
     // Do not render if no routing results are displayed
     if (!showResults) {
@@ -73,7 +69,7 @@ function BikeStations({
 
     return (
         <>
-            {pattern?.legs.map((leg, index) => {
+            {pattern?.originalLegs.map((leg, index) => {
                 if (!leg || leg.mode !== "wait" || !leg?.bikeStationInfo) {
                     return null;
                 }
@@ -81,6 +77,8 @@ function BikeStations({
                 const origin = leg.bikeStationInfo.origin
                 const selectedIndex = leg.bikeStationInfo.selectedBikeStationIndex;
                 const rack = leg.bikeStationInfo.rack;
+                const selectedStation = leg.bikeStationInfo.bikeStations[selectedIndex];
+                const capacity = selectedStation.place.capacity;
 
                 return (
                     <Fragment key={`${index}`}>
@@ -95,11 +93,47 @@ function BikeStations({
                             </CustomLeafletTooltip>
 
                             <Popup autoPan={false}>
+                                <strong>{selectedStation.place.name}</strong> <br/>
+                                <div className="bike-stations-popup-info">
+                                    <div className="bike-stations-coords">
+                                        <div>{t("map.lat")}: {leg.bikeStationInfo?.latitude.toFixed(5)}</div>
+                                        <div>{t("map.lon")}: {leg.bikeStationInfo?.longitude.toFixed(5)}</div>
+                                        <div>{t("map.score")}: {(selectedStation.score * 100).toFixed(2)} %</div>
+                                    </div>
+                                    {leg.bikeStationInfo.origin ? (
+                                        <>
+                                            <div className="bike-stations-bike-count">
+                                                <div className="count-header">{t("map.now")}</div>
+                                                <div className="count">
+                                                    {selectedStation.place.bikesAvailable !== undefined && selectedStation.place.bikesAvailable < 10 ? selectedStation.place.bikesAvailable : "10+"}
+                                                </div>
+                                                <div>{t("map.bike", { count: selectedStation.place.bikesAvailable })}</div>
+                                            </div>
+                                            <div className="bike-stations-bike-count">
+                                                <div className="count-header">{t("map.predicted")}</div>
+                                                <div className="count">{selectedStation.place.predictedBikes !== null ? selectedStation.place.predictedBikes : "--"}</div>
+                                                <div>{t("map.bike", { count: selectedStation.place.bikesAvailable })}</div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="bike-stations-bike-count">
+                                            <div className="count-header">{t("map.capacity")}</div>
+                                            <div className="count">
+                                            {capacity !== undefined && capacity < 10 ? capacity : "10+"}
+                                            </div>
+                                            <div>{t("map.bike", { count: capacity ?? 0 })}</div>
+                                        </div>
+                                    )}
+                                </div>
                                 <button
+                                    className="popup-button"
                                     onClick={() => invertBikeStationAtIndex(index)}
-                                    disabled={loading}
+                                    disabled={loading || leg?.bikeStationInfo.bikeStations.length === 1}
                                 >
-                                    {showBikeStations[index] ? "Hide bike stations" : "Show bike stations"}
+                                    {rack
+                                        ? (showBikeStations[index] ? t("map.hideBikeRacks") : t("map.showBikeRacks"))
+                                        : (showBikeStations[index] ? t("map.hideBikeStations") : t("map.showBikeStations"))
+                                    }
                                 </button>
                             </Popup>
                         </Marker>
@@ -119,19 +153,45 @@ function BikeStations({
 
                                     {/* Popup information */}
                                     <Popup autoPan={false}>
-                                        Index: {bikeStationIndex} <br/>
-                                        Score: {station.score} <br/>
-                                        Distance: {station.distance} <br/>
-                                        {rack ? (
-                                            <>Capacity:  {station.place?.capacity} <br/> </>
-                                        ) : (
-                                            <>BikesAvailable: {station.place.bikesAvailable} <br/> </>
-                                        )}
+                                        <strong>{station.place.name}</strong> <br/>
+                                        <div className="bike-stations-popup-info">
+                                            <div className="bike-stations-coords">
+                                                <div>{t("map.lat")}: {station.place.latitude.toFixed(5)}</div>
+                                                <div>{t("map.lon")}: {station.place.longitude.toFixed(5)}</div>
+                                                <div>{t("map.score")}: {(station.score * 100).toFixed(2)} %</div>
+                                            </div>
+                                            {leg.bikeStationInfo?.origin ? (
+                                                <>
+                                                    <div className="bike-stations-bike-count">
+                                                        <div className="count-header">{t("map.now")}</div>
+                                                        <div className="count">
+                                                            {station.place.bikesAvailable !== undefined && station.place.bikesAvailable < 10 ? station.place.bikesAvailable : "10+"}
+                                                        </div>
+                                                        <div>{t("map.bike", { count: station.place.bikesAvailable })}</div>
+                                                    </div>
+                                                    <div className="bike-stations-bike-count">
+                                                        <div className="count-header">{t("map.predicted")}</div>
+                                                        <div className="count">{station.place.predictedBikes !== null ? station.place.predictedBikes : "--"}</div>
+                                                        <div>{t("map.bike", { count: station.place.bikesAvailable })}</div>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <div className="bike-stations-bike-count">
+                                                    <div className="count-header">{t("map.capacity")}</div>
+                                                    <div className="count">
+                                                    {station.place.capacity !== undefined && station.place.capacity < 10 ? station.place.capacity : "10+"}
+                                                    </div>
+                                                    <div>{t("map.bike", { count: station.place.capacity })}</div>
+                                                </div>
+                                            )}
+                                        </div>
                                         <button 
                                             className="popup-button"
                                             onClick={() => changeBikeStation(origin, bikeStationIndex, leg.bikeStationInfo?.bikeStations as any, index)}
                                         >
-                                            Set as {origin ? "origin" : "destination"} bike station
+                                            {leg.bikeStationInfo?.origin ? t("map.setAsOriginStation")
+                                            : rack && !leg.bikeStationInfo?.origin ? t("map.setAsDestinationRack")
+                                            : t("map.setAsDestinationStation")}
                                         </button>
                                     </Popup>
                                 </Marker>

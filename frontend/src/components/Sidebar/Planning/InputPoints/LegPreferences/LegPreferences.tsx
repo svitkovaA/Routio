@@ -8,9 +8,8 @@ import ClickAwayListener from "@mui/material/ClickAwayListener";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import { modeIcons } from "../../Icons/Icons";
 import ModeSelect from "./Select/ModeSelect";
-import { useInput } from "../../../../InputContext";
+import { useInput } from "../../../../Contexts/InputContext";
 import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
-import WaitSelect from "./Select/WaitSelect";
 import "./LegPreferences.css";
 
 type LegPreferencesProps = {
@@ -58,9 +57,6 @@ function LegPreferences({
                         {modeIcons.map((mode) => 
                             mode.value === legPreferences[index].mode ? mode.html : null
                         )}
-                        <div className={"leg-preferences-time " + (legPreferences[index].mode !== "multimodal" ? "short" : "")}>
-                            {legPreferences[index].wait.hour()*60+legPreferences[index].wait.minute()} min
-                        </div>
                     </div>
                 </CustomTooltip>
             ) : (
@@ -76,9 +72,6 @@ function LegPreferences({
                     <div className="leg-preferences-select-wrapper">
                         <div className="select-wrapper">
                             <ModeSelect
-                                index={index}
-                            />                                
-                            <WaitSelect
                                 index={index}
                             />
                         </div>

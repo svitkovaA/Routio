@@ -5,6 +5,7 @@
  */
 
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useTranslation } from "react-i18next";
 import ResultTabs from "./ResultTabs/ResultTabs";
 import ResultList from "./ResultList/ResultList";
@@ -12,7 +13,7 @@ import ResultListItem from "./ResultList/ResultListItem/ResultListItem";
 import DetailSwitch from "./DetailSwitch/DetailSwitch";
 import Detail from "./Detail/Detail";
 import MoreDepartures from "./MoreDepartures/MoreDepartures";
-import { useResult } from "../../ResultContext";
+import { useResult } from "../../Contexts/ResultContext";
 import { useRecalculatePattern } from "../../Routing/RecalculatePattern";
 import { useBackButtonClick } from './useBackButtonClick';
 import ResultLoading from './ResultLoading/ResultLoading';
@@ -36,6 +37,7 @@ function Results() {
     // Hook for recalculating trip pattern
     const { recalculatePattern } = useRecalculatePattern();
 
+    // Hook for back button click
     const { backButtonClick } = useBackButtonClick();
 
     // Description of the routing modes
@@ -88,15 +90,18 @@ function Results() {
                     <ResultLoading />
                 ) : result?.tripPatterns?.length === 0 ? (
                     <div className="no-results">
+                        <WarningAmberIcon />
                         {t("resultsInfo.noResults")}
                     </div>
                 ) : !showDetail ? (
                     // List of available trip patterns
-                    <ResultList />
+                    <ResultList
+                        recalculatePattern={recalculatePattern}
+                    />
                 ) : showDepartures ? (
                     // Alternative departures for a selected public transport
                     <MoreDepartures
-                        leg={pattern.originalLegs[publicLegIndex]}  
+                        leg={pattern?.originalLegs[publicLegIndex]}  
                         recalculatePattern={recalculatePattern}               
                     />
                 ) : (

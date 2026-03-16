@@ -1,3 +1,9 @@
+/**
+ * @file ResultLoading.tsx
+ * @brief Displays a loading screen while trip data are being fetched
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import "./ResultLoading.css";
 
 function ResultLoading() {

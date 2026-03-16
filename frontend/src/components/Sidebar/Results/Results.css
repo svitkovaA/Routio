@@ -18,4 +18,16 @@
     margin-left: -20px;
 }
 
+.no-results {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 10px;
+    padding-left: 20px;
+}
+
+.no-results > svg {
+    color: red;
+}
+
 /** End of file Results.css */

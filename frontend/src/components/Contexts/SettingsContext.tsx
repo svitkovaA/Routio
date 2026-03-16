@@ -43,7 +43,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
  * @param defaultValue Default value used if no stored data exists
  * @returns Tuple containing current value and setter function
  */
-function useSettingsFromLocalStorage<T>(key: string, defaultValue: T) {
+export function useSettingsFromLocalStorage<T>(key: string, defaultValue: T) {
     // Attempt to read value from local storage, otherwise use default value
     const [value, setValue] = useState<T>(() => {
         const stored = localStorage.getItem(key);
@@ -60,24 +60,24 @@ function useSettingsFromLocalStorage<T>(key: string, defaultValue: T) {
 
 export function SettingsProvider({ children } : {children: React.ReactNode}) {
     // Transport preferences
-    const [maxTransfers, setMaxTransfers] = useSettingsFromLocalStorage("maxTransfers", 10);
+    const [maxTransfers, setMaxTransfers] = useSettingsFromLocalStorage<number>("maxTransfers", 10);
     const defaultModes = ["bus", "tram", "rail", "trolleybus", "metro", "water"]
     const [selectedModes, setSelectedModes] = useSettingsFromLocalStorage<string[]>("selectedModes", defaultModes);
-    const [useHistoricalDelays, setUseHistoricalDelays] = useSettingsFromLocalStorage("historicalDelays", false);
+    const [useHistoricalDelays, setUseHistoricalDelays] = useSettingsFromLocalStorage<boolean>("historicalDelays", false);
     
     // Cycling preferences
-    const [maxBikeDistance, setMaxBikeDistance] = useSettingsFromLocalStorage("maxBikeDistance", 5);
-    const [bikeAverageSpeed, setBikeAverageSpeed] = useSettingsFromLocalStorage("bikeAverageSpeed", 15);
-    const [bikeLockTime, setBikeLockTime] = useSettingsFromLocalStorage("bikeLockTime", 2);
+    const [maxBikeDistance, setMaxBikeDistance] = useSettingsFromLocalStorage<number>("maxBikeDistance", 5);
+    const [bikeAverageSpeed, setBikeAverageSpeed] = useSettingsFromLocalStorage<number>("bikeAverageSpeed", 15);
+    const [bikeLockTime, setBikeLockTime] = useSettingsFromLocalStorage<number>("bikeLockTime", 2);
 
     // Bikesharing preferences
-    const [maxBikesharingDistance, setMaxBikesharingDistance] = useSettingsFromLocalStorage("maxBikesharingDistance", 5);
-    const [bikesharingAverageSpeed, setBikesharingAverageSpeed] = useSettingsFromLocalStorage("bikesharingAverageSpeed", 15);
-    const [bikesharingLockTime, setBikesharingLockTime] = useSettingsFromLocalStorage("bikesharingLockTime", 5);
+    const [maxBikesharingDistance, setMaxBikesharingDistance] = useSettingsFromLocalStorage<number>("maxBikesharingDistance", 5);
+    const [bikesharingAverageSpeed, setBikesharingAverageSpeed] = useSettingsFromLocalStorage<number>("bikesharingAverageSpeed", 15);
+    const [bikesharingLockTime, setBikesharingLockTime] = useSettingsFromLocalStorage<number>("bikesharingLockTime", 2);
 
     // Walking preferences
-    const [maxWalkDistance, setMaxWalkDistance] = useSettingsFromLocalStorage("maxWalkDistance", 5);
-    const [walkAverageSpeed, setWalkAverageSpeed] = useSettingsFromLocalStorage("walkAverageSpeed", 5);
+    const [maxWalkDistance, setMaxWalkDistance] = useSettingsFromLocalStorage<number>("maxWalkDistance", 5);
+    const [walkAverageSpeed, setWalkAverageSpeed] = useSettingsFromLocalStorage<number>("walkAverageSpeed", 5);
     
     const [selectedLayerIndex, setSelectedLayerIndex] = useState<number>(0);
 

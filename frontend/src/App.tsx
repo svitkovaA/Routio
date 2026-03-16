@@ -11,9 +11,9 @@ import Map from './components/Map/Map';
 import SideBar from './components/Sidebar/Sidebar';
 import Controls from './components/Controls/Controls';
 import Info from './components/Info/Info';
-import { useInput } from './components/InputContext';
-import { useResult } from './components/ResultContext';
-import { NotificationProvider } from './components/NotificationContext';
+import { useInput } from './components/Contexts/InputContext';
+import { useResult } from './components/Contexts/ResultContext';
+import { NotificationProvider } from './components/Contexts/NotificationContext';
 import './App.css';
 
 function App() {

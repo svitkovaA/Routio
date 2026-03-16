@@ -7,7 +7,7 @@
 import { useEffect, useMemo } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
-import { useResult } from "../../ResultContext";
+import { useResult } from "../../Contexts/ResultContext";
 
 type FitBoundProps = {
     sidebarOpen: boolean;   // Indicates whether the sidebar is currently open
@@ -17,7 +17,10 @@ function FitBound({
     sidebarOpen
 }: FitBoundProps) {
     // Result context
-    const { pattern, mobileSidebarHeight } = useResult();
+    const {
+        polyInfo,
+        mobileSidebarHeight
+    } = useResult();
 
     // Leaflet map instance
     const map = useMap();
@@ -25,11 +28,9 @@ function FitBound({
     // Computes map bounds for the active trip pattern
     const bounds = useMemo(() => {
         // No route polyline data available
-        if (!pattern?.polyInfo?.length) {
+        if (polyInfo.length === 0) {
             return null;
         }
-
-        const polyInfo = pattern.polyInfo;
         
         // Initialize bounds using first available coordinate
         const firstCoords = polyInfo.find(p => p.coords.length > 0)?.coords;
@@ -61,7 +62,7 @@ function FitBound({
             }
         }
         return L.latLngBounds(L.latLng(minLat, minLon), L.latLng(maxLat, maxLon));
-    }, [pattern?.polyInfo]);
+    }, [polyInfo]);
 
     /**
      * Updates the map view whenever computed bounds or sidebar state changes.

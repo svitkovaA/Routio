@@ -1,3 +1,8 @@
+/**
+ * @file ResultLoading.css
+ * @brief Styles for a loading screen while trip data are being fetched
+ * @author Andrea Svitkova (xsvitka00)
+ */
 
 .result-loading-wrapper {
     width: 100%;
@@ -37,6 +42,5 @@
         background-position: -100% 0;
     }
 }
-
 
 /* End of file ResultLoading.css */

@@ -26,6 +26,41 @@
     border-top-color: var(--color-destination-station);
 }
 
+.bike-stations-popup-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    height: 80px;
+    margin: 5px 0;
+}
+
+.bike-stations-bike-count {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid black;
+    border-radius: 6px;
+    padding: 5px;
+    background-color: rgba(5,127,115,0.1);
+}
+
+.count-header {
+    font-weight: bolder;
+}
+
+.count {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.bike-stations-coords {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
 /* Other stations */
 .marker.small-bike-marker {
     width: 16px;

@@ -1,8 +1,14 @@
+/**
+ * @file Waystop.tsx
+ * @brief Displays a stop in the trip detail
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
 import "./Waystop.css";
 
 type WaystopProps = {
-    time: string;
-    name: string | undefined;
+    time: string;                   // Time associated with the stop
+    name: string | undefined;       // Name of the stop location
 };
 
 function Waystop({
@@ -24,3 +30,5 @@ function Waystop({
 }
 
 export default Waystop;
+
+/** End of file Waystop.tsx */

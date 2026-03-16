@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PUBLIC_URL } from "../../config/config";
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import "./HowToUse.css";
 
 function HowToUse() {
@@ -15,6 +16,21 @@ function HowToUse() {
     
     // Currently selected instruction step
     const [step, setStep] = useState(1);
+
+    const [current, setCurrent] = useState(0);
+
+    const images = [
+        `${process.env.PUBLIC_URL}/img/04_detail_b.png`,
+        `${process.env.PUBLIC_URL}/img/04_detail_bike.png`,
+    ];
+
+    const nextSlide = () => {
+        setCurrent((prev) => (prev + 1) % images.length);
+    };
+
+    const prevSlide = () => {
+        setCurrent((prev) => (prev - 1 + images.length) % images.length);
+    };
 
     // Available instruction steps
     const steps = [
@@ -66,38 +82,69 @@ function HowToUse() {
             <div className="howto-content">
                 {step === 1 && (
                     <>
+                        <img src={`${PUBLIC_URL}/img/01_input_f.png`} alt="Plánovanie" />
                         <p>
-                            {t("info.howToUse.steps.planningSection")}
+                            {/* {t("info.howToUse.steps.planningSection")} */}
+                            Zadajte východiskový a cieľový bod, prípadne medzibody, nastavte dátum a čas a upravte preferencie plánovania trasy.
                         </p>
-                        {/* <img src={`${PUBLIC_URL}/img/skuska.png`} alt="Plánovanie" /> */}
+                        <div className="about-header">
+                            Body trasy je možné vybrať jedným z následujúcich spôsobov:
+                        </div>
+                        <ul className="how-to-points">
+                            <li>
+                                Zadaním <strong>názvu lokality</strong> do vstupného poľa.
+                            </li>
+
+                            <li>
+                                Výberom polohy <strong>priamo z mapy</strong>, a to kliknutím na ikonu bodu a následným výberom miesta na mape.
+                            </li>
+
+                            <li>
+                                <strong>Zadaním geografických súradníc</strong> do vstupného poľa.
+                            </li>
+
+                            <li>
+                                Výber bodu <strong>z kontextového menu mapy</strong>, a to prostredníctvom pravého kliknutia na mapový podklad a následným
+                                výberom o ktorý bod sa jedná.
+                            </li>
+                        </ul>
                     </>
                 )}
 
                 {step === 2 && (
                     <>
+                        <img src={`${PUBLIC_URL}/img/02_pref.png`} alt="Preferencie" />
                         <p>
-                            {t("info.howToUse.steps.preferencesSection")}
+                            Nastavte preferencie plánovania, ako sú zohľadňované druhy dopravy alebo obmedzenia.
                         </p>
-                        {/* <img src={`${PUBLIC_URL}/img/skuska.png`} alt="Preferencie" /> */}
                     </>
                 )}
 
                 {step === 3 && (
                     <>
+                        <img src={`${PUBLIC_URL}/img/03_res.png`} alt="Výsledky" />
                         <p>
-                            {t("info.howToUse.steps.resultsSection")}
+                            Výsledky plánovania sú zobrazené na mape ako aj v textovej podobe.
                         </p>
-                        {/* <img src={`${PUBLIC_URL}/img/skuska.png`} alt="Výsledky" /> */}
                     </>
                 )}
 
                 {step === 4 && (
-                    <>
-                        <p>
-                            {t("info.howToUse.steps.detailSection")}
-                        </p>
-                        {/* <img src={`${PUBLIC_URL}/img/skuska.png`} alt="Detail" /> */}
-                    </>
+                    <div className="how-to-img-slider">
+
+                        <img src={images[current]} alt="Detail" className="slider-image" />
+                        <div className="arrows">
+                            <button className="arrow left" onClick={prevSlide}>
+                                <KeyboardArrowLeftIcon />
+                            </button>
+                            <div className="slider-cnt">
+                                {current + 1}/{images.length}
+                            </div>
+                            <button className="arrow right" onClick={nextSlide}>
+                                <KeyboardArrowLeftIcon sx={{ transform: 'rotate(180deg)' }} />
+                            </button>
+                        </div>
+                    </div>
                 )}
             </div>
         </div>

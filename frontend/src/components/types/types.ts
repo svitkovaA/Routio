@@ -93,6 +93,7 @@ export type Leg = {
                 id: string;                 // Internal station identifier
                 name: string;               // Bike station name
                 bikesAvailable: number;     // Number of currently available bikes
+                predictedBikes?: number;    // Number of predicted bikes in station
                 spacesAvailable: number;    // Number of available parking spaces
                 allowDropoff: boolean;      // Indicates whether drop-off is allowed
                 capacity?: number;          // Total station capacity
@@ -178,6 +179,7 @@ export type VehiclePosition = {
     lon: number;                            // Current longitude of the vehicle
     delay?: number;                         // Current vehicle delay
     direction: string;                      // Direction of the vehicle, final stop name
+    startTime: string;                      // Vehicle journey start time
 };
 
 /**
@@ -187,15 +189,15 @@ export type TripPattern = {
     aimedEndTime: string;                   // Planned arrival time of the whole trip in ISO string format
     totalDuration: number;                  // Total travel duration in seconds
     totalDistance: number;                  // Total travel distance in meters
+    totalTime: number;                      // Total trip time from start to the end
     numOfTransfers?: number;                // Total number of transfers
     legs: Leg[];                            // Processed legs
     originalLegs: Leg[];                    // Original legs, non processed legs
     modes: string[];                        // List of transport modes used in this trip pattern
-    polyInfo: PolyInfo[];                   // Polyline information used for map rendering
     bounds?: L.LatLngBounds;                // Geographical bounds of the trip used to fit map view
     tooLongWalkDistance?: boolean;          // Indicates that walking distance exceeds threshold defined by user
     tooLongBikeDistance?: boolean;          // Indicates that cycling distance exceeds threshold defined by user
-    vehicleRealtimeData: VehiclePosition[];    // Real-time positions of vehicles associated with this trip
+    vehicleRealtimeData: VehiclePosition[]; // Real-time positions of vehicles associated with this trip
 };
 
 /**
@@ -207,7 +209,17 @@ export type ResultsType = {
 };
 
 /**
- * Represents polyline rendering information
+ * Represents a single sampled point in an elevation profile
+ */
+export type ElevationPoint = {
+    lat: number;                            // Latitude of the sampled point
+    lon: number;                            // Longitude of the sampled point
+    elevation: number;                      // Elevation at this point in meters above sea level
+    distance: number;                       // Distance from the start of the route in meters
+};
+
+/**
+ * Represents rendering information for a leg polyline
  */
 export type PolyInfo = {
     coords: [number, number][];             // Ordered list of coordinates [latitude, longitude]
@@ -217,6 +229,11 @@ export type PolyInfo = {
     pathOptions: {
         "dashArray"?: string                // Additional Leaflet path styling options
     };
+    tripId?: number;                        // Trip identifier
+    elevationProfile?: ElevationPoint[];    // Computed elevation profile for this leg (foot, bicycle only)
+    totalAscent?: number;                   // Total elevation gain in meters for the leg
+    totalDescent?: number;                  // Total elevation loss in meters for the leg
+    elevationOpen: boolean;                 // Flag indicating whether the elevation profile for this leg is visible
 };
 
 /**

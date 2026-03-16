@@ -12,7 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
-import { useNotification } from "../../../../NotificationContext";
+import { useNotification } from "../../../../Contexts/NotificationContext";
 import "./Section.css";
 
 type SectionProps = {

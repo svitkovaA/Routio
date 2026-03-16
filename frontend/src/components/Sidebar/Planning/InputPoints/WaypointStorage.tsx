@@ -4,6 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { useTranslation } from "react-i18next";
 import { StoredWaypoint, Waypoint } from "../../../types/types";
 
 // Maximum number of stored waypoints per category (origin, middle stops, destination)
@@ -88,8 +89,9 @@ function save(key: string, data: StoredWaypoint[]) {
  * Stores intermediate waypoints
  * 
  * @param waypoints Intermediate waypoints
+ * @param yourLocation String representing the detected location
  */
-function storeMiddleWaypoints(waypoints: StoredWaypoint[]) {
+function storeMiddleWaypoints(waypoints: StoredWaypoint[], yourLocation: string) {
     // Do not store empty input
     if (waypoints.length === 0) {
         return;
@@ -104,7 +106,13 @@ function storeMiddleWaypoints(waypoints: StoredWaypoint[]) {
 
     // Remove duplicities
     for (const waypoint of merged) {
+        // Skip your location
+        if (waypoint.name === yourLocation) {
+            continue;
+        }
+
         const exists = unique.some((u) => isSameWaypoint(u, waypoint));
+        
         if (!exists) {
             unique.push(waypoint);
         }
@@ -119,8 +127,14 @@ function storeMiddleWaypoints(waypoints: StoredWaypoint[]) {
  * 
  * @param waypoint The waypoint to be stored
  * @param key Key to local storage
+ * @param yourLocation String representing the detected location
  */
-function storeWaypoint(waypoint: StoredWaypoint, key: string) {
+function storeWaypoint(waypoint: StoredWaypoint, key: string, yourLocation: string) {
+    // Skip your location
+    if (waypoint.name === yourLocation) {
+        return;
+    }
+
     // Load stored stack
     const stack = load(key);
 
@@ -141,8 +155,9 @@ function storeWaypoint(waypoint: StoredWaypoint, key: string) {
  * Stores route waypoints 
  * 
  * @param waypoints Waypoints to be stored
+ * @param yourLocation String representing the detected location
  */
-export const storeWaypoints = (waypoints: Waypoint[]) => {
+export const storeWaypoints = (waypoints: Waypoint[], yourLocation: string) => {    
     let waypointsToStore: StoredWaypoint[] = [];
 
     // Convert Waypoint to StoredWaypoint format
@@ -155,13 +170,13 @@ export const storeWaypoints = (waypoints: Waypoint[]) => {
     }
 
     // Store origin
-    storeWaypoint(waypointsToStore[0], ORIGIN);
+    storeWaypoint(waypointsToStore[0], ORIGIN, yourLocation);
 
     // Store destination
-    storeWaypoint(waypointsToStore[waypointsToStore.length - 1], DESTINATION);
+    storeWaypoint(waypointsToStore[waypointsToStore.length - 1], DESTINATION, yourLocation);
     
     // Store intermediate waypoints
-    storeMiddleWaypoints(waypointsToStore.slice(1, -1));
+    storeMiddleWaypoints(waypointsToStore.slice(1, -1), yourLocation);
 };
 
 /**

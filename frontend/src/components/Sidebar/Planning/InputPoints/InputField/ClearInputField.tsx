@@ -23,8 +23,9 @@ function ClearInputField({
     const { t } = useTranslation();
     
     // Do not render the component if rendering is disabled
-    if (!render) 
+    if (!render) {
         return null;
+    }
     
     return (
         <CustomTooltip title={t("tooltips.inputForm.clearField")}>

@@ -8,8 +8,9 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import dayjs from "dayjs";
-import { LegPreference, RoutePreference, Waypoint } from "./types/types";
+import { LegPreference, RoutePreference, Waypoint } from "../types/types";
 import { useResult } from "./ResultContext";
+import { useSettingsFromLocalStorage } from "./SettingsContext";
 
 type InputContextType = {
     waypoints: Waypoint[];
@@ -66,10 +67,10 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
     const [arriveBy, setArriveBy] = useState<boolean>(false);
 
     // Indicates whether the user prefers using their own bicycle instead of shared bicycles
-    const [useOwnBike, setUseOwnBike] = useState<boolean>(true);
+    const [useOwnBike, setUseOwnBike] = useSettingsFromLocalStorage<boolean>("useOwnBike", true);
 
     // Route optimization preference
-    const [preference, setPreference] = useState<RoutePreference>("fastest");
+    const [preference, setPreference] = useSettingsFromLocalStorage<RoutePreference>("routePreference", "fastest");
 
     // Index of the currently active input field
     const [activeField, setActiveField] = useState<number | null>(null);

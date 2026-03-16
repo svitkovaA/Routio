@@ -5,8 +5,10 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
-import { ResultsType, TripPattern, VehiclePosition } from "./types/types";
-import { API_BASE_URL } from "./config/config";
+import { PolyInfo, ResultsType, TripPattern, VehiclePosition } from "../types/types";
+import polyline from '@mapbox/polyline';
+import { API_BASE_URL } from "../config/config";
+import { computeAscent, computeDescent, computeElevation, resamplePolyline , smoothElevationForGraph} from "../Sidebar/Results/Detail/Elevation/ElevationUtils";
 
 type ResultContextType = {
     pattern: TripPattern;
@@ -33,6 +35,15 @@ type ResultContextType = {
     abortRef: React.RefObject<AbortController | null>;
     mobileSidebarHeight: number;
     setMobileSidebarHeight: (value: number) => void;
+    polyInfo: PolyInfo[];
+    polylineForceUpdate: number;
+    elevationLegIndex: number | null;
+    setElevationLegIndex: (v: number | null) => void;
+    hoveredProfileIndex: number | null;
+    setHoveredProfileIndex: (v: number | null) => void;
+    showBikeStations: boolean[];
+    setShowBikeStations: (value: boolean[] | ((prev: boolean[]) => boolean[])) => void;
+    openElevation: (index: number, value: boolean) => void;
 };
 
 const ResultContext = createContext<ResultContextType | undefined>(undefined);
@@ -84,12 +95,35 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     // AbortController reference for cancelling ongoing API requests
     const abortRef = useRef<AbortController | null>(null);
 
+    // Forces rerendering of map polylines when route geometry changes
+    const [polylineForceUpdate, setPolylineForceUpdate] = useState<number>(0);
+
+    // Stores route leg information extended with computed elevation data
+    const [polyInfoWithElevation, setPolyInfoWithElevation] = useState<PolyInfo[]>([]);
+
+    // Index of the currently hovered point in the elevation profile
+    const [hoveredProfileIndex, setHoveredProfileIndex] = useState<number | null>(null);
+
+    // Index of the route leg whose elevation profile is currently hovered
+    const [elevationLegIndex, setElevationLegIndex] = useState<number | null>(null);
+
+    // State handling visibility flags for alternative bike stations
+    const [showBikeStations, setShowBikeStations] = useState<boolean[]>([]);
+
     /**
      * Resets entire result state and stops all active processes
      */
     const closeResults = useCallback(() => {
         setShowResults(false);
-        setResults(prev => prev.map(result => ({...result, active: false, tripPatterns: [], originBikeStations: [], destinationBikeStations: []})));
+        setResults(prev =>
+            prev.map(result => ({
+                ...result,
+                active: false,
+                tripPatterns: [],
+                originBikeStations: [],
+                destinationBikeStations: []
+            }))
+        );
         setShowDetail(false);
         setSelectedTripPatternIndex(0);
         setLoading(false);
@@ -117,8 +151,128 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         }
     }, []);
 
+    // Currently selected trip pattern
+    const pattern = results[resultActiveIndex]?.tripPatterns[selectedTripPatternIndex];
+
+    /**
+     * Computes and stores decoded polyline data for the selected trip pattern
+     */
+    const polyInfo = useMemo(() => {
+        if (!pattern?.originalLegs) {
+            return [];
+        }
+
+        return pattern.originalLegs.map((leg) => {
+            // Decode main route polyline
+            const coords = Array.isArray(leg.pointsOnLink.points)
+                ? leg.pointsOnLink.points.flatMap((p) => polyline.decode(p))
+                : polyline.decode(leg.pointsOnLink.points);
+
+            // Decode inactive route segments
+            const inactiveCoords = leg.pointsOnLink.inactivePoints.map((p) =>
+                polyline.decode(p)
+            );
+
+            return {
+                coords,
+                inactiveCoords,
+                mode: leg.mode || "unknown",
+                color: leg.color || "#000000",
+                // Walking and cycling routes are rendered as dashed lines
+                pathOptions: leg.mode === "foot" || leg.mode === "bicycle" ? { dashArray: "5px, 5px" } : {},
+                tripId: leg.tripId,
+                elevationOpen: false
+            };
+        });
+    }, [pattern?.originalLegs]);
+
+    /**
+     * Forces polyline rerender when route geometry changes
+     */
+    useEffect(() => {
+        setPolylineForceUpdate(prev => prev + 1);
+    }, [pattern?.originalLegs]);
+
+    /**
+     * Computes elevation profiles for legs (foot, bicycle)
+     */
+    useEffect(() => {
+        // No geometry data
+        if (!polyInfo.length) {
+            setPolyInfoWithElevation([]);
+            return;
+        }
+
+        async function compute() {
+
+            const result = [];
+
+            // Iterate over all legs
+            for (let i = 0; i < polyInfo.length; i++) {
+                // Basic polyline information for the leg
+                const poly = polyInfo[i];
+
+                // Original leg data received from the backend
+                const leg = pattern?.originalLegs[i];
+                if (!leg) {
+                    continue;
+                }
+
+                // Elevation profile and statistics initialization
+                let elevationProfile = undefined;
+                let rawProfile = undefined;
+                let totalAscent = undefined;
+                let totalDescent = undefined;
+
+                // Elevation is only supported for cycling or walking segments
+                if (leg.mode === "bicycle" || (leg.mode === "foot" && leg.walkMode)) {
+                    // Resample polyline coordinates so points are evenly spaced approximately every 40 meters
+                    const sampled = resamplePolyline(poly.coords, 40);
+    
+                    // Fetch elevation values for each sampled point
+                    rawProfile = await computeElevation(sampled);
+    
+                    // Calculate total ascent
+                    totalAscent = computeAscent(rawProfile);
+
+                    // Calculate total descent
+                    totalDescent = computeDescent(rawProfile);
+                    elevationProfile = smoothElevationForGraph(rawProfile);
+                }
+
+                // Store combined polyline and elevation information
+                result.push({
+                    ...poly,
+                    elevationProfile,
+                    totalAscent,
+                    totalDescent
+                });
+
+            }
+
+            setPolyInfoWithElevation(result);
+        }
+
+        compute();
+
+    }, [polyInfo]);
+
+    /**
+     * Toggles visibility of elevation profile for a specific route leg
+     * 
+     * @param index Index of the leg the visibility will be toggled
+     * @param value The new toggle value
+     */
+    const openElevation = (index: number, value: boolean) => {
+        setPolyInfoWithElevation(prev => {
+            const newPolyInfo = [...prev];
+            newPolyInfo[index].elevationOpen = value;
+            return newPolyInfo;
+        });
+    };
+
     const value = useMemo(() => ({
-        pattern: results[resultActiveIndex]?.tripPatterns[selectedTripPatternIndex],
+        pattern: pattern,
         result: results[resultActiveIndex],
         results, setResults,
         resultActiveIndex, setResultActiveIndex,
@@ -132,7 +286,13 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         publicLegIndex, setPublicLegIndex,
         closeResults,
         abortRef,
-        mobileSidebarHeight, setMobileSidebarHeight
+        mobileSidebarHeight, setMobileSidebarHeight,
+        polyInfo: polyInfoWithElevation,
+        polylineForceUpdate,
+        hoveredProfileIndex, setHoveredProfileIndex,
+        elevationLegIndex, setElevationLegIndex,
+        showBikeStations, setShowBikeStations,
+        openElevation
     }), [
         results,
         resultActiveIndex,
@@ -145,7 +305,12 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         vehicleRealtimeData,
         publicLegIndex,
         closeResults,
-        mobileSidebarHeight
+        mobileSidebarHeight,
+        polyInfoWithElevation,
+        polylineForceUpdate,
+        hoveredProfileIndex,
+        elevationLegIndex,
+        showBikeStations
     ]);
 
     /**
@@ -212,14 +377,11 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         animationRef.current = requestAnimationFrame(frame);
     }, [linearInterpolation]);
 
-    // Currently selected trip pattern
-    const pattern = value.pattern;
-
     /**
-     * Extracts trip ids for which vehicle positions data should be requested
+     * Extracts trip ids with start time for which vehicle positions data should be requested
      */
     const tripIds = useMemo(
-        () => pattern?.vehicleRealtimeData?.map(p => p.tripId) ?? [],
+        () => pattern?.vehicleRealtimeData?.map((p) => ({"trip_id": p.tripId, "start_time": p.startTime})) ?? [],
         [pattern]
     );
 
@@ -270,7 +432,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         if (resultActiveIndex >= 0 && selectedTripPatternIndex >= 0) {
             setResults(prev => {
                 const newResults = [...prev];
-                for (const leg of newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex].originalLegs) {
+                for (const leg of newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex]?.originalLegs) {
                     if (!leg.tripId) {
                         continue;
                     }

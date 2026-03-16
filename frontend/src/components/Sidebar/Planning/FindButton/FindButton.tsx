@@ -5,7 +5,7 @@
  */
 
 import { useTranslation } from "react-i18next";
-import { useResult } from "../../../ResultContext";
+import { useResult } from "../../../Contexts/ResultContext";
 import "./FindButton.css";
 
 function FindButton() {

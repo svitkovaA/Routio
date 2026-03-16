@@ -20,18 +20,21 @@ function MoreDepartures({
 } : MoreDeparturesProps) {
     return (
         <div className="more-departure-detail">
-            {leg?.otherOptions?.departures.map((departure, index) => {   
+            {leg?.otherOptions?.departures.map((departure, index) => {  
+                /** Currently selected departure index */ 
                 const currentIndex = leg?.otherOptions?.currentIndex; 
 
                 return (
                     <div
                         key={`${index}`}
                         className={"more-departure-row" + (currentIndex === index ? " selected" : "") + (currentIndex === index + 1 ? " before-selected" : "")}
-                        onClick={() => recalculatePattern(index)}
+                        onClick={() => recalculatePattern(index)}   // Recalculate route when a different departure is selected
                     >   
                         <div className="more-departure-left">
+                                {/* Transport mode icon */}
                                 {timelineIcons[leg.mode]}
 
+                                {/* Public transport line code */}
                                 <span
                                     className="detail-public-code"
                                     style={{ backgroundColor: leg.color }}
@@ -39,15 +42,18 @@ function MoreDepartures({
                                     {leg.line?.publicCode}
                                 </span>
 
+                                {/* Direction indicator */}
                                 <span>
                                     <ArrowForwardIcon sx={{ fontSize: 16 }} />
                                 </span>
 
+                                {/* Direction of th vehicle */}
                                 <span className="direction">
                                     {departure.direction}
                                 </span>
                         </div>
                         <div className="more-departure-right">
+                            {/* Departure time */}
                             <span>
                                 {new Date(departure.departureTime).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit",})}
                             </span>

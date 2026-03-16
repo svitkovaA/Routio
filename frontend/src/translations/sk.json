@@ -9,10 +9,35 @@
     "markers": {
       "start": "ŠTART",
       "end": "CIEĽ"
-    }
+    },
+    "ptWithoutDelay": "Aktuálne bez meškania",
+    "ptCurrentDelay": "Aktuálne meškanie",
+    "clearWaypoint": "Vymazať bod",
+    "removeWaypoint": "Odstrániť bod",
+    "selectPosition": "Vybrať polohu",
+    "setAsOrigin": "Nastaviť ako začiatok",
+    "setAsDestination": "Nastaviť ako cieľ",
+    "setAsWaypoint": "Nastaviť ako medzibod",
+    "hideBikeStations": "Skryť stanice bicyklov",
+    "showBikeStations": "Zobraziť stanice bicyklov",
+    "hideBikeRacks": "Skryť stojany na bicykle",
+    "showBikeRacks": "Zobraziť stojany na bicykle",
+    "bike_one": "bicykel",
+    "bike_few": "bicykle",
+    "bike_other": "bicyklov",
+    "lat": "Lat",
+    "lon": "Lon",
+    "score": "Skóre",
+    "now": "Teraz",
+    "predicted": "Predikcia",
+    "capacity": "Kapacita",
+    "setAsOriginStation": "Nastaviť ako východiskovú stanicu bicyklov",
+    "setAsDestinationStation": "Nastaviť ako cieľovú stanicu bicyklov",
+    "setAsDestinationRack": "Nastaviť ako cieľový stojan na bicykel"
   },
   "planning": {
-     "origin": "Štart",
+    "position": "Vaša poloha",
+    "origin": "Štart",
     "destination": "Cieľ",
     "intermediatePoint": "Medzibod {{index}}",
     "setOrigin": "Zadajte východiskový bod",
@@ -33,14 +58,14 @@
     },
     "routePreferences": "Preferencie trasy",
     "routePreference": {
-      "fastestRoute": "Najrýchlejšia trasa",
-      "shortestRoute": "Najkratšia trasa",
-      "minimizeTransfers": "Minimalizovať prestupy"
+      "fastestRoute": "Najrýchlejšia",
+      "shortestRoute": "Najkratšia",
+      "minimizeTransfers": "Najmenej prestupov"
     },
     "bikeOptions": "Možnosti bicykla",
     "bikeOption": {
-      "ownBike": "Použiť vlastný bicykel",
-      "sharedBike": "Použiť zdieľaný bicykel"
+      "ownBike": "Vlastný bicykel",
+      "sharedBike": "Zdieľaný bicykel"
     },
     "find": "Nájsť",
     "invalidAddress": "Neplatná adresa",
@@ -71,8 +96,8 @@
   },
   "informationTab": {
     "overview": "O aplikácii",
-    "howToUse": "Ako začať",
-    "features": "Ďalšie funkcie"
+    "howToUse": "Plánovanie trasy",
+    "features": "Výber stanice"
   },
   "info": {
     "overview": {
@@ -109,7 +134,9 @@
   "results": "Výsledky",
   "resultsInfo": {
     "detail": "Detail",
-    "noResults": "Nenašli sa žiadne výsledky"
+    "noResults": "Nenašli sa žiadne výsledky",
+    "warningFoot": "Vzdialenosť chôdze presahuje maximálny povolený limit",
+    "warningBicycle": "Vzdialenosť jazdy na bicykli presahuje maximálny povolený limit"
   },
   "modeDescriptions": {
     "multimodalTransport": "Multimodálna doprava",
@@ -134,7 +161,11 @@
         "rail": "Vlak",
         "metro": "Metro",
         "water": "Loď"
-      }
+      },
+      "transfer": "Prestup",
+      "zone": "Zóna",
+      "zones": "Zóny",
+      "elevation": "Výškový profil"
     },
     "bicycle": {
       "lockTime": "na zamknutie bicykla",
@@ -152,6 +183,7 @@
       }
     },
     "inputForm": {
+      "currentPosition": "Použiť aktuálnu polohu",
       "clearField": "Vymazať toto pole",
       "mapSelect": "Vybrať polohu z mapy",
       "removeWaypoint": "Odstrániť tento bod",
@@ -196,7 +228,12 @@
         "otherDepartures": "Zobraziť ďalšie odchody",
         "closeOtherDepartures": "Skryť ďalšie odchody",
         "stopsOnRoute": "Zobraziť zastávky na trase",
-        "closeStopsOnRoute": "Skryť zastávky na trase"
+        "closeStopsOnRoute": "Skryť zastávky na trase",
+        "historicalDelays": "Zobraziť historické meškania spoja",
+        "closeHistoricalDelays": "Skryť historické meškania spoja",
+        "currentDelay": "Aktuálne meškanie",
+        "elevationProfile": "Zobraziť výškový profil úseku",
+        "closeElevationProfile": "Skryť výškový profil úseku"
       },
       "bicycle": {
         "lockTime": "Čas na zamknutie bicykla",
@@ -242,6 +279,7 @@
     "photon": "Služba Photon neodpovedá. Vyberte polohu na mape."
   },
   "errors": {
-    "serverOffline": "Server momentálne nie je dostupný. Skúste to prosím neskôr."
+    "serverOffline": "Server momentálne nie je dostupný. Skúste to prosím neskôr.",
+    "routingFailed": "Nastala chyba pri výpočte trasy. Skúste to znovu, prosím."
   }
 }

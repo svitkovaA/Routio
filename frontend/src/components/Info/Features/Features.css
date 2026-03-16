@@ -1,0 +1,45 @@
+/**
+ * @file Features.css
+ * @brief Styles for the component for displaying other information about the application
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+}
+
+.features-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.features-icon {
+    color: var(--color-info);
+}
+
+.feature-title{
+    display: block;
+}
+
+.feature-video {
+    display: flex;
+    justify-content: center;
+}
+
+.feature-video video {
+    max-width: 1000px;
+    min-width: 240px;
+    width: calc(100vw - 60px);
+}
+
+@media screen and (min-width: 768px) {
+    .feature-video video {
+        width: calc(100vw - 190px);
+    }
+}
+
+/** End of file Features.css */

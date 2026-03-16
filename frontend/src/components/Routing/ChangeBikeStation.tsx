@@ -5,9 +5,9 @@
  */
 
 import { API_BASE_URL } from "../config/config";
-import { useInput } from "../InputContext";
-import { useResult } from "../ResultContext";
-import { useSettings } from "../SettingsContext";
+import { useInput } from "../Contexts/InputContext";
+import { useResult } from "../Contexts/ResultContext";
+import { useSettings } from "../Contexts/SettingsContext";
 
 /**
  * Hook that provides functionality for updating bikesharing station selection
@@ -56,7 +56,7 @@ export function useChangeBikeStation() {
     const changeBikeStation = async (originBikeStation: boolean, bikeStationIndex: number, bikeStations: any[], legIndex: number) => {
         // Extract current route structure
         const legs = pattern.legs;
-        const originalLegs = pattern.originalLegs;
+        const originalLegs = pattern?.originalLegs;
         const modes = pattern.modes;
         
         // Convert waypoints to compatible format
@@ -102,8 +102,7 @@ export function useChangeBikeStation() {
                 leg_index: legIndex,
                 modes: modes,
                 original_legs: originalLegs,
-                route_data: routeData,
-                bike_rack: legs[legIndex].bikeStationInfo?.rack
+                route_data: routeData
             })
         });
 
