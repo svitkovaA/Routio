@@ -12,14 +12,15 @@ import os
 import shutil
 from typing import DefaultDict, Dict, List, Set, Tuple, cast
 import zipfile
+import numpy as np
 import pandas as pd
 from datetime import date, datetime
 from collections import defaultdict
-from zoneinfo import ZoneInfo
 import requests
 from config.datasets import GTFS_PATH, GTFS_URL
-from models.route import Departure, OtherDeparture, OtherOptions
+from models.route import TZ, Departure, OtherDeparture, OtherOptions
 from service.service_base import ServiceBase
+from sklearn.neighbors import BallTree
 
 @dataclass(frozen=True)
 class _GTFSState:
@@ -49,6 +50,9 @@ class _GTFSState:
 
     # Maps route_id to route_color, used in case Lissy is unavailable
     route_id_to_color: Dict[str, str | None]
+
+    # Spatial BallTree index for public transport stops
+    stops_tree: BallTree
 
 class GTFSService(ServiceBase[_GTFSState]):
     """
@@ -120,7 +124,7 @@ class GTFSService(ServiceBase[_GTFSState]):
         n_next: int = 20
     ) -> OtherOptions:
         """
-        Returns nearby departures for the given route between teo stops.
+        Returns nearby departures for the given route between two stops.
         
         Args:
             from_stop_id: Origin stop identifier
@@ -137,11 +141,10 @@ class GTFSService(ServiceBase[_GTFSState]):
         state = self._get_state()
 
         # Parse and normalize time to local timezone
-        time_zone = ZoneInfo("Europe/Bratislava")
         ref_dt_local = (
-            aimed_start_time.astimezone(time_zone) 
+            aimed_start_time.astimezone(TZ) 
             if aimed_start_time.tzinfo
-            else aimed_start_time.replace(tzinfo=time_zone)
+            else aimed_start_time.replace(tzinfo=TZ)
         )
 
         # Extract reference date, previous date and next date
@@ -181,7 +184,7 @@ class GTFSService(ServiceBase[_GTFSState]):
             # Converts GTFS time HH:MM:SS to YYYY-MM-DDTHH:MM:SS time_zone
             for departure in departures:
                 td = pd.to_timedelta(departure.departure_time_str)                           # type: ignore[type-arg]
-                dt = datetime.combine(date, datetime.min.time(), tzinfo=time_zone) + td
+                dt = datetime.combine(date, datetime.min.time(), tzinfo=TZ) + td
                 departure.departure_time = dt
             
             # Append to global list
@@ -207,6 +210,11 @@ class GTFSService(ServiceBase[_GTFSState]):
 
             # Insert first
             if not previous:
+                gap = all_departures[index].departure_time - current.departure_time
+
+                if gap > MAX_DEPARTURE_GAP:
+                    break
+
                 previous.append(current)
                 continue
             gap = previous[-1].departure_time - current.departure_time
@@ -263,12 +271,23 @@ class GTFSService(ServiceBase[_GTFSState]):
             currentIndex=current_index
         )
         
+    def get_stops_tree(self) -> BallTree:
+        """
+        Returns the BallTree used for spatial stop queries.
+
+        Returns:
+            BallTree structure containing stop coordinates
+        """
+        state = self._get_state()
+
+        return state.stops_tree
+
     async def reload(self) -> None:
         """
         Reload the GTFS dataset.
         """
-        
         print("Loading GTFS cache")
+        
         new_state = await asyncio.to_thread(self.__load_new_state)
 
         # Ensure atomic state swap
@@ -484,6 +503,15 @@ class GTFSService(ServiceBase[_GTFSState]):
                 color = None
             route_id_to_color[row["route_id"]] = color
 
+        # Extract stop coordinates
+        coordinates = stops[["stop_lat", "stop_lon"]].to_numpy()
+
+        # Convert coordinates to radians
+        coordinates_rad = np.radians(coordinates)
+
+        # Build BallTree spatial index
+        tree = BallTree(coordinates_rad, metric="haversine")
+
         return _GTFSState(
             calendar=calendar,
             calendar_dates=calendar_dates,
@@ -493,7 +521,8 @@ class GTFSService(ServiceBase[_GTFSState]):
             trip_id_to_stop_sequence=trip_id_to_stop_sequence,
             trip_id_to_stop_times=trip_id_to_stop_times,
             stop_id_to_coords=stop_id_to_coords,
-            route_id_to_color=route_id_to_color
+            route_id_to_color=route_id_to_color,
+            stops_tree=tree
         )
     
 # End of file gtfs_service.py

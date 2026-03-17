@@ -6,11 +6,13 @@ and processing realtime GTFS-RT dataset.
 """
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 import httpx
 from typing import Dict, List, Tuple
 import pandas as pd
 from google.transit.gtfs_realtime_pb2 import FeedMessage    # type: ignore[import-untyped]
+from models.route import TZ
+from models.vehicle_realtime_request_data import VehicleRealtimeRequestData
 from shared.geo_math import GeoMath
 from config.datasets import GTFSRT_URL
 from service.gtfs_service import GTFSService
@@ -28,7 +30,7 @@ class _GTFSRTState:
 
 class GTFSRTService(ServiceBase[_GTFSRTState]):
     """
-    Service responsible for retrieving and processing GTFS-Realtime vehicle data
+    Service responsible for retrieving and processing GTFS-Realtime vehicle data.
     """
     def __init__(self):
         super().__init__()
@@ -51,14 +53,14 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
 
     def get_vehicle_realtime_data(
         self,
-        trip_ids: List[int]
+        real_time_data: List[VehicleRealtimeRequestData]
     ) -> Dict[int, Dict[str, float]]:
         """
         Retrieves realtime vehicle positions for given trip identifiers and
         provides computed delay information.
 
         Args:
-            trip_ids: List of GTFS trip_ids
+            real_time_data: List of real time data
         
         Returns:
             Mapping trip_id to latitude and longitude coordinates and delay
@@ -69,20 +71,31 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
 
         state = self._get_state()
 
-        for trip_id in trip_ids:
+        # Reference time
+        now = datetime.now(TZ)
+
+        for data in real_time_data:
+            # Determines window
+            window_start = data.start_time - timedelta(minutes=10)
+            window_end = data.start_time + timedelta(hours=12)
+
+            # Skip data which are not in a window
+            if window_start > now or now > window_end:
+                continue
+
             # Retrieve cached vehicle position for a given trip_id
-            position = state.trip_realtime_data.get(trip_id)
+            position = state.trip_realtime_data.get(data.trip_id)
 
             if position:
                 # Store latitude and longitude
-                trip_id_to_position[trip_id] = {
+                trip_id_to_position[data.trip_id] = {
                     "lat": position[0][0],
                     "lon": position[0][1]
                 }
 
                 # Include delay if available
                 if position[1] is not None:
-                    trip_id_to_position[trip_id]["delay"] = position[1]
+                    trip_id_to_position[data.trip_id]["delay"] = position[1]
 
         return trip_id_to_position
 

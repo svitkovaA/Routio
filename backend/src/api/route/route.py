@@ -31,8 +31,6 @@ async def change_bike_station(data: BikeStationData):
         Updated trip pattern reflecting modified rack/station and recalculated
         affected segments
     """
-    print("endpoint: change_bike_station")
-
     # Initialize OTP GraphQL transport
     transport = AIOHTTPTransport(url=OTP_URL)
 

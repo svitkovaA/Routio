@@ -728,14 +728,8 @@ class StationChanger():
         # Original route legs
         legs = self.__ctx.data.original_legs
 
-        # Mode compressed legs
-        compressed_legs = self.__ctx.compressed_legs
-
         # Start from first leg
         i = 0
-
-        # Start from first compressed leg
-        compressed_index = 0
 
         # Count consecutive independent segments
         waypoint_count = 1
@@ -743,12 +737,7 @@ class StationChanger():
         # Track previous mode
         mode: Mode | Literal[""] = ""
 
-        # Traverse legs forward
-        while i < len(legs) - 1 and compressed_index < len(compressed_legs) - 1:
-            # Match compressed segment with original leg
-            if legs[i].mode == compressed_legs[compressed_index].mode:
-                compressed_index += 1
-            
+        while i < len(legs) - 1 and i < self.__ctx.data.leg_index + 1:        
             # Count consecutive foot/bicycle segments
             if mode == legs[i].mode and mode in TIME_INDEPENDENT_MODES:
                 waypoint_count += 1
@@ -769,14 +758,8 @@ class StationChanger():
         # Original route legs
         legs = self.__ctx.data.original_legs
 
-        # Mode compressed legs
-        compressed_legs = self.__ctx.compressed_legs
-
         # Start from last leg
         i = len(legs) - 1
-
-        # Start from last compressed leg
-        compressed_index = len(compressed_legs) - 1
 
         # Count consecutive independent segments
         waypoint_count = 1
@@ -784,12 +767,7 @@ class StationChanger():
         # Track previous mode
         mode: Mode | Literal[""] = ""
 
-        # Traverse legs backwards
-        while i >= 0 and compressed_index >= 0:
-            # Match compressed segment with original leg
-            if legs[i].mode == compressed_legs[compressed_index].mode:
-                compressed_index -= 1
-            
+        while i >= 0 and i > self.__ctx.data.leg_index - 2: 
             # Count consecutive foot/bicycle segments
             if mode == legs[i].mode and mode in TIME_INDEPENDENT_MODES:
                 waypoint_count += 1

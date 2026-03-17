@@ -5,9 +5,13 @@ Defines core routing domain models used by the routing engine.
 """
 
 from __future__ import annotations
-from typing import Dict, List, Any, Literal, Tuple
+from typing import Dict, List, Literal, Tuple
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
+from zoneinfo import ZoneInfo
+
+# Default timezone for route time normalization
+TZ = ZoneInfo("Europe/Bratislava")
 
 # Transport modes that do not depend on departure time
 TIME_INDEPENDENT_MODES = ["bicycle", "foot"]
@@ -62,6 +66,7 @@ class RackRow(BaseModel):
     lon: float                                  # Rack longitude
     distance: float                             # Distance from reference location
     capacity: int | None                        # Total rack capacity
+    name: str | None                            # Rack name
 
 class Place(PlaceBase):
     """ Extended place structure optionally containing name and quay reference"""
@@ -77,12 +82,23 @@ class VehicleRealtimeData(BaseModel):
     lat: float = -1                             # Current latitude
     lon: float = -1                             # Current longitude
     direction: str                              # Direction, vehicle headsign
+    startTime: datetime                         # Vehicle journey start time
+
+    @model_validator(mode="after")
+    def convert_datetime(self):
+        self.startTime = self.startTime.replace(tzinfo=TZ)
+        return self
 
 class Departure(BaseModel):
     """ Represents a single departure option """
     departureTime: datetime                     # Scheduled departure time
     direction: str                              # Final stop, headsign
     tripId: int                                 # GTFS trip identifier
+
+    @model_validator(mode="after")
+    def convert_datetime(self):
+        self.departureTime = self.departureTime.replace(tzinfo=TZ)
+        return self
 
 class OtherOptions(BaseModel):
     """ Alternative departure options for a public transport leg """
@@ -120,12 +136,17 @@ class Leg(BaseModel):
     nonContinuousDepartures: bool | None = None # No more departures available
     zone_ids: List[int] | None = None           # Fare zone identifiers
 
+    @model_validator(mode="after")
+    def convert_datetime(self):
+        self.aimedStartTime = self.aimedStartTime.replace(tzinfo=TZ)
+        self.aimedEndTime = self.aimedEndTime.replace(tzinfo=TZ)
+        return self
+
 class TripPattern(BaseModel):
     """ Represents a complete trip consisting of multiple legs """
     legs: List[Leg]                             # Ordered list of legs
     aimedEndTime: datetime = datetime.min       # Scheduled end time
     modes: List[RoutingMode] = []               # Modes used in trip
-    polyInfo: List[Any] = []                    # Polyline info
     totalDuration: float | None = None          # Total duration
     totalDistance: float | None = None          # Total distance
     bikeDistance: float | None = None           # Total cycling distance
@@ -136,6 +157,12 @@ class TripPattern(BaseModel):
     tooLongBikeDistance: bool | None = None     # Constraint flag cycling distance exceeding maximal allowed distance
     bikeSegmentFound: bool | None = None        # Indicates cycling presence
     vehicleRealtimeData: List[VehicleRealtimeData] = []   # Real-time vehicle data
+    totalTime: float = 0.0                      # Time from the start to end of the trip
+
+    @model_validator(mode="after")
+    def convert_datetime(self):
+        self.aimedEndTime = self.aimedEndTime.replace(tzinfo=TZ)
+        return self
 
 class WaypointGroup(BaseModel):
     """ Grouping of consecutive waypoints that share the same transport mode """
@@ -163,6 +190,11 @@ class OtherDeparture(BaseModel):
     direction: str                              # Tha final stop, trip headsign
     departure_time_str: str                     # Departure time string
 
+    @model_validator(mode="after")
+    def convert_datetime(self):
+        self.departure_time = self.departure_time.replace(tzinfo=TZ)
+        return self
+
 class TripResponse(BaseModel):
     """ Response object returned by an OTP trip query """
     tripPatterns: List[TripPattern]             # List of computed trip patterns
@@ -177,6 +209,7 @@ class BikeRentalPlace(PlaceBase):
     id: str = ""                                # Station identifier
     name: str = "Bike Station"                  # Station name
     bikesAvailable: int = 0                     # Available bicycles
+    predictedBikes: int | None = None           # Predicted number of bikes  
     spacesAvailable: int = 0                    # Free docking spaces
     allowDropoff: bool = False                  # Drop-off allowed flag
 
@@ -184,6 +217,7 @@ class BikeStationNodeBase(BaseModel):
     """ Base structure for a ranked bike station candidate """
     distance: float                             # Distance from reference location
     score: float = 0                            # Computed ranking score
+    in_A_plane: bool = False
 
 class BikeStationNode(BikeStationNodeBase):
     """ Represents a sharing bicycle station node """

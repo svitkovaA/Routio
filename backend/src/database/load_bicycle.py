@@ -1,23 +1,42 @@
+"""
+file: load_bicycle.py
+
+Loader for bicycle availability time series.
+"""
+
 from datetime import datetime, timezone
 from typing import Dict
 import httpx
 from config.lissy_ben import BEN_API_KEY, BICYCLE_INFO_URL
-import asyncpg  # type: ignore[import-untyped]
+import asyncpg                  # type: ignore[import-untyped]
 
-WINDOW_MS = 48 * 60 * 60 * 1000  # 48 hours
+# Maximum API query window (48 hours)
+WINDOW_MS = 48 * 60 * 60 * 1000
 
+# Initial timestamp for historical data loading
 START_DATETIME = datetime(2026, 1, 21, tzinfo=timezone.utc)
 START_TS = int(START_DATETIME.timestamp() * 1000)
 
 def now_ms() -> int:
+    """
+    Returns current unix timestamp in milliseconds.
+    """
     return int(datetime.now(tz=timezone.utc).timestamp() * 1000)
 
 async def load_bicycle_records(conn: asyncpg.Connection) -> None:
+    """
+    Load bicycle availability records for all stations.
+
+    Args:
+        conn: Active database connection
+    """
+    # Retrieve all station ids from database
     rows: list[dict[str, int]] = await conn.fetch("SELECT station_id FROM station")     #type: ignore
     stations: list[int] = [row["station_id"] for row in rows]
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         for station_id in stations:
+            # Get the latest stored timestamp for this station
             last_ts = await conn.fetchval(
                 """
                 SELECT MAX(unix_timestamp)
@@ -27,6 +46,7 @@ async def load_bicycle_records(conn: asyncpg.Connection) -> None:
                 station_id,
             )
 
+            # Determine starting timestamp for data retrieval
             if last_ts is None:
                 start = START_TS
             else:
@@ -34,13 +54,16 @@ async def load_bicycle_records(conn: asyncpg.Connection) -> None:
 
             end_now = now_ms()
 
+            # Skip station if data is already up to date
             if start >= end_now:
                 print(f"Station {station_id} is up to date")
                 continue
 
+            # Download data using time windows
             while start < end_now:
                 end = min(start + WINDOW_MS, end_now)
 
+                # Request bicycle availability
                 r = await client.get(
                     BICYCLE_INFO_URL,
                     params={
@@ -52,8 +75,10 @@ async def load_bicycle_records(conn: asyncpg.Connection) -> None:
                 )
                 r.raise_for_status()
 
-                data: Dict[str, dict[str, int]] = r.json()
+                # Response structure timestamp -> bikes
+                data: Dict[str, Dict[str, int]] = r.json()
 
+                # Convert API response into database records
                 values = [
                     (
                         station_id,
@@ -63,6 +88,7 @@ async def load_bicycle_records(conn: asyncpg.Connection) -> None:
                     for ts, record in data.items()
                 ]
 
+                # Insert records into database
                 if values:
                     await conn.executemany(
                         """
@@ -77,6 +103,7 @@ async def load_bicycle_records(conn: asyncpg.Connection) -> None:
 
                 print(f"Station {station_id}: {len(values)} records [{start} -> {end}]")
 
+                # Move to next time window
                 start = end
 
 # End of file load_bicycle.py

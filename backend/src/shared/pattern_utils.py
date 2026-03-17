@@ -88,6 +88,15 @@ class PatternUtils():
 
     @staticmethod
     def __legs_without_pt(legs: List[Leg]) -> bool:
+        """
+        Checks whether the legs are without public transport.
+
+        Args:
+            legs: List of route legs
+
+        Returns:
+            True if legs are without public transport, false otherwise
+        """
         return not any(leg.mode in TIME_DEPENDENT_MODES for leg in legs)
 
     @staticmethod

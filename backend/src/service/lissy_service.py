@@ -132,6 +132,9 @@ class LissyService(ServiceBase[_LissyState]):
         """
         Compute short deterministic hash for filesystem naming.
 
+        Args:
+            value: Value to be hashed
+
         Returns:
             stop_label hash
         """
@@ -149,7 +152,7 @@ class LissyService(ServiceBase[_LissyState]):
             today: Reference date
 
         Returns:
-            List of dates to be cached including today anf previous SHAPES_CACHE_DAYS - 1
+            List of dates to be cached including today and previous SHAPES_CACHE_DAYS - 1
 
         """
         # Generate sliding window of past dates
@@ -266,7 +269,7 @@ class LissyService(ServiceBase[_LissyState]):
             date: Date for which route shapes should be retrieved
 
         Returns:
-            A list of route shapes if success, None otherwise
+            A list of route shapes on success, None otherwise
         """
         try:
             # Convert date to API format (months are in format 0-11)
@@ -498,12 +501,25 @@ class LissyService(ServiceBase[_LissyState]):
     
     @staticmethod
     def __convert_month(date: str) -> str:
+        """
+        Increments the month value in a date string for correct date
+        visualisation on frontend.
+
+        Args:
+            date: Date in format YYYY-M-D or YYYY-MM-DD
+
+        Returns:
+            Date string with the month increased by 1
+        """
         def repl(match: re.Match[str]) -> str:
             year = match.group(1)
             month = int(match.group(2)) + 1
             day = match.group(3)
+
+            # Construct updated date string
             return f"{year}-{month}-{day}"
 
+        # Replace month value
         return re.sub(r'^(\d{4})-(\d{1,2})-(\d{1,2})$', repl, date)
 
     async def get_delays(

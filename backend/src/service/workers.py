@@ -6,14 +6,16 @@ Background asynchronous workers for periodic data updates and maintenance tasks.
 
 import asyncio
 import logging
+from datetime import datetime, timedelta
 from typing import Any, Awaitable, Callable, Type
+from service.prediction_service import PredictionService
+from service.database_service import DatabaseService
+from service.population_service import PopulationService
 from service.service_base import ServiceBase
 from service.gtfs_rt_service import GTFSRTService
 from service.gbfs_service import GBFSService
 from service.lissy_service import LissyService
 from service.gtfs_service import GTFSService
-from database.db import database
-from datetime import datetime, timedelta
 from config.worker import *
 
 async def _safe_reload(service: Type[ServiceBase[Any]]):
@@ -33,8 +35,13 @@ async def load_initial_data():
         _safe_reload(GTFSService),
         _safe_reload(GBFSService),
         _safe_reload(LissyService),
+        _safe_reload(PopulationService),
+        _safe_reload(DatabaseService)
     )
-    await _safe_reload(GTFSRTService)
+    await asyncio.gather(
+        _safe_reload(GTFSRTService),
+        _safe_reload(PredictionService)
+    )
 
 def seconds_until_next(
     hour: int,
@@ -77,6 +84,27 @@ def seconds_until_next(
 
     return (target - now).total_seconds()
 
+def seconds_until_next_10min_offset(offset: int = 1) -> float:
+    """
+    Calculate seconds until next (10 minute interval + offset).
+
+    Args:
+        offset: offset in minutes
+    """
+    now = datetime.now()
+
+    # Next 10-minute boundary
+    next_minute = ((now.minute // 10) + 1) * 10 + offset
+
+    target = now.replace(second=0, microsecond=0)
+
+    if next_minute >= 60:
+        target = target.replace(minute=offset) + timedelta(hours=1)
+    else:
+        target = target.replace(minute=next_minute)
+
+    return (target - now).total_seconds()
+
 async def run_periodic(task: Callable[[], Awaitable[None]], delay_fn: Callable[[], float], initial_load: bool):
     """
     Execute an asynchronous task periodically.
@@ -103,7 +131,7 @@ async def run_periodic(task: Callable[[], Awaitable[None]], delay_fn: Callable[[
 
 async def gtfs_worker():
     """
-    Periodic worker for updating GTFS data
+    Periodic worker for updating GTFS data.
     """
     await run_periodic(
         GTFSService.get_instance().reload,
@@ -113,7 +141,7 @@ async def gtfs_worker():
 
 async def gbfs_worker():
     """
-    Periodic worker for updating GBFS data
+    Periodic worker for updating GBFS data.
     """
     await run_periodic(
         GBFSService.get_instance().reload,
@@ -123,17 +151,17 @@ async def gbfs_worker():
 
 async def database_worker():
     """
-    Periodic worker for updating database
+    Periodic worker for updating database.
     """
     await run_periodic(
-        database,
-        lambda: seconds_until_next(**DATABASE_INTERVAL),
+        DatabaseService.get_instance().reload,
+        lambda: seconds_until_next_10min_offset(1),
         initial_load=True
     )
 
 async def lissy_worker():
     """
-    Periodic worker for updating data retrieved from Lissy
+    Periodic worker for updating data retrieved from Lissy.
     """
     await run_periodic(
         LissyService.get_instance().reload,
@@ -143,7 +171,7 @@ async def lissy_worker():
 
 async def gtfs_rt_worker():
     """
-    Periodic worker for updating GTFS-RT data
+    Periodic worker for updating GTFS-RT data.
     """
     await run_periodic(
         GTFSRTService.get_instance().reload,

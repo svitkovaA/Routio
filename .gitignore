@@ -23,9 +23,15 @@ yarn-error.log*
 # Python
 *__pycache__
 backend/venv/
-/backend/datasets
+/backend/dataset
 
 .vscode/
 .env*
 
 backend/src/*.json
+backend/src/*.png
+backend/prediction_results
+forecast_service.py
+gcn_tcn.py
+gradient_boost_rs.py
+tcn_covariate.py

@@ -20,6 +20,5 @@ class BikeStationData(BaseModel):
     modes: List[RoutingMode]        # Transport modes used for each route segment
     original_legs: List[Leg]        # Original legs before modification
     route_data: RouteData           # Route preferences
-    bike_rack: bool                 # True if the station represents a bike rack, false if shared bike station
 
 # End of file bike_station_data.py

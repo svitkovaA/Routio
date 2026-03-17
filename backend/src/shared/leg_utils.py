@@ -6,9 +6,12 @@ Utilities responsible for post processing routing engine output
 
 from copy import deepcopy
 from dataclasses import dataclass
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from typing import List, Literal, Optional
 from models.route import (
     TIME_INDEPENDENT_MODES,
+    TZ,
     PointOnLink, RoutingMode,
     ServiceJourney,
     Quay,
@@ -41,11 +44,17 @@ class LegUtils():
         "bicycle": "red"
     }
 
+    # Default timezone for route time normalization
+    TZ = ZoneInfo("Europe/Bratislava")
+
     @staticmethod
     def process_legs(pattern: TripPattern) -> None:
         """
         Post process a computed trip pattern. The method processes raw legs
         from the routing engine into a final representation.
+
+        Args:
+            pattern: Trip pattern containing raw routing legs that will be processed
         """
         legs = pattern.legs
 
@@ -53,7 +62,7 @@ class LegUtils():
         LegUtils.__assign_default_colors(legs)
 
         # Extract live vehicle positions for public transport legs
-        vehicle_positions = LegUtils.__collect_vehicle_positions(legs)
+        vehicle_positions = LegUtils.__collect_vehicle_realtime_data(legs)
 
         # Normalize walking mode representation
         LegUtils.__assign_walk_mode(legs, pattern.modes)
@@ -74,6 +83,9 @@ class LegUtils():
     def __assign_default_colors(legs: List[Leg]) -> None:
         """
         Assigns default color based on transport mode (used for foot and bicycle segments).
+
+        Args:
+            legs: List of legs representing route segments
         """
         for leg in legs:
             # Assign fallback color if none is provided
@@ -81,9 +93,15 @@ class LegUtils():
                 leg.color = LegUtils.COLORS.get(leg.mode, "black")
 
     @staticmethod
-    def __collect_vehicle_positions(legs: List[Leg]) -> List[VehicleRealtimeData]:
+    def __collect_vehicle_realtime_data(legs: List[Leg]) -> List[VehicleRealtimeData]:
         """
         Extract vehicles that should be tracked in realtime.
+
+        Args:
+            legs: List of legs representing route segments
+
+        Returns:
+            List of vehicle realtime data
         """
         vehicle_positions: List[VehicleRealtimeData] = []
 
@@ -95,7 +113,15 @@ class LegUtils():
                 and leg.otherOptions
                 and leg.otherOptions.currentIndex
                 and leg.color
+                and leg.serviceJourney
+                and leg.serviceJourney.passingTimes
             ):
+                # Extract the scheduled departure time of the first stop
+                time = datetime.strptime(leg.serviceJourney.passingTimes[0]["departure"].time, "%H:%M:%S").time()
+
+                # Combine the leg date with the departure time and attach timezone
+                start_time = datetime.combine(leg.aimedStartTime.date(), time, tzinfo=TZ)
+
                 vehicle_positions.append(
                     VehicleRealtimeData(
                         tripId=leg.tripId,
@@ -104,7 +130,8 @@ class LegUtils():
                         mode=leg.mode,
                         direction=leg.otherOptions.departures[
                             leg.otherOptions.currentIndex
-                        ].direction
+                        ].direction,
+                        startTime=start_time
                     )
                 )
 
@@ -114,6 +141,10 @@ class LegUtils():
     def __assign_walk_mode(legs: List[Leg], modes: List[RoutingMode]) -> None:
         """
         Decides whether a foot segment is actual walking or just a transfer.
+
+        Args:
+            legs: List of legs representing the route segments
+            modes: List of routing modes used to compute the route
         """
         mode: Mode | Literal[""] = ""
         mode_index = 0
@@ -125,7 +156,15 @@ class LegUtils():
 
             # Mark foot leg as real walking based on routing modes, else the segment is a transfer leg
             if leg.mode == "foot":
-                leg.walkMode = mode_index < len(modes) and modes[mode_index] == "foot"
+                leg.walkMode = (
+                    mode_index < len(modes) and (
+                        modes[mode_index] == "foot" or 
+                        (
+                            modes[mode_index] in ["public_bicycle", "bicycle_public"] and
+                            leg.distance > 500
+                        )
+                    )
+                )
 
             mode = leg.mode
 
@@ -133,6 +172,13 @@ class LegUtils():
     def __merge_same_service_legs(legs: List[Leg]) -> List[Leg]:
         """
         Merge consecutive legs that belong to the same transport service.
+
+        Args:
+            legs: List of legs representing route segments
+
+        Returns:
+            List of legs where consecutive segments belonging to the same
+            service are merged into a single leg
         """
         prev_leg = None
         new_legs: List[Leg] = []
@@ -170,6 +216,13 @@ class LegUtils():
     def __insert_transfer_legs(legs: List[Leg]) -> List[Leg]:
         """
         Insert transfer legs between public transport segments.
+
+        Args:
+            legs: List of processed legs representing route segments
+
+        Returns:
+            New list of legs where transfer legs are inserted between
+            consecutive public transport segments
         """
         prev_mode: Mode | Literal[""] = ""
         original_legs = deepcopy(legs)
@@ -181,8 +234,8 @@ class LegUtils():
             # Add transfer leg when switching between two segments using public transport
             if (
                 prev_mode
-                and leg.mode not in ["foot", "bicycle", "wait"]
-                and prev_mode not in ["foot", "bicycle", "wait"]
+                and leg.mode not in ["foot", "bicycle", "wait", "transfer"]
+                and prev_mode not in ["foot", "bicycle", "wait", "transfer"]
             ):
                 original_legs.insert(i, LegUtils.__prepare_transfer_leg())
                 # Skip inserted transfer leg
@@ -196,7 +249,10 @@ class LegUtils():
     @staticmethod
     def __prepare_transfer_leg() -> Leg:
         """
-        Create a placeholder transfer leg
+        Create a placeholder transfer leg.
+
+        Returns:
+            Leg representing a transfer segment used mainly for visualization
         """
         return Leg(
             mode="transfer",
@@ -213,6 +269,12 @@ class LegUtils():
     ) -> tuple[List[Leg], _LegStats]:
         """
         Merge compatible legs and compute aggregated route metrics.
+
+        Args:
+            legs: List of route legs
+
+        Returns:
+            Tuple containing (List of merged legs, _LegStats with aggregated route metrics)
         """
         merged_legs: List[Leg] = []
 
@@ -243,7 +305,7 @@ class LegUtils():
                 LegUtils.__merge_active_leg(current, leg)
             else:
                 # Count number of transfers
-                if current.mode not in ["foot", "bicycle", "wait"]:
+                if current.mode not in ["foot", "bicycle", "wait", "transfer"]:
                     number_of_transfers = number_of_transfers + 1 if number_of_transfers else 1
 
                 # Store accumulated duration
@@ -256,7 +318,7 @@ class LegUtils():
 
                 # Leg copy
                 current = deepcopy(leg)
-
+        
         # Count final transfer if last leg is public transport
         if current.mode not in TIME_INDEPENDENT_MODES:
             number_of_transfers = number_of_transfers + 1 if number_of_transfers else 1
@@ -269,8 +331,24 @@ class LegUtils():
         duration += current.duration
         distance += current.distance
 
+        legs_without_wait: List[Leg] = []
+        prev_mode = "foot" # Anything else from bicycle/wait
+
+        for leg in merged_legs:
+            # Merge waiting time into adjacent bicycle legs
+            if leg.mode == "bicycle" and prev_mode == "wait":
+                leg.duration += legs_without_wait[-1].duration
+                leg.accumulatedDuration = legs_without_wait[-1].accumulatedDuration
+                legs_without_wait[-1] = leg
+            elif leg.mode == "wait" and prev_mode == "bicycle":
+                legs_without_wait[-1].duration += leg.duration
+            else:
+                legs_without_wait.append(leg)
+
+            prev_mode = leg.mode
+
         # Return merged legs and aggregated metrics
-        return merged_legs, _LegStats(
+        return legs_without_wait, _LegStats(
             duration,
             distance,
             bike_distance,
@@ -282,6 +360,10 @@ class LegUtils():
     def __merge_active_leg(current: Leg, leg: Leg) -> None:
         """
         Merge two consecutive legs of the same time independent mode.
+
+        Args:
+            current: The active leg that accumulates the merged data
+            leg: The next leg that should be merged into the current leg
         """
 
         # Extend duration and distance to keep route continuous
@@ -313,15 +395,26 @@ class LegUtils():
         vehicle_positions: List[VehicleRealtimeData],
         original_legs: List[Leg],
     ) -> None:
+        """
+        Stores results into trip pattern.
 
+        Args:
+            pattern: The trip pattern the results are stored in
+            merged_legs: New merged legs to store
+            stats: Accumulates stats to store
+            vehicle_positions: List of realtime data to store
+            original_legs: Original unprocessed legs
+        """
         pattern.legs = merged_legs
         pattern.originalLegs = original_legs
-        pattern.polyInfo = []
         pattern.totalDuration = stats.total_duration
         pattern.totalDistance = stats.total_distance
         pattern.bikeDistance = stats.bike_distance
         pattern.walkDistance = stats.walk_distance
         pattern.vehicleRealtimeData = vehicle_positions
+        pattern.totalTime = (
+            pattern.aimedEndTime - pattern.legs[0].aimedStartTime   # Total trip time in seconds
+        ).total_seconds()
 
         if stats.number_of_transfers:
             pattern.numOfTransfers = stats.number_of_transfers - 1

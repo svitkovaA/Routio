@@ -5,11 +5,12 @@ Contains logic for recalculating a trip pattern when a user selects a different
 public transport departure option.
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import List
 from fastapi import HTTPException
+from shared.leg_utils import LegUtils
 from shared.pattern_utils import PatternUtils
-from models.route import Leg, TripPattern, VehicleRealtimeData
+from models.route import TIME_DEPENDENT_MODES, TZ, Leg, TripPattern, VehicleRealtimeData
 from models.departure_data import DepartureData
 
 class DepartureUpdater():
@@ -41,6 +42,10 @@ class DepartureUpdater():
 
         # Recalculate final trip end time
         DepartureUpdater.__update_final_end_time(data)
+
+        # Postprocess trip pattern
+        data.trip_pattern.legs = legs
+        LegUtils.process_legs(data.trip_pattern)
 
         return data.trip_pattern
 
@@ -77,8 +82,8 @@ class DepartureUpdater():
         leg.serviceJourney.direction = chosen_dep.direction
         leg.tripId = chosen_dep.tripId
 
-        # Compute end time of the selected leg based on duration
-        leg.aimedEndTime = leg.aimedStartTime + timedelta(seconds=leg.duration)
+        # Compute updated end time and passing time
+        DepartureUpdater.__update_times(leg)
 
         # Reset arrival/departure continuity flag
         leg.arrivalAfterDeparture = False
@@ -143,14 +148,42 @@ class DepartureUpdater():
             else:
                 DepartureUpdater.__select_next_valid_departure(leg, previous_leg)
 
-            # Compute updated end time
-            leg.aimedEndTime = (
-                leg.aimedStartTime +
-                timedelta(seconds=leg.duration)
-            )
+            # Compute updated end time and passing time
+            DepartureUpdater.__update_times(leg)
 
             # Move to next leg
             index += 1
+    
+    @staticmethod
+    def __update_times(leg: Leg) -> None:
+        """
+        Computes new end time and passing time for public transport leg.
+
+        Args:
+            leg: The leg to be changed
+        """
+        # Compute the new end time based on the start time and leg duration
+        new_end_time = leg.aimedStartTime + timedelta(seconds=leg.duration)
+
+        # Determine how much the end time shifted compared to the original value
+        time_delta = new_end_time - leg.aimedEndTime
+
+        # Update the leg end time
+        leg.aimedEndTime = new_end_time
+
+        # Public transport leg
+        if leg.mode in TIME_DEPENDENT_MODES and leg.serviceJourney:
+            # Extract departure time string from passingTimes
+            time_str = leg.serviceJourney.passingTimes[0]["departure"].time
+
+            # Convert the time string to a datetime
+            new_time = datetime.combine(
+                leg.aimedStartTime.date(),
+                datetime.strptime(time_str, "%H:%M:%S").time()
+            ) + time_delta
+
+            # Store the updated time back as string
+            leg.serviceJourney.passingTimes[0]["departure"].time = new_time.strftime("%H:%M:%S")
 
     @staticmethod
     def __select_next_valid_departure(
@@ -198,6 +231,7 @@ class DepartureUpdater():
             leg.otherOptions.currentIndex = len(deps) - 1
             leg.serviceJourney.direction = last.direction
             leg.nonContinuousDepartures = True
+            leg.tripId = last.tripId
 
     @staticmethod
     def __update_vehicle_positions(data: DepartureData) -> None:
@@ -218,7 +252,14 @@ class DepartureUpdater():
                 and leg.color
                 and leg.otherOptions
                 and leg.otherOptions.currentIndex is not None
+                and leg.serviceJourney
             ):
+                # Extract scheduled departure time from the first stop
+                time = datetime.strptime(leg.serviceJourney.passingTimes[0]["departure"].time, "%H:%M:%S").time()
+                
+                # Combine extracted time with the planned start date
+                start_time = datetime.combine(leg.aimedStartTime.date(), time, tzinfo=TZ)
+
                 vehicle_positions.append(
                     VehicleRealtimeData(
                         tripId=leg.tripId,
@@ -229,7 +270,8 @@ class DepartureUpdater():
                         lon=-1,
                         direction=leg.otherOptions.departures[
                             leg.otherOptions.currentIndex
-                        ].direction
+                        ].direction,
+                        startTime=start_time
                     )
                 )
 

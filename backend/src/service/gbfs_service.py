@@ -5,7 +5,7 @@ Service for retrieving and caching GBFS station capacity data.
 """
 
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Set
 import httpx
 from config.datasets import STATION_INFORMATION_URLS
 from service.service_base import ServiceBase
@@ -13,10 +13,13 @@ from service.service_base import ServiceBase
 @dataclass(frozen=True)
 class _GBFSState:
     """
-    Internal state of the GBFS service
+    Internal state of the GBFS service.
     """
     # Maps station_id to capacity
     capacities: Dict[str, int]
+
+    # Set of station ids
+    station_ids: Set[str]
 
 class GBFSService(ServiceBase[_GBFSState]):
     """
@@ -50,6 +53,9 @@ class GBFSService(ServiceBase[_GBFSState]):
         # Maps statin_id to capacity
         capacities: Dict[str, int] = {}
 
+        # Set of station ids
+        station_ids: Set[str] = set()
+
         # Iterate over all configured GBFS station information URLs
         for url in STATION_INFORMATION_URLS:
             try:
@@ -64,6 +70,9 @@ class GBFSService(ServiceBase[_GBFSState]):
                     # Retrieve capacity value if present
                     capacity = station.get("capacity")
 
+                    # Retrieve station ids
+                    station_ids.add(station["station_id"])
+
                     # Store capacity if available
                     if capacity is not None:
                         capacities[station["station_id"]] = capacity
@@ -71,7 +80,7 @@ class GBFSService(ServiceBase[_GBFSState]):
             except Exception:
                 continue
 
-        return _GBFSState(capacities=capacities)
+        return _GBFSState(capacities=capacities, station_ids=station_ids)
     
     def get_capacity(self, station_id: str) -> int | None:
         """
@@ -86,5 +95,19 @@ class GBFSService(ServiceBase[_GBFSState]):
         # Retrieve capacity for a specific station_id
         state = self._get_state()
         return state.capacities.get(station_id)
+
+    def valid_station_id(self, station_id: str) -> bool:
+        """
+        Checks whether a station id exists in the dataset.
+
+        Args:
+            station_id: Station identifier to validate
+
+        Returns:
+            True if the station id exists, false otherwise
+        """
+        state = self._get_state()
+
+        return station_id in state.station_ids
 
 # End of file gbfs_service.py

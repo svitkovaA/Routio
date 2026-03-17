@@ -18,13 +18,6 @@ GBFS_INTERVAL = {
     "weekday": 0
 }
 
-# Interval for refreshing database, executes weekly on Monday at 2.30
-DATABASE_INTERVAL = {
-    "hour": 2,
-    "minute": 30,
-    "weekday": 0
-}
-
 # Interval for refreshing Lissy, executes weekly on Monday at 4.00
 LISSY_INTERVAL = {
     "hour": 4

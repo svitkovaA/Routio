@@ -17,19 +17,19 @@ class StationChangerContext():
         Args:
             data: Request payload
         """
-        # Extract only the part of the route affected by the bike station change
-        # (prefix for arrive based routing, suffix for departure based routing)
-        self.compressed_legs = (
-            data.legs[:data.leg_index + 2] 
-            if data.route_data.arrive_by 
-            else data.legs[data.leg_index - 1:]
-        )
-
         # Reference time used to rerouting
         self.time_cursor = (
-            self.compressed_legs[-1].aimedEndTime
-            if data.route_data.arrive_by 
-            else self.compressed_legs[0].aimedStartTime
+            data.original_legs[
+                data.leg_index + 1
+                if data.leg_index < len(data.original_legs)
+                else data.leg_index
+            ].aimedEndTime
+            if data.route_data.arrive_by
+            else data.original_legs[
+                data.leg_index - 1
+                if data.leg_index > 0
+                else data.leg_index
+            ].aimedStartTime
         )
 
         # Selected bike station place object

@@ -7,13 +7,14 @@ a list of GTFS trip_ids.
 
 from typing import List
 from fastapi import APIRouter
+from models.vehicle_realtime_request_data import VehicleRealtimeRequestData
 from service.gtfs_rt_service import GTFSRTService
 
 # Create a router instance
 router = APIRouter()
 
 @router.post("/vehicleRealtimeData")
-def vehicle_realtime_data(data: List[int]):
+def vehicle_realtime_data(data: List[VehicleRealtimeRequestData]):
     """
     Retrieves current vehicle positions and delays for given GTFS trip IDs.
     

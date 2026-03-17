@@ -14,9 +14,6 @@ def server_status():
     """
     Returns basic health status of the server.
     """
-    
-    print("endpoint: server_status")
-    return {"message": "Server for multimodal transport planner is running",
-            "status": "ok"}
+    return {"status": "ok"}
 
 # End of file status.py

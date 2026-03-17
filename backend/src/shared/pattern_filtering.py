@@ -8,16 +8,12 @@ according to constraints defined by user.
 from datetime import datetime
 from typing import List, Literal
 from routing_engine.routing_context import RoutingContext
-from models.route import TripPattern
-from zoneinfo import ZoneInfo
+from models.route import TZ, TripPattern
 
 class PatternFiltering():
     """
     Handles filtering and sorting of trip patterns based on user preferences.
     """
-    # Default timezone for route time normalization
-    TZ = ZoneInfo("Europe/Bratislava")
-
     def __init__(self, context: RoutingContext):
         self.__ctx = context
 
@@ -67,6 +63,12 @@ class PatternFiltering():
     def __exceeds_transfer_limit(self, pattern: TripPattern) -> bool:
         """
         Check whether pattern exceeds maximum allowed transfers.
+
+        Args:
+            pattern: Trip patterns representing possible route
+
+        Returns:
+            True if the number of transfers is greater than the allowed limit, false otherwise
         """
         # No transfer information
         if pattern.numOfTransfers is None:
@@ -78,6 +80,14 @@ class PatternFiltering():
     def __exceeds_bike_distance(self, pattern: TripPattern, bike_in_pref: bool) -> bool:
         """
         Check whether bicycle distance exceeds allowed limit.
+
+        Args:
+            pattern: Trip pattern representing a possible route
+            bike_in_pref: Indicates whether cycling was explicitly requested in
+                user preferences
+
+        Returns:
+            True if the bicycle distance exceeds the allowed limit, false otherwise
         """
         # No bicycle segment
         if pattern.bikeDistance is None:
@@ -99,6 +109,14 @@ class PatternFiltering():
     def __exceeds_foot_distance(self, pattern: TripPattern, foot_in_pref: bool) -> bool:
         """
         Check whether walking distance exceeds allowed limit.
+
+        Args:
+            pattern: Trip pattern representing a possible route
+            foot_in_pref: Indicates whether walking was explicitly requested in
+                user preferences
+
+        Returns:
+            True if the walking distance exceeds the allowed limit, false otherwise
         """
         # No walking segment
         if pattern.walkDistance is None:
@@ -120,6 +138,12 @@ class PatternFiltering():
     def __sort_patterns(self, patterns: List[TripPattern]) -> List[TripPattern]:
         """
         Sort trip patterns based on the user preferences.
+
+        Args:
+            patterns: List of trip patterns representing a route
+
+        Returns:
+            List of trip patterns sorted based on te selected preference
         """
         preference = self.__ctx.data.route_preference
         # Sort patterns by total distance
@@ -150,7 +174,15 @@ class PatternFiltering():
                 )
 
     def __mode_in_preferences(self, mode: Literal["bicycle", "foot"]) -> bool:
-        """Check whether a specific mode is explicitly included in user preferences."""
+        """
+        Check whether a specific mode is explicitly included in user preferences.
+
+        Args:
+            mode: Transport mode to check
+
+        Returns:
+            True if the mode is explicitly requested in the users preferences, false otherwise
+        """
         data = self.__ctx.data
 
         # Match in unimodal routing
@@ -166,11 +198,19 @@ class PatternFiltering():
 
     @staticmethod
     def __ensure_aware(dt: datetime) -> datetime:
+        """
+        Ensures that a datetime is timezone aware and converted to the Europe/Bratislava timezone.
+        Args:
+            dt: Datetime that may be naive or timezone aware
+
+        Returns:
+            Timezone aware datetime
+        """
         # Attach default timezone
         if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
-            return dt.replace(tzinfo=PatternFiltering.TZ)
+            return dt.replace(tzinfo=TZ)
         
         # Convert to system timezone
-        return dt.astimezone(PatternFiltering.TZ)
+        return dt.astimezone(TZ)
     
 # End of file pattern_filtering.py
