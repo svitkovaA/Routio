@@ -50,7 +50,7 @@ class PredictionService(ServiceBase[_PredictionState]):
 
         # Load trained model checkpoint
         checkpoint = torch.load(
-            "../prediction_results/results/tcn/tcn_model.pt",
+            "./tcn_model.pt",
             weights_only=False
         )
 

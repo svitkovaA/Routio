@@ -14,3 +14,9 @@ asyncpg
 osmium
 gtfs-realtime-bindings
 protobuf
+scikit-learn
+pyproj
+rasterio
+torch
+matplotlib
+lightgbm
