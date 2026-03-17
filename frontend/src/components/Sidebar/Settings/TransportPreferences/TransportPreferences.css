@@ -13,8 +13,23 @@
     margin-top: 10px;
 }
 
+.transport-modes .options {
+    width: 130px;
+}
+
 .section .MuiFormControlLabel-root {
     margin-left: 0;
+}
+
+.switch-delays {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0;
+}
+
+.switch-button {
+    width: 130px;
 }
 
 /** End of file TransportPreferences.css */

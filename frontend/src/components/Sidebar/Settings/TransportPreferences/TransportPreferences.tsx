@@ -113,9 +113,8 @@ function TransportPreferences() {
                     </FormGroup>
                 </div>
                 {/* Historical delays */}
-                <div className="section transport-delays">
                     <FormControlLabel
-                        className="section"
+                        className="switch-delays"
                         label={t("settingsTab.useHistoricalDelays")}
                         labelPlacement="start"
                         control={
@@ -123,14 +122,15 @@ function TransportPreferences() {
                                 ? t("tooltips.settings.disableHistoricalDelays")
                                 : t("tooltips.settings.enableHistoricalDelays") 
                             }>
-                                <Switch
-                                    checked={useHistoricalDelays}
-                                    onChange={(e) => setUseHistoricalDelays(e.target.checked)}
-                                />
+                                <div className="switch-button">
+                                    <Switch
+                                        checked={useHistoricalDelays}
+                                        onChange={(e) => setUseHistoricalDelays(e.target.checked)}
+                                    />
+                                </div>
                             </CustomTooltip>
                         }
                     />
-                </div>
             </div>
         </div>
     );

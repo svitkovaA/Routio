@@ -51,6 +51,7 @@
     },
     "time": "Time",
     "date": "Date",
+    "now": "Now",
     "departureArrival": {
       "departure": "Departure",
       "arrival": "Arrival"

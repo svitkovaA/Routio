@@ -34,6 +34,8 @@ body {
     --color-origin-station: #2e7d32;
     --color-destination-station: #1565c0;
 
+    --color-warning: #ff7b00;
+
     /** Tooltip */
     --color-tooltip-bg: rgba(108, 108, 108, 0.95);
 

@@ -52,6 +52,7 @@
     },
     "time": "Čas",
     "date": "Datum",
+    "now": "Nyní",
     "departureArrival": {
       "departure": "Odjezd",
       "arrival": "Příjezd"

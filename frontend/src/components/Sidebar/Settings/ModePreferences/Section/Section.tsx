@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -117,6 +117,51 @@ function Section({
         }
     };
 
+    // Reference to interval
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    /**
+     * Starts continuous value change if button pressed
+     * 
+     * @param direction Direction the value is changed
+     */
+    const startChanging = (direction: "inc" | "dec") => {
+        // Apply first step immediately
+        setValue(prev => {
+            const newValue =
+                direction === "inc"
+                    ? Math.min(bounds.max, prev + 1)
+                    : Math.max(bounds.min, prev - 1);
+
+            setRawValue(newValue.toString());
+            return newValue;
+        });
+
+        // Start interval to repeatedly update value while holding
+        intervalRef.current = setInterval(() => {
+            setValue(prev => {
+                const newValue =
+                    direction === "inc"
+                        ? Math.min(bounds.max, prev + 1)
+                        : Math.max(bounds.min, prev - 1);
+
+                setRawValue(newValue.toString());
+                return newValue;
+            });
+        }, 100);
+    };
+
+    /**
+     * Stops continuous value change when button is released
+     */
+    const stopChanging = () => {
+        // Clear interval if active
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+    };
+
     return(
         <div className="section">
             <span className="section-label">
@@ -162,11 +207,11 @@ function Section({
                                     title={t("tooltips.settings.decrease")}
                                 >
                                     <IconButton
-                                        onClick={() => {
-                                            const newValue = Math.max(bounds.min, value - 1);
-                                            setValue(newValue);
-                                            setRawValue(newValue.toString());
-                                        }}
+                                        onMouseDown={() => startChanging("dec")}
+                                        onMouseUp={stopChanging}
+                                        onMouseLeave={stopChanging}
+                                        onTouchStart={() => startChanging("dec")}
+                                        onTouchEnd={stopChanging}
                                         size="small"
                                         disabled={value === bounds.min}
                                     >
@@ -179,11 +224,11 @@ function Section({
                                     title={t("tooltips.settings.increase")}
                                 >
                                     <IconButton
-                                        onClick={() => {
-                                            const newValue = Math.min(bounds.max, value + 1);
-                                            setValue(newValue);
-                                            setRawValue(newValue.toString());
-                                        }}
+                                        onMouseDown={() => startChanging("inc")}
+                                        onMouseUp={stopChanging}
+                                        onMouseLeave={stopChanging}
+                                        onTouchStart={() => startChanging("inc")}
+                                        onTouchEnd={stopChanging}
                                         size="small"
                                         disabled={value === bounds.max}
                                     >

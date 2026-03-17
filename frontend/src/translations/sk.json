@@ -52,6 +52,7 @@
     },
     "time": "Čas",
     "date": "Dátum",
+    "now": "Teraz",
     "departureArrival": {
       "departure": "Odchod",
       "arrival": "Príchod"

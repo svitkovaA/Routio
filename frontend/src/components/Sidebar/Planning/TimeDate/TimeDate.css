@@ -15,11 +15,35 @@
 .time-date {
     margin-top: 12px;
     margin-bottom: 10px !important;
+    position: relative;
+    grid-template-columns: 1fr 1fr 0px;
+    gap: 0px;
 }
 
 .MuiPickersInputBase-root {
     font-size: 0.9rem !important;
     height: 35px;
+}
+
+.time-date > div {
+    width: calc(100% - 5px);
+}
+
+.time-date > div:nth-child(2) {
+    margin-left: 5px;
+}
+
+.now-button {
+    right: 70px;
+    flex-direction: column;
+    height: 35px;
+    width: 35px;
+    padding-top: 6px !important;
+}
+
+.now-button span {
+    font-size: 12px;
+    margin-top: -2px;
 }
 
 /** End of file TimeDate.css */
