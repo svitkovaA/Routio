@@ -17,9 +17,58 @@ function CustomZoomControl() {
     // Function translation
     const { t } = useTranslation();
 
+    // Leaflet map instance
     const map = useMap();
-    const containerRef = useRef<HTMLDivElement>(null);
 
+    // References for elements and interval
+    const containerRef = useRef<HTMLDivElement>(null);
+    const zoomInButtonRef = useRef<HTMLButtonElement>(null);
+    const zoomOutButtonRef = useRef<HTMLButtonElement>(null);
+    const zoomInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    /**
+     * Start continuous zooming in or out
+     * 
+     * @param type Zoom action
+     */
+    const startZoom = (type: "in" | "out") => {
+        // Prevent multiple intervals running simultaneously
+        if (zoomInterval.current) {
+            return;
+        }
+
+        // Perform initial zoom step
+        if (type === "in") {
+            map.zoomIn();
+        }
+        else {
+            map.zoomOut();
+        }
+
+        // Start continuous zooming
+        zoomInterval.current = setInterval(() => {
+            if (type === "in") {
+                map.zoomIn();
+            }
+            else {
+                map.zoomOut();
+            }
+        }, 50);
+    };
+
+    /**
+     * Stop continuous zooming
+     */
+    const stopZoom = () => {
+        if (zoomInterval.current) {
+            clearInterval(zoomInterval.current);
+            zoomInterval.current = null;
+        }
+    };
+
+    /**
+     * Disable map interactions on controls
+     */
     useEffect(() => {
         if (!containerRef.current) {
             return;
@@ -29,10 +78,54 @@ function CustomZoomControl() {
         L.DomEvent.disableScrollPropagation(containerRef.current);
     }, []);
 
+    /**
+     * Attach mouse events to buttons
+     */
+    useEffect(() => {
+        const zoomInButton = zoomInButtonRef.current;
+        const zoomOutButton = zoomOutButtonRef.current;
+
+        if (!zoomInButton || !zoomOutButton) {
+            return;
+        }
+
+        // Handle press on zoom in
+        const handleZoomInMouseDown = (e: MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            startZoom("in");
+        };
+
+        // Handle press on zoom out
+        const handleZoomOutMouseDown = (e: MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            startZoom("out");
+        };
+
+        // Stop zooming when mouse is released anywhere
+        const handleMouseUp = () => {
+            stopZoom();
+        };
+
+        // Register listeners
+        zoomInButton.addEventListener("mousedown", handleZoomInMouseDown);
+        zoomOutButton.addEventListener("mousedown", handleZoomOutMouseDown);
+        window.addEventListener("mouseup", handleMouseUp);
+
+        // Cleanup listeners on unmount
+        return () => {
+            zoomInButton.removeEventListener("mousedown", handleZoomInMouseDown);
+            zoomOutButton.removeEventListener("mousedown", handleZoomOutMouseDown);
+            window.removeEventListener("mouseup", handleMouseUp);
+        };
+    }, [map]);
+
     return (
         <div ref={containerRef} className="custom-zoom-control">
             <CustomTooltip title={t("tooltips.controls.map.zoomIn")} placement="left">
                 <button
+                    ref={zoomInButtonRef}
                     className="custom-zoom-button inc"
                     onClick={() => map.zoomIn()}
                 >
@@ -42,6 +135,7 @@ function CustomZoomControl() {
 
             <CustomTooltip title={t("tooltips.controls.map.zoomOut")} placement="left">
                 <button
+                    ref={zoomOutButtonRef}
                     className="custom-zoom-button dec"
                     onClick={() => map.zoomOut()}
                 >

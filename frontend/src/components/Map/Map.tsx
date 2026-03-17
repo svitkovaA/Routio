@@ -233,7 +233,18 @@ function Map({
     }, [mapSelectionIndex]);
 
     return (
-        <MapContainer center={defaultCenter} zoom={defaultZoom} zoomControl={false} className={"map" + (mapSelectionIndex !== -1 ? "selected" : "")}>
+        <MapContainer
+            center={defaultCenter}
+            zoom={defaultZoom}
+            zoomControl={false}
+            minZoom={5}
+            maxBounds={[
+                [-90, -180],  // South west coordinate
+                [90, 180]     // North east coordinate
+            ]}
+            maxBoundsViscosity={0.5}
+            className={"map" + (mapSelectionIndex !== -1 ? "selected" : "")}
+        >
             {/* Popup information during waypoint selection */}
             <MapInfoPopup
                 waypoints={waypoints}

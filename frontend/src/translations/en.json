@@ -28,7 +28,7 @@
     "lon": "Lon",
     "score": "Score",
     "now": "Now",
-    "predicted": "Prediction",
+    "predicted": "Expected",
     "capacity": "Capacity",
     "setAsOriginStation": "Set as origin bike station",
     "setAsDestinationStation": "Set as destination bike station",

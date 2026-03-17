@@ -8,7 +8,9 @@ import { useState } from "react";
 import { Popup, useMapEvent } from "react-leaflet";
 import { Waypoint } from "../../types/types";
 import { useResult } from "../../Contexts/ResultContext";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useTranslation } from "react-i18next";
+import "./MapInfoPopup.css"
 
 type MapInfoPopupProps = {
     waypoints: Waypoint[];                                                      // List of currently defined waypoints
@@ -69,13 +71,14 @@ function MapInfoPopup({
         >
             <div className="map-popup selection">
                 <strong>{t("map.selectPosition")}</strong>
-                {waypoints.map((_, i) => (
+                {waypoints.map((w, i) => (
                     <button
-                        className="popup-button"
+                        className="popup-button context-menu"
                         key={i}
                         onClick={(e) => handleSetWaypoint(i, e)}
                     >
                         {i === 0 ? t("map.setAsOrigin") : i === waypoints.length - 1 ? t("map.setAsDestination") : `${t("map.setAsWaypoint")} ${i}`}
+                        {w.isActive && <LocationOnIcon sx={{ fontSize: 15 }} />}
                     </button>
                 ))}
             </div>

@@ -92,7 +92,7 @@ function BikeStations({
                                 {origin ? t("tooltips.map.originBikeStation") : t("tooltips.map.destinationBikeStation")}
                             </CustomLeafletTooltip>
 
-                            <Popup autoPan={false}>
+                            <Popup>
                                 <strong>{selectedStation.place.name}</strong> <br/>
                                 <div className="bike-stations-popup-info">
                                     <div className="bike-stations-coords">
@@ -152,7 +152,7 @@ function BikeStations({
                                     </CustomLeafletTooltip>
 
                                     {/* Popup information */}
-                                    <Popup autoPan={false}>
+                                    <Popup>
                                         <strong>{station.place.name}</strong> <br/>
                                         <div className="bike-stations-popup-info">
                                             <div className="bike-stations-coords">

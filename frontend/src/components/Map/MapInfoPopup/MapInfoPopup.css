@@ -1,0 +1,18 @@
+/**
+ * @file MapInfoPopup.css
+ * @brief Styles for the menu popup for assigning waypoints via map interaction
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.context-menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.context-menu > svg{
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+
+/** End of file MapInfoPopup.css */
