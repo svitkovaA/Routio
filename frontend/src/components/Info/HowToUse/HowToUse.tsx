@@ -10,18 +10,23 @@ import { PUBLIC_URL } from "../../config/config";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import "./HowToUse.css";
 
-function HowToUse() {
+type HowToUseProps = {
+    step: number;
+    setStep: (value: number) => void;
+}
+
+function HowToUse({
+    step,
+    setStep
+} : HowToUseProps) {
     // Translation function
     const { t } = useTranslation();
-    
-    // Currently selected instruction step
-    const [step, setStep] = useState(1);
 
     const [current, setCurrent] = useState(0);
 
     const images = [
-        `${process.env.PUBLIC_URL}/img/04_detail_b.png`,
-        `${process.env.PUBLIC_URL}/img/04_detail_bike.png`,
+        `${PUBLIC_URL}/img/04_detail_b.png`,
+        `${PUBLIC_URL}/img/04_detail_bike.png`,
     ];
 
     const nextSlide = () => {

@@ -36,6 +36,9 @@ function Info({ closeInfo }: InfoProps) {
     // Controls visibility of the navigation menu on mobile devices
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
+    // Currently selected instruction step in how to use tab
+    const [step, setStep] = useState(1);
+
     // Prevents the planel from closing when clicking inside its content
     const keepOpen = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -55,7 +58,9 @@ function Info({ closeInfo }: InfoProps) {
                             <MenuIcon />
                         </button>
                     )}
-                    <Logo />
+                    <Logo 
+                        disableReload={true}
+                    />
                     <button className="close-button" onClick={closeInfo}>
                         <CloseIcon />
                     </button>
@@ -106,7 +111,12 @@ function Info({ closeInfo }: InfoProps) {
                 {/* Information panel content */}
                 <div className="text-wrapper">
                 {tab === "about" && <About />}
-                {tab === "howto" && <HowToUse />}
+                {tab === "howto" && (
+                    <HowToUse
+                        step={step}
+                        setStep={setStep}
+                    />
+                )}
                 {tab === "features" && <Features />}
                 </div>
             </div>
