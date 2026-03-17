@@ -17,6 +17,10 @@
     margin-left: -3px;
 }
 
+.apexcharts-svg:focus {
+    outline: none;
+}
+
 .asc-desc {
     display: flex;
     flex-direction: row;
@@ -33,17 +37,19 @@
     gap: 5px;
 }
 
-.elevation-fixed-tooltip {
+.elevation-fixed-tooltip-wrapper {
     position: absolute;
-    right: 0px;
-    display: flex;
-    flex-direction: row;
-    bottom: 80px;
+    width: 70px;
+    padding: 1px;
+    background-color: white;
     border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 13px;
-    line-height: 1.2;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.elevation-fixed-tooltip {
+    width: 68px;
+    overflow: visible;
+    background-color: var(--color-background);
+    font-size: var(--font-size-detail);
 }
 
 /** End of file ElevationProfile.css */
