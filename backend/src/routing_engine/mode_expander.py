@@ -94,8 +94,6 @@ class ModeExpander():
                     if not self.__ctx.data.use_own_bike:
                         possible_modes[i].append("public_bicycle")
 
-            # After first iteration, segment is no longer first
-            is_first_segment = False        
             i += 1
 
         # Cartesian product of all segment mode possibilities
@@ -155,8 +153,7 @@ class ModeExpander():
         
         return distance
     
-    @staticmethod
-    def __is_valid_group_sequence(groups: List[WaypointGroup]) -> bool:
+    def __is_valid_group_sequence(self, groups: List[WaypointGroup]) -> bool:
         """
         Validates logical correctness of a sequence of waypoint groups.
 
@@ -177,7 +174,19 @@ class ModeExpander():
         if (ModeExpander.__contains_mode_sequence(groups, ["bicycle_public", "walk_transit"]) or 
             ModeExpander.__contains_mode_sequence(groups, ["walk_transit", "public_bicycle"])):
             return False
-        
+
+        # Ensure own bike is only at the start of the route
+        if self.__ctx.data.use_own_bike:
+            index = next(
+                (
+                    i for i, mode in enumerate([group.mode for group in groups])
+                    if mode in ["bicycle", "bicycle_public"]
+                ), None
+            )
+
+            if index is not None and index > 0:
+                return False
+
         return True
 
     @staticmethod

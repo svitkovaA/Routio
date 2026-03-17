@@ -6,7 +6,8 @@ Abstract base class for bicycle routers.
 
 from abc import ABC, abstractmethod
 import asyncio
-from typing import List, final
+import numpy as np
+from typing import List, Tuple, final
 from routing_engine.routing_context import RoutingContext
 from routers.router_base import RouterBase
 from otp.bicycle import OTPBicycle
@@ -83,5 +84,41 @@ class BicycleRouterBase(RouterBase, ABC):
                     pattern.legs.extend(result[0].legs)
 
         return trip_patterns
+
+    @final
+    @staticmethod
+    def _compute_bisector(
+        A: Tuple[float, float],
+        B: Tuple[float, float],
+        C: Tuple[float, float]
+    ) -> np.ndarray:
+        """
+        Computes the normalized angle bisector vector at point B.
+
+        Args:
+            A: Coordinate of the first point
+            B: Vertex point where the bisector is computed
+            C: Coordinate of the second point
+
+        Returns:
+            Normalized bisector direction vector originating from B
+        """
+        # Compute vectors BA and BC
+        BA = np.asarray(A) - np.asarray(B)
+        BC = np.asarray(C) - np.asarray(B)
+
+        # Normalize both vectors
+        BA_norm = BA / np.linalg.norm(BA)
+        BC_norm = BC / np.linalg.norm(BC)
+
+        # Sum normalized vectors to obtain angle bisector
+        bisector = BA_norm + BC_norm
+
+        # Handle case where vectors are opposite
+        if np.linalg.norm(bisector) < 1e-6:
+            return BC_norm
+        
+        # Return normalized bisector vector
+        return bisector / np.linalg.norm(bisector)
 
 # End of file bicycle_router_base.py

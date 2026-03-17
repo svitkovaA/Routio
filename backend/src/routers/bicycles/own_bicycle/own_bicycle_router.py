@@ -1,13 +1,14 @@
 """
 file: own_bicycle_router.py
 
-wn bicycle routers implementation. This file implements routing logic for
+Own bicycle routers implementation. This file implements routing logic for
 routes using own bicycles. It combines bicycle rack near the destination, 
 computes cycling segments, inserts lock time wait leg, and optionally adds
 a final walking segment.
 """
 
 from typing import List
+import numpy as np
 from routing_engine.routing_context import RoutingContext
 from routers.bicycles.bicycle_router_base import BicycleRouterBase
 from shared.pattern_utils import PatternUtils
@@ -44,22 +45,42 @@ class OwnBicycleRouter(BicycleRouterBase):
         Returns:
             List with trip pattern
         """
+        bisector: np.ndarray | None = None
+        if context.use_bisector:
+            if len(context.waypoints) < 3:
+                return []
+
+            # Compute bisector
+            bisector = self._compute_bisector(
+                self._parse_coordinates(context.waypoints[-3]),
+                self._parse_coordinates(context.waypoints[-2]),
+                self._parse_coordinates(context.waypoints[-1])
+            )
+
         # Select candidate racks near destination
         sorted_racks = await self.__bike_rack_selector.select_racks(
             context.bicycle_public,
             self._parse_coordinates(context.waypoints[-2]),
-            self._parse_coordinates(context.waypoints[-1])
+            self._parse_coordinates(context.waypoints[-1]),
+            bisector
         )
 
-        # Abort if no rack available
+        # Abort if no racks available
         if not sorted_racks:
             return []
         
-        # Compute cycling segments between waypoints
-        base_trip_patterns = await self._route_bicycle_segments(context.waypoints[:-1])
-
         # Use best ranked rack
         rack = sorted_racks[0]
+
+        # Compute bike segments according to presence of artificial waypoint
+        bike_segments = (
+            context.waypoints[:-2]
+            if rack.in_A_plane
+            else context.waypoints[:-1]
+        )
+
+        # Compute cycling segments between waypoints
+        base_trip_patterns = await self._route_bicycle_segments(bike_segments)
 
         # Extend route to selected rack
         trip_pattern = await self.__route_to_bike_rack(

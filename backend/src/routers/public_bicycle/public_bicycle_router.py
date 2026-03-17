@@ -10,7 +10,7 @@ from shared.pattern_utils import PatternUtils
 from routers.router import Router
 from shared.geo_math import GeoMath
 from routing_engine.routing_context import RoutingContext
-from models.route import TripPattern
+from models.route import TIME_DEPENDENT_MODES, TripPattern
 from models.planning_context import PlanningContext
 from routers.router_base import RouterBase
 from routers.public_transport.public_transport_router import PublicTransportRouter
@@ -74,12 +74,12 @@ class PublicBicycleRouter(RouterBase, Router):
         distance = 0
 
         # Create waypoint group to not exceed maximal allowed bicycle distance
-        while i > 0 and distance * 1.2 <= self._ctx.max_bike_distance:
+        while i > 0 and distance <= self._ctx.max_bike_distance:
             bike_group.insert(0, waypoints[i])
             distance += GeoMath.haversine_distance_km(
                 *self._parse_coordinates(waypoints[i - 1]),
                 *self._parse_coordinates(waypoints[i])
-            )
+            ) * 1.2
             i -= 1
 
         return i, bike_group, distance
@@ -95,7 +95,7 @@ class PublicBicycleRouter(RouterBase, Router):
         Returns:
             True if no public transport is needed, false otherwise
         """
-        return i == 0 and distance * 1.2 <= self._ctx.max_bike_distance
+        return i == 0 and distance <= self._ctx.max_bike_distance
     
     def __compute_extra_distance(
         self,
@@ -126,7 +126,7 @@ class PublicBicycleRouter(RouterBase, Router):
         return GeoMath.haversine_distance_km(
             *self._parse_coordinates(waypoints[i]),
             *self._parse_coordinates(waypoints[i + 1])
-        ) - distance_to_next
+        ) * 1.2 - distance_to_next
     
     async def __route_with_public(
         self,
@@ -164,6 +164,7 @@ class PublicBicycleRouter(RouterBase, Router):
             return await self.__use_first_algorithm(
                 i,
                 bike_group,
+                extra_distance,
                 context
             )
 
@@ -179,6 +180,7 @@ class PublicBicycleRouter(RouterBase, Router):
         self,
         i: int,
         bike_group: List[str],
+        extra_distance: float,
         context: PlanningContext
     ) -> List[TripPattern]:
         """
@@ -187,27 +189,97 @@ class PublicBicycleRouter(RouterBase, Router):
         Args:
             i: Index separating public and bicycle segments
             bike_group: Waypoints assigned to bicycle routing
+            extra_distance: Overflow distance beyond allowed bicycle limit
             context: Planning context with time and route data
 
         Returns:
             Combined trip patterns after merging bicycle and public transport
         """
-        # Route bicycle suffix directly
+        # Compute interpolated starting point for bicycle routing
+        lat, lon = GeoMath.interpolate_point(
+            *self._parse_coordinates(bike_group[0]),
+            *self._parse_coordinates(context.waypoints[i]),
+            extra_distance
+        )
+
+        # Store B coordinates for validation
+        lat_b, lon_b = self._parse_coordinates(bike_group[0])
+
+        # Route bicycle suffix directly from interpolated point
         bike_trip_patterns = await self.__bicycle_router.route_group(
             PlanningContext(
-                waypoints=bike_group,
+                waypoints=[f"{lat}, {lon}"] + bike_group,
                 time_cursor=context.time_cursor,
-                public_bicycle=True
+                public_bicycle=True,
+                use_bisector=True
             )
         )
 
-        # Combine with public transport prefix
-        return await self.__route_public_and_combine(
+        # Return empty if no bicycle routes found
+        if not bike_trip_patterns:
+            return []
+        
+        A_plane_routing = False
+        bikeStationInfo = bike_trip_patterns[0].legs[0].bikeStationInfo
+
+        # Check if routing stays within the A plane
+        if not bikeStationInfo or bikeStationInfo.bikeStations[1].in_A_plane:
+            if extra_distance > 0.5:
+                return []
+            A_plane_routing = True
+            i += 1
+
+        
+        # Combine bicycle suffix with public transport prefix
+        trip_patterns = await self.__route_public_and_combine(
             i,
             bike_trip_patterns,
             context
         )
-    
+
+        # If not in A plane, skip validation
+        if not A_plane_routing:
+            return trip_patterns
+        
+        validate_patterns: List[TripPattern] = []
+
+        # Validate combined routes to ensure proper public transport
+        for pattern in trip_patterns:
+            bike_leg_found = False
+            public_end_index = len(pattern.legs) - 1
+
+            # Locate boundary between public transport and bicycle segments
+            for leg in reversed(pattern.legs):
+                if leg.mode == "bicycle":
+                    bike_leg_found = True
+
+                # Stop at first non-bicycle leg after bicycle sequence
+                elif bike_leg_found and leg.mode != "wait":
+                    break
+
+                public_end_index -= 1
+
+            # Check only the two legs before bicycle segment
+            for leg in pattern.legs[public_end_index - 1:public_end_index + 1]:
+                
+                # Accept if a public transport leg exists
+                if leg.mode in TIME_DEPENDENT_MODES:
+                    validate_patterns.append(pattern)
+                    break
+
+                from_place = leg.fromPlace
+                if not from_place:
+                    continue
+
+                # Discard if route reaches original waypoint without public transport
+                if (
+                    abs(from_place.latitude - lat_b) < 1e-6 and
+                    abs(from_place.longitude - lon_b) < 1e-6
+                ):
+                    break
+
+        return validate_patterns
+
     async def __use_second_algorithm(
         self,
         i: int,

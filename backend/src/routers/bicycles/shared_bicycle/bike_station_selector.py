@@ -4,11 +4,13 @@ file: bike_station_selector.py
 Bike station selection and ranking logic.
 """
 
+from datetime import datetime
 from typing import List, Literal, Tuple
 import numpy as np
+from service.prediction_service import PredictionService
 from service.gbfs_service import GBFSService
 from routers.bicycles.selector_base import SelectorBase
-from models.route import BikeStationNode, BikeStationNodeWrapper
+from models.route import TZ, BikeStationNode, BikeStationNodeWrapper
 from models.planning_context import PlanningContext
 from otp.bicycle_stations import OTPBicycleStations
 from routing_engine.routing_context import RoutingContext
@@ -21,12 +23,14 @@ class BikeStationSelector(SelectorBase):
         super().__init__()
         self.__bicycle_stations_otp_client = OTPBicycleStations(context)
         self.__gbfs_service = GBFSService.get_instance()
+        self.__prediction_service = PredictionService.get_instance()
 
     async def select_origin_stations(
         self,
         origin: Tuple[float, float], 
         destination: Tuple[float, float],
-        context: PlanningContext
+        context: PlanningContext,
+        bisector_vector: np.ndarray | None = None
     ) -> List[BikeStationNode]:
         """
         Selects and ranks candidate origin bicycle stations.
@@ -35,6 +39,7 @@ class BikeStationSelector(SelectorBase):
             origin: Latitude and longitude of the first waypoint
             destination: Latitude and longitude of the second waypoint
             context: Planning context affecting scoring weights
+            bisector_vector: Bisector of the angle or None
 
         Returns:
             Top 10 highest ranked bicycle stations sorted by score in descending order
@@ -48,6 +53,14 @@ class BikeStationSelector(SelectorBase):
         # Create vector from origin to destination
         base_vector = self._direction_vector(origin, destination)
 
+        # Compute forward vector
+        forward_vector = self._compute_forward_vector(
+            origin,
+            destination,
+            bisector_vector,
+            origin_flag=True
+        )
+
         # Get scoring weights for origin selection
         angle_weight, availability_weight, distance_weight = self.__origin_weights(context)
 
@@ -55,19 +68,23 @@ class BikeStationSelector(SelectorBase):
         return self.__score_and_rank(
             nodes,
             origin,
+            destination,
             base_vector,
+            forward_vector,
             context,
             angle_weight,
             availability_weight,
             distance_weight,
-            "origin"
+            "origin",
+            bisector_vector
         )
 
     async def select_destination_stations(
         self,
         origin: tuple[float, float], 
         destination: tuple[float, float],
-        context: PlanningContext
+        context: PlanningContext,
+        bisector_vector: np.ndarray | None = None
     ) -> List[BikeStationNode]:
         """
         Selects and ranks candidate destination bicycle stations .
@@ -76,6 +93,7 @@ class BikeStationSelector(SelectorBase):
             origin: Latitude and longitude of the first waypoint
             destination: Latitude and longitude of the second waypoint
             context: Planning context affecting scoring weights
+            bisector_vector: Bisector of the angle or None
         
         Returns:
             Top 10 highest ranked bicycle stations sorted by score in descending order
@@ -89,6 +107,13 @@ class BikeStationSelector(SelectorBase):
         # Create vector from destination to origin
         base_vector = self._direction_vector(destination, origin)
 
+        # Compute forward vector
+        forward_vector = self._compute_forward_vector(
+            origin,
+            destination,
+            bisector_vector
+        )
+
         # Get scoring weights for destination selection
         angle_weight, availability_weight, distance_weight = self.__destination_weights(context)
 
@@ -96,24 +121,30 @@ class BikeStationSelector(SelectorBase):
         return self.__score_and_rank(
             nodes,
             destination,
+            origin,
             base_vector,
+            forward_vector,
             context,
             angle_weight,
             availability_weight,
             distance_weight,
-            "destination"
+            "destination",
+            bisector_vector
         )
 
     def __score_and_rank(
         self,
         nodes: List[BikeStationNodeWrapper],
         reference_point: Tuple[float, float],
+        b_point: Tuple[float, float],
         base_vector: np.ndarray,
+        forward_vector: np.ndarray,
         context: PlanningContext,
         angle_weight: float,
         availability_weight: float,
         distance_weight: float,
-        scoring_type: Literal["origin", "destination"]
+        scoring_type: Literal["origin", "destination"],
+        bisector_vector: np.ndarray | None
     ) -> List[BikeStationNode]:
         """
         Computes weighted score for each station and returns ranked list.
@@ -127,6 +158,7 @@ class BikeStationSelector(SelectorBase):
             availability_weight: Weight coefficient for availability component
             distance_weight: Weight coefficient for distance component
             scoring_type: Determines scoring behavior
+            bisector_vector: Bisector of the angle or None
 
         Returns:
             List of best bike stations objects sorted by descending score
@@ -139,7 +171,7 @@ class BikeStationSelector(SelectorBase):
             node = wrapper.node
             
             # Compute normalized availability score
-            station_availability = self.__compute_availability(node, scoring_type)
+            station_availability = self.__compute_availability(node, scoring_type, context.time_cursor)
 
             # Skip stations with no available bicycles or docks
             if station_availability is None:
@@ -158,7 +190,7 @@ class BikeStationSelector(SelectorBase):
                     if scoring_type == "origin" 
                     else context.bicycle_public
                 ) or self._is_in_forward_direction(
-                    base_vector,
+                    forward_vector,
                     candidate_vector
                 )
             )
@@ -178,6 +210,26 @@ class BikeStationSelector(SelectorBase):
 
             # Separate forward and non forward stations
             if in_forward:
+                if bisector_vector is not None:
+                    # Compute vector to station
+                    vector_b_station = self._direction_vector(
+                        b_point,
+                        (node.place.latitude, node.place.longitude)
+                    )
+
+                    # Compute vector cross product
+                    side = self._cross2d(
+                        bisector_vector,
+                        vector_b_station
+                    )
+
+                    # Determine in which plane is the station
+                    node.in_A_plane = bool(
+                        np.sign(side) > 0
+                        if scoring_type == "destination"
+                        else np.sign(side) <= 0
+                    )
+
                 scored_nodes.append(node)
             else:
                 discarded_nodes.append(node)
@@ -188,7 +240,8 @@ class BikeStationSelector(SelectorBase):
     def __compute_availability(
         self,
         node: BikeStationNode,
-        scoring_type: Literal["origin", "destination"]
+        scoring_type: Literal["origin", "destination"],
+        time_cursor: datetime
     ) -> float | None:
         """
         Computes normalized availability score for a bike station. The meaning
@@ -197,14 +250,41 @@ class BikeStationSelector(SelectorBase):
         Args:
             node: Bike station node containing data
             scoring_type: Defines scoring mode, origin, evaluate available
-                bicycles, destination, evaluate free docking capacity
+                bicycles, destination, evaluate free docking capacity,
+            tie_cursor: estimated arrival time to origin
 
         Returns:
             Normalized value in range (0,1)
         """
+        # Destination station scoring
+        station_id = node.place.id
+
+        # Skip station if identifier is missing
+        if not station_id:
+            return None
+        
         # Origin station scoring
         if scoring_type == "origin":
+
+            # When planning in the past do not take bikes number into account
+            if time_cursor < datetime.now(tz=TZ):
+                return 1
+
+            # Retrieve actual bike capacity
             bikes = node.place.bikesAvailable or 0
+
+            # Get predicted number of bicycles
+            node.place.predictedBikes = self.__prediction_service.predict_bikes(
+                int(station_id),
+                time_cursor
+            )
+
+            if node.place.predictedBikes is not None:
+                if node.place.predictedBikes == 0:
+                    return None
+
+                # Normalize bicycle count
+                return np.clip(node.place.predictedBikes, 0, 5) / 5
 
             # Skip station if no bicycles are available
             if bikes == 0:
@@ -212,13 +292,6 @@ class BikeStationSelector(SelectorBase):
             
             # Normalize bicycle count
             return np.clip(bikes, 0, 5) / 5
-        
-        # Destination station scoring
-        station_id = node.place.id
-
-        # Skip station if identifier is missing
-        if not station_id:
-            return None
 
         # Retrieve station capacity from GBFS cache
         capacity = self.__gbfs_service.get_capacity(station_id)

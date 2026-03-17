@@ -12,7 +12,7 @@ from routers.public_transport.public_transport_router import PublicTransportRout
 from routers.bicycles.bicycle_router import BicycleRouter
 from routing_engine.routing_context import RoutingContext
 from shared.geo_math import GeoMath
-from models.route import TripPattern
+from models.route import TIME_DEPENDENT_MODES, TripPattern
 from models.planning_context import PlanningContext
 from routers.router_base import RouterBase
 
@@ -86,7 +86,7 @@ class BicyclePublicRouter(RouterBase, Router):
         return GeoMath.haversine_distance_km(
             *self._parse_coordinates(waypoints[i - 1]),
             *self._parse_coordinates(waypoints[i])
-        ) - distance_to_next
+        ) * 1.2 - distance_to_next
     
     async def __route_with_public(
         self,
@@ -119,11 +119,12 @@ class BicyclePublicRouter(RouterBase, Router):
         if len(bike_group) == 1 and extra_distance <= 1:
             return []
     
-        # Small overflow, routing using first algorithm    
+        # Small overflow, routing using first algorithm  
         if extra_distance <= 1:
             return await self.__use_first_algorithm(
                 i,
                 bike_group,
+                extra_distance,
                 context
             )
 
@@ -139,6 +140,7 @@ class BicyclePublicRouter(RouterBase, Router):
         self,
         i: int,
         bike_group: List[str],
+        extra_distance: float,
         context: PlanningContext
     ) -> List[TripPattern]:
         """
@@ -147,26 +149,94 @@ class BicyclePublicRouter(RouterBase, Router):
         Args:
             i: Index separating bicycle and public transport segments
             bike_group: Waypoints assigned to bicycle routing
+            extra_distance: Overflow distance beyond allowed bicycle limit
             context: Planning context with time and route data
 
         Returns:
             Combined trip patterns after merging bicycle and public transport
         """
+        # Compute interpolated starting point for bicycle routing
+        lat, lon = GeoMath.interpolate_point(
+            *self._parse_coordinates(bike_group[-1]),
+            *self._parse_coordinates(context.waypoints[i]),
+            extra_distance
+        )
+
+        # Store B coordinates for validating
+        lat_b, lon_b = self._parse_coordinates(bike_group[-1])
+
         # Route bicycle prefix directly
         bike_trip_patterns = await self.__bicycle_router.route_group(
             PlanningContext(
-                waypoints=bike_group,
+                # Add interpolated extra distance point
+                waypoints=bike_group + [f"{lat}, {lon}"],
                 time_cursor=context.time_cursor,
-                bicycle_public=True
+                bicycle_public=True,
+                use_bisector=True
             )
         )
 
-        # Combine with public transport suffix
-        return await self.__route_public_and_combine(
+        # Return empty if no bicycle routes found
+        if not bike_trip_patterns:
+            return []
+        
+        A_plane_routing = False
+        bikeStationInfo = bike_trip_patterns[0].legs[-1].bikeStationInfo
+        # Check if routing stays within the A plane
+        if not bikeStationInfo or bikeStationInfo.bikeStations[0].in_A_plane:
+            if extra_distance > 0.5:
+                return []
+            else:
+                # Add B for routing
+                i -= 1
+            A_plane_routing = True
+
+        # Combine bicycle suffix with public transport prefix
+        trip_patterns = await self.__route_public_and_combine(
             i,
             bike_trip_patterns,
             context
         )
+
+         # If not in A plane, skip validation
+        if not A_plane_routing:
+            return trip_patterns
+
+        validate_patterns: List[TripPattern] = []
+        # Validate combined routes to ensure proper public transport
+        for pattern in trip_patterns:
+            bike_leg_found = False
+            public_start_index = 0
+
+            # Locate boundary between public transport and bicycle segments
+            for leg in pattern.legs:
+                if leg.mode == "bicycle":
+                    bike_leg_found = True
+                # Stop at first non-bicycle leg after bicycle sequence
+                elif bike_leg_found and leg.mode != "wait":
+                    break
+
+                public_start_index += 1
+
+             # Check only the two legs before bicycle segment
+            for leg in pattern.legs[public_start_index:public_start_index + 2]:
+                # Accept if a public transport leg exists
+                if leg.mode in TIME_DEPENDENT_MODES:
+                    validate_patterns.append(pattern)
+                    break
+
+                to_place = leg.toPlace
+                if not to_place:
+                    continue
+
+                # Discard if route reaches original waypoint without public transport
+                if (
+                    abs(to_place.latitude - lat_b) < 1e-6 and
+                    abs(to_place.longitude - lon_b) < 1e-6
+                ):
+                    break
+
+        return validate_patterns
 
     async def __use_second_algorithm(
         self,
@@ -293,7 +363,7 @@ class BicyclePublicRouter(RouterBase, Router):
         Returns:
             True if no public transport is needed, false otherwise
         """
-        return i + 1 == len(waypoints) and distance * 1.2 <= self._ctx.max_bike_distance
+        return i + 1 == len(waypoints) and distance <= self._ctx.max_bike_distance
     
     def __split_bike_segment(
         self,
@@ -315,12 +385,12 @@ class BicyclePublicRouter(RouterBase, Router):
         distance = 0
 
         # Create waypoint group to not exceed maximal allowed bicycle distance
-        while i + 1 < len(waypoints) and distance * 1.2 <= self._ctx.max_bike_distance:
+        while i + 1 < len(waypoints) and distance <= self._ctx.max_bike_distance:
             bike_group.append(waypoints[i])
             distance += GeoMath.haversine_distance_km(
                 *self._parse_coordinates(waypoints[i]),
                 *self._parse_coordinates(waypoints[i + 1])
-            )
+            ) * 1.2
             i += 1
 
         return i, bike_group, distance

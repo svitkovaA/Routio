@@ -6,7 +6,7 @@ Implements recursive route planning across grouped waypoints.
 import asyncio
 from datetime import datetime
 from typing import List
-from models.route import TripPattern, WaypointGroup
+from models.route import TZ, TripPattern, WaypointGroup
 from routing_engine.planning_cache import PlanningCache
 from routing_engine.routing_context import RoutingContext
 from routing_engine.mode_router import ModeRouter
@@ -47,7 +47,7 @@ class RecursivePlanner():
             List of computed TripPattern objects 
         """
         # Combine selected date and time
-        time_cursor = datetime.combine(self.__ctx.data.date, self.__ctx.data.time)
+        time_cursor = datetime.combine(self.__ctx.data.date, self.__ctx.data.time, tzinfo=TZ)
 
         # Recursive route planning
         return await self.__plan_recursive(

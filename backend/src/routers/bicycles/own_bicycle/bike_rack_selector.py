@@ -5,6 +5,7 @@ Bicycle rack selection and ranking logic.
 """
 
 from typing import List, Tuple
+import numpy as np
 from database.db import create_conn
 from routers.bicycles.selector_base import SelectorBase
 from models.route import BikeRackNode, BikeRackPlace, RackRow
@@ -18,6 +19,7 @@ class BikeRackSelector(SelectorBase):
         bicycle_public: bool,
         origin: Tuple[float, float],
         destination: Tuple[float, float],
+        bisector_vector: np.ndarray | None
     ) -> List[BikeRackNode]:
         """
         Select optimal bicycle parking racks near destination.
@@ -26,6 +28,7 @@ class BikeRackSelector(SelectorBase):
             bicycle_public: If true, direction filtering is applied
             origin: Origin coordinates in format lat,lon
             destination: Destination coordinates in format lat,lon
+            bisector_vector: Bisector of the angle or None
 
         Returns:
             Ranked list of bicycle racks sorted by descending score
@@ -37,6 +40,13 @@ class BikeRackSelector(SelectorBase):
         vector_destination_origin = self._direction_vector(
             destination,
             origin
+        )
+
+        # Compute forward facing vector
+        forward_vector = self._compute_forward_vector(
+            origin,
+            destination,
+            bisector_vector
         )
 
         # Retrieve scoring weights
@@ -54,13 +64,13 @@ class BikeRackSelector(SelectorBase):
             )
             
             # Determine whether station lies in forward direction
-            in_forward = (
-                not bicycle_public
-                or self._is_in_forward_direction(
-                    vector_destination_origin,
+            if not bicycle_public:
+                in_forward = True
+            else:
+                in_forward = self._is_in_forward_direction(
+                    forward_vector,
                     vector_destination_station
                 )
-            )
 
             # Compute normalized angular similarity
             normalized_angle = self._compute_normalized_angle(
@@ -76,6 +86,22 @@ class BikeRackSelector(SelectorBase):
         
             # Separate forward and fallback racks
             if in_forward:
+                if bisector_vector is not None:
+                    # Compute vector to station
+                    vector_origin_station = self._direction_vector(
+                        origin,
+                        (rack.place.latitude, rack.place.longitude)
+                    )
+
+                    # Compute vector cross product
+                    side = self._cross2d(
+                        bisector_vector,
+                        vector_origin_station
+                    )
+
+                    # Determine in which plane is the station
+                    rack.in_A_plane = bool(np.sign(side) > 0)
+
                 scored_racks.append(rack)
             else:
                 discarded_racks.append(rack)
@@ -105,6 +131,7 @@ class BikeRackSelector(SelectorBase):
                 osm_id,
                 lat,
                 lon,
+                name,
                 capacity,
                 ST_Distance(
                     geom::geography,
@@ -138,7 +165,7 @@ class BikeRackSelector(SelectorBase):
                     place=BikeRackPlace(
                         latitude=row.lat,
                         longitude=row.lon,
-                        name="Bike rack",
+                        name=row.name if row.name is not None else "Bike rack",
                         capacity=row.capacity if row.capacity is not None else 5
                     )
                 )

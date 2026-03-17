@@ -105,4 +105,65 @@ class SelectorBase(ABC):
         """
         return np.dot(base_vector, candidate_vector) > 0
 
+    @staticmethod
+    def _cross2d(a: np.ndarray, b: np.ndarray) -> float:
+        """
+        Computes the 2D cross product of two vectors.
+
+        Args:
+            a: First 2D vector
+            b: Second 2D vector
+
+        Returns:
+            Scalar value representing the z-component of the 2D cross product
+        """
+        return a[0] * b[1] - a[1] * b[0]
+
+    @staticmethod
+    def _compute_forward_vector(
+        origin: Tuple[float, float],
+        destination: Tuple[float, float],
+        bisector_vector: np.ndarray | None,
+        origin_flag: bool = False
+    ) -> np.ndarray:
+        """
+        Computes the forward direction vector for routing
+
+        Args:
+            origin: Starting coordinate
+            destination: Target coordinate
+            bisector_vector: Optional bisector vector used to adjust direction
+            origin_flag: If true direction is computed from origin to destination
+
+        Returns:
+            A normalized direction vector used for forward movement
+        """
+        # Compute base travel direction vector
+        forward_vector = (
+            SelectorBase._direction_vector(
+                destination,
+                origin
+            ) if not origin_flag
+            else SelectorBase._direction_vector(
+                origin,
+                destination
+            )
+        )
+
+        # Return base direction if no bisector is provided
+        if bisector_vector is None:
+            return forward_vector
+        
+        # Compute perpendicular vector to bisector
+        normal = np.array([
+            -bisector_vector[1],
+            bisector_vector[0]
+        ])
+
+        # Flip normal to face the forward direction - towards B
+        if np.dot(normal, forward_vector) < 0:
+            normal = -normal
+
+        return normal
+
 # End of file selector_base.py

@@ -10,6 +10,7 @@ import asyncio
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
+import numpy as np
 from shared.pattern_utils import PatternUtils
 from routing_engine.routing_context import RoutingContext
 from routers.bicycles.shared_bicycle.bike_station_selector import BikeStationSelector
@@ -65,17 +66,39 @@ class SharedBicycleRouter(BicycleRouterBase):
         # Determine number of station alternatives to evaluate
         num_of_nodes = 1 if self._ctx.data.mode == "multimodal" else 2
 
+        origin_bisector: np.ndarray | None = None
+        destination_bisector: np.ndarray | None = None
+        if context.use_bisector:
+            if len(context.waypoints) >= 3:
+                # Compute origin bisector
+                if context.public_bicycle:
+                    origin_bisector = self._compute_bisector(
+                        self._parse_coordinates(context.waypoints[2]),
+                        self._parse_coordinates(context.waypoints[1]),
+                        self._parse_coordinates(context.waypoints[0])
+                    )
+
+                # Compute destination bisector
+                if context.bicycle_public:
+                    destination_bisector = self._compute_bisector(
+                        self._parse_coordinates(context.waypoints[-3]),
+                        self._parse_coordinates(context.waypoints[-2]),
+                        self._parse_coordinates(context.waypoints[-1])
+                    )
+
         # Retrieve best origin and destination bike stations
         sorted_origin_nodes, sorted_destination_nodes = await asyncio.gather(
             self.__bike_station_selector.select_origin_stations(
                 self._parse_coordinates(context.waypoints[0]),  # Trip start
                 self._parse_coordinates(context.waypoints[1]),  # Next waypoint
-                context
+                context,
+                origin_bisector
             ),
             self.__bike_station_selector.select_destination_stations(
                 self._parse_coordinates(context.waypoints[-2]), # Previous waypoint
                 self._parse_coordinates(context.waypoints[-1]), # Trip end
-                context
+                context,
+                destination_bisector
             )
         )
 
@@ -85,7 +108,13 @@ class SharedBicycleRouter(BicycleRouterBase):
 
         # Compute intermediate cycling and walking segments
         intermediate_patterns, walk_to_origin_map, walk_from_destination_map = await asyncio.gather(
-            self._route_bicycle_segments(context.waypoints[1:-1]),  # Middle cycling segments
+            self._route_bicycle_segments(
+                context.waypoints[1:-2]                             # Ignore last waypoint
+                if context.use_bisector and context.bicycle_public
+                else context.waypoints[2:-1]                        # Ignore first waypoint
+                if context.use_bisector and context.public_bicycle
+                else context.waypoints[1:-1]
+            ),  # Middle cycling segments
             self.__route_walk_to_origin_stations(
                 sorted_origin_nodes[:num_of_nodes],                 # Candidate origin stations
                 self._parse_coordinates(context.waypoints[0]),      # Trip origin
@@ -233,11 +262,32 @@ class SharedBicycleRouter(BicycleRouterBase):
             trip_pattern = deepcopy(walk_patterns[0])
         
         # Compute first cycling segment
-        if len(trip_context.context.waypoints) > 2:
+        if (len(trip_context.context.waypoints) > 2 and (
+            not trip_context.context.use_bisector or (
+                trip_context.context.bicycle_public and
+                len(trip_context.context.waypoints) > 3
+            ) or (
+                trip_context.context.public_bicycle and
+                not trip_context.origin_node.in_A_plane and
+                len(trip_context.context.waypoints) > 3
+            )
+        )):
             result = await self._route_bicycle_segments([
                 origin_bike_station,
                 trip_context.context.waypoints[1]
             ])
+
+        elif (
+            trip_context.context.public_bicycle and
+            trip_context.context.use_bisector and
+            trip_context.origin_node.in_A_plane and
+            len(trip_context.context.waypoints) > 3
+        ):
+            result = await self._route_bicycle_segments([
+                origin_bike_station,
+                trip_context.context.waypoints[2]
+            ])
+
         else:
             result = await self._route_bicycle_segments([
                 origin_bike_station,
@@ -265,9 +315,35 @@ class SharedBicycleRouter(BicycleRouterBase):
         trip_pattern.legs.extend(trip_context.intermediate_legs)
 
         # Compute final cycling segment if multiple waypoints exist
-        if len(trip_context.context.waypoints) > 2:
+        if (len(trip_context.context.waypoints) > 2 and (
+            not trip_context.context.use_bisector or (
+                trip_context.context.bicycle_public and
+                not trip_context.destination_node.in_A_plane and
+                len(trip_context.context.waypoints) > 3
+            ) or (
+                trip_context.context.public_bicycle and
+                len(trip_context.context.waypoints) > 3
+            )
+        )):
             result = await self._route_bicycle_segments([
                 trip_context.context.waypoints[-2],
+                destination_bike_station
+            ])
+
+            # Abort if final cycling route failed
+            if not result:
+                return None
+
+            # Append final cycling legs
+            trip_pattern.legs.extend(result[0].legs)
+        elif (
+            trip_context.context.bicycle_public and
+            trip_context.context.use_bisector and
+            trip_context.destination_node.in_A_plane
+            and len(trip_context.context.waypoints) > 3
+        ):
+            result = await self._route_bicycle_segments([
+                trip_context.context.waypoints[-3],
                 destination_bike_station
             ])
 
