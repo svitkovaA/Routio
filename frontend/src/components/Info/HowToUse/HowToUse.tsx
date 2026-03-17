@@ -82,7 +82,7 @@ function HowToUse() {
             <div className="howto-content">
                 {step === 1 && (
                     <>
-                        <img src={`${PUBLIC_URL}/img/01_input_f.png`} alt="Plánovanie" />
+                        {/* <img src={`${PUBLIC_URL}/img/01_input_f.png`} alt="Plánovanie" /> */}
                         <p>
                             {/* {t("info.howToUse.steps.planningSection")} */}
                             Zadajte východiskový a cieľový bod, prípadne medzibody, nastavte dátum a čas a upravte preferencie plánovania trasy.
@@ -113,7 +113,7 @@ function HowToUse() {
 
                 {step === 2 && (
                     <>
-                        <img src={`${PUBLIC_URL}/img/02_pref.png`} alt="Preferencie" />
+                        {/* <img src={`${PUBLIC_URL}/img/02_pref.png`} alt="Preferencie" /> */}
                         <p>
                             Nastavte preferencie plánovania, ako sú zohľadňované druhy dopravy alebo obmedzenia.
                         </p>
@@ -122,7 +122,7 @@ function HowToUse() {
 
                 {step === 3 && (
                     <>
-                        <img src={`${PUBLIC_URL}/img/03_res.png`} alt="Výsledky" />
+                        {/* <img src={`${PUBLIC_URL}/img/03_res.png`} alt="Výsledky" /> */}
                         <p>
                             Výsledky plánovania sú zobrazené na mape ako aj v textovej podobe.
                         </p>
@@ -132,7 +132,7 @@ function HowToUse() {
                 {step === 4 && (
                     <div className="how-to-img-slider">
 
-                        <img src={images[current]} alt="Detail" className="slider-image" />
+                        {/* <img src={images[current]} alt="Detail" className="slider-image" /> */}
                         <div className="arrows">
                             <button className="arrow left" onClick={prevSlide}>
                                 <KeyboardArrowLeftIcon />
