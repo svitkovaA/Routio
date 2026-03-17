@@ -13,7 +13,8 @@ from config.datasets import POPULATION_DIR, POPULATION_PATH, POPULATION_URL
 from service.service_base import ServiceBase
 import numpy as np
 from pyproj import Transformer
-import rasterio     # type: ignore[import-untyped]
+import rasterio                             # type: ignore[import-untyped]
+from rasterio.windows import from_bounds    # type: ignore[import-untyped]
 
 @dataclass(frozen=True)
 class _PopulationState:
@@ -28,6 +29,9 @@ class _PopulationState:
 
     # Transformer for converting coordinates in lat, lon format into raster coordinate system
     transformer: Transformer
+
+    # Raster dataset JMK window
+    window: Any
 
 class PopulationService(ServiceBase[_PopulationState]):
     """
@@ -70,19 +74,30 @@ class PopulationService(ServiceBase[_PopulationState]):
         
         # Open population raster file
         population_raster = rasterio.open(POPULATION_PATH)
+        # Transformer converting WGS84 coordinates to raster CRS
+        transformer = Transformer.from_crs(
+            "EPSG:4326",
+            population_raster.crs,
+            always_xy=True
+        )
+
+        # JMK bounding box
+        minx, miny = transformer.transform(15.7, 48.8)
+        maxx, maxy = transformer.transform(16.7, 49.3)
+
+        window = from_bounds(
+            minx, miny, maxx, maxy,
+            transform=population_raster.transform
+        )
 
         # Read raster values into numpy array
-        population_data = population_raster.read(1)
+        population_data = population_raster.read(1, window=window)
 
         return _PopulationState(
             population_raster=population_raster,
             population_data=population_data,
-            # Transformer converting WGS84 coordinates to raster CRS
-            transformer=Transformer.from_crs(
-                "EPSG:4326",
-                population_raster.crs,
-                always_xy=True
-            )
+            transformer=transformer,
+            window=window
         )
 
     @staticmethod
@@ -138,6 +153,9 @@ class PopulationService(ServiceBase[_PopulationState]):
 
         # Convert coordinates to raster pixel indices
         row, col = state.population_raster.index(x, y)
+
+        row -= int(state.window.row_off)
+        col -= int(state.window.col_off)
 
         total = 0.0
 

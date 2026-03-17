@@ -89,9 +89,9 @@
     "bikesharingPreferences": "Preferencie zdieľaných bicyklov",
     "walkingPreferences": "Preferencie chôdze",
     "preferencesTab": {
-      "maxDistance": "Maximálna vzdialenosť",
-      "averageSpeed": "Priemerná rýchlosť",
-      "lockTime": "Čas na zamknutie bicykla"
+      "maxDistance": "Max. vzdialenosť (km)",
+      "averageSpeed": "Rýchlosť (km/h)",
+      "lockTime": "Zamknutie bicykla (min)"
     }
   },
   "informationTab": {

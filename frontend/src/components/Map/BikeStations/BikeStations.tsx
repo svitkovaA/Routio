@@ -51,7 +51,7 @@ function BikeStations({
         if (currentLegs.length > 0) {
             setShowBikeStations(currentLegs.map(() => false));
         }
-    }, [pattern?.originalLegs]);
+    }, [pattern?.originalLegs, setShowBikeStations]);
 
     // Do not render if no routing results are displayed
     if (!showResults) {

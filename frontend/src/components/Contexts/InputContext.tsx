@@ -273,7 +273,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         onDragEnd,
         addWaypoint,
         swapWaypoints,
-        fieldErrors
+        fieldErrors,
+        setPreference,
+        setUseOwnBike
     ]);
     
     return <InputContext.Provider value={value}>{children}</InputContext.Provider>;

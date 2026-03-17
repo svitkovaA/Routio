@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { useTranslation } from "react-i18next";
@@ -31,7 +31,7 @@ function CustomZoomControl() {
      * 
      * @param type Zoom action
      */
-    const startZoom = (type: "in" | "out") => {
+    const startZoom = useCallback((type: "in" | "out") => {
         // Prevent multiple intervals running simultaneously
         if (zoomInterval.current) {
             return;
@@ -54,17 +54,17 @@ function CustomZoomControl() {
                 map.zoomOut();
             }
         }, 50);
-    };
+    }, [map]);
 
     /**
      * Stop continuous zooming
      */
-    const stopZoom = () => {
+    const stopZoom = useCallback(() => {
         if (zoomInterval.current) {
             clearInterval(zoomInterval.current);
             zoomInterval.current = null;
         }
-    };
+    }, []);
 
     /**
      * Disable map interactions on controls
@@ -119,7 +119,7 @@ function CustomZoomControl() {
             zoomOutButton.removeEventListener("mousedown", handleZoomOutMouseDown);
             window.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [map]);
+    }, [map, startZoom, stopZoom]);
 
     return (
         <div ref={containerRef} className="custom-zoom-control">

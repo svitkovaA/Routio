@@ -156,7 +156,7 @@ async def database_worker():
     await run_periodic(
         DatabaseService.get_instance().reload,
         lambda: seconds_until_next_10min_offset(1),
-        initial_load=True
+        initial_load=False
     )
 
 async def lissy_worker():

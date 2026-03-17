@@ -23,7 +23,6 @@ import CustomZoomControl from './CustomZoomControl/CustomZoomControl';
 import { useInput } from '../Contexts/InputContext';
 import { useSettings } from '../Contexts/SettingsContext';
 import { useResult } from '../Contexts/ResultContext';
-import { useNotification } from '../Contexts/NotificationContext';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -88,9 +87,6 @@ function Map({
     const currentlyOpenTooltip = useRef<L.Marker | null>(null);
 
     const isDesktop = useMediaQuery("(min-width:768px)");
-
-    // Notification context
-    const { showNotification } = useNotification();
 
     const tooltipHandler = (id: string): L.LeafletEventHandlerFnMap => ({
         // Triggered when popup is open

@@ -88,9 +88,9 @@
     "cyclingPreferences": "Cycling preferences",
     "walkingPreferences": "Walking preferences",
     "preferencesTab": {
-      "maxDistance": "Max distance",
-      "averageSpeed": "Average speed",
-      "lockTime": "Bike lock time"
+      "maxDistance": "Max distance (km)",
+      "averageSpeed": "Average speed (km/h)",
+      "lockTime": "Bike lock time (min)"
     }
   },
   "informationTab": {

@@ -17,6 +17,6 @@ protobuf
 scikit-learn
 pyproj
 rasterio
-torch
+torch --index-url https://download.pytorch.org/whl/cpu
 matplotlib
 lightgbm
