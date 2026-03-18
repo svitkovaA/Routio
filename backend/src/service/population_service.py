@@ -82,8 +82,8 @@ class PopulationService(ServiceBase[_PopulationState]):
         )
 
         # JMK bounding box
-        minx, miny = transformer.transform(15.7, 48.8)
-        maxx, maxy = transformer.transform(16.7, 49.3)
+        minx, miny = transformer.transform(15.5, 48.6)
+        maxx, maxy = transformer.transform(17.6, 49.65)
 
         window = from_bounds(
             minx, miny, maxx, maxy,

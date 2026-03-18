@@ -47,34 +47,37 @@ async def stations(conn: asyncpg.Connection) -> None:
         while from_ms < now_ms:
             to_ms = min(from_ms + WINDOW_MS, now_ms)
 
-            # Request station data
-            r = await client.get(
-                BICYCLE_PLACES_URL,
-                params={
-                    "from": from_ms,
-                    "to": to_ms
-                },
-                headers={"Authorization": BEN_API_KEY},
-            )
-            r.raise_for_status()
-            data: List[Station] = r.json()
+            try:
+                # Request station data
+                r = await client.get(
+                    BICYCLE_PLACES_URL,
+                    params={
+                        "from": from_ms,
+                        "to": to_ms
+                    },
+                    headers={"Authorization": BEN_API_KEY},
+                )
+                r.raise_for_status()
+                data: List[Station] = r.json()
 
-            if data:
-                sql = """
-                    INSERT INTO station (station_id, latitude, longitude)
-                    VALUES ($1, $2, $3)
-                    ON CONFLICT (station_id) DO NOTHING
-                """
+                if data:
+                    sql = """
+                        INSERT INTO station (station_id, latitude, longitude)
+                        VALUES ($1, $2, $3)
+                        ON CONFLICT (station_id) DO NOTHING
+                    """
 
-                # Filter valid stations and prepare insert values
-                values = [
-                    (value["station_uid"], value["position"][0], value["position"][1])
-                    for value in data
-                    if gbfs_service.valid_station_id(str(value["station_uid"]))
-                ]
+                    # Filter valid stations and prepare insert values
+                    values = [
+                        (value["station_uid"], value["position"][0], value["position"][1])
+                        for value in data
+                        if gbfs_service.valid_station_id(str(value["station_uid"]))
+                    ]
 
-                # Insert stations into database
-                await conn.executemany(sql, values)     # type: ignore
+                    # Insert stations into database
+                    await conn.executemany(sql, values)     # type: ignore
+            except Exception:
+                continue
 
             # Move to the next time window
             from_ms = to_ms

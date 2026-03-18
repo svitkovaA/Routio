@@ -36,7 +36,7 @@ class PhotonGeocoder(GeocoderBase):
             List of Suggestion objects limited to requested count
         """
         # Bounding box limiting search area
-        bbox = "15.7,48.8,16.7,49.3"
+        bbox = "15.5,48.6,17.6,49.65"
 
         # Photon API call
         data = await self._get({

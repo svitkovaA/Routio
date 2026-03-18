@@ -60,14 +60,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                     },
                     maxWidth: {
                         xs: "calc(100% - 250px)",
-                        sm: "min(calc(100% - 410px - 230px), 400px)"
+                        sm: "min(calc(100% - 440px - 230px), 400px)"
                     },
                     minWidth: {
                         sm: "200px !important"
                     },
                     left: {
                         xs: "90px",
-                        sm: "max(410px, calc(50% - 200px))"
+                        sm: "max(440px, calc(50% - 200px))"
                     },
                     zIndex: 1300
                 }}

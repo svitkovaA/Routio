@@ -41,7 +41,7 @@ function parseCoordinates(input: string) {
     const lat = parseFloat(parts[0]);
     const lon = parseFloat(parts[1]);
 
-    if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+    if (lat >= 48.6 && lat <= 49.65 && lon >= 15.5 && lon <= 17.6) {
         return { lat, lon };
     }
 
@@ -138,7 +138,7 @@ function InputField({
 
         // Store current language for the next change detection
         previousLanguage.current = i18n.language;
-    }, [i18n.language]);
+    }, [i18n.language, setWaypoints, t]);
 
     // Detects the users current geographic position
     const detectCurrentPosition = () => {
@@ -184,7 +184,7 @@ function InputField({
         if (waypoint.lat !== 0 && waypoint.lon !== 0) {
             setFieldErrors(prev => prev.filter(i => i !== index));
         }
-    }, [waypoint.lat, waypoint.lon]);
+    }, [waypoint.lat, waypoint.lon, index, setFieldErrors]);
 
     return (
         <TextField

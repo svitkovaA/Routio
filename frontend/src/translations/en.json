@@ -276,7 +276,8 @@
   "warnings": {
     "valueClamp": "Value adjusted to fit the allowed range",
     "nominatim": "Nominatim is not responding. Using coordinates instead.",
-    "photon": "Photon is not responding. Please select a location on the map."
+    "photon": "Photon is not responding. Please select a location on the map.",
+    "bbox": "Position outside of JMK boundary."
   },
   "errors": {
     "serverOffline": "The server is currently unavailable. Please try again later.",

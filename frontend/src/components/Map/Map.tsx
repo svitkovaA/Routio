@@ -23,6 +23,7 @@ import CustomZoomControl from './CustomZoomControl/CustomZoomControl';
 import { useInput } from '../Contexts/InputContext';
 import { useSettings } from '../Contexts/SettingsContext';
 import { useResult } from '../Contexts/ResultContext';
+import { useNotification } from "../Contexts/NotificationContext";
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -145,6 +146,8 @@ function Map({
         }
     });
 
+    const { showNotification } = useNotification();
+
     /**
      * Handles location selection on the map
      * 
@@ -160,6 +163,14 @@ function Map({
         // No active click, ignore selection
         if (targetIndex === -1) {
             return false;
+        }
+
+        // Apply bounding box for selection
+        if (lon < 15.5 || lon > 17.6 || lat < 48.6 || lat > 49.65) {
+            showNotification(t("warnings.bbox"), "warning");
+            // Cancel map selection mode
+            setMapSelectionIndex(-1);
+            return true;
         }
         
         /**
@@ -195,7 +206,11 @@ function Map({
             })
             .then((data: InputText) => {
                 // Build display name from street and city information
-                const displayName = [data.street, data.city].filter(Boolean).join(", ");
+                let displayName = [data.street, data.city].filter(Boolean).join(", ");
+                // Prevent empty fields
+                if (displayName.length === 0) {
+                    displayName = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                }
                 updateWaypoints(displayName);
             })
             .catch((err) => {

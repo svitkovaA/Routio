@@ -15,7 +15,6 @@
     height: 28px;
     display: flex;
     justify-content: space-between;
-    background-color: var(--color-item-hover);
 }
 
 .dropdown-item .circle, .mode .circle{

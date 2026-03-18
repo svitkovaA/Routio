@@ -23,6 +23,7 @@
 
 .more-departure-row.selected {
     border-radius: 6px;
+    border-left: 3px solid gray;
 }
 
 .more-departure-row:last-child, .more-departure-row.before-selected {

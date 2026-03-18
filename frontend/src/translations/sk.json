@@ -277,7 +277,8 @@
   "warnings": {
     "valueClamp": "Hodnota bola upravená na povolený rozsah.",
     "nominatim": "Služba Nominatim neodpovedá. Zobrazujú sa súradnice.",
-    "photon": "Služba Photon neodpovedá. Vyberte polohu na mape."
+    "photon": "Služba Photon neodpovedá. Vyberte polohu na mape.",
+    "bbox": "Poloha mimo hraníc JMK."
   },
   "errors": {
     "serverOffline": "Server momentálne nie je dostupný. Skúste to prosím neskôr.",
