@@ -24,14 +24,6 @@ PAST_STEPS = 144
 # Number of future time steps the model predicts
 HORIZON = 24 * 6
 
-device = torch.device(
-    "mps" if torch.backends.mps.is_available()
-    else "cuda" if torch.cuda.is_available()
-    else "cpu"
-)
-print("Device:", device)
-torch.set_float32_matmul_precision("high")
-
 # Creates training dataset using sliding window
 class BikeDataset(Dataset[Tuple[torch.Tensor, torch.Tensor]]):
     """
@@ -299,6 +291,15 @@ def train_model(features: np.ndarray) -> Tuple[nn.Module, float, float]:
     Returns:
         Tuple, containing (trained model, mean value and standart deviation used for normalization)
     """
+
+    device = torch.device(
+        "mps" if torch.backends.mps.is_available()
+        else "cuda" if torch.cuda.is_available()
+        else "cpu"
+    )
+    print("Device:", device)
+    torch.set_float32_matmul_precision("high")
+
     # Create dataset for computing bike metrics
     dataset = BikeDataset(features, PAST_STEPS, HORIZON)
 
