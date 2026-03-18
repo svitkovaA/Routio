@@ -51,7 +51,8 @@ class PredictionService(ServiceBase[_PredictionState]):
         # Load trained model checkpoint
         checkpoint = torch.load(
             "./tcn_model.pt",
-            weights_only=False
+            weights_only=False,
+            map_location=torch.device("cpu")
         )
 
         # Load normalization parameters and model configuration
