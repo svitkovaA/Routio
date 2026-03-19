@@ -101,6 +101,10 @@ export default function ElevationProfile({
             return null;
         }
 
+        if (!seriesData[index]) {
+            return null;
+        }
+
         const g = ctx.w.globals;
 
         // Data x and y value
@@ -117,7 +121,7 @@ export default function ElevationProfile({
     };
 
     // Compute pixel position only when a valid point is hovered
-    const pointPos = hoveredProfileIndex !== null
+    const pointPos = hoveredProfileIndex !== null && hoveredProfileIndex >= 0 && hoveredProfileIndex < seriesData.length
         ? getPointPosition(hoveredProfileIndex)
         : null;
 

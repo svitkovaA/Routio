@@ -27,7 +27,7 @@ def plot_station_time_series_tcn(
         step_ahead: Index of the prediction horizon to visualize
     """
     # Directory where plots will be saved
-    save_dir = Path(f"../prediction_results/results/{name}")
+    save_dir = Path(f"../prediction_results/results/{name}_raw")
 
     # Create directory if it does not exist
     save_dir.mkdir(parents=True, exist_ok=True)
@@ -58,7 +58,7 @@ def plot_station_time_series_tcn(
         plt.figure(figsize=(14,6))
 
         plt.plot(time_axis, real, label="Real bikes", linewidth=1.5)
-        plt.plot(time_axis, np.round(pred), label="Predicted bikes", linewidth=1.5)
+        plt.plot(time_axis, pred, label="Predicted bikes", linewidth=1.5)
         # plt.plot(time_axis_plot_24, real, label="Real bikes", linewidth=1.5)
         # plt.plot(time_axis_plot_24, np.round(pred), label="Predicted bikes", linewidth=1.5)
 

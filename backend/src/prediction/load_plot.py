@@ -64,7 +64,7 @@ async def general():
     """
     # Load trained model checkpoint
     checkpoint = torch.load(
-        "../prediction_results/results/tcn/tcn_model.pt",
+        "./tcn_model.pt",
         map_location=device,
         weights_only=False
     )
