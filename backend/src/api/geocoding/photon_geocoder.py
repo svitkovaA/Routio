@@ -9,6 +9,7 @@ from shared.geo_math import GeoMath
 from api.geocoding.geocoder_base import GeocoderBase
 from models.suggestions import Suggestion
 from config.external import PHOTON_URL
+from config.datasets import NW_LAT, NW_LON, SE_LAT, SE_LON
 
 class PhotonGeocoder(GeocoderBase):
     """
@@ -36,7 +37,7 @@ class PhotonGeocoder(GeocoderBase):
             List of Suggestion objects limited to requested count
         """
         # Bounding box limiting search area
-        bbox = "15.5,48.6,17.6,49.65"
+        bbox = f"{NW_LON},{SE_LAT},{SE_LON},{NW_LAT}"
 
         # Photon API call
         data = await self._get({
@@ -55,10 +56,10 @@ class PhotonGeocoder(GeocoderBase):
             props = feature["properties"]
 
             suggestions.append(Suggestion(
-                name=props.get("name"),
-                type=props.get("type"),
-                country=props.get("country"),
-                city=props.get("city"),
+                name=props.get("name", ""),
+                type=props.get("type", ""),
+                country=props.get("country", ""),
+                city=props.get("city", ""),
                 street=props.get("street"),
                 lat=lat,
                 lon=lon

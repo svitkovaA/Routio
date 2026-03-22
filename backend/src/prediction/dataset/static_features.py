@@ -6,6 +6,7 @@ Computation of static spatial features for bike stations.
 
 from typing import List
 import numpy as np
+from config.datasets import IDS_JMK_AGENCY_NAME
 from service.gtfs_service import GTFSService
 from service.population_service import PopulationService
 
@@ -53,7 +54,7 @@ def compute_static_features(
         Array with shape (time, stations, features)
     """
     # Build spatial index of public transport stops
-    tree = GTFSService.get_instance().get_stops_tree()
+    tree = GTFSService.get_instance().get_stops_tree(IDS_JMK_AGENCY_NAME)
 
     # Compute public transport stop density around each station
     stops_density: List[float] = []

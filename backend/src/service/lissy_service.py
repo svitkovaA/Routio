@@ -16,7 +16,6 @@ import shutil
 from typing import Dict, List, Tuple
 from collections import OrderedDict
 import httpx
-import hashlib
 from config.datasets import LISSY_DELAY_CACHE_PATH
 from config.lissy_ben import (
     DELAY_DATA_URL,
@@ -128,22 +127,6 @@ class LissyService(ServiceBase[_LissyState]):
         return _LissyState(shapes_cache=shapes_cache)
 
     @staticmethod
-    def __hash_stops_label(value: str) -> str:
-        """
-        Compute short deterministic hash for filesystem naming.
-
-        Args:
-            value: Value to be hashed
-
-        Returns:
-            stop_label hash
-        """
-        return hashlib.blake2b(
-            value.encode("utf-8"),
-            digest_size=8
-        ).hexdigest()
-
-    @staticmethod
     def __get_cache_window(today: d) -> List[d]:
         """
         Retrieve date window for shapes caching.
@@ -248,7 +231,7 @@ class LissyService(ServiceBase[_LissyState]):
                     trips_by_time[dep_time] = trip_id
             
             # Store the delay route representation
-            file_path = dir_path / f"{self.__hash_stops_label(stops_label)}.json"
+            file_path = dir_path / f"{self._hash_label(stops_label)}.json"
             with open(file_path, "w") as f:
                 json.dump(
                     LissyDelayRoutes(
@@ -440,7 +423,7 @@ class LissyService(ServiceBase[_LissyState]):
             # Build path to cached delay file
             delay_route_dir = self.__cache_dir / date
             route_dir = delay_route_dir / route_short_name
-            stops_file = route_dir / f"{self.__hash_stops_label(stops_label)}.json"
+            stops_file = route_dir / f"{self._hash_label(stops_label)}.json"
 
             # Skip if cache file does not exist
             if not stops_file.exists():

@@ -59,6 +59,13 @@ class OTPPublicTransport(OTPBase):
                             publicCode
                             name
                             id
+                            authority {
+                                name
+                            }
+                            presentation {
+                                colour
+                                textColour
+                            }
                         }
                         serviceJourney {
                             quays {

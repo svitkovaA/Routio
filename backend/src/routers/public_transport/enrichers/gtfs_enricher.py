@@ -39,6 +39,7 @@ class GTFSEnricher(EnricherBase):
             ):
                 # Retrieve departure options from GTFS service
                 departures = self.__service.get_departures_via(
+                    leg.line.authority["name"],
                     leg.fromPlace.quay.id.split(":", 1)[1], 
                     leg.toPlace.quay.id.split(":", 1)[1], 
                     leg.line.publicCode, 
@@ -53,9 +54,7 @@ class GTFSEnricher(EnricherBase):
                     leg.tripId = departures.departures[departures.currentIndex].tripId
 
             # Attach route color if available
-            if leg.line:
-                color = self.__service.get_color(leg.line.publicCode)
-                if color:
-                    leg.color = color
+            if leg.line and "colour" in leg.line.presentation:
+                leg.color = f"#{leg.line.presentation["colour"]}"
 
 # End of file gtfs_enricher.py

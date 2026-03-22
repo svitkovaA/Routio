@@ -6,6 +6,7 @@ This file defines the abstract base class for all application services.
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
+import hashlib
 from typing import Any, ClassVar, Dict, Generic, TypeVar, Type, cast, final
 
 # Type variable representing concrete ServiceBase subclass
@@ -57,5 +58,22 @@ class ServiceBase(ABC, Generic[S]):
     async def reload(self) -> None:
         # Reload internal state
         pass
+
+    @final
+    @staticmethod
+    def _hash_label(value: str) -> str:
+        """
+        Compute short deterministic hash for filesystem naming.
+
+        Args:
+            value: Value to be hashed
+
+        Returns:
+            stop_label hash
+        """
+        return hashlib.blake2b(
+            value.encode("utf-8"),
+            digest_size=8
+        ).hexdigest()
 
 # End of file service_base.py

@@ -54,6 +54,8 @@ class PointOnLink(BaseModel):
 class Line(BaseModel):
     """ Basic information about a transport line """
     publicCode: str                             # Public line number
+    authority: Dict[str, str]                   # Agency name
+    presentation: Dict[str, str | None]         # Route color and text color for visualisation
 
 class PlaceBase(BaseModel):
     """ Base geographic location structure """
@@ -75,7 +77,8 @@ class Place(PlaceBase):
 
 class VehicleRealtimeData(BaseModel):
     """ Real-time vehicle position data """
-    tripId: int                                 # GTFS trip identifier
+    agencyName: str                             # GTFS agency name
+    tripId: str                                 # GTFS trip identifier
     publicCode: str                             # Public line number
     mode: Mode                                  # Transport mode
     color: str                                  # Line display color
@@ -93,7 +96,7 @@ class Departure(BaseModel):
     """ Represents a single departure option """
     departureTime: datetime                     # Scheduled departure time
     direction: str                              # Final stop, headsign
-    tripId: int                                 # GTFS trip identifier
+    tripId: str                                 # GTFS trip identifier
 
     @model_validator(mode="after")
     def convert_datetime(self):
@@ -130,7 +133,7 @@ class Leg(BaseModel):
     accumulatedDuration: int | None = None      # Accumulated duration up to this leg
     delays: Dict[str, int] = {}                 # Historical delay values per date
     bikeStationInfo: BikeStationInfo | None = None  # Bicycle station info
-    tripId: int | None = None                   # Trip identifier
+    tripId: str | None = None                   # Trip identifier
     vehicleRealtimeData: List[VehicleRealtimeData] = []   # Attached vehicle positions
     arrivalAfterDeparture: bool | None = None   # Inconsistency flag, arrival time is after next departure
     nonContinuousDepartures: bool | None = None # No more departures available
@@ -185,7 +188,7 @@ class WaypointGroup(BaseModel):
 
 class OtherDeparture(BaseModel):
     """ Used for processing GTFS data when searching for other departure options """
-    trip_id: int                                # GTFS trip identifier
+    trip_id: str                                # GTFS trip identifier
     departure_time: datetime                    # Departure time
     direction: str                              # Tha final stop, trip headsign
     departure_time_str: str                     # Departure time string

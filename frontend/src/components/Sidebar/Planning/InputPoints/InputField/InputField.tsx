@@ -13,8 +13,9 @@ import ClearInputField from "./ClearInputField";
 import RemoveInputField from "./RemoveInputField";
 import Geolocation from "./Geolocation";
 import { useInput } from "../../../../Contexts/InputContext";
-import "./InputField.css";
 import { useNotification } from "../../../../Contexts/NotificationContext";
+import { NW_LAT, NW_LON, SE_LAT, SE_LON } from "../../../../config/config";
+import "./InputField.css";
 
 type InputFieldProps = {
     index: number;                                  // Index of waypoint in array
@@ -41,7 +42,7 @@ function parseCoordinates(input: string) {
     const lat = parseFloat(parts[0]);
     const lon = parseFloat(parts[1]);
 
-    if (lat >= 48.6 && lat <= 49.65 && lon >= 15.5 && lon <= 17.6) {
+    if (lat >= SE_LAT && lat <= NW_LAT && lon >= NW_LON && lon <= SE_LON) {
         return { lat, lon };
     }
 

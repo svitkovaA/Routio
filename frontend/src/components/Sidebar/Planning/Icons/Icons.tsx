@@ -12,6 +12,7 @@ import TrainIcon from '@mui/icons-material/Train';
 import TramIcon from '@mui/icons-material/Tram';
 import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
 import TransferWithinAStationIcon from '@mui/icons-material/TransferWithinAStation';
+import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
 import { Mode } from "../../../types/types";
 import "./Icons.css";
 
@@ -104,7 +105,11 @@ export const timelineIcons: {[mode: string]: JSX.Element} = {
     transfer:
         <div className="timeline-icon">
             <TransferWithinAStationIcon sx={{ fontSize: 17 }} />
-        </div>
+        </div>,
+    metro:
+        <div className="timeline-icon">
+            <DirectionsTransitIcon sx={{ fontSize: 19 }} />
+        </div>,
 }
 
 /** End of file Icons.tsx */

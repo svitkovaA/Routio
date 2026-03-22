@@ -69,7 +69,7 @@ export type Leg = {
         points: string | string[];          // Encoded polyline or list of polylines representing the geometry of this leg
         inactivePoints: string[];           // Encoded polylines representing an inactive route segments
     };
-    tripId?: number;                        // GTFS trip identifier
+    tripId?: string;                        // GTFS trip identifier
     delay?: number;                         // Real time vehicle delay
     zone_ids?: number[];                    // List of faze zone identifiers
 
@@ -171,7 +171,8 @@ export type RoutePreference = "shortest" | "fastest" | "transfers";
  * Represents real-time vehicle position data
  */
 export type VehiclePosition = {
-    tripId: number;                         // Internal trip identifier
+    agencyName: string;                     // GTFS agency name
+    tripId: string;                         // Internal trip identifier
     publicCode: string;                     // Public line code
     mode: string;                           // Transport mode
     color: string;                          // Display color associated with the line
@@ -229,7 +230,7 @@ export type PolyInfo = {
     pathOptions: {
         "dashArray"?: string                // Additional Leaflet path styling options
     };
-    tripId?: number;                        // Trip identifier
+    tripId?: string;                        // Trip identifier
     elevationProfile?: ElevationPoint[];    // Computed elevation profile for this leg (foot, bicycle only)
     totalAscent?: number;                   // Total elevation gain in meters for the leg
     totalDescent?: number;                  // Total elevation loss in meters for the leg

@@ -381,7 +381,13 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
      * Extracts trip ids with start time for which vehicle positions data should be requested
      */
     const tripIds = useMemo(
-        () => pattern?.vehicleRealtimeData?.map((p) => ({"trip_id": p.tripId, "start_time": p.startTime})) ?? [],
+        () => pattern?.vehicleRealtimeData?.map((p) => (
+            {
+                "agency_name": p.agencyName,
+                "trip_id": p.tripId,
+                "start_time": p.startTime
+            }
+        )) ?? [],
         [pattern]
     );
 
@@ -400,10 +406,10 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             body: JSON.stringify(tripIds)
         });
 
-        const realtime: Record<number, { lat: number; lon: number, delay?: number }> = await res.json();
+        const realtime: Record<string, { lat: number; lon: number, delay?: number }> = await res.json();
 
         // Build next position map
-        const nextMap: Record<number, VehiclePosition> = {};
+        const nextMap: Record<string, VehiclePosition> = {};
         for (const v of pattern.vehicleRealtimeData) {
             const pos = realtime[v.tripId];
 

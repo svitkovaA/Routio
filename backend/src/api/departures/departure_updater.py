@@ -262,6 +262,7 @@ class DepartureUpdater():
 
                 vehicle_positions.append(
                     VehicleRealtimeData(
+                        agencyName=leg.line.authority["name"],
                         tripId=leg.tripId,
                         publicCode=leg.line.publicCode,
                         color=leg.color,

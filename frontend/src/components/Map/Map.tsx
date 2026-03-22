@@ -24,6 +24,7 @@ import { useInput } from '../Contexts/InputContext';
 import { useSettings } from '../Contexts/SettingsContext';
 import { useResult } from '../Contexts/ResultContext';
 import { useNotification } from "../Contexts/NotificationContext";
+import { NW_LAT, NW_LON, SE_LAT, SE_LON } from "../config/config";
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -166,7 +167,7 @@ function Map({
         }
 
         // Apply bounding box for selection
-        if (lon < 15.5 || lon > 17.6 || lat < 48.6 || lat > 49.65) {
+        if (lon < NW_LON || lon > SE_LON || lat < SE_LAT || lat > NW_LAT) {
             showNotification(t("warnings.bbox"), "warning");
             // Cancel map selection mode
             setMapSelectionIndex(-1);

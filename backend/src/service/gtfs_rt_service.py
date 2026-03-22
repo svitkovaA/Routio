@@ -5,6 +5,7 @@ This file implements an asynchronous GTFS-RT service. It handles downloading
 and processing realtime GTFS-RT dataset.
 """
 
+import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import httpx
@@ -14,11 +15,11 @@ from google.transit.gtfs_realtime_pb2 import FeedMessage    # type: ignore[impor
 from models.route import TZ
 from models.vehicle_realtime_request_data import VehicleRealtimeRequestData
 from shared.geo_math import GeoMath
-from config.datasets import GTFSRT_URL
+from config.datasets import GTFS_DATASETS, GTFS_DATASET
 from service.gtfs_service import GTFSService
 from service.service_base import ServiceBase
 
-TripRealtimeCache = Dict[int, Tuple[Tuple[float, float], int | None]]
+TripRealtimeCache = Dict[str, Tuple[Tuple[float, float], int | None]]
 
 @dataclass(frozen=True)
 class _GTFSRTState:
@@ -28,7 +29,7 @@ class _GTFSRTState:
     # Maps trip_id to (latitude, longitude, delay in minutes)
     trip_realtime_data: TripRealtimeCache
 
-class GTFSRTService(ServiceBase[_GTFSRTState]):
+class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
     """
     Service responsible for retrieving and processing GTFS-Realtime vehicle data.
     """
@@ -48,13 +49,25 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
         """
         Reloads GTFS-RT data and builds internal state.
         """
-        new_state = await self.__build_realtime_state()
+        datasets_with_rt = [
+            dataset for dataset in GTFS_DATASETS if dataset["realtime"] is not None
+        ]
+
+        states = await asyncio.gather(*[
+            self.__build_realtime_state(dataset)
+            for dataset in datasets_with_rt
+        ])
+
+        new_state = {
+            dataset["name"]: state
+            for state, dataset in zip(states, datasets_with_rt)
+        }
         self._set_state(new_state)
 
     def get_vehicle_realtime_data(
         self,
         real_time_data: List[VehicleRealtimeRequestData]
-    ) -> Dict[int, Dict[str, float]]:
+    ) -> Dict[str, Dict[str, float]]:
         """
         Retrieves realtime vehicle positions for given trip identifiers and
         provides computed delay information.
@@ -67,7 +80,7 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
         """
 
         # Maps trip_id to (latitude, longitude)
-        trip_id_to_position: Dict[int, Dict[str, float]] = {}
+        trip_id_to_position: Dict[str, Dict[str, float]] = {}
 
         state = self._get_state()
 
@@ -83,8 +96,12 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
             if window_start > now or now > window_end:
                 continue
 
+            dataset_name = self.__gtfs_service.get_dataset_name_by_agency(data.agency_name)
+            if dataset_name is None or dataset_name not in state:
+                continue
+
             # Retrieve cached vehicle position for a given trip_id
-            position = state.trip_realtime_data.get(data.trip_id)
+            position = state[dataset_name].trip_realtime_data.get(data.trip_id)
 
             if position:
                 # Store latitude and longitude
@@ -99,15 +116,18 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
 
         return trip_id_to_position
 
-    async def __build_realtime_state(self) -> _GTFSRTState:
+    async def __build_realtime_state(self, dataset: GTFS_DATASET) -> _GTFSRTState:
         """
         Downloads and processes the GTFS-Realtime feed.
 
         Returns:
             Initialized _GTFSRTState
         """
+        if dataset["realtime"] is None:
+            raise ValueError("Invalid GTFSRT url link")
+
         # Download GTFS-RT feed
-        response = await self.__client.get(GTFSRT_URL)
+        response = await self.__client.get(dataset["realtime"])
         response.raise_for_status()
         data = response.content
 
@@ -127,7 +147,7 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
                 if not (v.HasField("trip") and v.trip.trip_id): # type: ignore
                     continue
                 
-                trip_id = int(v.trip.trip_id)                   # type: ignore
+                trip_id = v.trip.trip_id                        # type: ignore
                 
                 # Skip entities without position data
                 if not (v.HasField("position") and v.position.latitude and v.position.longitude):   # type: ignore
@@ -140,15 +160,20 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
                 )
 
         # Compute delays for each vehicle
-        self.__compute_interpolated_trip_delays(trip_realtime_data)
+        self.__compute_interpolated_trip_delays(dataset["name"], trip_realtime_data)
         
         return _GTFSRTState(trip_realtime_data=trip_realtime_data)
 
-    def __compute_interpolated_trip_delays(self, trip_realtime_data: TripRealtimeCache) -> None:
+    def __compute_interpolated_trip_delays(
+        self,
+        dataset_name: str,
+        trip_realtime_data: TripRealtimeCache
+    ) -> None:
         """
         Computes interpolated delay values for each trip in the realtime cache.
 
         Args:
+            dataset_name: GTFS dataset name
             trip_realtime_data: Mapping trip_id to ((latitude, longitude), unix_timestamp)
         """        
         # Iterate through all vehicle positions
@@ -162,14 +187,14 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
                 continue
 
             # Get ordered stops for the trip
-            trip_stops = self.__gtfs_service.get_trip_stops(trip_id)
+            trip_stops = self.__gtfs_service.get_trip_stops(dataset_name, trip_id)
 
             # Skip if stop data are missing
             if not trip_stops or len(trip_stops) < 2:
                 continue
 
             # Find closest stop segment
-            best_index = self.__find_closest_segment_index(trip_stops, lat, lon)
+            best_index = self.__find_closest_segment_index(dataset_name, trip_stops, lat, lon)
 
             if best_index >= len(trip_stops) - 1:
                 continue
@@ -179,8 +204,8 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
             stop_b, time_b_str, _ = trip_stops[best_index + 1]
 
             # Get stop coordinates
-            stop_a_coordinates = self.__gtfs_service.get_stop_coordinates(stop_a)
-            stop_b_coordinates = self.__gtfs_service.get_stop_coordinates(stop_b)
+            stop_a_coordinates = self.__gtfs_service.get_stop_coordinates(dataset_name, stop_a)
+            stop_b_coordinates = self.__gtfs_service.get_stop_coordinates(dataset_name, stop_b)
 
             # Skip if stop coordinates are missing
             if not stop_a_coordinates or not stop_b_coordinates:
@@ -236,6 +261,7 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
     
     def __find_closest_segment_index(
         self,
+        dataset_name: str,
         trip_stops: List[Tuple[str, str, int]],
         position_lat: float,
         position_lon: float
@@ -244,6 +270,7 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
         Finds the index of the stop segment closest to the given vehicle position.
 
         Args:
+            dataset_name: GTFS dataset name
             trip_stops: All stops on trip
             position_lat: Current vehicle position latitude
             position_lon: Current vehicle position longitude
@@ -264,8 +291,8 @@ class GTFSRTService(ServiceBase[_GTFSRTState]):
             stop_b_id = trip_stops[i + 1][0]
 
             # Extract stop identifiers forming the segment
-            coords_a = self.__gtfs_service.get_stop_coordinates(stop_a_id)
-            coords_b = self.__gtfs_service.get_stop_coordinates(stop_b_id)
+            coords_a = self.__gtfs_service.get_stop_coordinates(dataset_name, stop_a_id)
+            coords_b = self.__gtfs_service.get_stop_coordinates(dataset_name, stop_b_id)
 
             # Skip if coordinates are missing
             if not coords_a or not coords_b:

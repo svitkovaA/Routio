@@ -8,7 +8,8 @@ from datetime import datetime
 from pydantic import BaseModel
 
 class VehicleRealtimeRequestData(BaseModel):
-    trip_id: int                    # Trip identifier
+    agency_name: str                # GTFS agency name
+    trip_id: str                    # Trip identifier
     start_time: datetime            # Vehicle journey start time
 
 # End of file vehicle_realtime_request_data.py
