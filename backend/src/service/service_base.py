@@ -75,5 +75,19 @@ class ServiceBase(ABC, Generic[S]):
             value.encode("utf-8"),
             digest_size=8
         ).hexdigest()
+    
+    @final
+    def service_available(self) -> bool:
+        """
+        Signalizes if service is available.
+
+        Returns:
+            True if service is available, false otherwise
+        """
+        try:
+            self._get_state()
+            return True
+        except:
+            return False
 
 # End of file service_base.py

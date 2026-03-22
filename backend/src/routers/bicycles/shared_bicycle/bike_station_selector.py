@@ -273,11 +273,12 @@ class BikeStationSelector(SelectorBase):
             # Retrieve actual bike capacity
             bikes = node.place.bikesAvailable or 0
 
-            # Get predicted number of bicycles
-            node.place.predictedBikes = self.__prediction_service.predict_bikes(
-                int(station_id),
-                time_cursor
-            )
+            if self.__prediction_service.service_available():
+                # Get predicted number of bicycles
+                node.place.predictedBikes = self.__prediction_service.predict_bikes(
+                    int(station_id),
+                    time_cursor
+                )
 
             if node.place.predictedBikes is not None:
                 if node.place.predictedBikes == 0:
