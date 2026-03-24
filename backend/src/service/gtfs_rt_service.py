@@ -258,12 +258,46 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
             # Compute delay in minutes
             delay_minutes = (vehicle_time - scheduled_time).total_seconds() / 60
 
-            # Store computed delay
+            # Threshold to detect if vehicle is at stop A
+            STOP_THRESHOLD_METERS = 15
+
+            # Distance from vehicle to stop A
+            distance_to_a = GeoMath.haversine_distance_km(
+                lat, lon,
+                lat_a, lon_a
+            ) * 1000
+
+            # Determine which stop index should be reported
+            if distance_to_a <= STOP_THRESHOLD_METERS:
+                target_index = best_index
+            else:
+                target_index = best_index + 1
+
+            # Store computed delay and stop index
             trip_realtime_data[trip_id] = (
                 (lat, lon),
                 int(delay_minutes),
-                best_index
+                target_index
             )
+
+    @staticmethod
+    def vector(
+        a_lat: float,
+        a_lon: float,
+        b_lat: float,
+        b_lon: float
+    ) -> Tuple[float, float]:
+        """
+        Computes vector from point A to point B.
+        """
+        return (b_lat - a_lat, b_lon - a_lon)
+    
+    @staticmethod
+    def dot(a: Tuple[float, float], b: Tuple[float, float]) -> float:
+        """
+        Computes dot product of two vectors.
+        """
+        return a[0] * b[0] + a[1] * b[1]
     
     def __find_closest_segment_index(
         self,
@@ -284,43 +318,49 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
         Returns:
             Best index i representing the first stop for interpolation
         """
-        # Initialize minimum score
-        min_score = float("inf")
 
-        # Index of the best matching segment
+        # Initialize best matching segment
         best_index = 0
+        best_distance = float("inf")
 
-        # Iterate through consecutive stop pairs
-        for i in range(len(trip_stops) - 1):
-            # Extract stop identifiers forming the segment
-            stop_a_id = trip_stops[i][0]
-            stop_b_id = trip_stops[i + 1][0]
+        # Find closest stop by distance
+        for index, trip_stop in enumerate(trip_stops):
+            coordinates = self.__gtfs_service.get_stop_coordinates(dataset_name, trip_stop[0])
 
-            # Extract stop identifiers forming the segment
-            coords_a = self.__gtfs_service.get_stop_coordinates(dataset_name, stop_a_id)
-            coords_b = self.__gtfs_service.get_stop_coordinates(dataset_name, stop_b_id)
-
-            # Skip if coordinates are missing
-            if not coords_a or not coords_b:
+            if not coordinates:
                 continue
 
-            lat_a, lon_a = coords_a
-            lat_b, lon_b = coords_b
+            distance = GeoMath.haversine_distance_km(position_lat, position_lon, *coordinates)
 
-            # Compute distance from vehicle to first stop of segment
-            dist_a = GeoMath.haversine_distance_km(position_lat, position_lon, lat_a, lon_a)
+            if distance < best_distance:
+                best_distance = distance
+                best_index = index
 
-            # Compute distance from vehicle to second stop of segment
-            dist_b = GeoMath.haversine_distance_km(position_lat, position_lon, lat_b, lon_b)
+        # If closest stop is first or last, return directly
+        if best_index == 0 or best_index == len(trip_stops) - 1:
+            return best_index
+        
+        # Get coordinates for direction check
+        best_index_coords = self.__gtfs_service.get_stop_coordinates(dataset_name, trip_stops[best_index][0])
+        next_coords = self.__gtfs_service.get_stop_coordinates(dataset_name, trip_stops[best_index + 1][0])
 
-            # Use sum of distances as a segment proximity score
-            score = dist_a + dist_b
+        if best_index_coords is None or next_coords is None:
+            return best_index
 
-            # Updates best index if current score is better
-            if score < min_score:
-                min_score = score
-                best_index = i
+        # Vector from current stop to next stop
+        vector_best_next = self.vector(*best_index_coords, *next_coords)
 
-        return best_index
+        # Vector from current stop to vehicle
+        vector_best_vehicle = self.vector(*best_index_coords, position_lat, position_lon)
+
+        # Dot product determines if vehicle is ahead or behind the stop
+        dot_next = self.dot(vector_best_next, vector_best_vehicle)
+
+        # If vehicle is in direction of next stop, use current segment
+        if dot_next > 0:
+            return best_index
+        # Otherwise, vehicle is before current stop, use previous segment
+        else:
+            return best_index - 1
 
 # End of file gtfs_rt_service.py

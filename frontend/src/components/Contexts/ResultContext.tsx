@@ -440,7 +440,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         if (resultActiveIndex >= 0 && selectedTripPatternIndex >= 0) {
             setResults(prev => {
                 const newResults = [...prev];
-                for (const leg of newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex]?.originalLegs) {
+                for (const leg of newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex]?.originalLegs ?? []) {
                     if (!leg.tripId) {
                         continue;
                     }
