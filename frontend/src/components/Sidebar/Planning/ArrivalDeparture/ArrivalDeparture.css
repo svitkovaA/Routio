@@ -4,6 +4,10 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+.arrival-departure-form-control {
+    width: 100%;
+}
+
 .mode-switch {
     display: grid !important;
     grid-template-columns: 1fr 1fr;

@@ -11,11 +11,11 @@ import { useResult } from "../../Contexts/ResultContext";
 import { useChangeBikeStation } from "../../Routing/ChangeBikeStation";
 import { createBikeStationPin, createSmallBikeStationPin } from "../MapComponents";
 import CustomLeafletTooltip from "../../CustomTooltip/CustomLeafletTooltip";
-import "./BikeStations.css"
+import "./BikeStations.css";
 
 type BikeStationsProps = {
     tooltipHandler: (id: string) => L.LeafletEventHandlerFnMap;
-}
+};
 
 function BikeStations({
     tooltipHandler
@@ -125,16 +125,17 @@ function BikeStations({
                                         </div>
                                     )}
                                 </div>
-                                <button
-                                    className="popup-button"
-                                    onClick={() => invertBikeStationAtIndex(index)}
-                                    disabled={loading || leg?.bikeStationInfo.bikeStations.length === 1}
-                                >
-                                    {rack
-                                        ? (showBikeStations[index] ? t("map.hideBikeRacks") : t("map.showBikeRacks"))
-                                        : (showBikeStations[index] ? t("map.hideBikeStations") : t("map.showBikeStations"))
-                                    }
-                                </button>
+                                {!loading && leg?.bikeStationInfo.bikeStations.length > 1 && (
+                                    <button
+                                        className="popup-button"
+                                        onClick={() => invertBikeStationAtIndex(index)}
+                                    >
+                                        {rack
+                                            ? (showBikeStations[index] ? t("map.hideBikeRacks") : t("map.showBikeRacks"))
+                                            : (showBikeStations[index] ? t("map.hideBikeStations") : t("map.showBikeStations"))
+                                        }
+                                    </button>
+                                )}
                             </Popup>
                         </Marker>
 

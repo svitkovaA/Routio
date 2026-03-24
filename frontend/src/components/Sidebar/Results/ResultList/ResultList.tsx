@@ -4,9 +4,12 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ResultListItem from "./ResultListItem/ResultListItem";
 import { useResult } from "../../../Contexts/ResultContext";
 import Detail from "../Detail/Detail";
+import { useTranslation } from 'react-i18next';
+import "./ResultList.css";
 
 type ResultListProps = {
     recalculatePattern: (selectedIndex: number, legIndex: number) => void;  // Function used to recalculate a trip pattern after selecting a different leg
@@ -23,6 +26,9 @@ function ResultList({
         resultActiveIndex,
         pattern
     } = useResult();
+
+    // Translation function
+    const { t } = useTranslation();
 
     // Displays list of trip patterns for multimodal transport, public transport and shared bicycle
     if ([0,1].includes(resultActiveIndex) || (resultActiveIndex === 2 && result.tripPatterns.length > 1)) {
@@ -44,10 +50,18 @@ function ResultList({
     setSelectedTripPatternIndex(0);
     
     return (
-        <Detail
-            tripPattern={pattern}
-            recalculatePattern={recalculatePattern}
-        />  
+        <>
+            {(pattern.tooLongBikeDistance || pattern.tooLongWalkDistance) && (
+                <div className="result-list-warning">
+                    <WarningAmberIcon />
+                    {t("resultsInfo.warningFootBicycle")}
+                </div>
+            )}
+            <Detail
+                tripPattern={pattern}
+                recalculatePattern={recalculatePattern}
+            />
+        </>
     );
 }
 

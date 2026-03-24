@@ -1,6 +1,6 @@
 /**
  * @file Options.tsx
- * @brief Displays dropdown menus for selecting routing preferences and bicycle usage options
+ * @brief Displays dropdown menus for selecting routing preferences and bicycle usage options and bicycle stations
  * @author Andrea Svitkova (xsvitka00)
  */
 
@@ -9,6 +9,9 @@ import { useTranslation } from "react-i18next";
 import { RoutePreference } from "../../../types/types";
 import { useInput } from '../../../Contexts/InputContext';
 import OptionSelect from './OptionSelect';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+import "./Options.css";
 
 /**
  * Returns next value in a circular array
@@ -31,7 +34,8 @@ function Options() {
     // User input context
     const {
         preference, setPreference,
-        useOwnBike, setUseOwnBike
+        useOwnBike, setUseOwnBike,
+        showBikeStations, setShowBikeStations
     } = useInput();
 
     // Available route optimization options
@@ -45,48 +49,69 @@ function Options() {
     const bikeOptions = [true, false];
 
     return (
-        <div className="grid-wrapper">
-            {/* Route optimization selection */}
-            <OptionSelect
-                label={t("planning.routePreferences")}
-                value={preference}
-                onChange={(event) => {
-                    setPreference(event.target.value as RoutePreference);
-                }}
-                setOption={(direction: number) => setPreference(
-                    getNextValue(routePreferences, preference, direction)
-                )}
-            >
-                <MenuItem value={"fastest"}>
-                    {t("planning.routePreference.fastestRoute")}
-                </MenuItem>
-                <MenuItem value={"shortest"}>
-                    {t("planning.routePreference.shortestRoute")}
-                </MenuItem>
-                <MenuItem value={"transfers"}>
-                    {t("planning.routePreference.minimizeTransfers")}
-                </MenuItem>
-            </OptionSelect>
+        <>
+            <div className="grid-wrapper">
+                {/* Route optimization selection */}
+                <OptionSelect
+                    label={t("planning.routePreferences")}
+                    value={preference}
+                    onChange={(event) => {
+                        setPreference(event.target.value as RoutePreference);
+                    }}
+                    setOption={(direction: number) => setPreference(
+                        getNextValue(routePreferences, preference, direction)
+                    )}
+                >
+                    <MenuItem value={"fastest"}>
+                        {t("planning.routePreference.fastestRoute")}
+                    </MenuItem>
+                    <MenuItem value={"shortest"}>
+                        {t("planning.routePreference.shortestRoute")}
+                    </MenuItem>
+                    <MenuItem value={"transfers"}>
+                        {t("planning.routePreference.minimizeTransfers")}
+                    </MenuItem>
+                </OptionSelect>
 
-            {/* Bicycle usage selection */}
-            <OptionSelect
-                label={t("planning.bikeOptions")}
-                value={useOwnBike.toString()}
-                onChange={(event) => {
-                    setUseOwnBike(event.target.value === "true");
-                }}
-                setOption={(direction: number) => setUseOwnBike(
-                    getNextValue(bikeOptions, useOwnBike, direction)
-                )}
-            >
-                <MenuItem value="true">
-                    {t("planning.bikeOption.ownBike")}
-                </MenuItem>
-                <MenuItem value="false">
-                    {t("planning.bikeOption.sharedBike")}
-                </MenuItem>
-            </OptionSelect>
-        </div>
+                {/* Bicycle usage selection */}
+                <OptionSelect
+                    label={t("planning.bikeOptions")}
+                    value={useOwnBike.toString()}
+                    onChange={(event) => {
+                        setUseOwnBike(event.target.value === "true");
+                    }}
+                    setOption={(direction: number) => setUseOwnBike(
+                        getNextValue(bikeOptions, useOwnBike, direction)
+                    )}
+                >
+                    <MenuItem value="true">
+                        {t("planning.bikeOption.ownBike")}
+                    </MenuItem>
+                    <MenuItem value="false">
+                        {t("planning.bikeOption.sharedBike")}
+                    </MenuItem>
+                </OptionSelect>
+            </div>
+
+            {/* Show shared bike stations if allowed */}
+            {!useOwnBike &&
+                <div className="options-bike-stations">
+                    <FormControlLabel
+                        className="switch-delays"
+                        label={t("planning.showBikeStations")}
+                        labelPlacement="start"
+                        control={
+                            <div className="switch-button">
+                                <Switch
+                                    checked={showBikeStations}
+                                    onChange={(e) => setShowBikeStations(e.target.checked)}
+                                />
+                            </div>
+                        }
+                    />
+                </div>
+            }
+        </>
     );
 }
 

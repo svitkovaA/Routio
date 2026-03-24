@@ -112,25 +112,26 @@ function TransportPreferences() {
                         ))}
                     </FormGroup>
                 </div>
+                
                 {/* Historical delays */}
-                    <FormControlLabel
-                        className="switch-delays"
-                        label={t("settingsTab.useHistoricalDelays")}
-                        labelPlacement="start"
-                        control={
-                            <CustomTooltip title={useHistoricalDelays 
-                                ? t("tooltips.settings.disableHistoricalDelays")
-                                : t("tooltips.settings.enableHistoricalDelays") 
-                            }>
-                                <div className="switch-button">
-                                    <Switch
-                                        checked={useHistoricalDelays}
-                                        onChange={(e) => setUseHistoricalDelays(e.target.checked)}
-                                    />
-                                </div>
-                            </CustomTooltip>
-                        }
-                    />
+                <FormControlLabel
+                    className="switch-delays"
+                    label={t("settingsTab.useHistoricalDelays")}
+                    labelPlacement="start"
+                    control={
+                        <CustomTooltip title={useHistoricalDelays 
+                            ? t("tooltips.settings.disableHistoricalDelays")
+                            : t("tooltips.settings.enableHistoricalDelays") 
+                        }>
+                            <div className="switch-button">
+                                <Switch
+                                    checked={useHistoricalDelays}
+                                    onChange={(e) => setUseHistoricalDelays(e.target.checked)}
+                                />
+                            </div>
+                        </CustomTooltip>
+                    }
+                />
             </div>
         </div>
     );

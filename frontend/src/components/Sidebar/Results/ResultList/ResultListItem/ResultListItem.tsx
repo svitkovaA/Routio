@@ -34,7 +34,7 @@ function ResultListItem({
     return (
         <div 
             className={"pattern " + (selected ? "selected" : "")}
-            onClick={onClick}
+            onClick={selected ? onClickDetail : onClick}
         >
             {/* Footer displaying trip start time and potential warnings */}
             <div className="pattern-footer">

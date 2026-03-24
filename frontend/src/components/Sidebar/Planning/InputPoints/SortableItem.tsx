@@ -75,7 +75,9 @@ function SortableItem({
                 newWaypoints[index] = { 
                 ...newWaypoints[index], 
                 displayName: value,
-                isActive: false
+                isActive: false,
+                bikeStationId: null,
+                origin: null
             };
             return newWaypoints;
         });
@@ -121,12 +123,14 @@ function SortableItem({
                     isPreview: true,
                     // Temporarily apply highlighted suggestion coordinates
                     lat: suggestions[highlightedIndex].lat,
-                    lon: suggestions[highlightedIndex].lon
+                    lon: suggestions[highlightedIndex].lon,
+                    bikeStationId: null,
+                    origin: null
                 }
                 return newWaypoints;
             });
         }
-    }, [highlightedIndex, index, suggestions]);
+    }, [highlightedIndex, index, suggestions, setWaypoints]);
 
     return (
         <div className="sortable-item" ref={setNodeRef} style={style}>

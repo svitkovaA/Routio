@@ -4,8 +4,10 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../config/config";
 import { useInput } from "../Contexts/InputContext";
+import { useNotification } from "../Contexts/NotificationContext";
 import { useResult } from "../Contexts/ResultContext";
 import { useSettings } from "../Contexts/SettingsContext";
 
@@ -14,6 +16,9 @@ import { useSettings } from "../Contexts/SettingsContext";
  * within an already computed route
  */
 export function useChangeBikeStation() {
+    // Translation function
+    const { t } = useTranslation();
+
     // User input context
     const {
         waypoints,
@@ -45,6 +50,9 @@ export function useChangeBikeStation() {
         selectedTripPatternIndex
     } = useResult();
 
+    // Notification context
+    const { showNotification } = useNotification();
+
     /**
      * Requests route recalculation with a selected bikesharing station
      * 
@@ -64,6 +72,9 @@ export function useChangeBikeStation() {
         for (let i = 0; i < waypoints.length; i++) {
             waypointsArray.push(waypoints[i].lat + ', ' + waypoints[i].lon);
         }
+
+        const originIndex = waypoints.findIndex(w => w.origin === true);
+        const destinationIndex = waypoints.findIndex(w => w.origin === false);
 
         // Routing data
         const routeData = {
@@ -85,34 +96,52 @@ export function useChangeBikeStation() {
             bikesharing_lock_time: bikesharingLockTime,
             bike_lock_time: bikeLockTime,
             route_preference: preference,
-            use_historical_delays: useHistoricalDelays
+            use_historical_delays: useHistoricalDelays,
+            origin_station: originIndex >= 0 ? {
+                "index": originIndex,
+                "id": waypoints[originIndex].bikeStationId
+            } : null,
+            destination_station: destinationIndex >= 0 ? {
+                "index": destinationIndex,
+                "id": waypoints[destinationIndex].bikeStationId
+            } : null
         }
 
-        // Send request to backend for route recalculation
-        const result = await fetch(`${API_BASE_URL}/changeBikeStation`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                origin_bike_station: originBikeStation,
-                new_index: bikeStationIndex,
-                bike_stations: bikeStations,
-                legs: legs,
-                leg_index: legIndex,
-                modes: modes,
-                original_legs: originalLegs,
-                route_data: routeData
-            })
-        });
-
-        const response = await result.json();
-
-        // Update the active trip pattern in results
-        const temporaryResults = [...results]
-        temporaryResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex] = response;
-
-        setResults(temporaryResults);
+        try {
+            // Send request to backend for route recalculation
+            const result = await fetch(`${API_BASE_URL}/changeBikeStation`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    origin_bike_station: originBikeStation,
+                    new_index: bikeStationIndex,
+                    bike_stations: bikeStations,
+                    legs: legs,
+                    leg_index: legIndex,
+                    modes: modes,
+                    original_legs: originalLegs,
+                    route_data: routeData
+                })
+            });
+    
+            // Change bike station failed
+            if (!result.ok) {
+                throw new Error("Change bike station failed");
+            }
+    
+            const response = await result.json();
+    
+            // Update the active trip pattern in results
+            const temporaryResults = [...results]
+            temporaryResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex] = response;
+    
+            setResults(temporaryResults);
+        }
+        catch (error: any) {
+            showNotification(t("errors.changeBikeStationFailed"), "error");
+        }
     };
     return changeBikeStation;
 }

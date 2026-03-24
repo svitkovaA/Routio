@@ -18,6 +18,9 @@ import { useNotification } from "../../../../Contexts/NotificationContext";
  * @param index Index of waypoint in input list
  */
 export function useSuggestionHandle(index: number) {
+    // Translation function
+    const { t } =useTranslation(); 
+
     // List of currently available suggestions
     const [suggestions, setSuggestions] = useState<InputText[]>([]);
 
@@ -77,7 +80,7 @@ export function useSuggestionHandle(index: number) {
                 setHighlightedIndex(-1);
             })
             .catch(() => {
-                // showNotification(t("warnings.photon"), "warning");
+                showNotification(t("warnings.photon"), "warning");
                 console.error("Nominatim error");
             });
     };
@@ -102,7 +105,9 @@ export function useSuggestionHandle(index: number) {
                 displayName: parts.join(", "),
                 isActive: true,
                 isPreview: false,
-                id: waypoints[index].id
+                id: waypoints[index].id,
+                bikeStationId: null,
+                origin: null
             };
             setWaypoints(newWaypoints);
             setSuggestions([]);

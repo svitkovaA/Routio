@@ -179,6 +179,27 @@
     gap: 5px;
 }
 
+.nextbike-marker, .cluster-marker {
+    background: #00AEEF;
+}
+
+.nextbike-marker::after, .cluster-marker::after {
+    border-top-color: #00AEEF;
+}
+
+.nextbike-marker .marker-inner {
+    padding: 2px;
+}
+
+.nextbike-marker .station-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.cluster-marker .marker-inner {
+    color: #2b3089;
+}
+
 @media (min-width: 768px) {
     .leaflet-bottom .leaflet-control-zoom {
         display: block;

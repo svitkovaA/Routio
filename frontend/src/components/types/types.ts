@@ -18,6 +18,16 @@ export type InputText = {
 };
 
 /**
+ * Represents shared bicycle station
+ */
+export type Station = {
+    id: string;                             // Station id
+    lat: number;                            // Station latitude
+    lon: number;                            // Station longitude
+    name: string;                           // Station name
+}
+
+/**
  * Represents a waypoint used during route planning.
  * Can be origin, destination or intermediate point
  */
@@ -28,6 +38,8 @@ export type Waypoint = {
     isActive: boolean;                      // Indicates whether the waypoint is currently selected
     isPreview: boolean;                     // Indicates whether the waypoint is shown only as a preview 
     id: any;                                // Internal identifier
+    bikeStationId: string | null;           // Station identifier
+    origin: boolean | null;                 // True if station is set as origin one, false otherwise
 };
 
 /**
@@ -144,6 +156,8 @@ export type Leg = {
         quays: {
             name: string;                   // Ordered list of quays, stops, served by this journey
         }[];
+        startOffset?: number;               // Stop start index
+        currentIndex: number | null;        // Current vehicle stop index
     };
 
     /**
@@ -160,6 +174,7 @@ export type Leg = {
     delays?: {[date: string]: number};      // Historical delay information
     nonContinuousDepartures?: boolean;      // Indicates that there are no further continuous departures available
     arrivalAfterDeparture?: boolean;        // Indicates data inconsistency where arrival time is after departure time
+    artificial: boolean;                    // Indicates artificial leg
 };
 
 /**
@@ -181,6 +196,7 @@ export type VehiclePosition = {
     delay?: number;                         // Current vehicle delay
     direction: string;                      // Direction of the vehicle, final stop name
     startTime: string;                      // Vehicle journey start time
+    stopIndex?: number;                     // Index of the closes stop
 };
 
 /**
@@ -244,6 +260,7 @@ export type VerticalTimeline = {
     mode: string;                           // Transport mode of the timeline segment
     length: number;                         // Length of the segment
     color: string;                          // Color associated with the segment
+    artificial: boolean;                    // Indicates artificial leg
 };
 
 /** End of file types.ts */

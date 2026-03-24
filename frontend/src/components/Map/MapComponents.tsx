@@ -125,6 +125,50 @@ export function createSmallBikeStationPin(origin: boolean) {
 }
 
 /**
+ * Creates a marker for Nextbike stations
+ * 
+ * @returns Leaflet DivIcon instance
+ */
+export function createNextbikePin() {
+    const imgSrc = `${PUBLIC_URL}/img/nextbikeLogo.svg`;
+
+    return L.divIcon({
+        html: `
+            <div class="marker nextbike-marker">
+                <div class="marker-inner">
+                    <img src="${imgSrc}" class="station-svg" />
+                </div>
+            </div>
+        `,
+        className: "",
+        iconAnchor: [15, 40],
+        popupAnchor: [0, -40],
+        tooltipAnchor: [0, -40]
+    });
+}
+
+/**
+ * Creates a cluster marker for multiple stations
+ * 
+ * @param count Number of markers in cluster
+ * @returns Leaflet DivIcon instance
+ */
+export function createClusterPin(count: number) {
+    return L.divIcon({
+        html: `
+            <div class="marker cluster-marker">
+                <div class="marker-inner">
+                    ${count}
+                </div>
+            </div>
+        `,
+        className: "",
+        iconAnchor: [15, 40],
+        tooltipAnchor: [0, -40]
+    });
+}
+
+/**
  * Handles map click interaction
  * If the callback returns false the map is moved animated to the clicked position
  * 

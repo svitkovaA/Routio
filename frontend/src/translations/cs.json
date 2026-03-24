@@ -33,7 +33,10 @@
     "capacity": "Kapacita",
     "setAsOriginStation": "Nastavit jako výchozí stanici kol",
     "setAsDestinationStation": "Nastavit jako cílovou stanici kol",
-    "setAsDestinationRack": "Nastavit jako cílový stojan na kola"
+    "setAsDestinationRack": "Nastavit jako cílový stojan na kola",
+    "addWaypoint": "Přidat jako nový bod",
+    "useAsOrigin": "Použít jako výchozí stanici",
+    "useAsDestination": "Použít jako cílovou stanici"
   },
   "planning": {
     "position": "Vaše poloha",
@@ -68,6 +71,7 @@
       "ownBike": "Vlastní kolo",
       "sharedBike": "Sdílené kolo"
     },
+    "showBikeStations": "Zobrazit stanice sdílených kol",
     "find": "Najít",
     "invalidAddress": "Neplatná adresa",
     "fieldRequired": "Prázdne pole"
@@ -137,7 +141,8 @@
     "detail": "Detail",
     "noResults": "Nebyly nalezeny žádné výsledky",
     "warningFoot": "Vzdálenost chůze překračuje maximální povolený limit",
-    "warningBicycle": "Vzdálenost jízdy na kole překračuje maximální povolený limit"
+    "warningBicycle": "Vzdálenost jízdy na kole překračuje maximální povolený limit",
+    "warningFootBicycle": "Překročen limit vzdálenosti"
   },
   "modeDescriptions": {
     "multimodalTransport": "Multimodální doprava",
@@ -256,8 +261,8 @@
       "decrease": "Snížit hodnotu",
       "addMode": "Zahrnout do plánování trasy",
       "removeMode": "Vyloučit z plánování trasy",
-      "enableHistoricalDelays": "Povoliť zobrazení historických zpoždění",
-      "disableHistoricalDelays": "Nepovoliť zobrazení historických zpoždění"
+      "enableHistoricalDelays": "Povolit zobrazení historických zpoždění",
+      "disableHistoricalDelays": "Zakázat zobrazení historických zpoždění"
     },
     "map": {
       "originBikeStation": "Výchozí stanice kol",
@@ -265,7 +270,8 @@
       "alternativeOriginBikeStation": "Alternativní výchozí stanice",
       "alternativeDestinationBikeStation": "Alternativní cílová stanice",
       "marker": "Kliknutím zobrazíte informace o zastávce",
-      "vehiclePosition": "Aktuální poloha vozidla"
+      "vehiclePosition": "Aktuální poloha vozidla",
+      "transfer": "Přestupní bod"
     },
     "info": {
       "bus": "Veřejná doprava",
@@ -282,6 +288,8 @@
   },
   "errors": {
     "serverOffline": "Server je momentálně nedostupný. Zkuste to prosím později.",
-    "routingFailed": "Došlo k chybě při výpočtu trasy. Zkuste to prosím znovu."
+    "routingFailed": "Došlo k chybě při výpočtu trasy. Zkuste to prosím znovu.",
+    "positionDetectionFailed": "Nepodařilo se zjistit aktuální polohu.",
+    "changeBikeStationFailed": "Změna stanice kol selhala."
   }
 }

@@ -19,6 +19,26 @@
     left: -64px;
 }
 
+.current .timeline-dot.public {
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0% {
+        background-color: #02bf34;
+    }
+    50% {
+        background-color: white;
+    }
+    100% {
+        background-color: #02bf34;
+    }
+}
+
+.passed .timeline-dot.public {
+    background-color: var(--color-icons);
+}
+
 .station-square {
     width: 16px;
     height: 10px;

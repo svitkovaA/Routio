@@ -1,0 +1,16 @@
+/**
+ * @file Options.css
+ * @brief Styles for the dropdown menus for selecting routing preferences and bicycle usage options with bicycle stations
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.options-bike-stations {
+    margin-bottom: 5px;
+    margin-top: -7px;
+}
+
+.options-bike-stations .switch-button {
+    width: 50px;
+}
+
+/** End of file Options.css  */

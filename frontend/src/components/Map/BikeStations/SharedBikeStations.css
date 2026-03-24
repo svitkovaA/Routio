@@ -1,0 +1,25 @@
+/**
+ * @file SharedBikeStations.css
+ * @brief Styles for displaying shared bike stations on the map with clustering
+ * @author Andrea Svitkova (xsvitka00)
+ */
+
+.shared-bike-radio-group {
+    padding-left: 8px;
+    gap: 5px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+.shared-bike-radio-group span {
+    padding: 0 !important;
+}
+
+.shared-bike-popup-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 14px;
+}
+
+/** End of file SharedBikeStations.css */

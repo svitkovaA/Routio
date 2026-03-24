@@ -225,7 +225,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                 let totalDescent = undefined;
 
                 // Elevation is only supported for cycling or walking segments
-                if (leg.mode === "bicycle" || (leg.mode === "foot" && leg.walkMode)) {
+                if (leg.mode === "bicycle" || (leg.mode === "foot" && leg.walkMode && !leg.artificial)) {
                     // Resample polyline coordinates so points are evenly spaced approximately every 40 meters
                     const sampled = resamplePolyline(poly.coords, 40);
     
@@ -255,7 +255,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
 
         compute();
 
-    }, [polyInfo]);
+    }, [polyInfo, pattern?.originalLegs]);
 
     /**
      * Toggles visibility of elevation profile for a specific route leg
@@ -310,7 +310,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         polylineForceUpdate,
         hoveredProfileIndex,
         elevationLegIndex,
-        showBikeStations
+        showBikeStations,
+        pattern
     ]);
 
     /**
@@ -395,7 +396,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
      * Fetches vehicle positions from backend API
      */
     const fetchPositions = useCallback(async () => {
-        if (!pattern) {
+        if (!pattern || tripIds.length === 0) {
             return;
         }
 
@@ -406,7 +407,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             body: JSON.stringify(tripIds)
         });
 
-        const realtime: Record<string, { lat: number; lon: number, delay?: number }> = await res.json();
+        const realtime: Record<string, { lat: number; lon: number, delay?: number, stopIndex?: number }> = await res.json();
 
         // Build next position map
         const nextMap: Record<string, VehiclePosition> = {};
@@ -422,7 +423,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                 ...v,
                 lat: pos.lat,
                 lon: pos.lon,
-                delay: pos?.delay
+                delay: pos?.delay,
+                stopIndex: pos?.stopIndex
             };
         }
 
@@ -449,6 +451,9 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                     }
 
                     leg.delay = pos.delay;
+                    if (leg.serviceJourney) {
+                        leg.serviceJourney.currentIndex = pos.stopIndex ?? null;
+                    }
                 }
                 return newResults;
             });

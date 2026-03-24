@@ -95,18 +95,18 @@ export function SettingsProvider({ children } : {children: React.ReactNode}) {
         selectedLayerIndex, setSelectedLayerIndex,
         useHistoricalDelays, setUseHistoricalDelays
     }), [
-        maxTransfers,
-        selectedModes,
-        maxBikeDistance,
-        bikeAverageSpeed,
-        maxBikesharingDistance,
-        bikesharingAverageSpeed,
-        maxWalkDistance,
-        walkAverageSpeed,
-        bikesharingLockTime,
-        bikeLockTime,
-        selectedLayerIndex,
-        useHistoricalDelays
+        maxTransfers, setMaxTransfers,
+        selectedModes, setSelectedModes,
+        maxBikeDistance, setMaxBikeDistance,
+        bikeAverageSpeed, setBikeAverageSpeed,
+        maxBikesharingDistance, setMaxBikesharingDistance,
+        bikesharingAverageSpeed, setBikesharingAverageSpeed,
+        maxWalkDistance, setMaxWalkDistance,
+        walkAverageSpeed, setWalkAverageSpeed,
+        bikesharingLockTime, setBikesharingLockTime,
+        bikeLockTime, setBikeLockTime,
+        selectedLayerIndex, setSelectedLayerIndex,
+        useHistoricalDelays, setUseHistoricalDelays
     ]);
     
     return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

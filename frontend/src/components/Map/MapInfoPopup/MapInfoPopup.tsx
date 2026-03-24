@@ -4,21 +4,19 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Popup, useMapEvent } from "react-leaflet";
-import { Waypoint } from "../../types/types";
 import { useResult } from "../../Contexts/ResultContext";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useTranslation } from "react-i18next";
+import { useInput } from "../../Contexts/InputContext";
 import "./MapInfoPopup.css"
 
 type MapInfoPopupProps = {
-    waypoints: Waypoint[];                                                      // List of currently defined waypoints
-    handleMapSelection: (lat: number, lon: number, index?: number) => boolean;  // Callback handling map based waypoint selection
+    handleMapSelection: (lat: number, lon: number, index?: number, target_waypoint_length?: number) => boolean;  // Callback handling map based waypoint selection
 }
 
 function MapInfoPopup({
-    waypoints,
     handleMapSelection
 } : MapInfoPopupProps) {
     // Translation function
@@ -27,8 +25,17 @@ function MapInfoPopup({
     // Position state of the menu popup
     const [position, setPosition] = useState<[number, number] | null>(null);
 
+    // Signalizes update needed
+    const update = useRef<boolean>(null);
+
+    // Waypoint length reference
+    const length = useRef<number>(null);
+
     // Result context
     const { loading } = useResult();
+
+    // Input context
+    const { waypoints, addWaypoint } = useInput();
 
     // Displays popup on right mouse click
     useMapEvent('contextmenu', (e) => {
@@ -52,6 +59,38 @@ function MapInfoPopup({
         setPosition(null);
     };
 
+    /**
+     * Adds waypoint handled by selection from context menu
+     * 
+     * @param e Mouse click event
+     */
+    const handleAddWaypoint = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!position) {
+            return;
+        }
+
+        // Prevents popup close propagation
+        e.stopPropagation();
+
+        // Add waypoint to the second to last position
+        addWaypoint(waypoints.length - 2);
+        length.current = waypoints.length;
+        update.current = true;
+    };
+
+    /**
+     * Geocodes newly added waypoint
+     */
+    useEffect(() => {
+        if (update.current && position && length.current !== null && length.current === waypoints.length - 1) {
+            handleMapSelection(position[0], position[1], waypoints.length - 2, waypoints.length);
+            setPosition(null);
+        }
+        
+        update.current = null;
+        length.current = null;
+    }, [waypoints.length, handleMapSelection, position]);
+
     // Do not render popup if no position is selected
     if (!position) {
         return null;
@@ -71,6 +110,8 @@ function MapInfoPopup({
         >
             <div className="map-popup selection">
                 <strong>{t("map.selectPosition")}</strong>
+
+                {/* Set as existing waypoint */}
                 {waypoints.map((w, i) => (
                     <button
                         className="popup-button context-menu"
@@ -81,6 +122,16 @@ function MapInfoPopup({
                         {w.isActive && <LocationOnIcon sx={{ fontSize: 15 }} />}
                     </button>
                 ))}
+
+                {/* Add new waypoint if maximum number is not already reached */}
+                {waypoints.length < 10 &&
+                    <button
+                        className="popup-button context-menu"
+                        onClick={(e) => handleAddWaypoint(e)}
+                    >
+                        {t("map.addWaypoint")}
+                    </button>
+                }
             </div>
         </Popup>
     );

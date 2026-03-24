@@ -213,7 +213,15 @@ function PublicTransportDetail({
                     {stopsOpen && leg.serviceJourney?.quays.map((quay, index) => (
                         <div
                             key={`${index}`}
-                            className="stop"
+                            className={"stop " + (
+                                leg.serviceJourney?.startOffset !== undefined && 
+                                leg.serviceJourney.currentIndex !== null
+                                ? (leg.serviceJourney.currentIndex - leg.serviceJourney.startOffset) === index
+                                    ? "current" 
+                                    : (leg.serviceJourney.currentIndex - leg.serviceJourney.startOffset) > index
+                                        ? "passed" : ""
+                                : "")
+                            }
                         >
                             <div className="timeline-dot public"/>
                             {quay.name}

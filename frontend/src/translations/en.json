@@ -32,7 +32,10 @@
     "capacity": "Capacity",
     "setAsOriginStation": "Set as origin bike station",
     "setAsDestinationStation": "Set as destination bike station",
-    "setAsDestinationRack": "Set as destination bike rack"
+    "setAsDestinationRack": "Set as destination bike rack",
+    "addWaypoint": "Add as new waypoint",
+    "useAsOrigin": "Use as origin station",
+    "useAsDestination": "Use as destination station"
   },
   "planning": {
     "position": "Your position",
@@ -67,6 +70,7 @@
       "ownBike": "Own bike",
       "sharedBike": "Shared bike"
     },
+    "showBikeStations": "Show shared bike stations",
     "find": "Find",
     "invalidAddress": "Invalid address",
     "fieldRequired": "Empty field"
@@ -136,7 +140,8 @@
     "detail": "Detail",
     "noResults": "No results found",
     "warningFoot": "Walking distance exceeds the maximum allowed limit",
-    "warningBicycle": "Cycling distance exceeds the maximum allowed limit"
+    "warningBicycle": "Cycling distance exceeds the maximum allowed limit",
+    "warningFootBicycle": "Distance limit exceeded"
   },
   "modeDescriptions": {
     "multimodalTransport": "All means of transport",
@@ -264,7 +269,8 @@
       "alternativeOriginBikeStation": "Alternative origin station",
       "alternativeDestinationBikeStation": "Alternative destination station",
       "marker": "Click for stop information",
-      "vehiclePosition": "Current vehicle position"
+      "vehiclePosition": "Current vehicle position",
+      "transfer": "Transfer point"
     },
     "info": {
       "bus": "Public Transport",
@@ -281,6 +287,8 @@
   },
   "errors": {
     "serverOffline": "The server is currently unavailable. Please try again later.",
-    "routingFailed": "An error occurred while calculating the route. Please try again."
+    "routingFailed": "An error occurred while calculating the route. Please try again.",
+    "positionDetectionFailed": "Unable to detect current position.",
+    "changeBikeStationFailed": "Change bicycle station failed." 
   }
 }

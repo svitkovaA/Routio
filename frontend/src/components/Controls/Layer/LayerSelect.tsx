@@ -36,8 +36,7 @@ function LayerSelect() {
     };
 
     return (
-        <div className={"controls-select " + (window.innerWidth < 768)}>
-
+        <div className={"controls-select"}>
             {/* Button opening the layer selection dropdown */}
             <CustomTooltip title={t("tooltips.controls.layer")} disableTooltip={open}>
                 <button

@@ -8,9 +8,10 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import dayjs from "dayjs";
-import { LegPreference, RoutePreference, Waypoint } from "../types/types";
+import { LegPreference, RoutePreference, Station, Waypoint } from "../types/types";
 import { useResult } from "./ResultContext";
 import { useSettingsFromLocalStorage } from "./SettingsContext";
+import { API_BASE_URL } from "../config/config";
 
 type InputContextType = {
     waypoints: Waypoint[];
@@ -38,13 +39,19 @@ type InputContextType = {
     swapWaypoints: () => void;
     fieldErrors: number[];
     setFieldErrors: Dispatch<SetStateAction<number[]>>;
+    showBikeStations: boolean;
+    setShowBikeStations: (value: boolean) => void;
+    bikeStations: Station[];
 };
 
 const InputContext = createContext<InputContextType | undefined>(undefined);
 
 export function InputProvider({ children } : {children: React.ReactNode}) {
     // Currently active result index
-    const { resultActiveIndex } = useResult();
+    const {
+        resultActiveIndex,
+        showResults
+    } = useResult();
 
     // Waypoints initialization
     const [waypoints, setWaypoints] = useState<Waypoint[]>([{
@@ -53,14 +60,18 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         displayName: "",
         isActive: false,
         isPreview: false,
-        id: Math.random().toString(36).substring(2,9)
+        id: Math.random().toString(36).substring(2,9),
+        bikeStationId: null,
+        origin: null
     }, {
         lat: 0,
         lon: 0,
         displayName: "",
         isActive: false,
         isPreview: false,
-        id: Math.random().toString(36).substring(2,9)
+        id: Math.random().toString(36).substring(2,9),
+        bikeStationId: null,
+        origin: null
     }]);
 
     // Determines whether the selected time represents arrival time, or departure time
@@ -92,12 +103,53 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
     // Stores indices of input fields that currently contain validation errors
     const [fieldErrors, setFieldErrors] = useState<number[]>([]);
 
+    // Stores information about showing bicycle stations
+    const [showBikeStations, setShowBikeStations] = useState<boolean>(false);
+
+    // Stores bike stations
+    const [bikeStations, setBikeStations] = useState<Station[]>([]);
+
+    /**
+     * Fetches bicycle stations
+     */
+    useEffect(() => {
+        const loadStations = async () => {
+            const apiResult = await fetch(`${API_BASE_URL}/bicycleStations`);
+            const data = await apiResult.json();
+
+            setBikeStations(data);
+        }
+        if (bikeStations.length === 0) {
+            loadStations();
+        }
+    }, [showBikeStations, bikeStations]);
+
     /**
      * Unset mapSelectionIndex if other action occurs
      */
     useEffect(() => {
         setMapSelectionIndex(-1);
     }, [waypoints, time, date, preference, useOwnBike, arriveBy, legPreferences, resultActiveIndex]);
+
+    /**
+     * Hide bicycle stations when bicycle options are changed
+     */
+    useEffect(() => {
+        setShowBikeStations(false);
+    }, [useOwnBike, showResults]);
+
+    /**
+     * Remove information about stations from input form when bike options change
+     */
+    useEffect(() => {
+        setWaypoints(prev => {
+            return prev.map(w => ({
+                ...w,
+                bikeStationId: null,
+                origin: null
+            }));
+        });
+    }, [useOwnBike]);
 
     /**
      *  Clears waypoint at the specified index
@@ -112,7 +164,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             newWaypoints[index] = { 
                 ...newWaypoints[index], 
                 displayName: clearDisplayName ? "" : newWaypoints[index].displayName,
-                isActive: false 
+                isActive: false,
+                bikeStationId: null,
+                origin: null
             };
 
             return newWaypoints;
@@ -173,34 +227,39 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             return;
         }
 
-        // Insertion index
-        const insertIndex = index + 1;
-
         // Insert new waypoint after the given index
-        const newWaypoints = [...waypoints];
-        newWaypoints.splice(index + 1, 0, {
-            lat: 0,
-            lon: 0,
-            displayName: "",
-            isActive: false,
-            isPreview: false,
-            id: Math.random().toString(36).substring(2,9)
+        setWaypoints(prev => {
+            if (prev.length >= 10) return prev;
+
+            const updated = [...prev];
+            updated.splice(index + 1, 0, {
+                lat: 0,
+                lon: 0,
+                displayName: "",
+                isActive: false,
+                isPreview: false,
+                id: Math.random().toString(36).substring(2, 9),
+                bikeStationId: null,
+                origin: null
+            });
+            return updated;
         });
-        setWaypoints(newWaypoints);
 
         // Insert default leg preference for the newly added segment
-        const newLegPreferences = [...legPreferences];
-        newLegPreferences.splice(index + 1, 0, {
-            mode: "multimodal",
-            wait: dayjs().startOf("day"),
-            open: false
+        setLegPreferences(prev => {
+            const updated = [...prev];
+            updated.splice(index + 1, 0, {
+                mode: "multimodal",
+                wait: dayjs().startOf("day"),
+                open: false
+            });
+            return updated;
         });
-        setLegPreferences(newLegPreferences);
         
         // Shift error indices forward after inserting a new field
-        setFieldErrors(prev => prev.map(errorIndex => errorIndex >= insertIndex ? errorIndex + 1 : errorIndex));
+        setFieldErrors(prev => prev.map(errorIndex => errorIndex >= index + 1 ? errorIndex + 1 : errorIndex));
 
-    }, [waypoints, legPreferences]);
+    }, [waypoints]);
 
     /**
      * Swaps origin and destination waypoints
@@ -242,6 +301,54 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         }
     }, [waypoints]);
 
+    /**
+     * Updates leg preferences
+     */
+    useEffect(() => {
+        setLegPreferences(prev => {
+            // Find indices of origin and destination stations
+            const originIndex = waypoints.findIndex(w => w.origin === true);
+            const destinationIndex = waypoints.findIndex(w => w.origin === false);
+
+            // Ensure correct station order
+            if (originIndex >= 0 && destinationIndex >= 0 && originIndex > destinationIndex) {
+                setWaypoints(prev => {
+                    const updated = [...prev];
+                    updated[originIndex].origin = false;
+                    updated[destinationIndex].origin = true;
+                    return updated;
+                });
+                return prev;
+            }
+
+            // Indicates whether any bike station is selected
+            const stationSet = originIndex >= 0 || destinationIndex >= 0;
+
+            // Converts bicycle segment to multimodal if stations are involved
+            const updated: LegPreference[] = prev.map(p => ({
+                ...p,
+                mode: p.mode === "bicycle" && stationSet ? "multimodal" : p.mode
+            }));
+
+            // Assign bicycle mode to all legs between origin and destination stations
+            if (originIndex >= 0 && destinationIndex >= 0) {
+                for (let i = originIndex; i < destinationIndex; i++) {
+                    updated[i].mode = "bicycle";
+                }
+            }
+            // If only origin is set apply bicycle segment after this waypoint
+            else if (originIndex >= 0 && originIndex < updated.length) {
+                updated[originIndex].mode = "bicycle";
+            }
+            // If only destination is set apply bicycle segment before this waypoint
+            else if (destinationIndex > 0) {
+                updated[destinationIndex - 1].mode = "bicycle";
+            }
+
+            return updated;
+        });
+    }, [waypoints]);
+
     const value = useMemo(() => ({
         waypoints, setWaypoints,
         arriveBy, setArriveBy,
@@ -257,7 +364,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         onDragEnd,
         addWaypoint,
         swapWaypoints,
-        fieldErrors, setFieldErrors
+        fieldErrors, setFieldErrors,
+        showBikeStations, setShowBikeStations,
+        bikeStations
     }), [
         waypoints,
         arriveBy,
@@ -275,7 +384,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         swapWaypoints,
         fieldErrors,
         setPreference,
-        setUseOwnBike
+        setUseOwnBike,
+        showBikeStations,
+        bikeStations
     ]);
     
     return <InputContext.Provider value={value}>{children}</InputContext.Provider>;

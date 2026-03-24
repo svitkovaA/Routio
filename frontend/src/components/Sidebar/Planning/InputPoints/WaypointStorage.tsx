@@ -4,7 +4,6 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useTranslation } from "react-i18next";
 import { StoredWaypoint, Waypoint } from "../../../types/types";
 
 // Maximum number of stored waypoints per category (origin, middle stops, destination)

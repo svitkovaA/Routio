@@ -11,11 +11,13 @@ import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
 import { useTranslation } from "react-i18next";
 
 type LocationDotProps = {
-    onClick: () => void;    // // Callback triggered when the map selection icon is clicked
-}
+    onClick: () => void;    // Callback triggered when the map selection icon is clicked
+    active: boolean;        // Indicates whether location pin icon is active
+};
 
 function LocationDot({
-    onClick
+    onClick,
+    active
 } : LocationDotProps) {
     // Translation function
     const { t } = useTranslation();
@@ -28,7 +30,10 @@ function LocationDot({
                     onClick={onClick}
                     size="small"
                     edge="end"
-                    sx={{mr: -1, color: 'var(--color-icons)'}}
+                    sx={{
+                        mr: -1,
+                        color: active ? 'var(--color-info)' : 'var(--color-icons)'
+                    }}
                     tabIndex={-1}
                 >
                     <LocationOnIcon />

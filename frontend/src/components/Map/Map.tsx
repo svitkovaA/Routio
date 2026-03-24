@@ -25,6 +25,7 @@ import { useSettings } from '../Contexts/SettingsContext';
 import { useResult } from '../Contexts/ResultContext';
 import { useNotification } from "../Contexts/NotificationContext";
 import { NW_LAT, NW_LON, SE_LAT, SE_LON } from "../config/config";
+import SharedBikeStations from './BikeStations/SharedBikeStations';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
@@ -70,6 +71,8 @@ function Map({
         setMapSelectionIndex,
         setFieldErrors
     } = useInput();
+
+    const { showNotification } = useNotification();
 
     // Default map center
     const defaultCenter: L.LatLngTuple = [49.1951, 16.6068];
@@ -147,17 +150,16 @@ function Map({
         }
     });
 
-    const { showNotification } = useNotification();
-
     /**
      * Handles location selection on the map
      * 
      * @param lat Latitude of the selected location
      * @param lon Longitude of the selected location
      * @param index Waypoint index
+     * @param target_waypoint_length Target length
      * @returns True if the selection was handled, false otherwise
      */
-    const handleMapSelection = (lat: number, lon: number, index?: number): boolean => {
+    const handleMapSelection = (lat: number, lon: number, index?: number, target_waypoint_length?: number): boolean => {
         // Resolve target waypoint index
         const targetIndex = index !== undefined ? index : mapSelectionIndex;
 
@@ -180,13 +182,25 @@ function Map({
          * @param displayName Address resolved from reverse geocoding
          */
         const updateWaypoints = (displayName: string) => {
-            const newWaypoints = [...waypoints];
-            newWaypoints[targetIndex] = {
-                ...newWaypoints[targetIndex], lat, lon, displayName, isActive: true
-            };
-
             // Update waypoint state
-            setWaypoints(newWaypoints);
+            setWaypoints(prev => {
+                if (targetIndex < 0 || targetIndex >= prev.length || !prev[targetIndex] || (target_waypoint_length !== undefined && target_waypoint_length !== prev.length)) {
+                    return prev;
+                }
+
+                const updated = [...prev];
+                updated[targetIndex] = {
+                    ...updated[targetIndex],
+                    lat,
+                    lon,
+                    displayName,
+                    isActive: true,
+                    bikeStationId: null,
+                    origin: null
+                };
+
+                return updated;
+            });
 
             // Automatically open sidebar on mobile devices
             if (window.innerWidth < 768) {
@@ -211,12 +225,13 @@ function Map({
                 // Prevent empty fields
                 if (displayName.length === 0) {
                     displayName = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                    showNotification(t("warnings.nominatim"), "warning");
                 }
                 updateWaypoints(displayName);
             })
             .catch((err) => {
                 // Fallback to use coordinates if reverse geocoding fails
-                // showNotification(t("warnings.nominatim"), "warning");
+                showNotification(t("warnings.nominatim"), "warning");
                 const displayName = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
                 updateWaypoints(displayName);
             });
@@ -259,7 +274,6 @@ function Map({
         >
             {/* Popup information during waypoint selection */}
             <MapInfoPopup
-                waypoints={waypoints}
                 handleMapSelection={handleMapSelection}
             />
             
@@ -297,12 +311,15 @@ function Map({
             <SetViewOnClick 
                 onMapClick={(lat: number, lon: number) => handleMapSelection(lat, lon)}
             />
+
+            {/* Shared bicycle stations in input form */}
+            <SharedBikeStations />
             
             {/* Render waypoint markers */}
             {waypoints.map((w, i) =>
                 (w.isActive || w.isPreview) && (
                     <Marker
-                        key={i}
+                        key={`${i}-${w.lat}-${w.lon}`}
                         position={[w.lat, w.lon]}
                         icon={i === 0 ? startMarker : i !== waypoints.length - 1 ? createPinIcon(i.toString(), w.isPreview) : endMarker}
                         eventHandlers={tooltipHandler(`waypoint-${i}`)}

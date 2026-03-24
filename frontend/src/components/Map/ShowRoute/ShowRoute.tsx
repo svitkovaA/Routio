@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Polyline, useMap } from "react-leaflet";
 import { useResult } from "../../Contexts/ResultContext";
 import React from "react";
@@ -24,7 +24,8 @@ function ShowRoute() {
         elevationLegIndex,
         setElevationLegIndex,
         setHoveredProfileIndex,
-        showBikeStations
+        showBikeStations,
+        pattern
     } = useResult();
 
     /**
@@ -54,6 +55,13 @@ function ShowRoute() {
     else if (zoom <= 14) hoverThresholdPx = 10;
     else if (zoom <=18) hoverThresholdPx = 45;
     else hoverThresholdPx = 10;
+
+    useEffect(() => {
+        if (!map.getPane("markerTopPane")) {
+            const pane = map.createPane("markerTopPane");
+            pane.style.zIndex = "610";
+        }
+    }, [map]);
 
     useMapEvents({
         mousemove(e) {
@@ -194,6 +202,17 @@ function ShowRoute() {
                     pathOptions={{ color: "var(--color-info)", fillColor: "white", fillOpacity: 1 }}
                 />
             )}
+
+            {/* Markers for transfers */}
+            {pattern && pattern?.originalLegs.filter(l => l.mode === "transfer" && l.fromPlace !== null).map((l, i) => (
+                <CircleMarker
+                    key={i}
+                    center={[l.fromPlace?.latitude, l.fromPlace?.longitude] as [number, number]}
+                    radius={6}
+                    pathOptions={{ color: "black", fillColor: "white", fillOpacity: 1 }}
+                    pane="markerTopPane"
+                />
+            ))}
         </React.Fragment>
     );
 }

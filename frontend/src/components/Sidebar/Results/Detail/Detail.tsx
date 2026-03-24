@@ -39,7 +39,8 @@ function Detail({
         tripPattern?.originalLegs.map(leg => ({
             color: leg.color,
             length: 60,
-            mode: leg.mode
+            mode: leg.mode,
+            artificial: leg.artificial
         }))
     );
 
@@ -51,7 +52,8 @@ function Detail({
             tripPattern?.originalLegs.map(leg => ({
                 color: leg.color,
                 length: 60,
-                mode: leg.mode
+                mode: leg.mode,
+                artificial: leg.artificial
             }))
         );
     }, [tripPattern]);
@@ -83,7 +85,7 @@ function Detail({
                     return (
                         <Fragment key={`${index}`}>
                             {/* Starting waypoint */}
-                            {index === 0 && (
+                            {index === 0 && !leg.artificial && (
                                 <Waystop
                                     time={time}
                                     name={waypoints[waypointCount]?.displayName}
@@ -91,7 +93,7 @@ function Detail({
                             )}
 
                             {/* Intermediate waypoint */}
-                            {displayWaypoint && (
+                            {displayWaypoint && !leg.artificial && (
                                 <Waystop
                                     time={time}
                                     name={waypoints[waypointCount]?.displayName}
@@ -100,11 +102,13 @@ function Detail({
 
                             {/* Render leg component based on transport mode */}
                             {leg.mode === "foot" ? (
-                                <WalkDetail
-                                    leg={leg}
-                                    setVerticalTimeline={setVerticalTimeline}
-                                    index={index}
-                                />
+                                !leg.artificial && (
+                                    <WalkDetail
+                                        leg={leg}
+                                        setVerticalTimeline={setVerticalTimeline}
+                                        index={index}
+                                    />
+                                )
                             ) : leg.mode === "bicycle" ? (
                                 <BicycleDetail
                                     leg={leg}
@@ -115,7 +119,7 @@ function Detail({
                                 />
                             ) : leg.mode === "wait" ? (
                                 <Waystop
-                                    time={previousLegMode === "bicycle" ? endTime :time}
+                                    time={previousLegMode === "bicycle" ? endTime : time}
                                     name={leg.bikeStationInfo?.bikeStations[leg.bikeStationInfo.selectedBikeStationIndex].place.name}
                                 />
                             ) : leg.mode === "transfer" ? (
@@ -135,7 +139,7 @@ function Detail({
                             )}
 
                             {/* Destination waypoint */}
-                            {index === tripPattern.originalLegs.length - 1 && (
+                            {index === tripPattern.originalLegs.length - 1 && !leg.artificial && (
                                 <Waystop
                                     time={endTime}
                                     name={waypoints[waypointCount + 1]?.displayName}

@@ -20,7 +20,7 @@ function ArrivalDeparture() {
     const { arriveBy, setArriveBy } = useInput();
 
     return (
-        <FormControl>
+        <FormControl className="arrival-departure-form-control">
             <RadioGroup 
                 row 
                 value={arriveBy.toString()}

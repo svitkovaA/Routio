@@ -12,8 +12,8 @@ type VerticalTimelineComponentProps = {
 }
 
 function VerticalTimelineComponent({ verticalTimeline } : VerticalTimelineComponentProps) {
-    // Filter out waiting segments
-    const nonWaitLegs = verticalTimeline.filter((i) => i.mode !== "wait");
+    // Filter out waiting and artificial segments
+    const nonWaitLegs = verticalTimeline.filter((i) => i.mode !== "wait" && !i.artificial);
     
     return (
         <div className="vertical-timeline">

@@ -82,6 +82,9 @@ export function useRoute() {
                 waypointsArray.push(waypoints[i].lat + ', ' + waypoints[i].lon);
             }
 
+            const originIndex = waypoints.findIndex(w => w.origin === true);
+            const destinationIndex = waypoints.findIndex(w => w.origin === false);
+
             // Prepare leg preference configuration
             let legPreferencesArray = [];
             const firstPref = legPreferences[0].mode;
@@ -142,7 +145,7 @@ export function useRoute() {
                     throw error;
                 }
 
-                setShowResults(true)
+                setShowResults(true);
 
                 // Send routing request to backend
                 const result = await fetch(`${API_BASE_URL}/route`, {
@@ -170,7 +173,15 @@ export function useRoute() {
                         bikesharing_lock_time: bikesharingLockTime,
                         bike_lock_time: bikeLockTime,
                         route_preference: preference,
-                        use_historical_delays: useHistoricalDelays
+                        use_historical_delays: useHistoricalDelays,
+                        origin_station: originIndex >= 0 ? {
+                            "index": originIndex,
+                            "id": waypoints[originIndex].bikeStationId
+                        } : null,
+                        destination_station: destinationIndex >= 0 ? {
+                            "index": destinationIndex,
+                            "id": waypoints[destinationIndex].bikeStationId
+                        } : null
                     })
                 });
 

@@ -27,7 +27,7 @@
 }
 
 .no-results > svg {
-    color: red;
+    color: var(--color-warning);
 }
 
 /** End of file Results.css */

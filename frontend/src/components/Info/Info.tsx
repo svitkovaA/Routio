@@ -58,9 +58,7 @@ function Info({ closeInfo }: InfoProps) {
                             <MenuIcon />
                         </button>
                     )}
-                    <Logo 
-                        disableReload={true}
-                    />
+                    <Logo />
                     <button className="close-button" onClick={closeInfo}>
                         <CloseIcon />
                     </button>

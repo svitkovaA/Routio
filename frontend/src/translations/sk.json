@@ -33,7 +33,10 @@
     "capacity": "Kapacita",
     "setAsOriginStation": "Nastaviť ako východiskovú stanicu bicyklov",
     "setAsDestinationStation": "Nastaviť ako cieľovú stanicu bicyklov",
-    "setAsDestinationRack": "Nastaviť ako cieľový stojan na bicykel"
+    "setAsDestinationRack": "Nastaviť ako cieľový stojan na bicykel",
+    "addWaypoint": "Pridať ako nový bod",
+    "useAsOrigin": "Použiť ako počiatočnú stanicu",
+    "useAsDestination": "Použiť ako cieľovú stanicu"
   },
   "planning": {
     "position": "Vaša poloha",
@@ -68,6 +71,7 @@
       "ownBike": "Vlastný bicykel",
       "sharedBike": "Zdieľaný bicykel"
     },
+    "showBikeStations": "Zobraziť stanice zdieľaných bicyklov",
     "find": "Nájsť",
     "invalidAddress": "Neplatná adresa",
     "fieldRequired": "Prázdne pole"
@@ -137,7 +141,8 @@
     "detail": "Detail",
     "noResults": "Nenašli sa žiadne výsledky",
     "warningFoot": "Vzdialenosť chôdze presahuje maximálny povolený limit",
-    "warningBicycle": "Vzdialenosť jazdy na bicykli presahuje maximálny povolený limit"
+    "warningBicycle": "Vzdialenosť jazdy na bicykli presahuje maximálny povolený limit",
+    "warningFootBicycle": "Prekročený limit vzdialenosti"
   },
   "modeDescriptions": {
     "multimodalTransport": "Multimodálna doprava",
@@ -265,7 +270,8 @@
       "alternativeOriginBikeStation": "Alternatívna počiatočná stanica",
       "alternativeDestinationBikeStation": "Alternatívna cieľová stanica",
       "marker": "Kliknutím zobrazíte informácie o zastávke",
-      "vehiclePosition": "Aktuálna poloha vozidla"
+      "vehiclePosition": "Aktuálna poloha vozidla",
+      "transfer": "Prestupný bod"
     },
     "info": {
       "bus": "Verejná doprava",
@@ -282,6 +288,8 @@
   },
   "errors": {
     "serverOffline": "Server momentálne nie je dostupný. Skúste to prosím neskôr.",
-    "routingFailed": "Nastala chyba pri výpočte trasy. Skúste to znovu, prosím."
+    "routingFailed": "Nastala chyba pri výpočte trasy. Skúste to znovu, prosím.",
+    "positionDetectionFailed": "Nepodarilo sa zistiť aktuálnu polohu.",
+    "changeBikeStationFailed": "Zmena stanice bicyklov zlyhala."
   }
 }

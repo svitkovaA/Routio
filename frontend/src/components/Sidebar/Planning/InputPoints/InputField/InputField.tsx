@@ -37,6 +37,12 @@ type InputFieldProps = {
     closeSidebar: () => void;                       // Closes sidebar
 }
 
+/**
+ * Parses provided coordinates
+ * 
+ * @param input Provided coordinates
+ * @returns Parsed coordinates
+ */
 function parseCoordinates(input: string) {
     const parts = input.split(/[,;\s]+/);
     const lat = parseFloat(parts[0]);
@@ -73,7 +79,7 @@ function InputField({
         activeField, setActiveField,
         clearWaypoint,
         removeWaypoint,
-        setMapSelectionIndex,
+        mapSelectionIndex, setMapSelectionIndex,
         setWaypoints,
         fieldErrors, setFieldErrors,
         waypoints
@@ -116,6 +122,9 @@ function InputField({
     // Stores the previously active language
     const previousLanguage = useRef(i18n.language);
 
+    /**
+     *  User location handle
+     */
     useEffect(() => {
         // Language before the change
         const oldLanguage = previousLanguage.current;
@@ -164,7 +173,9 @@ function InputField({
                         isActive: true,
                         displayName: t("planning.position"),
                         lat,
-                        lon
+                        lon,
+                        bikeStationId: null,
+                        origin: null
                     };
 
                     return updated;
@@ -172,7 +183,7 @@ function InputField({
             },
             () => {
                 // If location detection fails
-                showNotification("Unable to detect current position.", "error");
+                showNotification(t("errors.positionDetectionFailed"), "error");
             },
             {
                 enableHighAccuracy: true
@@ -244,7 +255,9 @@ function InputField({
                                         ...prev[index],
                                         isPreview: false,
                                         lat: 0,
-                                        lon: 0
+                                        lon: 0,
+                                        bikeStationId: null,
+                                        origin: null
                                     }
                                 }
                                 // Possible to parse coordinates, set it as input
@@ -255,7 +268,9 @@ function InputField({
                                         isActive: true,
                                         displayName: `${parsed.lat.toFixed(5)}, ${parsed.lon.toFixed(5)}`,
                                         lat: parsed.lat,
-                                        lon: parsed.lon
+                                        lon: parsed.lon,
+                                        bikeStationId: null,
+                                        origin: null
                                     }
                                 }
                             }
@@ -265,7 +280,9 @@ function InputField({
                                     ...prev[index],
                                     isPreview: false,
                                     lat: 0,
-                                    lon: 0
+                                    lon: 0,
+                                    bikeStationId: null,
+                                    origin: null
                                 }
                             }
                         }
@@ -277,7 +294,9 @@ function InputField({
                                 isActive: true,
                                 displayName: [suggestion.name, suggestion.street, suggestion.city].filter(Boolean).join(", "),
                                 lat: suggestion.lat,
-                                lon: suggestion.lon
+                                lon: suggestion.lon,
+                                bikeStationId: null,
+                                origin: null
                             }
                         }
                         return prev;
@@ -313,7 +332,8 @@ function InputField({
                             />
                         )}
                                             
-                        <LocationDot 
+                        <LocationDot
+                            active={mapSelectionIndex === index}
                             onClick={() => {
                                 setMapSelectionIndex(index);
                                 if (window.innerWidth < 768) {
