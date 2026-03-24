@@ -6,7 +6,7 @@ Bicycle rack selection and ranking logic.
 
 from typing import List, Tuple
 import numpy as np
-from database.db import create_conn
+from service.database_service import DatabaseService
 from routers.bicycles.selector_base import SelectorBase
 from models.route import BikeRackNode, BikeRackPlace, RackRow
 
@@ -14,6 +14,10 @@ class BikeRackSelector(SelectorBase):
     """
     Selects and ranks bicycle parking racks near destination.
     """
+    def __init__(self):
+        super().__init__()
+        self.__database_service = DatabaseService.get_instance()
+
     async def select_racks(
         self,
         bicycle_public: bool,
@@ -108,8 +112,7 @@ class BikeRackSelector(SelectorBase):
 
         # Sort and limited rack list
         return self._sort_and_limit(scored_racks, discarded_racks)
-
-    
+   
     async def __find_bike_racks(
         self,
         lat: float,
@@ -125,37 +128,15 @@ class BikeRackSelector(SelectorBase):
         Returns:
             List of nearby bicycle racks
         """
-
-        query = """
-            SELECT
-                osm_id,
-                lat,
-                lon,
-                name,
-                capacity,
-                ST_Distance(
-                    geom::geography,
-                    ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
-                ) AS distance
-            FROM bicycle_racks
-            WHERE ST_DWithin(
-                geom::geography,
-                ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
-                $3
-            )
-            ORDER BY distance;
-        """
-
         # Execute async database query
-        async with create_conn() as conn:                                  # type: ignore
-            rows = await conn.fetch(query, lon, lat, self._max_distance)   # type: ignore
+        rows = await self.__database_service.find_bike_racks(lat, lon, self._max_distance)
 
         racks: List[BikeRackNode] = []
 
         # Convert raw DB rows
-        for raw_row in rows:                                                # type: ignore
+        for raw_row in rows:
             try:
-                row = RackRow.model_validate(dict(raw_row))                 # type: ignore
+                row = RackRow.model_validate(dict(raw_row))
             except Exception:
                 continue
 

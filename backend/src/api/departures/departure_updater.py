@@ -40,12 +40,15 @@ class DepartureUpdater():
         # Update vehicle positions
         DepartureUpdater.__update_vehicle_positions(data)
 
-        # Recalculate final trip end time
-        DepartureUpdater.__update_final_end_time(data)
+        # Save original trip time
+        original_total_time = data.trip_pattern.totalTime
 
         # Postprocess trip pattern
         data.trip_pattern.legs = legs
         LegUtils.process_legs(data.trip_pattern)
+
+        # Preserve original trip time
+        data.trip_pattern.totalTime = original_total_time
 
         return data.trip_pattern
 
@@ -278,16 +281,5 @@ class DepartureUpdater():
 
         # Replace vehicle list in trip pattern
         data.trip_pattern.vehicleRealtimeData = vehicle_positions
-
-    @staticmethod
-    def __update_final_end_time(data: DepartureData) -> None:
-        """
-        Updates final trip end time based on last leg.
-
-        Args:
-            data: Request payload containing updated trip pattern
-        """
-        legs = data.trip_pattern.originalLegs
-        data.trip_pattern.aimedEndTime = legs[-1].aimedEndTime
 
 # End of file departure_updater.py

@@ -7,7 +7,6 @@ Base abstraction for bicycle station/rack selection strategies
 from abc import ABC
 from typing import List, Tuple, TypeVar
 import numpy as np
-from scipy.spatial.distance import cosine
 from models.route import BikeStationNodeBase
 
 # Generic type representing a concrete BikeStationNodeBase subtype
@@ -64,10 +63,21 @@ class SelectorBase(ABC):
         Returns:
             Normalized similarity value
         """
-        # Compute cosine similarity
-        similarity = 1 - cosine(vector1, vector2)
+        # Normalize vectors
+        norm1 = np.linalg.norm(vector1)
+        norm2 = np.linalg.norm(vector2)
 
-        # Normalize computed similarity
+        # Prevent zero vectors
+        if norm1 == 0 or norm2 == 0:
+            return 0.0
+        
+        # Cosine similarity
+        similarity = np.dot(vector1, vector2) / (norm1 * norm2)
+
+        # Clip result
+        similarity = np.clip(similarity, -1.0, 1.0)
+
+        # Normalize similarity
         return (similarity + 1) * 0.5
     
     @staticmethod

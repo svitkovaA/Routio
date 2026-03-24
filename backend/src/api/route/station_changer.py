@@ -23,6 +23,8 @@ from models.route import (
     BikeStationInfo,
     Leg,
     Mode,
+    Place,
+    PlaceBase,
     PointOnLink,
     RoutingMode,
     TripPattern
@@ -194,7 +196,7 @@ class StationChanger():
         new_pattern = TripPattern(
             legs=(
                 (
-                   routed_suffix_pattern.legs
+                   routed_suffix_pattern.originalLegs
                    if routed_suffix_pattern
                    else [] 
                 ) + new_legs + base_legs
@@ -236,7 +238,7 @@ class StationChanger():
         new_pattern = TripPattern(
             legs=(
                 base_legs + new_legs + (
-                   routed_prefix_pattern.legs
+                   routed_prefix_pattern.originalLegs
                    if routed_prefix_pattern
                    else [] 
                 )
@@ -421,12 +423,20 @@ class StationChanger():
                 (from_place.latitude, from_place.longitude),
                 (to_place.latitude, to_place.longitude),
             )
-            if not walk_patterns:
+            # Foot pattern not found and the waypoints are too close insert artificial foot leg
+            if not walk_patterns and GeoMath.haversine_distance_km(
+                from_place.latitude, from_place.longitude,
+                to_place.latitude, to_place.longitude
+            ) < 0.003:
+                new_legs.append(self.__prepare_artificial_leg(from_place, to_place))
+            elif not walk_patterns:
                 raise HTTPException(
                     status_code = 400,
                     detail = "Foot pattern not found"
                 )
-            new_legs.extend(walk_patterns[0].legs)
+            else:
+                new_legs.extend(walk_patterns[0].legs)
+
         # Add artificial waypoint when waypoint was not reached
         else:
             waypoint_group.insert(0, f"{from_place.latitude},{from_place.longitude}")
@@ -458,34 +468,43 @@ class StationChanger():
 
         # Reconnect modified route to original waypoints
         reconnect_leg_index = leg_index - 2
-        from_place = self.__ctx.place
-        to_place = self.__ctx.data.original_legs[reconnect_leg_index].fromPlace
+        from_place = self.__ctx.data.original_legs[reconnect_leg_index].fromPlace
+        to_place = self.__ctx.place
 
         waypoint_found = True
         # Determine if waypoint was reached
-        if waypoint_group and to_place:
+        if waypoint_group and from_place:
             waypoint_found = self.__at_waypoint(
-                to_place.latitude,
-                to_place.longitude,
+                from_place.latitude,
+                from_place.longitude,
                 waypoint_group[-1]
             )
 
-        # Add walking connection to waypoint from bike station
-        if waypoint_found and to_place:
+        # Add walking connection from waypoint to bike station
+        if waypoint_found and from_place:
             walk_patterns = await self.__otp_foot_client.execute(
                 (from_place.latitude, from_place.longitude),
                 (to_place.latitude, to_place.longitude),
             )
-            if not walk_patterns:
+
+            # Foot pattern not found and the waypoints are too close insert artificial foot leg
+            if not walk_patterns and GeoMath.haversine_distance_km(
+                from_place.latitude, from_place.longitude,
+                to_place.latitude, to_place.longitude
+            ) < 0.003:
+                new_legs.insert(0, self.__prepare_artificial_leg(from_place, to_place))
+            elif not walk_patterns:
                 raise HTTPException(
                     status_code = 400,
                     detail = "Foot pattern not found"
                 )
-            # Append foot legs before original legs
-            new_legs[:0] = walk_patterns[0].legs
+            else:
+                # Append foot legs before original legs
+                new_legs[:0] = walk_patterns[0].legs
+
         # Add artificial waypoint when waypoint was not reached
         else:
-            waypoint_group.append(f"{from_place.latitude},{from_place.longitude}")
+            waypoint_group.append(f"{to_place.latitude},{to_place.longitude}")
             routing_modes.append("walk_transit")
 
         return waypoint_group, routing_modes
@@ -546,6 +565,16 @@ class StationChanger():
             new_legs.append(deepcopy(legs[reconnect_leg_index]))
             reconnect_leg_index += 1
 
+        # Get waypoint for which routing is required
+        waypoint_group = self.__routing_ctx.data.waypoints[-waypoint_count:]
+
+        # Get routing modes
+        routing_modes = (
+            self.__ctx.data.modes[-waypoint_count + 1:]
+            if waypoint_count > 1 
+            else []
+        )
+
         found_waypoint = True
         # Determine if waypoint was reached
         if reconnect_leg_index < len(legs):
@@ -556,22 +585,12 @@ class StationChanger():
                     status_code = 400,
                     detail = "ToPlace missing in data"
                 )
-            
+
             found_waypoint = self.__at_waypoint(
                 to_place.latitude,
                 to_place.longitude,
-                self.__routing_ctx.data.waypoints[waypoint_count - 1]
+                waypoint_group[0]
             )
-
-        # Get waypoint for which routing is required
-        waypoint_group = self.__routing_ctx.data.waypoints[-waypoint_count:]
-
-        # Get routing modes
-        routing_modes = (
-            self.__ctx.data.modes[-waypoint_count + 1:]
-            if waypoint_count > 1 
-            else []
-        )
 
         # Append leg if it leads to waypoint
         if found_waypoint:
@@ -629,13 +648,20 @@ class StationChanger():
         )
 
         if not pattern:
-            raise HTTPException(
-                status_code=400,
-                detail="Pattern not found"
-            )
-
-        # Initialize new legs
-        new_legs = pattern[0].legs
+            # Foot pattern not found and the waypoints are too close insert artificial foot leg
+            if not self.__ctx.data.origin_bike_station and GeoMath.haversine_distance_km(
+                from_place.latitude, from_place.longitude,
+                to_place.latitude, to_place.longitude
+            ) < 0.003:
+                new_legs = [self.__prepare_artificial_leg(from_place, to_place)]
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Pattern not found"
+                )
+        else:
+            # Initialize new legs
+            new_legs = pattern[0].legs
 
         # Insert wait leg
         new_legs.insert(0, self.__prepare_wait_leg())
@@ -680,13 +706,20 @@ class StationChanger():
         )
 
         if not pattern:
-            raise HTTPException(
-                status_code=400,
-                detail="Pattern not found"
-            )
-
-        # Initialize new legs
-        new_legs = pattern[0].legs
+            # Foot pattern not found and the waypoints are too close insert artificial foot leg
+            if self.__ctx.data.origin_bike_station and GeoMath.haversine_distance_km(
+                from_place.latitude, from_place.longitude,
+                to_place.latitude, to_place.longitude
+            ) < 0.003:
+                new_legs = [self.__prepare_artificial_leg(from_place, to_place)]
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Pattern not found"
+                )
+        else:
+            # Initialize new legs
+            new_legs = pattern[0].legs
 
         # Append wait leg
         new_legs.append(self.__prepare_wait_leg())
@@ -717,6 +750,33 @@ class StationChanger():
             )
         )
     
+    @staticmethod
+    def __prepare_artificial_leg(from_place: PlaceBase, to_place: PlaceBase) -> Leg:
+        """
+        Prepare artificial foot leg.
+
+        Args:
+            from_place: First place coordinates
+            to_place: Second place coordinates
+
+        Returns:
+            Prepared artificial leg
+        """
+        return Leg(
+            mode="foot",
+            duration=0,
+            pointsOnLink=PointOnLink(points=[]),
+            fromPlace=Place(
+                latitude=from_place.latitude,
+                longitude=from_place.longitude
+            ),
+            toPlace=Place(
+                latitude=to_place.latitude,
+                longitude=to_place.longitude
+            ),
+            artificial=True
+        )
+
     def __find_affected_segment_arrival(self) -> Tuple[int, int]:
         """
         Identifies affected segment when rebuilding route.
@@ -795,6 +855,21 @@ class StationChanger():
             First TripPattern returned by routing engine,
             or None if no route was found.
         """
+        # Offset for mapping station indices for the changed route part
+        offset = (
+            len(self.__routing_ctx.data.waypoints) - len(waypoint_group)
+            if not self.__routing_ctx.data.arrive_by
+            else 0
+        )
+
+        origin_station = self.__routing_ctx.data.origin_station
+        if origin_station is not None:
+            origin_station.index -= offset
+
+        destination_station = self.__routing_ctx.data.destination_station
+        if destination_station is not None:
+            destination_station.index -= offset
+
         # Create modified RouteData for partial rerouting
         new_route_data = self.__routing_ctx.data.model_copy(
             update={
@@ -804,7 +879,9 @@ class StationChanger():
                 ],
                 "waypoints": waypoint_group,
                 "date": time_cursor.date(),
-                "time": time_cursor.time()
+                "time": time_cursor.time(),
+                "origin_station": origin_station,
+                "destination_station": destination_station
             }
         )
 

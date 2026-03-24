@@ -81,6 +81,7 @@ class LissyEnricher(EnricherBase):
                 
                 # Keep only intermediate stops
                 leg.serviceJourney.quays = leg.serviceJourney.quays[start_index + 1:stop_index]
+                leg.serviceJourney.startOffset = start_index + 1
 
                 # Fetch historical delays if enabled
                 if self.__use_historical_delays:

@@ -152,7 +152,9 @@ class BikeStationSelector(SelectorBase):
         Args:
             nodes: List of nearby bike station
             reference_point: Geographic reference in format lat, lon
+            b_point: Point B in algorithm
             base_vector: Direction vector representing intended travel direction
+            forward_vector: Forward vector PB used in algorithm
             context: Planning context containing routing flags
             angle_weight: Weight coefficient for angular alignment component
             availability_weight: Weight coefficient for availability component
@@ -166,9 +168,49 @@ class BikeStationSelector(SelectorBase):
         scored_nodes: List[BikeStationNode] = []
         discarded_nodes: List[BikeStationNode] = []
 
+        # Find origin station if provided
+        if scoring_type == "origin" and context.origin_station_id is not None:
+            selected_node = None
+
+            for wrapper in nodes:
+                if str(wrapper.node.place.id) == str(context.origin_station_id):
+                    selected_node = wrapper.node
+                    break
+
+            if selected_node:
+                selected_node.score = 1
+                scored_nodes.append(selected_node)
+
+        # Find destination station if provided
+        if scoring_type == "destination" and context.destination_station_id is not None:
+            selected_node = None
+
+            for wrapper in nodes:
+                if str(wrapper.node.place.id) == str(context.destination_station_id):
+                    selected_node = wrapper.node
+                    break
+
+            if selected_node:
+                selected_node.score = 1
+                scored_nodes.append(selected_node)
+
         # Evaluate each candidate station
         for wrapper in nodes:
             node = wrapper.node
+
+            # Skip provided stations
+            if (
+                (
+                    scoring_type == "origin"
+                    and context.origin_station_id is not None
+                    and str(node.place.id) == str(context.origin_station_id)
+                ) or (
+                    scoring_type == "destination"
+                    and context.destination_station_id is not None
+                    and str(node.place.id) == str(context.destination_station_id)
+                )
+            ):
+                continue
             
             # Compute normalized availability score
             station_availability = self.__compute_availability(node, scoring_type, context.time_cursor)

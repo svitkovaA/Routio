@@ -254,12 +254,19 @@ class SharedBicycleRouter(BicycleRouterBase):
         else:
             # Start with walking leg to origin station
             walk_patterns = trip_context.walk_to_origin_map[trip_context.origin_node.place.id]
-            # Abort if walking route not available
-            if not walk_patterns:
-                return None
             
-            # Start trip with walking leg
-            trip_pattern = deepcopy(walk_patterns[0])
+            if not walk_patterns:
+                # Append artificial leg if needed
+                if trip_context.context.origin_station_id is not None:
+                    trip_pattern = TripPattern(legs=[
+                    self.__prepare_artificial_leg(trip_context.origin_node)
+                ])
+                # Abort if walking route not available
+                else:
+                    return None
+            else:
+                # Start trip with walking leg
+                trip_pattern = deepcopy(walk_patterns[0])
         
         # Compute first cycling segment
         if (len(trip_context.context.waypoints) > 2 and (
@@ -370,11 +377,17 @@ class SharedBicycleRouter(BicycleRouterBase):
         if not trip_context.context.bicycle_public:
             walk_patterns = trip_context.walk_from_destination_map[trip_context.destination_node.place.id]
 
-            # Abort if walking route not available
             if not walk_patterns:
-                return None
-                 
-            trip_pattern.legs.extend(walk_patterns[0].legs)
+                # Append artificial leg if needed
+                if trip_context.context.destination_station_id is not None:
+                    trip_pattern.legs.append(
+                    self.__prepare_artificial_leg(trip_context.destination_node)
+                )
+                # Abort if walking route not available
+                else:
+                    return None
+            else:
+                trip_pattern.legs.extend(walk_patterns[0].legs)
 
         # Adjust trip timing
         PatternUtils.justify_time(
@@ -431,6 +444,32 @@ class SharedBicycleRouter(BicycleRouterBase):
         leg.bikeStationInfo.selectedBikeStationIndex = selected_index
         leg.bikeStationInfo.bikeStations = stations
         return leg
+
+    @staticmethod
+    def __prepare_artificial_leg(node: BikeStationNode) -> Leg:
+        """
+        Prepares artificial leg.
+
+        Args:
+            node: Bike station node
+
+        Returns:
+            Leg as artificial segment
+        """
+        return Leg(
+            mode="foot",
+            duration=0,
+            pointsOnLink=PointOnLink(points=[]),
+            fromPlace=Place(
+                latitude=node.place.latitude,
+                longitude=node.place.longitude
+            ),
+            toPlace=Place(
+                latitude=node.place.latitude,
+                longitude=node.place.longitude
+            ),
+            artificial=True
+        )
 
     def __prepare_wait_leg(self):
         """

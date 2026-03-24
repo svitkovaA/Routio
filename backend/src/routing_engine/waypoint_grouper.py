@@ -6,7 +6,7 @@ defined leg preferences.
 """
 
 from typing import List
-from models.route_data import LegPreferences
+from models.route_data import LegPreferences, Station
 from models.route import RoutingMode, WaypointGroup
 
 class WaypointGrouper():
@@ -17,7 +17,9 @@ class WaypointGrouper():
     @staticmethod
     def group(
         waypoints: List[str],
-        pref: List[LegPreferences]
+        pref: List[LegPreferences],
+        origin_station: Station | None = None,
+        destination_station: Station | None = None
     ) -> List[WaypointGroup]:
         """
         Splits a sequence of waypoints into consecutive groups according to the
@@ -26,6 +28,8 @@ class WaypointGrouper():
         Args:
             waypoints: Ordered list of waypoint identifiers
             pref: List of leg preferences corresponding to waypoint legs
+            origin_station: Optional origin bike station
+            destination_station: Optional destination bike station
         
         Returns:
             List of WaypointGroup objects representing grouped segments
@@ -51,11 +55,25 @@ class WaypointGrouper():
                 group.append(waypoints[j + 2])
                 j += 1
 
+            origin_station_id = (
+                origin_station.id
+                if origin_station is not None and i == origin_station.index
+                else None
+            )
+
+            destination_station_id = (
+                destination_station.id
+                if destination_station is not None and j + 1 == destination_station.index
+                else None
+            )
+
             # Store constructed group with its routing mode
             groups.append(
                 WaypointGroup(
                     waypoints=group,
-                    mode=mode
+                    mode=mode,
+                    origin_station_id=origin_station_id,
+                    destination_station_id=destination_station_id
                 )
             )
 

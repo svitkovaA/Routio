@@ -15,6 +15,7 @@ from api.geocoding import geocode
 from api.departures import departures
 from api.route import route
 from api import vehicle_realtime_data
+from api import stations
 from database.db import init_pool, close_pool
 from service.workers import (
     database_worker,
@@ -78,6 +79,7 @@ app.include_router(route.router)
 app.include_router(status.router)
 app.include_router(departures.router)
 app.include_router(vehicle_realtime_data.router)
+app.include_router(stations.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", port=8000, host="127.0.0.1", reload=True)

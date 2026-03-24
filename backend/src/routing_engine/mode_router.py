@@ -62,7 +62,9 @@ class ModeRouter():
         else:
             return await self.__routers[group.mode].route_group(PlanningContext(
                 waypoints=group.waypoints,
-                time_cursor=time_cursor
+                time_cursor=time_cursor,
+                origin_station_id=group.origin_station_id,
+                destination_station_id=group.destination_station_id
             ))
 
 # End of file mode_grouper.py

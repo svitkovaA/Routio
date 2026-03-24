@@ -45,6 +45,8 @@ class ServiceJourney(BaseModel):
     quays: List[Quay]                           # Ordered list of stops
     direction: str = ""                         # Final stop, headsign
     passingTimes: List[Dict[str, PassingTime]]  # Timetable data per stop
+    startOffset: int | None = None              # Index of the first stop
+    currentIndex: int | None = None             # Index of the current vehicle stop
 
 class PointOnLink(BaseModel):
     """ Encoded polyline representation of route geometry """
@@ -138,6 +140,7 @@ class Leg(BaseModel):
     arrivalAfterDeparture: bool | None = None   # Inconsistency flag, arrival time is after next departure
     nonContinuousDepartures: bool | None = None # No more departures available
     zone_ids: List[int] | None = None           # Fare zone identifiers
+    artificial: bool = False                    # Indicates artificial leg
 
     @model_validator(mode="after")
     def convert_datetime(self):
@@ -169,8 +172,10 @@ class TripPattern(BaseModel):
 
 class WaypointGroup(BaseModel):
     """ Grouping of consecutive waypoints that share the same transport mode """
-    waypoints: List[str]                            # Ordered waypoint coordinates
+    waypoints: List[str]                        # Ordered waypoint coordinates
     mode: RoutingMode                           # Assigned transport mode
+    origin_station_id: str | None = None        # Optional origin bike station identifier
+    destination_station_id: str | None = None   # Optional destination bike station identifier
 
     def get_key(
         self,

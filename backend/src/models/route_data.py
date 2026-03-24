@@ -14,6 +14,11 @@ class LegPreferences(BaseModel):
     mode: RoutingMode                           # Preferred transport mode for the segment
     wait: int                                   # Wait time in minutes before departure
 
+class Station(BaseModel):
+    """ Bike station information """
+    index: int                                  # Waypoint index
+    id: str                                     # Station identifier
+
 class RouteData(BaseModel):
     """ Main routing configuration model including user preferences and constraints """
     waypoints: List[str]                        # Ordered list of waypoint coordinates
@@ -35,5 +40,7 @@ class RouteData(BaseModel):
     bike_lock_time: int                         # Time required to lock an own bicycle
     route_preference: str                       # Route optimization preference, e.g. fastest, shortest, maximum transfers
     use_historical_delays: bool                 # Whether historical delay data should be retrieved during routing
+    origin_station: Station | None = None       # Optional original station info
+    destination_station: Station | None = None  # Optional destination station info
 
 # End of file route_data.py

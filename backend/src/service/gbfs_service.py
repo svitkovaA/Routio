@@ -5,7 +5,7 @@ Service for retrieving and caching GBFS station capacity data.
 """
 
 from dataclasses import dataclass
-from typing import Dict, Set
+from typing import Dict, List, Set, Tuple
 import httpx
 from config.datasets import STATION_INFORMATION_URLS
 from service.service_base import ServiceBase
@@ -15,11 +15,11 @@ class _GBFSState:
     """
     Internal state of the GBFS service.
     """
-    # Maps station_id to capacity
-    capacities: Dict[str, int]
-
     # Set of station ids
     station_ids: Set[str]
+
+    # Maps station id to (capacity, latitude, longitude, name)
+    station_info: Dict[str, Tuple[int | None, float, float, str]]
 
 class GBFSService(ServiceBase[_GBFSState]):
     """
@@ -50,11 +50,11 @@ class GBFSService(ServiceBase[_GBFSState]):
         Returns:
             Initialized internal _GBFSState
         """
-        # Maps statin_id to capacity
-        capacities: Dict[str, int] = {}
-
         # Set of station ids
         station_ids: Set[str] = set()
+
+        # Maps station id to (capacity, latitude, longitude, name)
+        station_info: Dict[str, Tuple[int | None, float, float, str]] = {}
 
         # Iterate over all configured GBFS station information URLs
         for url in STATION_INFORMATION_URLS:
@@ -72,15 +72,22 @@ class GBFSService(ServiceBase[_GBFSState]):
 
                     # Retrieve station ids
                     station_ids.add(station["station_id"])
-
-                    # Store capacity if available
-                    if capacity is not None:
-                        capacities[station["station_id"]] = capacity
+                    
+                    # Store station latitude and longitude
+                    station_info[station["station_id"]] = (
+                        capacity,
+                        station["lat"],
+                        station["lon"],
+                        station["name"]
+                    )
 
             except Exception:
                 continue
 
-        return _GBFSState(capacities=capacities, station_ids=station_ids)
+        return _GBFSState(
+            station_ids=station_ids,
+            station_info=station_info
+        )
     
     def get_capacity(self, station_id: str) -> int | None:
         """
@@ -94,7 +101,13 @@ class GBFSService(ServiceBase[_GBFSState]):
         """
         # Retrieve capacity for a specific station_id
         state = self._get_state()
-        return state.capacities.get(station_id)
+        station = state.station_info.get(station_id)
+
+        # Return capacity if available
+        if station is not None:
+            return station[0]
+        
+        return None
 
     def valid_station_id(self, station_id: str) -> bool:
         """
@@ -109,5 +122,23 @@ class GBFSService(ServiceBase[_GBFSState]):
         state = self._get_state()
 
         return station_id in state.station_ids
+    
+    def get_station_info(self) -> List[Dict[str, str | float]]:
+        """
+        Get station information including id and coordinates.
+
+        Returns:
+            List of dicts (station id, latitude, longitude, name)
+        """
+        state = self._get_state()
+        return [
+            {
+                "id": key,
+                "lat": item[1],
+                "lon": item[2],
+                "name": item[3]
+            }
+            for key, item in state.station_info.items()
+        ]
 
 # End of file gbfs_service.py

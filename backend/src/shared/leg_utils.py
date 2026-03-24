@@ -4,6 +4,7 @@ file: leg_utils.py
 Utilities responsible for post processing routing engine output
 """
 
+import polyline
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
@@ -12,6 +13,7 @@ from typing import List, Literal, Optional
 from models.route import (
     TIME_INDEPENDENT_MODES,
     TZ,
+    Place,
     PointOnLink, RoutingMode,
     ServiceJourney,
     Quay,
@@ -225,7 +227,7 @@ class LegUtils():
             New list of legs where transfer legs are inserted between
             consecutive public transport segments
         """
-        prev_mode: Mode | Literal[""] = ""
+        prev_leg: Leg | None = None
         original_legs = deepcopy(legs)
         i = 0
 
@@ -234,34 +236,55 @@ class LegUtils():
 
             # Add transfer leg when switching between two segments using public transport
             if (
-                prev_mode
+                prev_leg
                 and leg.mode not in ["foot", "bicycle", "wait", "transfer"]
-                and prev_mode not in ["foot", "bicycle", "wait", "transfer"]
+                and prev_leg.mode not in ["foot", "bicycle", "wait", "transfer"]
             ):
-                original_legs.insert(i, LegUtils.__prepare_transfer_leg())
+                original_legs.insert(i, LegUtils.__prepare_transfer_leg(
+                    prev_leg,
+                    leg
+                ))
                 # Skip inserted transfer leg
                 i += 1
             
-            prev_mode = leg.mode
+            prev_leg = leg
             i += 1
 
         return original_legs
 
     @staticmethod
-    def __prepare_transfer_leg() -> Leg:
+    def __prepare_transfer_leg(prev_leg: Leg, next_leg: Leg) -> Leg:
         """
         Create a placeholder transfer leg.
+
+        Args:
+            prev_leg: Leg before transfer leg
+            next_leg: Leg after transfer leg
 
         Returns:
             Leg representing a transfer segment used mainly for visualization
         """
+        points = next_leg.pointsOnLink.points
+        first_segment = (
+            points
+            if isinstance(points, str)
+            else points[0]
+        )
+        coords = polyline.decode(first_segment)
+
         return Leg(
             mode="transfer",
             color="gray",
             duration=0,
             pointsOnLink=PointOnLink(
                 points=[]
-            )
+            ),
+            fromPlace=Place(
+                latitude=coords[0][0],
+                longitude=coords[0][1]
+            ),
+            aimedStartTime=prev_leg.aimedEndTime,
+            aimedEndTime=next_leg.aimedStartTime
         )
 
     @staticmethod

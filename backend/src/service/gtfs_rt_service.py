@@ -19,7 +19,7 @@ from config.datasets import GTFS_DATASETS, GTFS_DATASET
 from service.gtfs_service import GTFSService
 from service.service_base import ServiceBase
 
-TripRealtimeCache = Dict[str, Tuple[Tuple[float, float], int | None]]
+TripRealtimeCache = Dict[str, Tuple[Tuple[float, float], int | None, int | None]]
 
 @dataclass(frozen=True)
 class _GTFSRTState:
@@ -114,6 +114,10 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
                 if position[1] is not None:
                     trip_id_to_position[data.trip_id]["delay"] = position[1]
 
+                # Include stop position if available
+                if position[2] is not None:
+                    trip_id_to_position[data.trip_id]["stopIndex"] = position[2]
+
         return trip_id_to_position
 
     async def __build_realtime_state(self, dataset: GTFS_DATASET) -> _GTFSRTState:
@@ -156,7 +160,8 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
                 # Store current vehicle position for the trip with a timestamp
                 trip_realtime_data[trip_id] = (
                     (v.position.latitude, v.position.longitude),    # type: ignore
-                    int(v.timestamp) if v.timestamp else None       # type: ignore
+                    int(v.timestamp) if v.timestamp else None,      # type: ignore
+                    None
                 )
 
         # Compute delays for each vehicle
@@ -177,10 +182,10 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
             trip_realtime_data: Mapping trip_id to ((latitude, longitude), unix_timestamp)
         """        
         # Iterate through all vehicle positions
-        for trip_id, ((lat, lon), unix_timestamp) in trip_realtime_data.items():
+        for trip_id, ((lat, lon), unix_timestamp, _) in trip_realtime_data.items():
 
             # Set delay to None by default
-            trip_realtime_data[trip_id] = ((lat, lon), None)
+            trip_realtime_data[trip_id] = ((lat, lon), None, None)
 
             # Skip if timestamp is missing
             if not unix_timestamp:
@@ -256,7 +261,8 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
             # Store computed delay
             trip_realtime_data[trip_id] = (
                 (lat, lon),
-                int(delay_minutes)
+                int(delay_minutes),
+                best_index
             )
     
     def __find_closest_segment_index(

@@ -6,7 +6,7 @@ data from the database.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 import pandas as pd
 import time
 import numpy as np
@@ -281,6 +281,40 @@ class DatabaseService(ServiceBase[_DatabaseState]):
 
         return df, normalization_means, normalization_stds
     
+    @staticmethod
+    async def find_bike_racks(lat: float, lon: float, radius: float) -> Any:
+        """
+        Retrieves bike racks in a given location.
+
+        Args:
+            lat: Location latitude
+            lon: Location longitude
+            radius: Search radius
+
+        Returns:
+            Database query results
+        """
+        async with create_conn() as conn:           # type: ignore
+            return await conn.fetch("""
+                SELECT
+                    osm_id,
+                    lat,
+                    lon,
+                    name,
+                    capacity,
+                    ST_Distance(
+                        geom::geography,
+                        ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
+                    ) AS distance
+                FROM bicycle_racks
+                WHERE ST_DWithin(
+                    geom::geography,
+                    ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+                    $3
+                )
+                ORDER BY distance;
+            """, lat, lon, radius)                  # type: ignore
+
     def get_station_info(self) -> Tuple[List[int], np.ndarray, Dict[int, int]]:
         """
         Returns cached station data.

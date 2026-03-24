@@ -65,13 +65,17 @@ class RoutingEngine():
         if self.__ctx.data.mode == "multimodal":
             return WaypointGrouper.group(
                 self.__ctx.data.waypoints,
-                self.__ctx.data.leg_preferences
+                self.__ctx.data.leg_preferences,
+                self.__ctx.data.origin_station,
+                self.__ctx.data.destination_station
             )
         # Create unimodal groups by applying the same mode to all legs
         else:
             return WaypointGrouper.group(
                 self.__ctx.data.waypoints,
-                [LegPreferences(mode=self.__ctx.data.mode, wait=0)] * len(self.__ctx.data.leg_preferences)
+                [LegPreferences(mode=self.__ctx.data.mode, wait=0)] * len(self.__ctx.data.leg_preferences),
+                self.__ctx.data.origin_station,
+                self.__ctx.data.destination_station
             )
 
 # End of file routing_engine.py
