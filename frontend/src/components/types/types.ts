@@ -62,7 +62,8 @@ export type Mode = "foot" | "bicycle" | "walk_transit" | "multimodal";
 export type LegPreference = {
     mode: Mode;                             // Selected transportation mode
     wait: dayjs.Dayjs;                      // Selected wait time in the stop 
-    open: boolean;                          // Indicates whether preference panel for leg is expanded in UI 
+    open: boolean;                          // Indicates whether preference panel for leg is expanded in UI
+    fixed: boolean;                         // Indicates whether mode is fixes and cannot be changed
 };
 
 /**
@@ -106,8 +107,6 @@ export type Leg = {
                 name: string;               // Bike station name
                 bikesAvailable: number;     // Number of currently available bikes
                 predictedBikes?: number;    // Number of predicted bikes in station
-                spacesAvailable: number;    // Number of available parking spaces
-                allowDropoff: boolean;      // Indicates whether drop-off is allowed
                 capacity?: number;          // Total station capacity
             };
         }[];

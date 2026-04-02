@@ -63,11 +63,15 @@
     margin-bottom: 20px;
 }
 
-.howto-content img {
+.slider-media {
     width: 100%;
     border-radius: 6px;
     margin: 0 auto;
     display: flex;
+}
+
+.slider-media.video {
+    max-width: 40%;
 }
 
 .how-to-img-slider {
@@ -142,8 +146,8 @@
         flex-grow: 1;
         border-bottom: 2px solid var(--color-info);
     }
-
-    .howto-content img {
+    
+    .slider-media {
         max-height: max(calc(100vh - 450px), 400px);
         width: auto;
     }

@@ -38,6 +38,7 @@ async def weather_stations(conn: asyncpg.Connection) -> None:
     values = [
         (int(key), value[0], value[1])
         for key, value in data.items()
+        if int(key) != 1
     ]
 
     # Insert weather station records

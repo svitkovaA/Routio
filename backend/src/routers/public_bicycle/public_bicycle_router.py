@@ -5,6 +5,7 @@ Implements PublicBicycleRouter, the planning strategy designed to efficiently
 handle multimodal route segments.
 """
 
+from datetime import timedelta
 from typing import List, Tuple
 from shared.pattern_utils import PatternUtils
 from routers.router import Router
@@ -205,11 +206,14 @@ class PublicBicycleRouter(RouterBase, Router):
         # Store B coordinates for validation
         lat_b, lon_b = self._parse_coordinates(bike_group[0])
 
+        # Estimate public transport part duration
+        time_offset = self._estimate_public_time_duration(context.waypoints[:i + 2])
+
         # Route bicycle suffix directly from interpolated point
         bike_trip_patterns = await self.__bicycle_router.route_group(
             PlanningContext(
                 waypoints=[f"{lat}, {lon}"] + bike_group,
-                time_cursor=context.time_cursor,
+                time_cursor=context.time_cursor + time_offset,
                 public_bicycle=True,
                 use_bisector=True
             )
@@ -315,11 +319,14 @@ class PublicBicycleRouter(RouterBase, Router):
 
             new_waypoint = f"{lat}, {lon}"
 
+            # Estimate public transport part duration
+            time_offset = self._estimate_public_time_duration(context.waypoints[:i + 1] + [new_waypoint])
+
             # Attempt bicycle routing from interpolated point
             bike_trip_patterns = await self.__bicycle_router.route_group(
                 PlanningContext(
                     waypoints=[new_waypoint] + bike_group,
-                    time_cursor=context.time_cursor,
+                    time_cursor=context.time_cursor + time_offset,
                     public_bicycle=True
                 )
             )
@@ -393,4 +400,19 @@ class PublicBicycleRouter(RouterBase, Router):
             True
         )
     
+    def _estimate_public_time_duration(self, waypoints: List[str]) -> timedelta:
+        """
+        Estimates public transport time waypoints in departure mode.
+
+        Args:
+            waypoints: The waypoints between which the time is estimated
+
+        Returns:
+            Estimated time in departure mode, zero in arrival mode
+        """
+        if self._ctx.data.arrive_by:
+            return timedelta()
+
+        return super()._estimate_public_time_duration(waypoints)
+
 # End of file public_bicycle_router.py

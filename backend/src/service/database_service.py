@@ -313,7 +313,7 @@ class DatabaseService(ServiceBase[_DatabaseState]):
                     $3
                 )
                 ORDER BY distance;
-            """, lat, lon, radius)                  # type: ignore
+            """, lon, lat, radius)                  # type: ignore
 
     def get_station_info(self) -> Tuple[List[int], np.ndarray, Dict[int, int]]:
         """

@@ -17,7 +17,6 @@ function CustomLeafletTooltip({
     children,
     direction = "top"
 } : Props) {
-
     return (
         <LeafletTooltip
             sticky={false}

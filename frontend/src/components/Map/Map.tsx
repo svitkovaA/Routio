@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ScaleControl } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, ScaleControl, Polyline } from 'react-leaflet'
 import L from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
@@ -26,8 +26,10 @@ import { useResult } from '../Contexts/ResultContext';
 import { useNotification } from "../Contexts/NotificationContext";
 import { NW_LAT, NW_LON, SE_LAT, SE_LON } from "../config/config";
 import SharedBikeStations from './BikeStations/SharedBikeStations';
+import { Polygon } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
+import { JMKBounds } from './JMKBounds';
 
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
@@ -48,6 +50,14 @@ function Map({
 }: MapProps) {
     // Translation function
     const { t } = useTranslation();
+
+    // Whole world bounds
+    const worldBounds: [number, number][] = [
+        [-90, -180],
+        [-90, 180],
+        [90, 180],
+        [90, -180],
+    ];
 
     // Contexts
     const {
@@ -360,6 +370,24 @@ function Map({
             {/* Bicycle stations visualisation */}
             <BikeStations
                 tooltipHandler={tooltipHandler}
+            />
+
+            {/* Border around JMK region */}
+            <Polyline
+                key="JMKBounds"
+                positions={JMKBounds}
+                color="var(--color-info)"
+                pathOptions={{ weight: 2 }}
+            />
+
+            {/* Grey overlay outside JMK */}
+            <Polygon
+                positions={[worldBounds, JMKBounds]}
+                pathOptions={{
+                    color: "none",
+                    fillColor: "grey",
+                    fillOpacity: 0.3,
+                }}
             />
 
             {/* Actual vehicle position visualisation */}

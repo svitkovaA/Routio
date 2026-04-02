@@ -8,7 +8,7 @@ export const API_BASE_URL = process.env.NODE_ENV === "production" ? `${PUBLIC_UR
 // export const SE_LON = 17.9;
 
 // JMK
-export const NW_LAT = 49.65;
-export const NW_LON = 15.5;
-export const SE_LAT = 48.6;
-export const SE_LON = 17.6;
+export const NW_LAT = 49.6332550;
+export const NW_LON = 15.5424248;
+export const SE_LAT = 48.6165408;
+export const SE_LON = 17.6469364;

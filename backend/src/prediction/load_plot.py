@@ -8,8 +8,9 @@ import asyncio
 from typing import List, Tuple
 import torch
 import numpy as np
+from service.database_service import DatabaseService
 from prediction.dataset.dataset_builder import get_features
-from prediction.plots import plot_station_time_series_tcn
+from prediction.plots import plot_rmse_map, plot_station_time_series_tcn
 from prediction.tcn import TCN
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
@@ -30,6 +31,32 @@ horizons = {
     "12h": 71,
     "24h": 143
 }
+
+def compute_rmse_per_station(
+    y: np.ndarray,
+    pred: np.ndarray,
+    step: int
+) -> np.ndarray:
+    """
+    Compute RMSE per station for a specific prediction step.
+
+    Args:
+        y: Real values
+        pred: Predicted values
+        step: Time step index within the horizon
+    
+    Returns:
+        Array of RMSE values per station
+
+    """
+    # Select values for the prediction step
+    y_h = y[:, :, step]
+    pred_h = pred[:, :, step]
+
+    # Compute RMSE per station
+    rmse_per_station = np.sqrt(np.mean((y_h - pred_h) ** 2, axis=0))
+    
+    return rmse_per_station
 
 def evaluate_horizon(
     y: np.ndarray,
@@ -139,6 +166,17 @@ async def general():
 
     # Denormalize values
     pred = pred * bike_std + bike_mean
+
+    # Retrieve RMSEs per station
+    rmse = compute_rmse_per_station(y, pred, step=143)
+
+    _, station_coordinates, _ = DatabaseService.get_instance().get_station_info()
+
+    lats = station_coordinates[:, 0]
+    lons = station_coordinates[:, 1]
+
+    # Plot the RMSE per station on map tiles
+    plot_rmse_map(lats, lons, rmse)
 
     print("pred shape:", pred.shape)
     print("y shape:", y.shape)

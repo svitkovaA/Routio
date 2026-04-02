@@ -31,8 +31,6 @@ class OTPBicycleStations(OTPBase):
                                 id
                                 name
                                 bikesAvailable
-                                spacesAvailable
-                                allowDropoff
                             }
                         }
                     }

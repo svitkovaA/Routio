@@ -12,12 +12,10 @@ from sklearn.metrics import root_mean_squared_error
 from sklearn.metrics import r2_score
 from prediction.dataset.dataset_builder import get_features
 import matplotlib.pyplot as plt
+from prediction.load_plot import horizons
 import numpy as np
 import lightgbm as lgb
 from pathlib import Path
-
-# Prediction horizon
-HORIZON = 4 * 6
 
 def plot_station_time_series(
     y_true: np.ndarray,
@@ -40,18 +38,11 @@ def plot_station_time_series(
     """
 
     # Create output directory for storing plots
-    Path(f"results/{name}").mkdir(parents=True, exist_ok=True)
+    Path(f"../prediction_results/results/{name}").mkdir(parents=True, exist_ok=True)
 
     # Reshape flattened arrays back to original structure (time, stations)
     y_true = y_true.reshape(T, N)
     y_pred = y_pred.reshape(T, N)
-
-    # Shift real values by prediction horizon
-    y_true_shifted = np.full((T, N), np.nan)
-    y_true_shifted[HORIZON:] = y_true[:-HORIZON]
-
-    # Create time axis for plotting
-    time_axis = np.arange(T)
 
     # Generate a separate plot for each selected station
     for station in station_ids:
@@ -59,10 +50,10 @@ def plot_station_time_series(
         plt.figure(figsize=(14,6))
 
         # Plot real bike availability
-        plt.plot(time_axis, y_true_shifted[:, station], label="Real bikes", linewidth=2)
+        plt.plot(y_true[:, station], label="Real bikes", linewidth=2)
 
         # Plot predicted bike availability
-        plt.plot(time_axis, y_pred[:, station], label="Predicted bikes", linewidth=2)
+        plt.plot(y_pred[:, station], label="Predicted bikes", linewidth=2)
 
         plt.xlabel("Time step (10 min)")
         plt.ylabel("Number of bikes")
@@ -91,32 +82,52 @@ def build_lightgbm_dataset(
         Tuple, containing (training feature matrix, test feature matrix, test
         targets, num of time steps in test set)
     """
+    # features = features[::3]
+
     # Dataset dimensions
     T, N, _ = features.shape
 
     # Skip initial timesteps required for lag features
-    start = 144
+    start = 144 * 7
+    # start = 48 * 7
 
     # Last usable timestep
-    end = T- horizon
+    end = T - horizon
 
     # All non bike features
     base = features[start:end, :, 1:]
 
+    base = np.delete(base, [15, 16], axis=2)
+
     # Lag features
-    lag_1 = features[start-1:end-1, :, 0:1]
+    current = features[start:end, :, 0:1]
+    # lag_1 = features[start-1:end-1, :, 0:1]
     lag_3 = features[start-3:end-3, :, 0:1]
     lag_6 = features[start-6:end-6, :, 0:1]
-    lag_12 = features[start-12:end-12, :, 0:1]
-    lag_24 = features[start-24:end-24, :, 0:1]
-    lag_144 = features[start-144:end-144, :, 0:1]
+    # lag_12 = features[start-12:end-12, :, 0:1]
+    # lag_24 = features[start-24:end-24, :, 0:1]
 
-    # Rolling average feature
-    rolling_3 = (lag_1 + lag_3 + lag_6) / 3
+    # lag_142 = features[start-46:end-46, :, 0:1]
+    # lag_143 = features[start-47:end-47, :, 0:1]
+    # lag_prev_wp1 = features[start-48*7+2:end-48*7+2, :, 0:1]
+    # lag_prev_w = features[start-48*7+1:end-48*7+1, :, 0:1]
+    lag_142 = features[start-142:end-142, :, 0:1]
+    lag_143 = features[start-143:end-143, :, 0:1]
+    lag_prev_wp1 = features[start-144*7+2:end-144*7+2, :, 0:1]
+    lag_prev_w = features[start-144*7+1:end-144*7+1, :, 0:1]
+
+    dPd = current - lag_143
+    dSd = current - lag_142
+    dPw = current - lag_prev_w
+    dSw = current - lag_prev_wp1
+
+    # Station ids (time, stations, 1)
+    station_ids = np.arange(N)
+    station_ids = np.tile(station_ids, (end - start, 1))[:, :, None]
 
     # Combine all features
     X = np.concatenate(
-        [base, lag_1, lag_3, lag_6, lag_12, lag_24, lag_144, rolling_3],
+        [base, lag_3, lag_6, lag_143, lag_prev_w, dPd, dSd, dPw, dSw, station_ids],
         axis=2
     )
 
@@ -208,76 +219,94 @@ FEATURE_NAMES = [
     "weekday_cos",
     "stops_density",
     "population_density",
-    "station_lat",
-    "station_lon",
+    # "station_lat",
+    # "station_lon",
     "neighbor_weighted_lag1",
-    "lag_1",
+    # "lag_1",
     "lag_3",
     "lag_6",
-    "lag_12",
-    "lag_24",
-    "lag_144",
-    "rolling_3"
+    # "lag_12",
+    # "lag_24",
+    # "lag_144",
+    "prev_day",
+    "prev_week",
+    "dPd",
+    "dSd",
+    "dPw",
+    "dSw",
+    "station_id"
 ]
 
 async def lightgbm():
     """
-    Train and evaluate LightGBM regression model.
+    Train multiple LightGBM models for different horizons.
     """
     print("Loading features")
 
-    # Load dataset features
     features, _, _, _ = await get_features()
 
-    # Convert feature tensor into dataset for LightGBM
-    X_train, X_test, y_train, y_test, T_test = build_lightgbm_dataset(features, horizon=HORIZON)
+    model_dir = Path("../prediction_results/models")
+    model_dir.mkdir(parents=True, exist_ok=True)
 
-    # Performance counter
-    start = time.perf_counter()
-    print("Trening GB")
+    for name, h in horizons.items():
+        # h_old = h
+        # h = int(round(h / 3))
 
-    # Initialize LightGBM regressor
-    model = lgb.LGBMRegressor(
-        n_estimators=1000,
-        learning_rate=0.03,
-        num_leaves=128,
-        max_depth=-1,
-        min_child_samples=50,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=42,
-        max_bin=512,
-        n_jobs=-1
-    )
+        print(f"Training LGBM for {name} (h={h})")
 
-    # Train model on prepared dataset
-    model.fit(
-        X_train,
-        y_train,
-        feature_name=FEATURE_NAMES
-    )
+        h_dataset = h + 1
 
-    end = time.perf_counter()
-    print(f"Training time: {end - start:.4f} sec")
+        X_train, X_test, y_train, y_test, T_test = build_lightgbm_dataset(
+            features,
+            horizon=h_dataset
+        )
 
-    # Predict bike availability
-    pred = model.predict(X_test)
+        start = time.perf_counter()
 
-    # Evaluate metrics
-    evaluate_predictions(y_test, pred, threshold=0.8)
+        model = lgb.LGBMRegressor(
+            n_estimators=1000,
+            learning_rate=0.03,
+            num_leaves=128,
+            max_depth=-1,
+            min_child_samples=50,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=42,
+            max_bin=512,
+            n_jobs=-1
+        )
 
-    # Extract number of stations
-    _, N, _ = features.shape
+        station_id_index = X_train.shape[1] - 1
 
-    # Plot predicted vs real bike counts for selected stations
-    plot_station_time_series(
-        y_test,
-        pred,
-        N=N,
-        T=T_test,
-        station_ids=[0,1,2,3,4,5,6],
-        name="lightgbm"
-    )
+        model.fit(
+            X_train,
+            y_train,
+            feature_name=FEATURE_NAMES,
+            categorical_feature=[station_id_index]
+        )
+
+        # model_path = model_dir / f"lgbm_h{h_old}.txt"
+        model_path = model_dir / f"lgbm_h{h}.txt"
+        model.booster_.save_model(model_path)
+
+        end = time.perf_counter()
+        print(f"Training time: {end - start:.2f}s")
+
+        _, N, _ = features.shape
+        pred = model.predict(X_test)
+
+        print(f"Metrics for {name}")
+        evaluate_predictions(y_test, pred, threshold=0.8)
+
+        # Plot predicted vs real bike counts for selected stations
+        plot_station_time_series(
+            y_test,
+            pred,
+            N=N,
+            T=T_test,
+            station_ids=[0,1,2,3,4,5,6],
+            name=f"lightgbm_{name}",
+        )
 
 if __name__ == "__main__":
     asyncio.run(lightgbm())

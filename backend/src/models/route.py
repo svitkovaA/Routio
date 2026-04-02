@@ -217,9 +217,7 @@ class BikeRentalPlace(PlaceBase):
     id: str = ""                                # Station identifier
     name: str = "Bike Station"                  # Station name
     bikesAvailable: int = 0                     # Available bicycles
-    predictedBikes: int | None = None           # Predicted number of bikes  
-    spacesAvailable: int = 0                    # Free docking spaces
-    allowDropoff: bool = False                  # Drop-off allowed flag
+    predictedBikes: int | None = None           # Predicted number of bikes
 
 class BikeStationNodeBase(BaseModel):
     """ Base structure for a ranked bike station candidate """

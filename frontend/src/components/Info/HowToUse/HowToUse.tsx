@@ -10,6 +10,55 @@ import { PUBLIC_URL } from "../../config/config";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import "./HowToUse.css";
 
+type MediaItem = {
+    type: "image" | "video";
+    src: string;
+};
+
+function MediaSlider({ items }: { items: MediaItem[] }) {
+    const [current, setCurrent] = useState(0);
+
+    const nextSlide = () => {
+        setCurrent((prev) => (prev + 1) % items.length);
+    };
+
+    const prevSlide = () => {
+        setCurrent((prev) => (prev - 1 + items.length) % items.length);
+    };
+
+    return (
+        <div className="how-to-img-slider">
+            {items[current].type === "image" ? (
+                <img src={items[current].src} className="slider-media" />
+            ) : (
+                <video
+                    src={items[current].src}
+                    className="slider-media video"
+                    autoPlay
+                    muted
+                    loop
+                />
+            )}
+
+            {items.length > 1 && (
+                <div className="arrows">
+                    <button className="arrow left" onClick={prevSlide}>
+                        <KeyboardArrowLeftIcon />
+                    </button>
+
+                    <div className="slider-cnt">
+                        {current + 1}/{items.length}
+                    </div>
+
+                    <button className="arrow right" onClick={nextSlide}>
+                        <KeyboardArrowLeftIcon sx={{ transform: 'rotate(180deg)' }} />
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
+
 type HowToUseProps = {
     step: number;
     setStep: (value: number) => void;
@@ -20,22 +69,38 @@ function HowToUse({
     setStep
 } : HowToUseProps) {
     // Translation function
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
-    const [current, setCurrent] = useState(0);
+    const MEDIA_MAP = {
+        step1: [
+            { type: "image", src: "01a_input_form.png" },
+            { type: "video", src: "demo1.mp4" },
+        ],
+        step2: [
+            { type: "image", src: "02_pref.png" }
+        ],
+        step3: [
+            { type: "image", src: "03_res.png" }
+        ],
+        step4: [
+            { type: "image", src: "04_detail_b.png" },
+            { type: "image", src: "04_detail_bike.png" }
+        ]
+    } as const;
 
-    const images = [
-        `${PUBLIC_URL}/img/04_detail_b.png`,
-        `${PUBLIC_URL}/img/04_detail_bike.png`,
-    ];
+    const getLang = (lang: string) => lang.split("-")[0];
 
-    const nextSlide = () => {
-        setCurrent((prev) => (prev + 1) % images.length);
-    };
+    const getImg = (lang: string, name: string) =>
+        `${PUBLIC_URL}/img/${lang}/${name}`;
 
-    const prevSlide = () => {
-        setCurrent((prev) => (prev - 1 + images.length) % images.length);
-    };
+    const lang = getLang(i18n.language);
+
+    const items = MEDIA_MAP[`step${step}` as keyof typeof MEDIA_MAP]
+        .map(item => ({
+            ...item,
+            src: getImg(lang, item.src)
+        }));
+
 
     // Available instruction steps
     const steps = [
@@ -87,14 +152,14 @@ function HowToUse({
             <div className="howto-content">
                 {step === 1 && (
                     <>
-                        <img src={`${PUBLIC_URL}/img/01_input_f.png`} alt="Plánovanie" />
+                        <MediaSlider items={items} />
                         <p>
-                            {/* {t("info.howToUse.steps.planningSection")} */}
                             Zadajte východiskový a cieľový bod, prípadne medzibody, nastavte dátum a čas a upravte preferencie plánovania trasy.
                         </p>
                         <div className="about-header">
-                            Body trasy je možné vybrať jedným z následujúcich spôsobov:
+                            Výber bodov trasy
                         </div>
+                        Body trasy je možné vybrať jedným z následujúcich spôsobov
                         <ul className="how-to-points">
                             <li>
                                 Zadaním <strong>názvu lokality</strong> do vstupného poľa.
@@ -112,13 +177,27 @@ function HowToUse({
                                 Výber bodu <strong>z kontextového menu mapy</strong>, a to prostredníctvom pravého kliknutia na mapový podklad a následným
                                 výberom o ktorý bod sa jedná.
                             </li>
+
+                            <li>
+                                Na základe aktuálnej polohy.
+                            </li>
                         </ul>
+
+                        <div className="about-header">
+                            Výber stanice zdieľaných bicyklov (obrázok 2)
+                        </div>
+                        <div>
+                            Stanice zdieľaných bicyklov je možné nastaviť vybraním zdieľaného bicykla a následným povolením zobrazenia.<br/>
+
+                            Pridanie stanice zdieľaného bicykla ako bodu trasy:
+                            Stanicu je možné použiť ako bod trasy, a to kliknutím na príslušnú stanicu, nastavením,či ide o počiatočnú alebo cieľovú stanicu a vybraním bodu, na ktorý sa stanica premietne. V prípade pridania ako nového bodu je stanica automaticky pridaná pred koniec trasy a je potrebné ju umiestniť na požadované miesto.
+                        </div>
                     </>
                 )}
 
                 {step === 2 && (
                     <>
-                        <img src={`${PUBLIC_URL}/img/02_pref.png`} alt="Preferencie" />
+                        <MediaSlider items={items} />
                         <p>
                             Nastavte preferencie plánovania, ako sú zohľadňované druhy dopravy alebo obmedzenia.
                         </p>
@@ -127,7 +206,7 @@ function HowToUse({
 
                 {step === 3 && (
                     <>
-                        <img src={`${PUBLIC_URL}/img/03_res.png`} alt="Výsledky" />
+                        <MediaSlider items={items} />
                         <p>
                             Výsledky plánovania sú zobrazené na mape ako aj v textovej podobe.
                         </p>
@@ -135,21 +214,7 @@ function HowToUse({
                 )}
 
                 {step === 4 && (
-                    <div className="how-to-img-slider">
-
-                        <img src={images[current]} alt="Detail" className="slider-image" />
-                        <div className="arrows">
-                            <button className="arrow left" onClick={prevSlide}>
-                                <KeyboardArrowLeftIcon />
-                            </button>
-                            <div className="slider-cnt">
-                                {current + 1}/{images.length}
-                            </div>
-                            <button className="arrow right" onClick={nextSlide}>
-                                <KeyboardArrowLeftIcon sx={{ transform: 'rotate(180deg)' }} />
-                            </button>
-                        </div>
-                    </div>
+                    <MediaSlider items={items} />
                 )}
             </div>
         </div>

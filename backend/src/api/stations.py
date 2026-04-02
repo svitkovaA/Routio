@@ -7,7 +7,7 @@ Defines API endpoint for retrieving bicycle station information.
 from fastapi import APIRouter
 from service.gbfs_service import GBFSService
 
-# Router instance for status endpoint
+# Router instance for bicycle stations endpoint
 router = APIRouter()
 
 @router.get("/bicycleStations")

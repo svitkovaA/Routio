@@ -17,6 +17,10 @@
     height: 20px;
 }
 
+.leg-preferences-button.fixed {
+    cursor: not-allowed;
+}
+
 .leg-preferences-button .bicycle {
     left: 15px;
 }

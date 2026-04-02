@@ -83,8 +83,8 @@ function FitBound({
         // Adjust notebook layout with open sidebar for route to fit map bounds
         else if (sidebarOpen) {
             map.fitBounds(bounds, {
-                paddingTopLeft: [370, 50],
-                paddingBottomRight: [50, 50],
+                paddingTopLeft: [425, 50],
+                paddingBottomRight: [25, 50],
             });
         }
         // Adjust notebook layout with closed sidebar for route to fit map bounds

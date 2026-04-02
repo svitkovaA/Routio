@@ -49,10 +49,13 @@ BICYCLE_PLACES_URL = BEN_URL + "places"
 # Available bicycles information endpoint
 BICYCLE_INFO_URL = BEN_URL + "records"
 
+BEN_NEW_URL = "https://walter.fit.vutbr.cz/new-ben/"
+
 # Load variables from .env into the environment
 load_dotenv()
 
 LISSY_API_KEY = os.environ.get("LISSY_API_KEY", "")
 BEN_API_KEY = os.environ.get("BEN_API_KEY", "")
+NEW_BEN_API_KEY = os.environ.get("NEW_BEN_API_KEY", "")
 
 # End of file lissy_ben.py

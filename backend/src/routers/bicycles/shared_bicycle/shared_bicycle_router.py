@@ -7,10 +7,12 @@ cycling segments, and station wait times into complete trip patterns.
 """
 
 import asyncio
+from datetime import timedelta
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 import numpy as np
+from shared.geo_math import GeoMath
 from shared.pattern_utils import PatternUtils
 from routing_engine.routing_context import RoutingContext
 from routers.bicycles.shared_bicycle.bike_station_selector import BikeStationSelector
@@ -51,6 +53,14 @@ class SharedBicycleRouter(BicycleRouterBase):
         # Station selector used to rank candidate bicycle stations
         self.__bike_station_selector = BikeStationSelector(self._ctx)
 
+        # Average distance in km from waypoint to station
+        self.__average_distance_to_station_km = 0.3
+
+        # Estimated time to walk to station
+        self.__walk_to_station_time = (
+            self.__average_distance_to_station_km / self._ctx.data.walk_speed
+        )
+
     async def route_bike_group(self, context: PlanningContext) -> List[TripPattern]:
         """
         Main entry point for shared bicycle routing. Selects station
@@ -86,12 +96,46 @@ class SharedBicycleRouter(BicycleRouterBase):
                         self._parse_coordinates(context.waypoints[-1])
                     )
 
+        # Estimate time offset for prediction
+        if self._ctx.data.arrive_by:
+            # Compute total distance
+            total_distance = 0.0
+            for i in range(len(context.waypoints) - 1):
+                a = context.waypoints[i]
+                b = context.waypoints[i + 1]
+
+                total_distance += GeoMath.haversine_distance_km(
+                    *self._parse_coordinates(a),
+                    *self._parse_coordinates(b)
+                ) * 1.3
+
+            # Walk to origin and walk from destination
+            if total_distance < 2 * self.__average_distance_to_station_km:
+                time_offset = timedelta()
+            else:
+                bike_distance = total_distance - 2 * self.__average_distance_to_station_km
+
+                # Bike time plus lock times
+                bike_time = bike_distance / (self._ctx.bike_speed * 4 / 5) + 2 * self._ctx.bike_lock_time / 60
+
+                offset = bike_time + self.__walk_to_station_time
+                time_offset = (
+                    timedelta()
+                    if offset < 0
+                    else timedelta(hours=-offset)
+                )
+        else:
+            time_offset = timedelta(hours=self.__walk_to_station_time)
+
         # Retrieve best origin and destination bike stations
         sorted_origin_nodes, sorted_destination_nodes = await asyncio.gather(
             self.__bike_station_selector.select_origin_stations(
                 self._parse_coordinates(context.waypoints[0]),  # Trip start
                 self._parse_coordinates(context.waypoints[1]),  # Next waypoint
-                context,
+                context.model_copy(
+                    # Update time for prediction
+                    update={ "time_cursor": context.time_cursor + time_offset}
+                ),
                 origin_bisector
             ),
             self.__bike_station_selector.select_destination_stations(

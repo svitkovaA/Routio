@@ -26,7 +26,7 @@ class _GTFSRTState:
     """
     Processed GTFS-RT data representation.
     """
-    # Maps trip_id to (latitude, longitude, delay in minutes)
+    # Maps trip_id to (latitude, longitude, delay in minutes and closest stop id)
     trip_realtime_data: TripRealtimeCache
 
 class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):

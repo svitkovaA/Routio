@@ -194,40 +194,44 @@ function PublicTransportDetail({
                 </div>
             </div>
             <div>
-                {/* Expandable list of stops served by the vehicle */}
-                <div 
-                    onClick={() => setStopsOpen(!stopsOpen)}
-                    className="detail-stops"
-                >
-                    <CustomTooltip title={stopsOpen ? t("tooltips.detail.publicTransport.closeStopsOnRoute") : t("tooltips.detail.publicTransport.stopsOnRoute")}>
-                        <KeyboardArrowDownIcon className={stopsOpen ? "" : "rotate90"}/>
-                    </CustomTooltip>
-
-                    <span className="station-icon">
-                        <div className="station-square">
-                        </div>
-                    </span>
-                    {((leg.serviceJourney?.quays.length ?? 0) + 1)} {t("detailInfo.publicTransport.stops")}
-                </div>
-                <div>
-                    {stopsOpen && leg.serviceJourney?.quays.map((quay, index) => (
-                        <div
-                            key={`${index}`}
-                            className={"stop " + (
-                                leg.serviceJourney?.startOffset !== undefined && 
-                                leg.serviceJourney.currentIndex !== null
-                                ? (leg.serviceJourney.currentIndex - leg.serviceJourney.startOffset) === index
-                                    ? "current" 
-                                    : (leg.serviceJourney.currentIndex - leg.serviceJourney.startOffset) > index
-                                        ? "passed" : ""
-                                : "")
-                            }
+                {(leg.serviceJourney?.quays.length ?? 0) >= 1 && (
+                    <>
+                        {/* Expandable list of stops served by the vehicle */}
+                        <div 
+                            onClick={() => setStopsOpen(!stopsOpen)}
+                            className="detail-stops"
                         >
-                            <div className="timeline-dot public"/>
-                            {quay.name}
+                            <CustomTooltip title={stopsOpen ? t("tooltips.detail.publicTransport.closeStopsOnRoute") : t("tooltips.detail.publicTransport.stopsOnRoute")}>
+                                <KeyboardArrowDownIcon className={stopsOpen ? "" : "rotate90"}/>
+                            </CustomTooltip>
+
+                            <span className="station-icon">
+                                <div className="station-square">
+                                </div>
+                            </span>
+                            {((leg.serviceJourney?.quays.length ?? 0) + 1)} {t("detailInfo.publicTransport.stops")}
                         </div>
-                    ))}
-                </div>
+                        <div>
+                            {stopsOpen && leg.serviceJourney?.quays.map((quay, index) => (
+                                <div
+                                    key={`${index}`}
+                                    className={"stop " + (
+                                        leg.serviceJourney?.startOffset !== undefined && 
+                                        leg.serviceJourney.currentIndex !== null
+                                        ? (leg.serviceJourney.currentIndex - leg.serviceJourney.startOffset) === index
+                                            ? "current" 
+                                            : (leg.serviceJourney.currentIndex - leg.serviceJourney.startOffset) > index
+                                                ? "passed" : ""
+                                        : "")
+                                    }
+                                >
+                                    <div className="timeline-dot public"/>
+                                    {quay.name}
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* Historical delay statistics for this service */}

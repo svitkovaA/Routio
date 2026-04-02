@@ -35,11 +35,13 @@ function LegPreferences({
     const setLegPreference = (value: boolean) => {
         setLegPreferences((prev) => {
             const newLegPreferences = [...prev];
-            newLegPreferences[index] = { ...newLegPreferences[index], open: value};
+            if (!newLegPreferences[index].fixed) {
+                newLegPreferences[index] = { ...newLegPreferences[index], open: value};
+            }
             
             return newLegPreferences;
         })
-    }
+    };
 
     // Do not render component if disabled
     if (!render) {
@@ -51,7 +53,11 @@ function LegPreferences({
             {!legPreferences[index].open ? (
                 <CustomTooltip title={t("tooltips.inputForm.modeTimePrefs")}>
                     <div
-                        className={"leg-preferences-button " + (legPreferences[index].mode === "multimodal" ? "multimodal" : "")}
+                        className={
+                            "leg-preferences-button " + 
+                            (legPreferences[index].mode === "multimodal" ? "multimodal " : "") +
+                            (legPreferences[index].fixed ? "fixed" : "")
+                        }
                         onClick={() => setLegPreference(true)}
                     >
                         {modeIcons.map((mode) => 

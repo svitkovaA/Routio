@@ -90,7 +90,8 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
     const [legPreferences, setLegPreferences] = useState<LegPreference[]>([{
         mode: "multimodal",
         wait: dayjs().startOf("day"),
-        open: false
+        open: false,
+        fixed: false
     }]);
 
     // Selected travel date and time
@@ -202,7 +203,8 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
                 return [{
                     mode: "multimodal",
                     wait: dayjs().startOf("day"),
-                    open: false
+                    open: false,
+                    fixed: false
                 }];
             }
 
@@ -251,7 +253,8 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             updated.splice(index + 1, 0, {
                 mode: "multimodal",
                 wait: dayjs().startOf("day"),
-                open: false
+                open: false,
+                fixed: false
             });
             return updated;
         });
@@ -327,22 +330,26 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             // Converts bicycle segment to multimodal if stations are involved
             const updated: LegPreference[] = prev.map(p => ({
                 ...p,
-                mode: p.mode === "bicycle" && stationSet ? "multimodal" : p.mode
+                mode: p.mode === "bicycle" && stationSet ? "multimodal" : p.mode,
+                fixed: false
             }));
 
             // Assign bicycle mode to all legs between origin and destination stations
             if (originIndex >= 0 && destinationIndex >= 0) {
                 for (let i = originIndex; i < destinationIndex; i++) {
                     updated[i].mode = "bicycle";
+                    updated[i].fixed = true;
                 }
             }
             // If only origin is set apply bicycle segment after this waypoint
             else if (originIndex >= 0 && originIndex < updated.length) {
                 updated[originIndex].mode = "bicycle";
+                updated[originIndex].fixed = true;
             }
             // If only destination is set apply bicycle segment before this waypoint
             else if (destinationIndex > 0) {
                 updated[destinationIndex - 1].mode = "bicycle";
+                updated[destinationIndex - 1].fixed = true;
             }
 
             return updated;

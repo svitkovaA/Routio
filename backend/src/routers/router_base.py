@@ -5,7 +5,9 @@ Provides a shared base implementation for concrete router classes.
 """
 
 from abc import ABC
-from typing import Tuple, final
+from datetime import timedelta
+from typing import List, Tuple, final
+from shared.geo_math import GeoMath
 from routing_engine.routing_context import RoutingContext
 
 class RouterBase(ABC):
@@ -36,5 +38,45 @@ class RouterBase(ABC):
         lat, lon = value.split(",")
 
         return float(lat), float(lon)
+    
+    def _estimate_public_time_duration(self, waypoints: List[str]) -> timedelta:
+        """
+        Estimate travel duration for public transport between waypoints.
+
+        Args:
+            waypoints: List of waypoint coordinates
+
+        Returns:
+            Estimated travel time
+        """
+        total_distance = 0.0
+
+        # Sum adjusted distances between consecutive waypoints
+        for index in range(len(waypoints) - 1):
+            total_distance += GeoMath.haversine_distance_km(
+                *self._parse_coordinates(waypoints[index]),
+                *self._parse_coordinates(waypoints[index + 1])
+            ) * 1.4
+
+        # Estimate average speed based on total distance
+        estimated_speed = self.__estimate_speed(total_distance)
+
+        # Compute travel time
+        estimated_time = total_distance / estimated_speed
+
+        return timedelta(hours=estimated_time)
+
+    @staticmethod
+    def __estimate_speed(distance_km: float) -> float:
+        """
+        Estimate average transport speed based on travel distance.
+
+        Args:
+            distance_km: Total travel distance in kilometers
+
+        Returns:
+            Estimated speed in km/h
+        """
+        return min(50, 12 + 0.7 * distance_km)
 
 # End of file router_base.py

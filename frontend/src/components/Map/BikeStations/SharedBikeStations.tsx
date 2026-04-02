@@ -44,6 +44,13 @@ const StationPopup = memo(({
     // Indicates whether station is considered as origin or destination
     const [selected, setSelected] = useState<"origin" | "destination">("origin");
 
+    /**
+     * Update originRef when mounted
+     */
+    useEffect(() => {
+        originRef.current = selected;
+    }, []);
+
     return (
         <div className="shared-bike-popup-info">
             {/* Station basic information */}

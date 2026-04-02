@@ -18,10 +18,10 @@ from typing import List, TypedDict
 # SE_LON = 17.9
 
 # JMK
-NW_LAT = 49.65
-NW_LON = 15.5
-SE_LAT = 48.6
-SE_LON = 17.6
+NW_LAT = 49.6332550
+NW_LON = 15.5424248
+SE_LAT = 48.6165408
+SE_LON = 17.6469364
 
 # Local directory for storing GTFS dataset
 GTFS_DIR = Path("../dataset/gtfs")
@@ -65,7 +65,7 @@ LISSY_DELAY_CACHE_PATH = "../dataset/lissy_cache"
 STATION_INFORMATION_URLS = {
     "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_te/cs/station_information.json",   # Brno
     "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nh/cs/station_information.json",   # Hodonin
-    # # PRAHA
+    # PRAHA
     # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_tg/cs/station_information.json",   # Praha
     # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_tq/cs/station_information.json",   # Mladoboleslavsko
     # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_td/cs/station_information.json",   # Berounsko
