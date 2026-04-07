@@ -30,24 +30,24 @@ function About() {
                 <div className="about-transport-modes">
                     <CustomTooltip title={t("tooltips.info.bus")}>
                         <div>
-                            <img className="data-brno" src={`${PUBLIC_URL}/img/publicTransport.svg`} alt="Data Brno logo" />
+                            <img className="data-brno" src={`${PUBLIC_URL}img/publicTransport.svg`} alt="Data Brno logo" />
                         </div>
                     </CustomTooltip>
 
                     <CustomTooltip title={t("tooltips.info.foot")}>
                         <div>
-                            <img className="data-brno" src={`${PUBLIC_URL}/img/foot.svg`} alt="Data Brno logo" />
+                            <img className="data-brno" src={`${PUBLIC_URL}img/foot.svg`} alt="Data Brno logo" />
                         </div>
                     </CustomTooltip>
 
                     <CustomTooltip title={t("tooltips.info.bicycle")}>
                         <div>
-                            <img className="data-brno" src={`${PUBLIC_URL}/img/bicycle.svg`} alt="Data Brno logo" />
+                            <img className="data-brno" src={`${PUBLIC_URL}img/bicycle.svg`} alt="Data Brno logo" />
                         </div>
                     </CustomTooltip>
                     <CustomTooltip title={t("tooltips.info.sharedBicycle")}>
                         <div>
-                            <img className="data-brno" src={`${PUBLIC_URL}/img/sharedBike.svg`} alt="Data Brno logo" />
+                            <img className="data-brno" src={`${PUBLIC_URL}img/sharedBike.svg`} alt="Data Brno logo" />
                         </div>
                     </CustomTooltip>
                 </div>
@@ -68,7 +68,7 @@ function About() {
                 <p className="about-header">{t("info.overview.external")}</p>
                 <div className="about-external">
                     <a href="https://data.brno.cz/" target="_blank" rel="noreferrer" className="external-item">
-                        <img className="data-brno" src={`${PUBLIC_URL}/img/dataBrnoLogo.svg`} alt="Data Brno logo" />
+                        <img className="data-brno" src={`${PUBLIC_URL}img/dataBrnoLogo.svg`} alt="Data Brno logo" />
                         <div className="external-text">
                             <h4>data.Brno</h4>
                             <p>{t("info.overview.externalSectionDB")}</p>
@@ -76,7 +76,7 @@ function About() {
                     </a>
 
                     <a href="https://docs.opentripplanner.org/" target="_blank" rel="noreferrer" className="external-item">
-                        <img src={`${PUBLIC_URL}/img/otpLogo.svg`} alt="OpenTripPlanner logo" />
+                        <img src={`${PUBLIC_URL}img/otpLogo.svg`} alt="OpenTripPlanner logo" />
                         <div className="external-text">
                             <h4>OpenTripPlanner</h4>
                             <p>{t("info.overview.externalSectionOTP")}</p>
@@ -84,7 +84,7 @@ function About() {
                     </a>
 
                     <a href="https://dexter.fit.vutbr.cz/lissy/" target="_blank" rel="noreferrer" className="external-item">
-                        <img src={`${PUBLIC_URL}/img/lissyLogo.svg`} alt="Lissy API logo" />
+                        <img src={`${PUBLIC_URL}img/lissyLogo.svg`} alt="Lissy API logo" />
                         <div className="external-text">
                             <h4>Lissy</h4>
                             <p>{t("info.overview.externalSectionLissy")}</p>
@@ -92,7 +92,7 @@ function About() {
                     </a>
 
                     <a href="https://nextbikeczech.com/" target="_blank" rel="noreferrer" className="external-item">
-                        <img src={`${PUBLIC_URL}/img/nextbikeLogo.svg`} alt="Nextbike logo" />
+                        <img src={`${PUBLIC_URL}img/nextbikeLogo.svg`} alt="Nextbike logo" />
                         <div className="external-text">
                             <h4>Nextbike</h4>
                             <p>{t("info.overview.externalSectionNextbike")}</p>
@@ -100,7 +100,7 @@ function About() {
                     </a>
 
                     <a href="https://www.openstreetmap.org/" target="_blank" rel="noreferrer" className="external-item">
-                        <img src={`${PUBLIC_URL}/img/osmLogo.svg`} alt="OpenStreetMap logo" />
+                        <img src={`${PUBLIC_URL}img/osmLogo.svg`} alt="OpenStreetMap logo" />
                         <div className="external-text">
                             <h4>OpenStreetMap</h4>
                             <p>{t("info.overview.externalSectionOSM")}</p>

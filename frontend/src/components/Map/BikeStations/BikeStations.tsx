@@ -4,6 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
+import L from "leaflet";
 import { Fragment, useEffect, useState } from "react";
 import { Marker, Popup, useMapEvent } from "react-leaflet";
 import { useTranslation } from "react-i18next";
@@ -188,7 +189,12 @@ function BikeStations({
                                         </div>
                                         <button 
                                             className="popup-button"
-                                            onClick={() => changeBikeStation(origin, bikeStationIndex, leg.bikeStationInfo?.bikeStations as any, index)}
+                                            onClick={() => {
+                                                if (!leg.bikeStationInfo?.bikeStations) {
+                                                    return;
+                                                }
+                                                changeBikeStation(origin, bikeStationIndex, leg.bikeStationInfo.bikeStations, index)
+                                            }}
                                         >
                                             {leg.bikeStationInfo?.origin ? t("map.setAsOriginStation")
                                             : rack && !leg.bikeStationInfo?.origin ? t("map.setAsDestinationRack")

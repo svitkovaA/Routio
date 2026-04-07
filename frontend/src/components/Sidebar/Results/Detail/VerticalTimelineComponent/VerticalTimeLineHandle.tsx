@@ -4,8 +4,9 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { RefObject, useEffect } from "react";
-import { Leg, VerticalTimeline } from "../../../../types/types";
+import { useEffect } from "react";
+import type { RefObject } from "react";
+import type { Leg, VerticalTimeline } from "../../../../types/types";
 
 export function useVerticalTimeLineHandle(
     ref: RefObject<HTMLDivElement | null>,  // Reference to the element representing leg detail
@@ -21,7 +22,7 @@ export function useVerticalTimeLineHandle(
 
         // Observe size changes of the referenced element
         const observer = new ResizeObserver((entries) => {
-            for (let entry of entries) {
+            for (const entry of entries) {
                 const newLength = entry.contentRect.height + offset;
 
                 // New timeline segment length based on element height

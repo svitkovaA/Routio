@@ -7,8 +7,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { Mode } from "../../../../../types/types";
-import { modeIcons } from "../../../Icons/Icons";
+import type { Mode } from "../../../../../types/types";
+import { modeIcons } from "../../../Icons/IconMappings";
 import { useInput } from "../../../../../Contexts/InputContext";
 import CustomTooltip from "../../../../../CustomTooltip/CustomTooltip";
 import "./Select.css";

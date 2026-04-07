@@ -35,20 +35,18 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/src:/app
-    command: python main.py
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
-      - "3000:3000"
+      - "5173:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
-    command: npm start
     depends_on:
       - backend
 

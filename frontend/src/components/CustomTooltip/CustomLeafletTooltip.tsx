@@ -5,7 +5,7 @@
  */
 
 import { Tooltip as LeafletTooltip } from "react-leaflet";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import "./CustomLeafletTooltip.css"
 
 type Props = {

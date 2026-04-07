@@ -41,11 +41,11 @@ function Results() {
     const { backButtonClick } = useBackButtonClick();
 
     // Description of the routing modes
-    const descriptions: String[] = [
-        t("modeDescriptions.multimodalTransport") as String,
-        t("modeDescriptions.publicTransport") as String,
-        t("modeDescriptions.bicycle") as String,
-        t("modeDescriptions.walk") as String
+    const descriptions: string[] = [
+        t("modeDescriptions.multimodalTransport") as string,
+        t("modeDescriptions.publicTransport") as string,
+        t("modeDescriptions.bicycle") as string,
+        t("modeDescriptions.walk") as string
     ];
 
     return (

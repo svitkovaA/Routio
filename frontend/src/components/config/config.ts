@@ -1,5 +1,5 @@
-export const PUBLIC_URL = process.env.PUBLIC_URL || "";
-export const API_BASE_URL = process.env.NODE_ENV === "production" ? `${PUBLIC_URL}/api` : "http://127.0.0.1:8000";
+export const PUBLIC_URL = import.meta.env.BASE_URL;
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 // Praha + JMK + Olomouc
 // export const NW_LAT = 50.6;

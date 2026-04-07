@@ -6,7 +6,7 @@
 
 import MenuItem from '@mui/material/MenuItem';
 import { useTranslation } from "react-i18next";
-import { RoutePreference } from "../../../types/types";
+import type { RoutePreference } from "../../../types/types";
 import { useInput } from '../../../Contexts/InputContext';
 import OptionSelect from './OptionSelect';
 import FormControlLabel from '@mui/material/FormControlLabel';

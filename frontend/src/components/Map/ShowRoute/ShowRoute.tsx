@@ -160,7 +160,7 @@ function ShowRoute() {
                         <Polyline
                             key={`outline-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${polylineForceUpdate}-${info.color}`}
                             positions={info.coords}
-                            color="rgba(255,255,255,0.7)"
+                            color={"rgba(255,255,255,0.7)"}
                             pathOptions={{
                                 ...info.pathOptions,
                                 weight: info.pathOptions?.dashArray === "5px, 5px" ? 2 : 6

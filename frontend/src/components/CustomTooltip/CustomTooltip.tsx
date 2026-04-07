@@ -4,12 +4,13 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { ReactElement, ReactNode, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import type { ReactElement, ReactNode } from "react";
 import Tooltip from "@mui/material/Tooltip";
 
 type CustomTooltipProps = {
     title: ReactNode;                                   // Tooltip content
-    children: ReactElement<any>;                        // Wrapped element
+    children: ReactElement;                             // Wrapped element
     disableTooltip?: boolean;                           // Conditionally disable tooltip
     placement?: "top" | "bottom" | "left" | "right";    // Tooltip position
 };

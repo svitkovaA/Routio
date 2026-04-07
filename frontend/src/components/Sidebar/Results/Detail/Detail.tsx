@@ -5,7 +5,7 @@
  */
 
 import { Fragment, useEffect, useState } from "react";
-import { TripPattern, VerticalTimeline } from "../../../types/types";
+import type { TripPattern, VerticalTimeline } from "../../../types/types";
 import PublicTransportDetail from "./PublicTransportDetail/PublicTransportDetail";
 import WalkDetail from "./WalkDetail/WalkDetail";
 import BicycleDetail from "./BicycleDetail/BicycleDetail";

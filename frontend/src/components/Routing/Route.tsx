@@ -11,7 +11,7 @@ import { useInput } from "../Contexts/InputContext";
 import { useResult } from "../Contexts/ResultContext";
 import { useSettings } from "../Contexts/SettingsContext";
 import { storeWaypoints } from "../Sidebar/Planning/InputPoints/WaypointStorage";
-import { Mode } from "../types/types";
+import type { Mode } from "../types/types";
 import { useNotification } from "../Contexts/NotificationContext";
 
 /**
@@ -77,7 +77,7 @@ export function useRoute() {
             setLoading(true);
 
             // Convert waypoints to to compatible format
-            let waypointsArray: string[] = [];
+            const waypointsArray: string[] = [];
             for (let i = 0; i < waypoints.length; i++) {
                 waypointsArray.push(waypoints[i].lat + ', ' + waypoints[i].lon);
             }
@@ -140,9 +140,11 @@ export function useRoute() {
                         throw new Error("Server offline");
                     }
                 }
-                catch (error: any) {
-                    showNotification(t("errors.serverOffline"), "error");
-                    throw error;
+                catch (error: unknown) {
+                    if (error instanceof Error) {
+                        showNotification(t("errors.serverOffline"), "error");
+                        throw error;
+                    }
                 }
 
                 setShowResults(true);
@@ -204,9 +206,9 @@ export function useRoute() {
                 // Set result active index to the result index
                 setResultActiveIndex(resultIndex);
             }
-            catch (error: any) {
+            catch (error: unknown) {
                 // Ignore abort errors
-                if (error.name === "AbortError") {
+                if (error instanceof Error && error.name === "AbortError") {
                     return;
                 }
                 console.error(error);

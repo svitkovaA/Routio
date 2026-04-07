@@ -4,7 +4,8 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { PointerEventHandler, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import type { PointerEventHandler } from "react";
 import { useResult } from "../../Contexts/ResultContext";
 import { useBackButtonClick } from "../Results/useBackButtonClick";
 import "./DragHandle.css";
@@ -12,7 +13,8 @@ import "./DragHandle.css";
 type DragHandleProps = {
     translateY: number;                                                     // Current vertical translation value
     setTranslateY: (value: number | ((prev: number) => number)) => void;    // Setter for vertical translation
-    dragging: React.RefObject<boolean>;                                     // Reference indicating whether dragging is active
+    draggingRef: React.RefObject<boolean>;                                  // Reference indicating whether dragging is active
+    setIsDragging: (value: boolean) => void;                                // Setter for dragging state
     maxDrag: number;                                                        // Maximum allowed drag distance for fully opened state
     sidebarOpen: boolean;                                                   // Indicates whether sidebar is currently open
     setSidebarOpen: (value: boolean) => void;                               // Setter controlling sidebar visibility
@@ -21,7 +23,8 @@ type DragHandleProps = {
 function DragHandle({ 
     translateY, 
     setTranslateY, 
-    dragging,
+    draggingRef,
+    setIsDragging,
     maxDrag,
     sidebarOpen,
     setSidebarOpen
@@ -50,7 +53,7 @@ function DragHandle({
     useEffect(() => {
         const handleUp = () => {
             // Ignore if dragging was not active
-            if (!dragging.current) {
+            if (!draggingRef.current) {
                 return;
             }
 
@@ -97,7 +100,8 @@ function DragHandle({
             }
 
             // Reset drag state
-            dragging.current = false;
+            draggingRef.current = false;
+            setIsDragging(false);
             hasDragged.current = false;
         };
 
@@ -116,7 +120,8 @@ function DragHandle({
         showSettings, 
         showResults, 
         backButtonClick, 
-        dragging, 
+        draggingRef,
+        setIsDragging,
         setShowSettings, 
         setSidebarOpen, 
         setTranslateY
@@ -130,7 +135,8 @@ function DragHandle({
      */
     const onPointerDown = (e: React.PointerEvent<HTMLDivElement>, left: boolean) => {
         e.preventDefault();
-        dragging.current = true;
+        draggingRef.current = true;
+        setIsDragging(true);
         hasDragged.current = false;
         clickable.current = left;
         startY.current = e.clientY;
@@ -144,7 +150,7 @@ function DragHandle({
      * @param e Pointer event
      */
     const onPointerMove: PointerEventHandler<HTMLDivElement> = (e) => {
-        if (!dragging.current) {
+        if (!draggingRef.current) {
             return;
         }
 

@@ -65,13 +65,14 @@ async def database():
     Load all required data into the database.
     """
     async with create_conn() as conn:
-        await weather_stations(conn)
+        pass
+        # await weather_stations(conn)
 
-        await stations(conn)
+        # await stations(conn)
 
-        await load_bicycle_records(conn)
+        # await load_bicycle_records(conn)
 
-        await load_weather(conn)
+        # await load_weather(conn)
 
         # await load_bike_racks(conn)
 

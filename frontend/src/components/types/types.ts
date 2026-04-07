@@ -5,6 +5,7 @@
  */
 
 import dayjs from "dayjs";
+import L from 'leaflet';
 
 /**
  * Represents structured location
@@ -37,7 +38,7 @@ export type Waypoint = {
     displayName: string;                    // Name displayed on UI
     isActive: boolean;                      // Indicates whether the waypoint is currently selected
     isPreview: boolean;                     // Indicates whether the waypoint is shown only as a preview 
-    id: any;                                // Internal identifier
+    id: string;                             // Internal identifier
     bikeStationId: string | null;           // Station identifier
     origin: boolean | null;                 // True if station is set as origin one, false otherwise
 };
@@ -64,6 +65,23 @@ export type LegPreference = {
     wait: dayjs.Dayjs;                      // Selected wait time in the stop 
     open: boolean;                          // Indicates whether preference panel for leg is expanded in UI
     fixed: boolean;                         // Indicates whether mode is fixes and cannot be changed
+};
+
+/**
+ * Represents alternative bike station with metadata
+ */
+export type BikeStation = {
+    distance: number;               // Distance from waypoint/relevant point to the bike station
+    score: number;                  // Computed score used for ranking stations
+    place: {
+        latitude: number;           // Latitude coordinate
+        longitude: number;          // Longitude coordinate
+        id: string;                 // Internal station identifier
+        name: string;               // Bike station name
+        bikesAvailable: number;     // Number of currently available bikes
+        predictedBikes?: number;    // Number of predicted bikes in station
+        capacity?: number;          // Total station capacity
+    };
 };
 
 /**
@@ -97,19 +115,7 @@ export type Leg = {
         selectedBikeStationIndex: number;   // Index of the currently selected bike station in the list
 
         /** List of alternative bike stations with metadata */
-        bikeStations: {
-            distance: number;               // Distance from waypoint/relevant point to the bike station
-            score: number;                  // Computed score used for ranking stations
-            place: {
-                latitude: number;           // Latitude coordinate
-                longitude: number;          // Longitude coordinate
-                id: string;                 // Internal station identifier
-                name: string;               // Bike station name
-                bikesAvailable: number;     // Number of currently available bikes
-                predictedBikes?: number;    // Number of predicted bikes in station
-                capacity?: number;          // Total station capacity
-            };
-        }[];
+        bikeStations: BikeStation[];
     };
 
     /**

@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { StoredWaypoint, Waypoint } from "../../../types/types";
+import type { StoredWaypoint, Waypoint } from "../../../types/types";
 
 // Maximum number of stored waypoints per category (origin, middle stops, destination)
 const MAX_STORED_WAYPOINTS = 5;
@@ -157,7 +157,7 @@ function storeWaypoint(waypoint: StoredWaypoint, key: string, yourLocation: stri
  * @param yourLocation String representing the detected location
  */
 export const storeWaypoints = (waypoints: Waypoint[], yourLocation: string) => {    
-    let waypointsToStore: StoredWaypoint[] = [];
+    const waypointsToStore: StoredWaypoint[] = [];
 
     // Convert Waypoint to StoredWaypoint format
     for (let i = 0; i < waypoints.length; i++) {

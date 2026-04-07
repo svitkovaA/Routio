@@ -31,7 +31,7 @@ function TimeDate(){
     } = useInput();
 
     // Maps application language codes to MUI picker locales
-    const pickerLocaleMap: Record<string, any> = {
+    const pickerLocaleMap: Record<string, typeof csCZ> = {
         cs: csCZ,
         sk: skSK,
         en: enUS,

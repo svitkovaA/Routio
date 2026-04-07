@@ -7,7 +7,7 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../../../../config/config";
-import { InputText, StoredWaypoint } from "../../../../types/types";
+import type { InputText, StoredWaypoint } from "../../../../types/types";
 import { useInput } from "../../../../Contexts/InputContext";
 import { loadDestination, loadMiddleWaypoints, loadOrigin } from "../WaypointStorage";
 import { useNotification } from "../../../../Contexts/NotificationContext";

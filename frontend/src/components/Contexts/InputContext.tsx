@@ -1,14 +1,16 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * @file InputContext.tsx
  * @brief Provides global state management for user input parameters
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, Dispatch, SetStateAction } from "react"
-import { DragEndEvent } from '@dnd-kit/core';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import type { Dispatch, SetStateAction } from "react";
+import type { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import dayjs from "dayjs";
-import { LegPreference, RoutePreference, Station, Waypoint } from "../types/types";
+import type { LegPreference, RoutePreference, Station, Waypoint } from "../types/types";
 import { useResult } from "./ResultContext";
 import { useSettingsFromLocalStorage } from "./SettingsContext";
 import { API_BASE_URL } from "../config/config";
@@ -53,26 +55,23 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         showResults
     } = useResult();
 
+    // Creates empty waypoint
+    const createWaypoint = (): Waypoint => ({
+        lat: 0,
+        lon: 0,
+        displayName: "",
+        isActive: false,
+        isPreview: false,
+        id: Math.random().toString(36).substring(2,9),
+        bikeStationId: null,
+        origin: null
+    });
+
     // Waypoints initialization
-    const [waypoints, setWaypoints] = useState<Waypoint[]>([{
-        lat: 0,
-        lon: 0,
-        displayName: "",
-        isActive: false,
-        isPreview: false,
-        id: Math.random().toString(36).substring(2,9),
-        bikeStationId: null,
-        origin: null
-    }, {
-        lat: 0,
-        lon: 0,
-        displayName: "",
-        isActive: false,
-        isPreview: false,
-        id: Math.random().toString(36).substring(2,9),
-        bikeStationId: null,
-        origin: null
-    }]);
+    const [waypoints, setWaypoints] = useState<Waypoint[]>(() => [
+        createWaypoint(),
+        createWaypoint()
+    ]);
 
     // Determines whether the selected time represents arrival time, or departure time
     const [arriveBy, setArriveBy] = useState<boolean>(false);
@@ -234,16 +233,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
             if (prev.length >= 10) return prev;
 
             const updated = [...prev];
-            updated.splice(index + 1, 0, {
-                lat: 0,
-                lon: 0,
-                displayName: "",
-                isActive: false,
-                isPreview: false,
-                id: Math.random().toString(36).substring(2, 9),
-                bikeStationId: null,
-                origin: null
-            });
+            updated.splice(index + 1, 0, createWaypoint());
             return updated;
         });
 

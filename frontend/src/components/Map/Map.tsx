@@ -5,20 +5,20 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ScaleControl, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, ScaleControl, Polyline, useMapEvent } from 'react-leaflet'
 import L from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
 import { API_BASE_URL } from '../config/config';
-import { InputText } from '../types/types';
+import type { InputText } from '../types/types';
 import { useLayers } from '../Controls/Layer/Layers';
 import ShowRoute from './ShowRoute/ShowRoute';
 import FitBound from './FitBound/FitBound';
 import BikeStations from './BikeStations/BikeStations';
 import MapInfoPopup from './MapInfoPopup/MapInfoPopup';
 import CustomLeafletTooltip from '../CustomTooltip/CustomLeafletTooltip';
-import { createPinIcon, SetViewOnClick, createVehiclePositionIcon } from './MapComponents';
-import { timelineIcons } from '../Sidebar/Planning/Icons/Icons';
+import { createPinIcon, createVehiclePositionIcon } from './MapComponents';
+import { timelineIcons } from '../Sidebar/Planning/Icons/IconMappings';
 import CustomZoomControl from './CustomZoomControl/CustomZoomControl';
 import { useInput } from '../Contexts/InputContext';
 import { useSettings } from '../Contexts/SettingsContext';
@@ -30,12 +30,35 @@ import { Polygon } from "react-leaflet";
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 import { JMKBounds } from './JMKBounds';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 L.Icon.Default.mergeOptions({
-    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-    iconUrl: require('leaflet/dist/images/marker-icon.png'),
-    shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
 });
+
+/**
+ * Handles map click interaction
+ * If the callback returns false the map is moved animated to the clicked position
+ * 
+ * @param onMapClick Callback handling map click event
+ */
+function SetViewOnClick({ onMapClick }: { onMapClick: (lat: number, lng: number) => boolean }) {
+    useMapEvent('click', (e) => {
+        const map = e.target;
+        // Move map to the position
+        if (!onMapClick(e.latlng.lat, e.latlng.lng)) {
+            map.setView(e.latlng, map.getZoom(), {
+                animate: true,
+                duration: 0.3
+            });
+        }
+    });
+    return null;
+}
 
 type MapProps = {
     sidebarOpen: boolean;                           // Indicates whether the sidebar is currently open
@@ -239,7 +262,7 @@ function Map({
                 }
                 updateWaypoints(displayName);
             })
-            .catch((err) => {
+            .catch(() => {
                 // Fallback to use coordinates if reverse geocoding fails
                 showNotification(t("warnings.nominatim"), "warning");
                 const displayName = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
@@ -296,14 +319,14 @@ function Map({
             <ScaleControl position="bottomleft" imperial={false} />
 
             {/* Base map layer */}
-            <TileLayer 
+            <TileLayer
                 url={baseLayers[selectedLayerIndex].url}
                 attribution={baseLayers[selectedLayerIndex].attribution}
             />
 
             {/* Optional satellite overlay */}
             {selectedLayerIndex === 2 && (
-                <TileLayer 
+                <TileLayer
                     url={satelliteOverlay.url}
                     attribution={satelliteOverlay.attribution}
                     opacity={0.6}
@@ -391,7 +414,7 @@ function Map({
             />
 
             {/* Actual vehicle position visualisation */}
-            {vehicleRealtimeData.filter(p => p.lat > 0 && p.lon > 0).map((p, i) => (
+            {vehicleRealtimeData.filter(p => p.lat > 0 && p.lon > 0).map((p) => (
                 <Marker
                     key={`${p.tripId}`}
                     position={[p.lat, p.lon]}

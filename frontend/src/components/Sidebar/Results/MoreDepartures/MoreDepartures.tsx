@@ -4,8 +4,8 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { Leg } from "../../../types/types";
-import { timelineIcons } from "../../Planning/Icons/Icons";
+import type { Leg } from "../../../types/types";
+import { timelineIcons } from "../../Planning/Icons/IconMappings";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import "./MoreDepartures.css"
 

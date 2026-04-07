@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { VerticalTimeline } from "../../../../types/types";
+import type { VerticalTimeline } from "../../../../types/types";
 import "./VerticalTimelineComponent.css";
 
 type VerticalTimelineComponentProps = {

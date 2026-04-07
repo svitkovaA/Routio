@@ -10,6 +10,7 @@ import { useInput } from "../Contexts/InputContext";
 import { useNotification } from "../Contexts/NotificationContext";
 import { useResult } from "../Contexts/ResultContext";
 import { useSettings } from "../Contexts/SettingsContext";
+import type { BikeStation } from "../types/types";
 
 /**
  * Hook that provides functionality for updating bikesharing station selection
@@ -61,14 +62,14 @@ export function useChangeBikeStation() {
      * @param bikeStations List of available bike stations
      * @param legIndex Index of the route leg being modified
      */
-    const changeBikeStation = async (originBikeStation: boolean, bikeStationIndex: number, bikeStations: any[], legIndex: number) => {
+    const changeBikeStation = async (originBikeStation: boolean, bikeStationIndex: number, bikeStations: BikeStation[], legIndex: number) => {
         // Extract current route structure
         const legs = pattern.legs;
         const originalLegs = pattern?.originalLegs;
         const modes = pattern.modes;
         
         // Convert waypoints to compatible format
-        let waypointsArray: string[] = [];
+        const waypointsArray: string[] = [];
         for (let i = 0; i < waypoints.length; i++) {
             waypointsArray.push(waypoints[i].lat + ', ' + waypoints[i].lon);
         }
@@ -139,7 +140,7 @@ export function useChangeBikeStation() {
     
             setResults(temporaryResults);
         }
-        catch (error: any) {
+        catch {
             showNotification(t("errors.changeBikeStationFailed"), "error");
         }
     };

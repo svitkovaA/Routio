@@ -7,7 +7,7 @@
 import { memo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import TextField from "@mui/material/TextField";
-import { InputText, Waypoint } from "../../../../types/types";
+import type { InputText, Waypoint } from "../../../../types/types";
 import LocationDot from "./LocationDot";
 import ClearInputField from "./ClearInputField";
 import RemoveInputField from "./RemoveInputField";

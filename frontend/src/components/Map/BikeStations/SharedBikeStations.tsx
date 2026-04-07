@@ -5,13 +5,15 @@
  */
 
 import { Marker, Popup, useMap } from "react-leaflet";
+import type { MarkerCluster } from "leaflet.markercluster";
 import { useInput } from "../../Contexts/InputContext";
 import { createNextbikePin } from "../MapComponents";
-import { memo, RefObject, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import type { RefObject } from "react";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { FormControl, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { Station } from "../../types/types";
+import type { Station } from "../../types/types";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -49,7 +51,7 @@ const StationPopup = memo(({
      */
     useEffect(() => {
         originRef.current = selected;
-    }, []);
+    }, [originRef, selected]);
 
     return (
         <div className="shared-bike-popup-info">
@@ -240,7 +242,7 @@ function SharedBikeStations() {
             showCoverageOnHover={false}
 
             // Custom cluster icon
-            iconCreateFunction={(cluster: any) => {
+            iconCreateFunction={(cluster: MarkerCluster) => {
                 const count = cluster.getChildCount();
 
                 // Cluster with one station
@@ -255,7 +257,7 @@ function SharedBikeStations() {
 
             // Custom cluster click behavior
             eventHandlers={{
-                clusterclick: (e: any) => {
+                clusterclick: (e: { layer: MarkerCluster}) => {
                     const cluster = e.layer;
                     const count = cluster.getChildCount();
 

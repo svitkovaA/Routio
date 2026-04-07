@@ -5,7 +5,6 @@
  */
 
 import L from "leaflet";
-import { useMapEvent } from "react-leaflet";
 import { PUBLIC_URL } from "../config/config";
 
 /**
@@ -84,7 +83,7 @@ export function createBikeStationPin(origin: boolean) {
     const typeClass = origin ? "origin-marker" : "destination-marker";
 
     // Load bicycle station image based on the origin parameter
-    const imgSrc = origin ? `${PUBLIC_URL}/img/originStation.svg` : `${PUBLIC_URL}/img/destinationStation.svg`;
+    const imgSrc = origin ? `${PUBLIC_URL}img/originStation.svg` : `${PUBLIC_URL}img/destinationStation.svg`;
 
     return L.divIcon({
         html: `
@@ -130,7 +129,7 @@ export function createSmallBikeStationPin(origin: boolean) {
  * @returns Leaflet DivIcon instance
  */
 export function createNextbikePin() {
-    const imgSrc = `${PUBLIC_URL}/img/nextbikeLogo.svg`;
+    const imgSrc = `${PUBLIC_URL}img/nextbikeLogo.svg`;
 
     return L.divIcon({
         html: `
@@ -166,25 +165,6 @@ export function createClusterPin(count: number) {
         iconAnchor: [15, 40],
         tooltipAnchor: [0, -40]
     });
-}
-
-/**
- * Handles map click interaction
- * If the callback returns false the map is moved animated to the clicked position
- * 
- * @param onMapClick Callback handling map click event
- */
-export function SetViewOnClick({ onMapClick }: { onMapClick: (lat: number, lng: number) => boolean }) {
-    const map = useMapEvent('click', (e) => {
-        // Move map to the position
-        if (!onMapClick(e.latlng.lat, e.latlng.lng)) {
-            map.setView(e.latlng, map.getZoom(), {
-                animate: true,
-                duration: 0.3
-            });
-        }
-    });
-    return null;
 }
 
 /** End of file MapComponents.tsx */

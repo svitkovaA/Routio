@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { InputText } from "../../../../types/types";
+import type { InputText } from "../../../../types/types";
 import './Suggestions.css'
 
 type SuggestionsProps = {

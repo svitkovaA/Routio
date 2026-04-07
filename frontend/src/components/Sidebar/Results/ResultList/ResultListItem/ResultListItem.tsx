@@ -9,7 +9,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { IconButton } from "@mui/material";
-import { TripPattern } from "../../../../types/types";
+import type { TripPattern } from "../../../../types/types";
 import Timeline from "../Timeline/Timeline";
 import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
 import { useTranslation } from 'react-i18next';

@@ -91,7 +91,7 @@ function HowToUse({
     const getLang = (lang: string) => lang.split("-")[0];
 
     const getImg = (lang: string, name: string) =>
-        `${PUBLIC_URL}/img/${lang}/${name}`;
+        `${PUBLIC_URL}img/${lang}/${name}`;
 
     const lang = getLang(i18n.language);
 
@@ -134,7 +134,7 @@ function HowToUse({
                 </div>
                 <div className="howto-steps-tuple">
                     {/* Second two steps */}
-                    {steps.slice(2).map((s, i) => (
+                    {steps.slice(2).map((s) => (
                         <div
                             key={s.id}
                             className={"howto-step " + (step === s.id ? "active" : "")}

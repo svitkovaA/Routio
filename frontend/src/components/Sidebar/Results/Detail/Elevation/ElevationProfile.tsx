@@ -8,7 +8,7 @@ import { useRef, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import LandscapeIcon from '@mui/icons-material/Landscape';
-import { PolyInfo } from "../../../../types/types";
+import type { PolyInfo } from "../../../../types/types";
 import { useResult } from "../../../../Contexts/ResultContext";
 import NorthEastIcon from '@mui/icons-material/NorthEast';
 import SouthEastIcon from '@mui/icons-material/SouthEast';
@@ -142,8 +142,11 @@ export default function ElevationProfile({
 
             events: {
                 // Triggered when mouse moves over chart
-                mouseMove: (event, chartContext, config) => {
-                    const idx = config.dataPointIndex;
+                mouseMove: (_, __, config) => {
+                    const idx = config?.dataPointIndex;
+                    if (idx === undefined) {
+                        return;
+                    }
                     // Hide fixed marker while hovering directly over chart
                     setDisplayMarker(false);
                     if (idx !== -1) {

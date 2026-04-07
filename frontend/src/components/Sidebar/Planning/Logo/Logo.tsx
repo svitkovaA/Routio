@@ -10,8 +10,8 @@ import "./Logo.css";
 function Logo() {
     return (
         <div className="logo">
-            <img src={`${PUBLIC_URL}/routioLogo.png`} alt="Logo"/>
-            <img src={`${PUBLIC_URL}/routioText.png`} alt="Logo-text" />
+            <img src={`${PUBLIC_URL}routioLogo.png`} alt="Logo"/>
+            <img src={`${PUBLIC_URL}routioText.png`} alt="Logo-text" />
         </div>
     );
 }

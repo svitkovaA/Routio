@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * @file NotificationContext.tsx
  * @brief Provides global notification system for success messages, warnings and errors
@@ -5,7 +6,8 @@
  */
 
 import { createContext, useContext, useState } from "react";
-import Snackbar, { SnackbarCloseReason } from "@mui/material/Snackbar";
+import Snackbar from "@mui/material/Snackbar";
+import type { SnackbarCloseReason } from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
 // Allowed notification severity levels
@@ -35,7 +37,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     };
 
     // Handles Snackbar close events
-    const handleClose = (event?: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
+    const handleClose = (_?: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
         // Prevent closing when clicking outside
         if (reason === "clickaway") {
             return;

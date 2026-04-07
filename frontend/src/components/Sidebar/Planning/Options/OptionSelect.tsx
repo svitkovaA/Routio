@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { ChangeEventHandler } from "react";
+import type { ChangeEventHandler } from "react";
 import TextField from "@mui/material/TextField";
 
 type OptionSelectProps = {

@@ -6,7 +6,7 @@
 import { useTranslation } from "react-i18next";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import { modeIcons } from "../../Icons/Icons";
+import { modeIcons } from "../../Icons/IconMappings";
 import ModeSelect from "./Select/ModeSelect";
 import { useInput } from "../../../../Contexts/InputContext";
 import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";

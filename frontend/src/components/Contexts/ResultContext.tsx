@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * @file ResultContext.tsx
  * @brief Provides global state management for route search results
@@ -5,7 +6,7 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
-import { PolyInfo, ResultsType, TripPattern, VehiclePosition } from "../types/types";
+import type { PolyInfo, ResultsType, TripPattern, VehiclePosition } from "../types/types";
 import polyline from '@mapbox/polyline';
 import { API_BASE_URL } from "../config/config";
 import { computeAscent, computeDescent, computeElevation, resamplePolyline , smoothElevationForGraph} from "../Sidebar/Results/Detail/Elevation/ElevationUtils";
@@ -87,7 +88,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     const prevPositionsRef = useRef<Record<number, VehiclePosition>>({});
 
     // Interval reference for periodic data polling
-    const intervalRef = useRef<NodeJS.Timer | null>(null);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     // Reference to current animation frame request
     const animationRef = useRef<number | null>(null);
@@ -154,15 +155,17 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     // Currently selected trip pattern
     const pattern = results[resultActiveIndex]?.tripPatterns[selectedTripPatternIndex];
 
+    // Current original legs
+    const originalLegs = pattern?.originalLegs;
     /**
      * Computes and stores decoded polyline data for the selected trip pattern
      */
     const polyInfo = useMemo(() => {
-        if (!pattern?.originalLegs) {
+        if (!originalLegs) {
             return [];
         }
 
-        return pattern.originalLegs.map((leg) => {
+        return originalLegs.map((leg) => {
             // Decode main route polyline
             const coords = Array.isArray(leg.pointsOnLink.points)
                 ? leg.pointsOnLink.points.flatMap((p) => polyline.decode(p))
@@ -184,14 +187,14 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                 elevationOpen: false
             };
         });
-    }, [pattern?.originalLegs]);
+    }, [originalLegs]);
 
     /**
      * Forces polyline rerender when route geometry changes
      */
     useEffect(() => {
         setPolylineForceUpdate(prev => prev + 1);
-    }, [pattern?.originalLegs]);
+    }, [originalLegs]);
 
     /**
      * Computes elevation profiles for legs (foot, bicycle)
@@ -213,7 +216,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                 const poly = polyInfo[i];
 
                 // Original leg data received from the backend
-                const leg = pattern?.originalLegs[i];
+                const leg = originalLegs[i];
                 if (!leg) {
                     continue;
                 }
@@ -255,7 +258,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
 
         compute();
 
-    }, [polyInfo, pattern?.originalLegs]);
+    }, [polyInfo, originalLegs]);
 
     /**
      * Toggles visibility of elevation profile for a specific route leg

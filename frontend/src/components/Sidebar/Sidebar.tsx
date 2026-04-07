@@ -51,7 +51,9 @@ function Sidebar({
     const isMobile = useMediaQuery("(max-width: 767px)");
 
     // Tracks whether user is currently dragging the sidebar
-    const dragging = useRef(false);
+    const draggingRef = useRef(false);
+
+    const [isDragging, setIsDragging] = useState<boolean>(false);
 
     // Current vertical translation value
     const [translateY, setTranslateY] = useState<number>(0);
@@ -162,7 +164,7 @@ function Sidebar({
                 transform: isMobile
                     ? `translateY(${closedOffset + translateY}px)`
                     : undefined,
-                transition: dragging.current ? undefined : "transform 0.3s ease",
+                transition: isDragging ? undefined : "transform 0.3s ease",
             }}
             ref={sidebarRef}
         >
@@ -200,7 +202,8 @@ function Sidebar({
                 <DragHandle 
                     translateY={translateY}
                     setTranslateY={setTranslateY}
-                    dragging={dragging}
+                    draggingRef={draggingRef}
+                    setIsDragging={setIsDragging}
                     maxDrag={closedOffset}
                     sidebarOpen={sidebarOpen}
                     setSidebarOpen={setSidebarOpen}

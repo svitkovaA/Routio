@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { ElevationPoint } from "../../../../types/types"
+import type { ElevationPoint } from "../../../../types/types"
 
 // Loaded DEM representation
 type TileData = {

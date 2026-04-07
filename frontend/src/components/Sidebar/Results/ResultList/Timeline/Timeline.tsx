@@ -5,8 +5,8 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Leg } from "../../../../types/types";
-import { timelineIcons } from "../../../Planning/Icons/Icons";
+import type { Leg } from "../../../../types/types";
+import { timelineIcons } from "../../../Planning/Icons/IconMappings";
 import "./Timeline.css"
 
 type TimelineProps = {
@@ -34,7 +34,7 @@ function Timeline({
 
         // Create ResizeObserver to detect changes in container size
         const observer = new ResizeObserver((entries) => {
-            for (let entry of entries) {
+            for (const entry of entries) {
                 // Update component state with the new container width
                 setWidth(entry.contentRect.width);
             }
