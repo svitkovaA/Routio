@@ -6,6 +6,7 @@ Main orchestrator of the routing system, coordinates the planning pipeline.
 
 from typing import List
 from gql.client import AsyncClientSession
+from service.prediction_service import PredictionService
 from models.route import TripPattern, WaypointGroup
 from models.route_data import LegPreferences, RouteData
 from routing_engine.recursive_planner import RecursivePlanner
@@ -15,15 +16,20 @@ from shared.leg_utils import LegUtils
 from shared.pattern_filtering import PatternFiltering
 
 class RoutingEngine():
-    def __init__(self, data: RouteData, session: AsyncClientSession):
+    def __init__(self, data: RouteData, session: AsyncClientSession, station_changer: bool = False):
         """
         Initializes the routing engine.
 
         Args:
             data: Route data containing waypoints and leg preferences
             session: Asynchronous GraphQL client session for API calls
+            station_changer: Flag indicating if routing engine is called from StationChanger
         """
         self.__ctx = RoutingContext(data, session)
+
+        self.__station_changer = station_changer
+
+        self.__prediction_service = PredictionService.get_instance()
 
     async def plan_route(self) -> List[TripPattern]:
         """
@@ -48,6 +54,14 @@ class RoutingEngine():
         # Postprocess legs in each trip pattern
         for pattern in trip_patterns:
             LegUtils.process_legs(pattern)
+
+            # Updates predictions to accurate time
+            if (
+                not self.__ctx.data.use_own_bike and 
+                not self.__station_changer and 
+                self.__prediction_service.service_available()
+            ):
+                self.__prediction_service.update_pattern_predictions(pattern)
 
         # Filter and sort trip patterns based on the user preferences
         pattern_filtering = PatternFiltering(self.__ctx)

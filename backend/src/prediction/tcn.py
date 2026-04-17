@@ -96,7 +96,7 @@ class BikeDataset(Dataset[Tuple[torch.Tensor, torch.Tensor]]):
 
         # Normalizes bike count
         if self.bike_mean is not None and self.bike_std is not None:
-            x[:, :, 0] = (x[:, :, 0] - self.bike_mean) / self.bike_std
+            x[:, :, 0] = (x[:, :, 0] - self.bike_mean) / (self.bike_std + 1e-6)
 
         # Target sequence, future bike counts
         y: torch.Tensor = self.bikes[i:i + self.horizon].T
@@ -354,7 +354,7 @@ def train_model(features: np.ndarray) -> Tuple[nn.Module, float, float]:
 
     epochs: int = 80
     best_loss: float = float("inf")
-    patience: int = 8
+    patience: int = 5
     patience_counter: int = 0
     best_state: Dict[str, torch.Tensor] | None = None
 

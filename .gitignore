@@ -31,7 +31,13 @@ backend/venv/
 backend/src/*.json
 backend/src/*.png
 backend/prediction_results
-forecast_service.py
-gcn_tcn.py
-gradient_boost_rs.py
-tcn_covariate.py
+
+# Helper scripts
+combine_plot.py
+feature_importance.py
+analyze.py
+store.py
+acceleration.py
+analysis.py
+*.txt 
+!requirements*

@@ -55,6 +55,8 @@ class FootRouter(RouterBase, Router):
 
         # Merge segment results into a single pattern chain
         for result in results:
+            if not result:
+                return []
             # Initialize with first segment result
             if trip_patterns == []:
                 trip_patterns = result

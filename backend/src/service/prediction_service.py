@@ -9,7 +9,8 @@ from datetime import datetime
 import numpy as np
 import torch
 import pandas as pd
-from models.route import TZ
+from config.db import PRODUCTION_WINDOW_DAYS
+from models.route import TZ, BikeStationNode, TripPattern
 from prediction.tcn import TCN
 from prediction.dataset.weather_features import get_weather_array
 from prediction.dataset.static_features import compute_static_features
@@ -96,7 +97,7 @@ class PredictionService(ServiceBase[_PredictionState]):
         station_ids, station_coordinates, weather_map = self.__db_service.get_station_info()
 
         # Load recent bike count timeseries
-        bike_df = await self.__db_service.get_station_timeseries(station_ids, last_hours=24)
+        bike_df = await self.__db_service.get_station_timeseries(station_ids, last_hours=24 * PRODUCTION_WINDOW_DAYS)
 
         # Convert raw data into station matrix
         dataset = build_station_matrix(bike_df)
@@ -122,14 +123,14 @@ class PredictionService(ServiceBase[_PredictionState]):
                 id,
                 normalization_means=means,
                 normalization_stds=stds,
-                last_hours=24
+                last_hours=24 * PRODUCTION_WINDOW_DAYS
             ),
             self.weather_means,
             self.weather_stds
         )
 
         # Normalize bike counts
-        bike_array = (dataset.values[..., None] - self.bike_mean) / self.bike_std
+        bike_array = (dataset.values[..., None] - self.bike_mean) / (self.bike_std + 1e-6)
 
         # Expand time features to match station dimension
         time_array = time_features.values[:, None, :]
@@ -207,7 +208,50 @@ class PredictionService(ServiceBase[_PredictionState]):
         if step < 0 or step >= state.predictions.shape[1]:
             return None
 
+        # Retrieve prediction value
+        value = state.predictions[station_index, step]
+
+        # Validate value
+        if value is None or np.isnan(value) or np.isinf(value):
+            return None
+        
         # Return rounded prediction
-        return int(round(state.predictions[station_index, step]))
+        return int(round(value))
+
+    def update_pattern_predictions(self, pattern: TripPattern) -> None:
+        """
+        Updates predicted bike availability for all bike stations within a trip pattern.
+
+        Args:
+            pattern: TripPattern containing route legs and bike station data
+        """
+        for leg in pattern.originalLegs:
+            if leg.mode == "wait" and leg.bikeStationInfo is not None:
+                time_cursor = leg.aimedStartTime
+
+                # Predict bike availability for each candidate station
+                for station in leg.bikeStationInfo.bikeStations:
+                    if isinstance(station, BikeStationNode):
+
+                        # Do not predict for past times
+                        if time_cursor < datetime.now(tz=TZ):
+                            station.place.predictedBikes = None
+                        else:
+                            prediction = self.predict_bikes(
+                                int(station.place.id),
+                                time_cursor
+                            )
+                            if prediction is not None:
+                                station.place.predictedBikes = prediction
+
+                # Check selected station and flag if no bikes are expected
+                selected = leg.bikeStationInfo.selectedBikeStationIndex
+                station = leg.bikeStationInfo.bikeStations[selected]
+                if (
+                    isinstance(station, BikeStationNode) and
+                    station.place.predictedBikes is not None and
+                    station.place.predictedBikes == 0
+                ):
+                    leg.zeroBikesPredicted = True
 
 # End of file prediction_service.py

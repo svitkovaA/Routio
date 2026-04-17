@@ -355,7 +355,8 @@ class BicyclePublicRouter(RouterBase, Router):
         return PatternUtils.combine(
             bike_trip_patterns,
             [public_trip_patterns],
-            False                      # Always add public segments after bicycle ones
+            False,                      # Always add public segments after bicycle ones
+            bicycle_public=True
         )
 
     def __fits_entire_bike(self, distance: float, i: int, waypoints: List[str]) -> bool:

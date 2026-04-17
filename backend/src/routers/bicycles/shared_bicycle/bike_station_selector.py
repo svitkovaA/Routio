@@ -62,7 +62,7 @@ class BikeStationSelector(SelectorBase):
         )
 
         # Get scoring weights for origin selection
-        angle_weight, availability_weight, distance_weight = self.__origin_weights(context)
+        angle_weight, availability_weight, distance_weight = self._origin_weights()
 
         # Rank the candidates
         return self.__score_and_rank(
@@ -115,7 +115,7 @@ class BikeStationSelector(SelectorBase):
         )
 
         # Get scoring weights for destination selection
-        angle_weight, availability_weight, distance_weight = self.__destination_weights(context)
+        angle_weight, availability_weight, distance_weight = self._destination_weights()
 
         # Rank the candidates
         return self.__score_and_rank(
@@ -351,43 +351,5 @@ class BikeStationSelector(SelectorBase):
             return None
 
         return float(np.clip(free_ratio, 0.0, 1.0))
-
-    @staticmethod
-    def __origin_weights(context: PlanningContext) -> Tuple[float, float, float]:
-        """
-        Returns scoring weights for origin station selection. Weights
-        correspond to: (angle_weight, availability_weight, distance_weight)
-
-        Args:
-            context: Planning context influencing scoring behavior
-
-        Returns:
-            Tuple of three weight coefficients
-        """
-        # In public bicycle mode, emphasize direction alignment
-        if context.public_bicycle:
-            return 0.4, 0.3, 0.3
-
-        # Otherwise emphasize distance and availability
-        return 0.1, 0.4, 0.5
-    
-    @staticmethod
-    def __destination_weights(context: PlanningContext) -> Tuple[float, float, float]:
-        """
-        Returns scoring weights for destination station selection. Weights
-        correspond to: (angle_weight, availability_weight, distance_weight)
-
-        Args:
-            context: Planning context influencing scoring behavior
-
-        Returns:
-            Tuple of three weight coefficients
-        """
-        # In bicycle_public mode, emphasize direction alignment
-        if context.bicycle_public:
-            return 0.4, 0.3, 0.3
-
-        # Otherwise emphasize distance and availability
-        return 0.3, 0.3, 0.4
 
 # End of file bike_station_selector.py

@@ -4,11 +4,13 @@ file: osm.py
 OSM data loader.
 """
 
+import asyncio
 import os
 import httpx
 import osmium
 import asyncpg          # type: ignore[import-untyped]
 from typing import List, Tuple
+from database.db import close_pool, create_conn, init_pool
 from config.datasets import OSM_PBF_PATH, OSM_PBF_URL
 
 class AddressHandler(osmium.SimpleHandler):
@@ -217,5 +219,18 @@ async def load_bike_racks(conn: asyncpg.Connection) -> None:
     await resolve_rack_addresses(conn)
 
     print("Finished OSM import")
+
+async def main() -> None:
+    """
+    Executes bike rack loading to database.
+    """
+    await init_pool()
+    with create_conn() as conn:
+        await load_bike_racks(conn)
+
+    await close_pool()
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 # End of file osm.py

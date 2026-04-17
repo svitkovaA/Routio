@@ -28,6 +28,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       TZ: Europe/Bratislava
+      PRODUCTION: true
     depends_on:
       db:
         condition: service_healthy

@@ -6,18 +6,21 @@ Defines dataset sources and local storage paths, includes:
 - OSM extract
 - GBFS station information feeds
 - TIF population data
+- OpenWeather data
 """
 
+import os
+from dotenv import load_dotenv
 from pathlib import Path
 from typing import List, TypedDict
 
-# Praha + JMK + Olomouc
+# Praha + JMK + Olomouc bounds
 # NW_LAT = 50.6
 # NW_LON = 13.3
 # SE_LAT = 48.6
 # SE_LON = 17.9
 
-# JMK
+# JMK bounds
 NW_LAT = 49.6332550
 NW_LON = 15.5424248
 SE_LAT = 48.6165408
@@ -29,9 +32,12 @@ GTFS_DIR = Path("../dataset/gtfs")
 IDS_JMK_AGENCY_NAME = "IDS JMK (Data from: KORDIS JMK, DPMB)"
 
 class GTFS_DATASET(TypedDict):
-    url: str
-    name: str
-    realtime: str | None
+    """
+    Class representing one GTFS dataset.
+    """
+    url: str                # Dataset URL for download
+    name: str               # Dataset unique name
+    realtime: str | None    # Optional realtime data URL
 
 # GTFS datasets
 GTFS_DATASETS: List[GTFS_DATASET] = [
@@ -61,20 +67,20 @@ OSM_PBF_PATH = "../dataset/osm/czech-republic-latest.osm.pbf"
 # Local storage path for Lissy historical delays
 LISSY_DELAY_CACHE_PATH = "../dataset/lissy_cache"
 
-# GBFS station information URLS
-STATION_INFORMATION_URLS = {
-    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_te/cs/station_information.json",   # Brno
-    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nh/cs/station_information.json",   # Hodonin
-    # PRAHA
-    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_tg/cs/station_information.json",   # Praha
-    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_tq/cs/station_information.json",   # Mladoboleslavsko
-    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_td/cs/station_information.json",   # Berounsko
-    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_ni/cs/station_information.json",   # Kolin
-    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_co/cs/station_information.json",   # Benesov
+# GBFS datasets
+GBFS_URLS = {
+    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_te/gbfs.json",   # Brno
+    "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nh/gbfs.json",   # Hodonin
+    # # PRAHA
+    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_tg/gbfs.json",   # Praha
+    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_tq/gbfs.json",   # Mladoboleslavsko
+    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_td/gbfs.json",   # Berounsko
+    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_ni/gbfs.json",   # Kolin
+    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_co/gbfs.json",   # Benesov
     # # OLOMOUC
-    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_ti/cs/station_information.json",   # Olomouc
-    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_lb/cs/station_information.json",   # Lipnik nad Becvou
-    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nr/cs/station_information.json"    # Prerov
+    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_ti/gbfs.json",   # Olomouc
+    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_lb/gbfs.json",   # Lipnik nad Becvou
+    # "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_nr/gbfs.json"    # Prerov
 }
 
 # Directory where population density dataset is stored
@@ -85,5 +91,11 @@ POPULATION_PATH = POPULATION_DIR / "JRC-ESTAT_Census_Population_2021_100m.tif"
 
 # URL used to download the population density dataset
 POPULATION_URL = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/MAPS/JRC-ESTAT_Census_Population_2021_100m/JRC-ESTAT_Census_Population_2021_100m.zip"
+
+# URL for the current weather data
+WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
+
+load_dotenv()
+WEATHER_API_KEY = os.environ.get("OPEN_WEATHER_API_KEY", "")
 
 # End of file datasets.py

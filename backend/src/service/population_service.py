@@ -111,7 +111,11 @@ class PopulationService(ServiceBase[_PopulationState]):
         zip_path = POPULATION_DIR / "population.zip"
 
         # Download zipped dataset
-        with requests.get(POPULATION_URL, stream=True) as r:
+        with requests.get(
+            POPULATION_URL,
+            stream=True,
+            headers={"User-Agent": "Routio/1.0 (academic project)"}
+        ) as r:
             r.raise_for_status()
             with open(zip_path, "wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):

@@ -16,6 +16,8 @@ from api.departures import departures
 from api.route import route
 from api import vehicle_realtime_data
 from api import stations
+from config.db import PRODUCTION
+from service.service_base import ServiceBase
 from database.db import init_pool, close_pool
 from service.workers import (
     database_worker,
@@ -23,7 +25,9 @@ from service.workers import (
     gbfs_worker, 
     lissy_worker,
     load_initial_data,
-    gtfs_rt_worker
+    gtfs_rt_worker,
+    prediction_worker,
+    weather_worker
 )
 
 @asynccontextmanager
@@ -45,12 +49,13 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(database_worker()),
         asyncio.create_task(lissy_worker()),
         asyncio.create_task(gtfs_rt_worker()),
+        asyncio.create_task(prediction_worker())
     ]
+    
+    if PRODUCTION:
+        tasks.append(asyncio.create_task(weather_worker()))
 
     yield
-
-    # Close database connection
-    await close_pool()
 
     # Gracefully shut down background workers
     for task in tasks:
@@ -61,6 +66,12 @@ async def lifespan(app: FastAPI):
             await task
         except asyncio.CancelledError:
             pass
+
+    # Gracefully shutdown all services
+    await ServiceBase.shutdown_services()
+
+    # Close database connection
+    await close_pool()
 
 app = FastAPI(lifespan=lifespan)
 

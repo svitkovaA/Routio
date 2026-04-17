@@ -21,21 +21,22 @@ RADIUS: float = STOP_THRESHOLD / EARTH_RADIUS
 
 def normalize_values(values: List[float] | np.ndarray) -> np.ndarray:
     """
-    Applies min max normalization to a list of values.
+    Applies z-score normalization to a list of values.
 
     Args:
         values: Input numeric values
 
     Returns:
-        Normalized values in range (0,1)
+        Normalized values with mean 0 and std 1
     """
     # Convert input values to numpy array
     normalized_values = np.array(values, dtype=np.float32)
 
-    # Apply min max normalization
-    normalized_values = (normalized_values - normalized_values.min()) / (
-        normalized_values.max() - normalized_values.min() + 1e-6
-    )
+    mean = normalized_values.mean()
+    std = normalized_values.std()
+
+    # Apply z-score normalization
+    normalized_values = (normalized_values - mean) / (std + 1e-6)
 
     return normalized_values
 

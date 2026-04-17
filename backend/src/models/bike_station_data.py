@@ -15,7 +15,6 @@ class BikeStationData(BaseModel):
     origin_bike_station: bool       # True if the modified station is the origin station, false otherwise
     new_index: int                  # Index of the newly selected bike station
     bike_stations: List[BikeRackNode] | List[BikeStationNode]   # List of available bike stations
-    legs: List[Leg]                 # Current list of trip legs that need to be updated
     leg_index: int                  # Index of the leg associated with the bike station that should be recalculated
     modes: List[RoutingMode]        # Transport modes used for each route segment
     original_legs: List[Leg]        # Original legs before modification

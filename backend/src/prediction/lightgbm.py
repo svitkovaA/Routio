@@ -267,7 +267,6 @@ async def lightgbm():
             n_estimators=1000,
             learning_rate=0.03,
             num_leaves=128,
-            max_depth=-1,
             min_child_samples=50,
             subsample=0.8,
             colsample_bytree=0.8,

@@ -41,21 +41,17 @@ WEATHER_DATA_URL = LISSY_URL + "weather/data"
 WEATHER_POSITIONS_URL = LISSY_URL + "weather/positions"
 
 # Ben API used for retrieving information about shared-bike stations and available bicycles
-BEN_URL = "https://walter.fit.vutbr.cz/ben/nextbike/"
+BEN_URL = "https://walter.fit.vutbr.cz/ben/records/"
 
-# Shared-bike stations endpoint
-BICYCLE_PLACES_URL = BEN_URL + "places"
+# Ben API for historical weather
+BEN_WEATHER_URL = BEN_URL + "openWeather"
 
-# Available bicycles information endpoint
-BICYCLE_INFO_URL = BEN_URL + "records"
-
-BEN_NEW_URL = "https://walter.fit.vutbr.cz/new-ben/"
+# Ben API for historical bicycles in stations
+BEN_NEXTBIKE_URL = BEN_URL + "nextBike"
 
 # Load variables from .env into the environment
 load_dotenv()
-
 LISSY_API_KEY = os.environ.get("LISSY_API_KEY", "")
 BEN_API_KEY = os.environ.get("BEN_API_KEY", "")
-NEW_BEN_API_KEY = os.environ.get("NEW_BEN_API_KEY", "")
 
 # End of file lissy_ben.py

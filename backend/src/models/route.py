@@ -141,6 +141,7 @@ class Leg(BaseModel):
     nonContinuousDepartures: bool | None = None # No more departures available
     zone_ids: List[int] | None = None           # Fare zone identifiers
     artificial: bool = False                    # Indicates artificial leg
+    zeroBikesPredicted: bool = False            # Indicates zero bike prediction
 
     @model_validator(mode="after")
     def convert_datetime(self):

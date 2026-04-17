@@ -19,7 +19,9 @@ class PatternUtils():
     def combine(
         partial_patterns: List[TripPattern],
         connecting_patterns: List[List[TripPattern]],
-        arrive_by: bool
+        arrive_by: bool,
+        public_bicycle: bool = False,
+        bicycle_public: bool = False
     ) -> List[TripPattern]:
         """
         Combine partial patterns with corresponding connecting patterns into
@@ -29,6 +31,8 @@ class PatternUtils():
             partial_patterns: List of already constructed trip patterns
             connecting_patterns: List of lists containing new patterns corresponding to each partial pattern
             arrive_by: If true, the planning is arrival based, if false, departure based
+            public_bicycle: If true the planning mode is public bicycle
+            bicycle_public: If true the planning mode is bicycle public
 
         Returns:
             List of combined trip patterns
@@ -51,17 +55,22 @@ class PatternUtils():
                         new_modes = deepcopy(connection.modes)
 
                         # Adjust times when connection segment does not contain public transport
-                        if PatternUtils.__legs_without_pt(new_legs):
+                        if PatternUtils.__legs_without_pt(new_legs) and not public_bicycle:
                             # Align connection end to partial start
                             PatternUtils.justify_time(
                                 TripPattern(legs=new_legs),
                                 partial_pattern.legs[0].aimedStartTime,
                                 True
                             )
+
                         # Adjust times when partial segment does not contain public transport
                         elif PatternUtils.__legs_without_pt(combined_pattern.legs):
                             # Align partial pattern start to connection end
-                            PatternUtils.justify_time(combined_pattern, new_legs[-1].aimedEndTime, False)
+                            PatternUtils.justify_time(
+                                combined_pattern,
+                                new_legs[-1].aimedEndTime,
+                                False
+                            )
                         
                         # Prepend connection before partial segment
                         new_legs.extend(deepcopy(combined_pattern.legs))
@@ -72,14 +81,30 @@ class PatternUtils():
 
                     # Departure based routing
                     else:
+                        new_legs = deepcopy(connection.legs)
+                        new_modes = deepcopy(connection.modes)
+
+                        # Adjust times when connection segment does not contain public transport
+                        if PatternUtils.__legs_without_pt(new_legs) and not bicycle_public:
+                            # Align connection start to partial end
+                            PatternUtils.justify_time(
+                                TripPattern(legs=new_legs),
+                                combined_pattern.aimedEndTime,
+                                False
+                            )
+
                         # Align partial start to connection start if needed
-                        if PatternUtils.__legs_without_pt(combined_pattern.legs):
-                            PatternUtils.justify_time(combined_pattern, connection.legs[0].aimedStartTime, True)
+                        elif PatternUtils.__legs_without_pt(combined_pattern.legs):
+                            PatternUtils.justify_time(
+                                combined_pattern,
+                                new_legs[0].aimedStartTime,
+                                True
+                            )
 
                         # Append connection after partial segment
-                        combined_pattern.legs.extend(connection.legs)
-                        combined_pattern.aimedEndTime = connection.aimedEndTime
-                        combined_pattern.modes = combined_pattern.modes + connection.modes
+                        combined_pattern.legs.extend(new_legs)
+                        combined_pattern.aimedEndTime = new_legs[-1].aimedEndTime
+                        combined_pattern.modes = combined_pattern.modes + new_modes
                     
                     # Store combined result
                     trip_patterns.append(combined_pattern)

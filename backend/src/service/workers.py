@@ -8,6 +8,8 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 from typing import Any, Awaitable, Callable, Type
+from config.db import PRODUCTION
+from service.weather_service import WeatherService
 from service.prediction_service import PredictionService
 from service.database_service import DatabaseService
 from service.population_service import PopulationService
@@ -36,12 +38,14 @@ async def load_initial_data():
         _safe_reload(GBFSService),
         _safe_reload(LissyService),
         _safe_reload(PopulationService),
-        _safe_reload(DatabaseService)
     )
+    if PRODUCTION:
+        await _safe_reload(WeatherService)
     await asyncio.gather(
-        _safe_reload(GTFSRTService),
-        _safe_reload(PredictionService)
+        _safe_reload(DatabaseService),
+        _safe_reload(GTFSRTService)
     )
+    await _safe_reload(PredictionService)
 
 def seconds_until_next(
     hour: int,
@@ -84,7 +88,7 @@ def seconds_until_next(
 
     return (target - now).total_seconds()
 
-def seconds_until_next_10min_offset(offset: int = 1) -> float:
+def seconds_until_next_10min_offset(offset_min: int = 1, offset_sec: int = 0) -> float:
     """
     Calculate seconds until next (10 minute interval + offset).
 
@@ -94,30 +98,51 @@ def seconds_until_next_10min_offset(offset: int = 1) -> float:
     now = datetime.now()
 
     # Next 10-minute boundary
-    next_minute = ((now.minute // 10) + 1) * 10 + offset
+    next_minute = ((now.minute // 10) + 1) * 10 + offset_min
 
-    target = now.replace(second=0, microsecond=0)
+    target = now.replace(second=offset_sec, microsecond=0)
 
     if next_minute >= 60:
-        target = target.replace(minute=offset) + timedelta(hours=1)
+        target = target.replace(minute=offset_min) + timedelta(hours=1)
     else:
         target = target.replace(minute=next_minute)
 
     return (target - now).total_seconds()
 
-async def run_periodic(task: Callable[[], Awaitable[None]], delay_fn: Callable[[], float], initial_load: bool):
+def seconds_until_next_10s_offset(offset: int = 2) -> float:
+    """
+    Calculate seconds until next (10 second interval + offset).
+
+    Args:
+        offset: Offset in seconds
+    """
+    now = datetime.now()
+
+    sec = now.second
+
+    # Next 10-second boundary
+    next_sec = ((sec // 10) + 1) * 10 + offset
+
+    target = now.replace(microsecond=0)
+
+    if next_sec >= 60:
+        target = target.replace(second=offset) + timedelta(minutes=1)
+    else:
+        target = target.replace(second=next_sec)
+
+    return (target - now).total_seconds()
+
+async def run_periodic(task: Callable[[], Awaitable[None]], delay_fn: Callable[[], float]):
     """
     Execute an asynchronous task periodically.
 
     Args:
         task: Asynchronous function to execute
         delay_fn: Function returning delay before next execution
-        initial_load: If true, run task immediately on server start
     """
     while True:
-        # Wait before execution if not initial load
-        if not initial_load:
-            await asyncio.sleep(delay_fn())
+        # Wait before execution
+        await asyncio.sleep(delay_fn())
 
         # Execute scheduled task
         try:
@@ -125,18 +150,13 @@ async def run_periodic(task: Callable[[], Awaitable[None]], delay_fn: Callable[[
         except Exception:
             logging.exception(f"{task.__name__} failed")
 
-        # Wait after execution if initial load was done
-        if initial_load:
-            await asyncio.sleep(delay_fn())
-
 async def gtfs_worker():
     """
     Periodic worker for updating GTFS data.
     """
     await run_periodic(
         GTFSService.get_instance().reload,
-        lambda: seconds_until_next(**GTFS_INTERVAL),
-        initial_load=False
+        lambda: seconds_until_next(**GTFS_INTERVAL)
     )
 
 async def gbfs_worker():
@@ -145,8 +165,7 @@ async def gbfs_worker():
     """
     await run_periodic(
         GBFSService.get_instance().reload,
-        lambda: seconds_until_next(**GBFS_INTERVAL),
-        initial_load=False
+        lambda: seconds_until_next_10min_offset(offset_min=0)
     )
 
 async def database_worker():
@@ -155,8 +174,7 @@ async def database_worker():
     """
     await run_periodic(
         DatabaseService.get_instance().reload,
-        lambda: seconds_until_next_10min_offset(1),
-        initial_load=False
+        lambda: seconds_until_next_10min_offset(offset_min=0, offset_sec=30)
     )
 
 async def lissy_worker():
@@ -165,8 +183,7 @@ async def lissy_worker():
     """
     await run_periodic(
         LissyService.get_instance().reload,
-        lambda: seconds_until_next(**LISSY_INTERVAL),
-        initial_load=False
+        lambda: seconds_until_next(**LISSY_INTERVAL)
     )
 
 async def gtfs_rt_worker():
@@ -175,8 +192,25 @@ async def gtfs_rt_worker():
     """
     await run_periodic(
         GTFSRTService.get_instance().reload,
-        lambda: VEHICLE_POSITION_INTERVAL,
-        initial_load=True
+        lambda: seconds_until_next_10s_offset(2)
+    )
+
+async def weather_worker():
+    """
+    Periodic worker for updating weather data.
+    """
+    await run_periodic(
+        WeatherService.get_instance().reload,
+        lambda: seconds_until_next_10min_offset(offset_min=0)
+    )
+
+async def prediction_worker():
+    """
+    Periodic worker for computing prediction.
+    """
+    await run_periodic(
+        PredictionService.get_instance().reload,
+        lambda: seconds_until_next_10min_offset(offset_min=1)
     )
 
 # End of file workers.py

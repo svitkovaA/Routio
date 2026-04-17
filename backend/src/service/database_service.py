@@ -6,12 +6,17 @@ data from the database.
 """
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple
 import pandas as pd
 import time
 import numpy as np
+from service.weather_service import WeatherService
+from config.db import PRODUCTION, PRODUCTION_WINDOW_DAYS
+from models.route import TZ
 from database.db import create_conn, database
 from service.service_base import ServiceBase
+from service.gbfs_service import GBFSService
 
 @dataclass(frozen=True)
 class _DatabaseState:
@@ -34,6 +39,12 @@ class DatabaseService(ServiceBase[_DatabaseState]):
     def __init__(self):
         super().__init__()
 
+        # GBFS service instance
+        self.__gbfs_service = GBFSService.get_instance()
+
+        # Weather service instance
+        self.__weather_service = WeatherService.get_instance()
+
     async def reload(self) -> None:
         """
         Reloads data and replaces the internal cached state.
@@ -48,8 +59,25 @@ class DatabaseService(ServiceBase[_DatabaseState]):
         Returns:
             _DatabaseState: Newly constructed database state
         """
-        # Download newest data
-        await database()
+        if PRODUCTION:
+            # Ensure database contains only recent data
+            await self.__ensure_db_window()
+
+            # If database is empty, try to initialize it
+            if await self.__db_empty():
+                await database()
+
+                # If still empty, fallback to runtime loading
+                if await self.__db_empty():
+                    await self.__runtime_load()
+
+            # Refresh data during runtime
+            else:
+                await self.__runtime_load()
+
+        else:
+            # Download newest data
+            await database()
 
         # Retrieve station ids and coordinates
         station_ids, station_coordinates = await self.__get_station_info()
@@ -62,6 +90,133 @@ class DatabaseService(ServiceBase[_DatabaseState]):
             station_ids=station_ids,
             weather_map=weather_map
         )
+    
+    @staticmethod
+    async def __ensure_db_window():
+        """
+        Removes outdated data from the database based on configured time window.
+        """
+        threshold_dt = datetime.now(tz=TZ) - timedelta(days=PRODUCTION_WINDOW_DAYS, hours=1)
+        threshold_ms = int(threshold_dt.timestamp() * 1000)
+
+        async with create_conn() as conn:
+            deleted_bicycle = await conn.execute(
+                """
+                DELETE FROM bicycle
+                WHERE unix_timestamp < $1
+                """,
+                threshold_ms
+            )
+
+            deleted_weather = await conn.execute(
+                """
+                DELETE FROM weather
+                WHERE unix_timestamp < $1
+                """,
+                threshold_ms
+            )
+
+        print(f"Deleted bicycle rows: {deleted_bicycle}")
+        print(f"Deleted weather rows: {deleted_weather}")
+
+    @staticmethod
+    async def __db_empty() -> bool:
+        """
+        Checks whether the bicycle table contains any data.
+
+        Returns:
+            bool: True if empty, false otherwise
+        """
+        async with create_conn() as conn:
+            exists = await conn.fetchval("""
+                SELECT EXISTS (
+                    SELECT 1 FROM bicycle LIMIT 1
+                );
+            """)
+        return not exists
+    
+    async def __load_bicycles(self) -> None:
+        """
+        Loads bike station data and availability data into the database.
+        """
+        bicycle_station_info = self.__gbfs_service.get_station_info()
+
+        # Prepare station records
+        bicycle_station_rows: List[Tuple[int, float, float]] = [
+            (int(item["id"]), item["lat"], item["lon"])                 # type: ignore
+            for item in bicycle_station_info
+        ]
+
+        # Prepare bike availability rows
+        bicycle_rows = self.__gbfs_service.get_bicycle_rows()
+        print("bike: ", len(bicycle_rows))
+        print("stations: ", len(bicycle_station_rows))
+
+        async with create_conn() as conn:
+            await conn.executemany(
+                    """
+                    INSERT INTO station (station_id, latitude, longitude)
+                    VALUES ($1, $2, $3)
+                    ON CONFLICT (station_id) DO NOTHING
+                    """,
+                    bicycle_station_rows,
+                )
+            
+            await conn.executemany(
+                    """
+                    INSERT INTO bicycle (station_id, unix_timestamp, available_bicycles)
+                    VALUES ($1, $2, $3)
+                    ON CONFLICT (station_id, unix_timestamp)
+                    DO UPDATE SET
+                        available_bicycles = EXCLUDED.available_bicycles
+                    """,
+                    bicycle_rows,
+                )
+
+    async def __load_weather(self) -> None:
+        """
+        Loads weather station data and weather data into the database.
+        """
+        weather_stations = self.__weather_service.get_stations()
+        weather_data = self.__weather_service.get_weather_rows()
+
+        async with create_conn() as conn:
+            await conn.executemany(
+                """
+                INSERT INTO weather_station (weather_station_id, latitude, longitude)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (weather_station_id) DO NOTHING
+                """,
+                weather_stations,
+            )
+
+            await conn.executemany(
+                    """
+                    INSERT INTO weather (
+                        weather_station_id,
+                        weather_id,
+                        unix_timestamp,
+                        temperature,
+                        wind_speed,
+                        clouds
+                    )
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                    ON CONFLICT (weather_station_id, unix_timestamp)
+                    DO UPDATE SET
+                        weather_id = EXCLUDED.weather_id,
+                        temperature = EXCLUDED.temperature,
+                        wind_speed = EXCLUDED.wind_speed,
+                        clouds = EXCLUDED.clouds
+                    """,
+                    weather_data,
+                )
+
+    async def __runtime_load(self) -> None:
+        """
+        Performs bicycles and weather runtime data update.
+        """
+        await self.__load_bicycles()
+        await self.__load_weather()
 
     @staticmethod
     async def __get_station_info() -> Tuple[List[int], np.ndarray]:
@@ -84,7 +239,6 @@ class DatabaseService(ServiceBase[_DatabaseState]):
                 JOIN public.station s ON b.station_id = s.station_id
                 GROUP BY b.station_id, s.latitude, s.longitude
                 ORDER BY records DESC
-                LIMIT 273
                 """
             )
 

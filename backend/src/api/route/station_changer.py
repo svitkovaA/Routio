@@ -21,6 +21,7 @@ from shared.leg_utils import LegUtils
 from models.route import (
     TIME_INDEPENDENT_MODES,
     BikeStationInfo,
+    BikeStationNode,
     Leg,
     Mode,
     Place,
@@ -73,10 +74,10 @@ class StationChanger():
 
     async def __rebuild_pattern_departure(self) -> TripPattern:
         """
-        Rebuilds trip pattern after bike station change
+        Rebuilds trip pattern after bike station change.
 
         Returns:
-            Updated TripPattern with recalculated prefix and timing.
+            Updated TripPattern with recalculated prefix and timing
         """
         legs = self.__ctx.data.original_legs
 
@@ -125,10 +126,10 @@ class StationChanger():
 
     async def __rebuild_pattern_arrival(self) -> TripPattern:
         """
-        Rebuilds trip pattern after bike station change
+        Rebuilds trip pattern after bike station change.
 
         Returns:
-            Updated TripPattern with recalculated suffix and timing.
+            Updated TripPattern with recalculated suffix and timing
         """
         legs = self.__ctx.data.original_legs
 
@@ -622,7 +623,7 @@ class StationChanger():
             leg_index: Index of leg in original route used for reconnection
 
         Returns:
-            List of newly computed legs including wait segment.
+            List of newly computed legs including wait segment
         """
         from_place = self.__ctx.place
         to_place = self.__ctx.data.original_legs[leg_index].toPlace
@@ -680,7 +681,7 @@ class StationChanger():
             leg_index: Index of leg in original route used for reconnection
 
         Returns:
-            List of newly computed legs including wait segment.
+            List of newly computed legs including wait segment
         """
         from_place = self.__ctx.data.original_legs[leg_index].fromPlace
         to_place = self.__ctx.place
@@ -731,8 +732,14 @@ class StationChanger():
         Creates artificial wait leg representing bike lock/unlock time.
 
         Returns:
-            Leg instance with mode "wait" and bike station metadata.
+            Leg instance with mode "wait" and bike station metadata
         """
+        new_station = self.__ctx.data.bike_stations[self.__ctx.data.new_index]
+        predicted_bikes = (
+            new_station.place.predictedBikes
+            if isinstance(new_station, BikeStationNode)
+            else None
+        )
         return Leg(
             mode="wait",
             color="black",
@@ -747,6 +754,14 @@ class StationChanger():
                 origin=self.__ctx.data.origin_bike_station,
                 selectedBikeStationIndex=self.__ctx.data.new_index,
                 bikeStations=self.__ctx.data.bike_stations
+            ),
+            zeroBikesPredicted=(
+                self.__ctx.data.origin_bike_station and
+                not self.__routing_ctx.data.use_own_bike and
+                (
+                    predicted_bikes is None or
+                    predicted_bikes == 0
+                )
             )
         )
     
@@ -853,7 +868,7 @@ class StationChanger():
 
         Returns:
             First TripPattern returned by routing engine,
-            or None if no route was found.
+            or None if no route was found
         """
         # Offset for mapping station indices for the changed route part
         offset = (
@@ -886,7 +901,7 @@ class StationChanger():
         )
 
         # Initialize routing engine with updated data
-        engine = RoutingEngine(new_route_data, self.__routing_ctx.session)
+        engine = RoutingEngine(new_route_data, self.__routing_ctx.session, station_changer=True)
 
         # Execute routing
         trip_patterns = await engine.plan_route()
@@ -897,7 +912,7 @@ class StationChanger():
     @staticmethod
     def __at_waypoint(lat: float, lon: float, waypoint: str) -> bool:
         """
-        Check whether a given geographic position is close a specified waypoint
+        Check whether a given geographic position is close a specified waypoint.
 
         Args:
             lat: Latitude of the given position
@@ -926,7 +941,7 @@ class StationChanger():
             modes: Original routing modes for affected segment
 
         Returns:
-            List of normalized routing modes.
+            List of normalized routing modes
         """
         if self.__routing_ctx.data.arrive_by:
             # Remove public_bicycle from routing modes

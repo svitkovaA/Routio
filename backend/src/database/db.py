@@ -7,11 +7,9 @@ Database connection management and initialization utilities.
 import asyncpg                  # type: ignore[import-untyped]
 from contextlib import asynccontextmanager
 from config.db import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE
-from .load_weather import load_weather
-from .load_station import stations
-from .load_weather_stations import weather_stations
-from .create_db import create_tables
-from .load_bicycle import load_bicycle_records
+from database.create_db import create_tables
+from database.load_bicycles import load_bicycles
+from database.load_weather import load_weather
 
 # Global connection pool used across the application
 pool: asyncpg.Pool | None = None
@@ -60,20 +58,14 @@ async def create_conn():
     async with pool.acquire() as conn:
         yield conn
 
-async def database():
+async def database() -> None:
     """
     Load all required data into the database.
     """
     async with create_conn() as conn:
-        pass
-        # await weather_stations(conn)
 
-        # await stations(conn)
+        await load_bicycles(conn)
 
-        # await load_bicycle_records(conn)
-
-        # await load_weather(conn)
-
-        # await load_bike_racks(conn)
+        await load_weather(conn)
 
 # End of file db.py

@@ -44,6 +44,12 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
 
         # Reference to static GTFS service
         self.__gtfs_service = GTFSService.get_instance()
+    
+    async def _shutdown(self) -> None:
+        """
+        Gracefully releases service resources.
+        """
+        await self.__client.aclose()
 
     async def reload(self) -> None:
         """

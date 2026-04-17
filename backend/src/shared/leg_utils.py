@@ -93,6 +93,10 @@ class LegUtils():
             # Assign fallback color if none is provided
             if not leg.color:
                 leg.color = LegUtils.COLORS.get(leg.mode, "black")
+            
+            # Change white color to black for better visualisation
+            if leg.color in ["#ffffff", "white", "#FFFFFF"]:
+                leg.color = "black"
 
     @staticmethod
     def __collect_vehicle_realtime_data(legs: List[Leg]) -> List[VehicleRealtimeData]:

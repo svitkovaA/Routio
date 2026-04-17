@@ -71,6 +71,12 @@ class LissyService(ServiceBase[_LissyState]):
         self.__cache_dir = Path(LISSY_DELAY_CACHE_PATH)
         self.__cache_dir.mkdir(parents=True, exist_ok=True)
 
+    async def _shutdown(self) -> None:
+        """
+        Gracefully releases service resources.
+        """
+        await self.__client.aclose()
+
     async def reload(self) -> None:
         """
         On reload updates Lissy data and replaces the internal cache state.

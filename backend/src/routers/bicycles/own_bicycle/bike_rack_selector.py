@@ -54,7 +54,7 @@ class BikeRackSelector(SelectorBase):
         )
 
         # Retrieve scoring weights
-        angle_weight, distance_weight = self.__get_weights(bicycle_public)
+        angle_weight, availability_weight, distance_weight = self._destination_weights()
 
         scored_racks: List[BikeRackNode] = []
         discarded_racks: List[BikeRackNode] = []
@@ -85,6 +85,7 @@ class BikeRackSelector(SelectorBase):
             # Compute final weighted score
             rack.score = (
                 angle_weight * normalized_angle +
+                availability_weight * (np.clip(rack.place.capacity, 0, 5) / 5) + 
                 distance_weight * (self._max_distance - rack.distance) / self._max_distance
             )
         
@@ -153,23 +154,5 @@ class BikeRackSelector(SelectorBase):
             )
 
         return racks
-
-    @staticmethod
-    def __get_weights(bicycle_public: bool) -> Tuple[float, float]:
-        """
-        Returns scoring weights for bicycle rack selection. Weights
-        correspond to: (angle_weight, distance_weight)
-
-        Args:
-            bicycle_public: Determines scoring emphasis.
-
-        Returns:
-            Tuple of two weight coefficients
-        """
-        # If bicycle_ public emphasize direction alignment
-        if bicycle_public:
-            return 0.6, 0.4
-        # Otherwise emphasize distance
-        return 0.4, 0.6
 
 # End of file bike_rack_selector.py

@@ -397,7 +397,8 @@ class PublicBicycleRouter(RouterBase, Router):
         return PatternUtils.combine(
             bike_trip_patterns,
             [public_trip_patterns],
-            True
+            True,
+            public_bicycle=True
         )
     
     def _estimate_public_time_duration(self, waypoints: List[str]) -> timedelta:

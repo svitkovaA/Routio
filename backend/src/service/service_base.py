@@ -89,5 +89,21 @@ class ServiceBase(ABC, Generic[S]):
             return True
         except:
             return False
+        
+    async def _shutdown(self) -> None:
+        """
+        Gracefully releases service resources.
+        """
+        pass
+        
+    @classmethod
+    @final
+    async def shutdown_services(cls) -> None:
+        """
+        Gracefully releases resources of all instantiated services.
+        """
+        for instance in cls.__instances.values():
+            if isinstance(instance, ServiceBase):
+                await instance._shutdown()
 
 # End of file service_base.py
