@@ -5,12 +5,14 @@
  */
 
 .waystop {
-    height: 30px;
+    height: fit-content;
+    min-height: 30px;
     border-bottom: 1px solid black;
     border-top: 1px solid black;
     font-size: 15px;
     padding-left: 10px;
     padding-top: 5px;
+    padding-bottom: 5px;
     font-size: var(--font-size-detail);
 }
 
@@ -19,7 +21,11 @@
     grid-template-columns: 40px calc(100% - 50px);
     margin-left: -55px;
     gap: 10px;
-    height: 30px;
+}
+
+.waystop-detail > span {
+    height: fit-content;
+    margin: auto 0;
 }
 
 /** End of file Waystop.css */

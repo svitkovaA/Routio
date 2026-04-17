@@ -65,13 +65,10 @@
 
 .slider-media {
     width: 100%;
+    max-width: 300px;
     border-radius: 6px;
     margin: 0 auto;
     display: flex;
-}
-
-.slider-media.video {
-    max-width: 40%;
 }
 
 .how-to-img-slider {
@@ -103,6 +100,34 @@
 .slider-cnt {
     display: flex;
     align-items: center;
+}
+
+.how-to-flex {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.about-header.small{
+    font-size: 16px;
+    padding-top: 10px;
+}
+
+.how-to-list {
+    padding-left: 20px;
+    list-style: circle;
+}
+
+.how-to-bold {
+    font-weight: bolder;
+    background-color: var(--color-info);
+    color: white;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+.howto-content {
+    margin-top: 10px;
 }
 
 @media screen and (min-width: 768px) {
@@ -149,7 +174,21 @@
     
     .slider-media {
         max-height: max(calc(100vh - 450px), 400px);
+        max-width: none;
         width: auto;
+    }
+
+    .how-to-flex {
+        flex-direction: row;
+        gap: 40px;
+    }
+
+    .how-to-right {
+        flex-grow: 1;
+    }
+
+    .howto-content {
+        margin-top: 0px;
     }
 }
 

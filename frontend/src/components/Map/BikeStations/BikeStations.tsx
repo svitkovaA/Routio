@@ -12,6 +12,7 @@ import { useResult } from "../../Contexts/ResultContext";
 import { useChangeBikeStation } from "../../Routing/ChangeBikeStation";
 import { createBikeStationPin, createSmallBikeStationPin } from "../MapComponents";
 import CustomLeafletTooltip from "../../CustomTooltip/CustomLeafletTooltip";
+import CustomTooltip from "../../CustomTooltip/CustomTooltip";
 import "./BikeStations.css";
 
 type BikeStationsProps = {
@@ -99,7 +100,6 @@ function BikeStations({
                                     <div className="bike-stations-coords">
                                         <div>{t("map.lat")}: {leg.bikeStationInfo?.latitude.toFixed(5)}</div>
                                         <div>{t("map.lon")}: {leg.bikeStationInfo?.longitude.toFixed(5)}</div>
-                                        <div>{t("map.score")}: {(selectedStation.score * 100).toFixed(2)} %</div>
                                     </div>
                                     {leg.bikeStationInfo.origin ? (
                                         <>
@@ -108,12 +108,18 @@ function BikeStations({
                                                 <div className="count">
                                                     {selectedStation.place.bikesAvailable !== undefined && selectedStation.place.bikesAvailable < 10 ? selectedStation.place.bikesAvailable : "10+"}
                                                 </div>
-                                                <div>{t("map.bike", { count: selectedStation.place.bikesAvailable })}</div>
                                             </div>
                                             <div className="bike-stations-bike-count">
                                                 <div className="count-header">{t("map.predicted")}</div>
-                                                <div className="count">{selectedStation.place.predictedBikes !== null ? selectedStation.place.predictedBikes : "--"}</div>
-                                                <div>{t("map.bike", { count: selectedStation.place.bikesAvailable })}</div>
+                                                <div className="count">
+                                                    {selectedStation.place.predictedBikes !== null ? (
+                                                        selectedStation.place.predictedBikes
+                                                    ) : (
+                                                        <CustomTooltip title={t("tooltips.map.noPrediction")}>
+                                                            <span>--</span>
+                                                        </CustomTooltip>
+                                                    )}
+                                                </div>
                                             </div>
                                         </>
                                     ) : (
@@ -122,7 +128,6 @@ function BikeStations({
                                             <div className="count">
                                             {capacity !== undefined && capacity < 10 ? capacity : "10+"}
                                             </div>
-                                            <div>{t("map.bike", { count: capacity ?? 0 })}</div>
                                         </div>
                                     )}
                                 </div>
@@ -160,7 +165,6 @@ function BikeStations({
                                             <div className="bike-stations-coords">
                                                 <div>{t("map.lat")}: {station.place.latitude.toFixed(5)}</div>
                                                 <div>{t("map.lon")}: {station.place.longitude.toFixed(5)}</div>
-                                                <div>{t("map.score")}: {(station.score * 100).toFixed(2)} %</div>
                                             </div>
                                             {leg.bikeStationInfo?.origin ? (
                                                 <>
@@ -169,12 +173,18 @@ function BikeStations({
                                                         <div className="count">
                                                             {station.place.bikesAvailable !== undefined && station.place.bikesAvailable < 10 ? station.place.bikesAvailable : "10+"}
                                                         </div>
-                                                        <div>{t("map.bike", { count: station.place.bikesAvailable })}</div>
                                                     </div>
                                                     <div className="bike-stations-bike-count">
                                                         <div className="count-header">{t("map.predicted")}</div>
-                                                        <div className="count">{station.place.predictedBikes !== null ? station.place.predictedBikes : "--"}</div>
-                                                        <div>{t("map.bike", { count: station.place.bikesAvailable })}</div>
+                                                        <div className="count">
+                                                            {station.place.predictedBikes !== null ? (
+                                                                station.place.predictedBikes
+                                                            ) : (
+                                                                <CustomTooltip title={t("tooltips.map.noPrediction")}>
+                                                                    <span>--</span>
+                                                                </CustomTooltip>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </>
                                             ) : (
@@ -183,7 +193,6 @@ function BikeStations({
                                                     <div className="count">
                                                     {station.place.capacity !== undefined && station.place.capacity < 10 ? station.place.capacity : "10+"}
                                                     </div>
-                                                    <div>{t("map.bike", { count: station.place.capacity })}</div>
                                                 </div>
                                             )}
                                         </div>

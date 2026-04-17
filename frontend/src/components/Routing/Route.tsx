@@ -55,7 +55,8 @@ export function useRoute() {
         results, setResults,
         setShowResults,
         setLoading,
-        abortRef
+        abortRef,
+        setRoutingError
     } = useResult();
 
     // Notification context
@@ -189,6 +190,7 @@ export function useRoute() {
 
                 if (!result.ok) {
                     showNotification(t("errors.routingFailed"), "error");
+                    setRoutingError(true);
                     throw new Error("Server error");
                 }
 
@@ -224,7 +226,7 @@ export function useRoute() {
     }, [waypoints, legPreferences, arriveBy, useOwnBike, preference, date, time, maxTransfers, selectedModes,
         maxBikeDistance,bikeAverageSpeed, maxBikesharingDistance, bikesharingAverageSpeed, maxWalkDistance, 
         walkAverageSpeed, bikesharingLockTime, bikeLockTime, results, abortRef, setLoading, setResultActiveIndex,
-        setResults, setShowResults, showNotification, useHistoricalDelays, t
+        setResults, setShowResults, showNotification, useHistoricalDelays, t, setRoutingError
     ]);
     return route;
 }

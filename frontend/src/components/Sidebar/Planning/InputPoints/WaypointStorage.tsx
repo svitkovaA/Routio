@@ -11,8 +11,7 @@ const MAX_STORED_WAYPOINTS = 5;
 
 // Local storage keys
 const MIDDLE_WAYPOINTS = "middle_waypoints";
-const ORIGIN = "first_waypoints";
-const DESTINATION = "last_waypoints";
+const END_WAYPOINTS = "end_waypoints";
 
 // Maximum distance for considering to waypoints the same
 const MAX_DISTANCE = 100;
@@ -128,14 +127,14 @@ function storeMiddleWaypoints(waypoints: StoredWaypoint[], yourLocation: string)
  * @param key Key to local storage
  * @param yourLocation String representing the detected location
  */
-function storeWaypoint(waypoint: StoredWaypoint, key: string, yourLocation: string) {
+function storeWaypoint(waypoint: StoredWaypoint, yourLocation: string) {
     // Skip your location
     if (waypoint.name === yourLocation) {
         return;
     }
 
     // Load stored stack
-    const stack = load(key);
+    const stack = load(END_WAYPOINTS);
 
     // Remove duplicities
     for (let i = 0; i < stack.length; i++) {
@@ -147,7 +146,7 @@ function storeWaypoint(waypoint: StoredWaypoint, key: string, yourLocation: stri
 
     // Insert new waypoint at the beginning and save
     stack.unshift(waypoint);
-    save(key, stack.slice(0, MAX_STORED_WAYPOINTS));
+    save(END_WAYPOINTS, stack.slice(0, MAX_STORED_WAYPOINTS));
 }
 
 /**
@@ -169,20 +168,13 @@ export const storeWaypoints = (waypoints: Waypoint[], yourLocation: string) => {
     }
 
     // Store origin
-    storeWaypoint(waypointsToStore[0], ORIGIN, yourLocation);
+    storeWaypoint(waypointsToStore[0], yourLocation);
 
     // Store destination
-    storeWaypoint(waypointsToStore[waypointsToStore.length - 1], DESTINATION, yourLocation);
+    storeWaypoint(waypointsToStore[waypointsToStore.length - 1], yourLocation);
     
     // Store intermediate waypoints
     storeMiddleWaypoints(waypointsToStore.slice(1, -1), yourLocation);
-};
-
-/**
- * Loads stored origin waypoints
- */
-export const loadOrigin = () => {
-    return load(ORIGIN);
 };
 
 /**
@@ -193,10 +185,10 @@ export const loadMiddleWaypoints = () => {
 };
 
 /**
- * Loads stored destination waypoints
+ * Loads stored end waypoints
  */
-export const loadDestination = () => {
-    return load(DESTINATION);
+export const loadEndWaypoints = () => {
+    return load(END_WAYPOINTS);
 };
 
 /** End of file WaypointStorage.tsx */

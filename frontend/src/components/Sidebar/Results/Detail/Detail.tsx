@@ -5,7 +5,7 @@
  */
 
 import { Fragment, useEffect, useState } from "react";
-import type { TripPattern, VerticalTimeline } from "../../../types/types";
+import type { Leg, VerticalTimeline } from "../../../types/types";
 import PublicTransportDetail from "./PublicTransportDetail/PublicTransportDetail";
 import WalkDetail from "./WalkDetail/WalkDetail";
 import BicycleDetail from "./BicycleDetail/BicycleDetail";
@@ -17,26 +17,24 @@ import { useResult } from "../../../Contexts/ResultContext";
 import "./Detail.css"
 
 type DetailProps = {
-    tripPattern: TripPattern;                                               // Trip pattern displayed in the detail view
     recalculatePattern: (selectedIndex: number, legIndex: number) => void;  // Callback used to recalculate pattern when selecting alternative departures
 }
 
-function Detail({ 
-    tripPattern, 
+function Detail({
     recalculatePattern
 } : DetailProps) {
     // Waypoints entered by the user
     const { waypoints } = useInput();
 
     // Setter for selecting a public transport leg
-    const { setPublicLegIndex } = useResult();
+    const { setPublicLegIndex, pattern } = useResult();
 
     // Counter used to track which waypoint should be displayed
     let waypointCount = 0;
     
     // State representing the vertical timeline segments
     const [verticalTimeline, setVerticalTimeline] = useState<VerticalTimeline[]>(
-        tripPattern?.originalLegs.map(leg => ({
+        pattern?.originalLegs.map(leg => ({
             color: leg.color,
             length: 60,
             mode: leg.mode,
@@ -44,38 +42,82 @@ function Detail({
         }))
     );
 
+    // Filter out non wait legs
+    const nonWaitLegs = pattern?.originalLegs.filter(l => l.mode != "wait");
+
+    // State storing heights of individual Waystop components
+    const [waystopHeights, setWaystopHeights] = useState<number[]>(
+        Array((nonWaitLegs.length ?? -1) + 1).fill(30)
+    );
+
+    // Find index of a given leg within non wait legs
+    const findIndex = (leg: Leg) => nonWaitLegs.findIndex(l => l === leg);
+
+    // Update height of a specific waystop
+    const setHeight = (index: number, value: number) => {
+        setWaystopHeights(prev => {
+            // Skip update if index is invalid or value unchanged
+            if (index < 0 || index >= prev.length || prev[index] === value) {
+                return prev;
+            }
+
+            const copy = [...prev];
+            copy[index] = value;
+            return copy;
+        });
+    };
+
+    /**
+     * Compute vertical offset between two adjacent waystops
+     */
+    const computeOffset = (leg: Leg) => {
+        const index = findIndex(leg);
+        const prevHeight = waystopHeights[index] / 2;
+        const nextHeight = waystopHeights[index + 1] / 2;
+
+        // Compute vertical offset between two adjacent waystops
+        return prevHeight + nextHeight;
+    }
+
     /**
      * Update vertical timeline when trip pattern changes
      */
     useEffect(() => {
         setVerticalTimeline(
-            tripPattern?.originalLegs.map(leg => ({
+            pattern?.originalLegs.map(leg => ({
                 color: leg.color,
                 length: 60,
                 mode: leg.mode,
                 artificial: leg.artificial
             }))
         );
-    }, [tripPattern]);
+        setWaystopHeights(Array((nonWaitLegs.length ?? -1) + 1).fill(30));
+    }, [pattern, nonWaitLegs.length]);
 
     return (
         <div className="detail-wrapper">
 
             {/* Vertical timeline */}
-            <VerticalTimelineComponent verticalTimeline={verticalTimeline} />
+            <VerticalTimelineComponent 
+                verticalTimeline={verticalTimeline}
+                offset={Math.floor(waystopHeights[0] / 2)}
+            />
             <div className="detail-patterns">
-                {tripPattern?.originalLegs.map((leg, index) => {
+                {pattern?.originalLegs.map((leg, index) => {
                     /** Mode of the previous and next legs */
-                    const previousLegMode = index > 0 ? tripPattern.originalLegs[index - 1].mode : null;
-                    const nextLegMode = index < tripPattern.originalLegs.length - 1 ? tripPattern.originalLegs[index + 1].mode : null;
+                    const previousLegMode = index > 0 ? pattern.originalLegs[index - 1].mode : null;
+                    const nextLegMode = index < pattern.originalLegs.length - 1 ? pattern.originalLegs[index + 1].mode : null;
                    
                     // Determines whether an intermediate waypoint should be displayed
                     let displayWaypoint = false;
 
                     // Consecutive walking or cycling legs share waypoints
-                    if (previousLegMode === leg.mode && (leg.mode === "foot" || leg.mode === "bicycle")) {
+                    if (previousLegMode !== null && ["foot", "bicycle"].includes(previousLegMode) && ["foot", "bicycle"].includes(leg.mode)) {
                         waypointCount++;
-                        displayWaypoint = index !== tripPattern.originalLegs.length - 1 || !!leg.walkMode;
+                        displayWaypoint = index !== pattern.originalLegs.length - 1 || leg.mode == "foot";
+                        if (displayWaypoint) {
+                            console.log(index);
+                        }
                     }
 
                     // Start and end times
@@ -89,6 +131,7 @@ function Detail({
                                 <Waystop
                                     time={time}
                                     name={waypoints[waypointCount]?.displayName}
+                                    updateHeight={(v) => setHeight(0, v)}
                                 />
                             )}
 
@@ -97,6 +140,7 @@ function Detail({
                                 <Waystop
                                     time={time}
                                     name={waypoints[waypointCount]?.displayName}
+                                    updateHeight={(v) => setHeight(findIndex(leg), v)}
                                 />
                             )}
 
@@ -107,6 +151,7 @@ function Detail({
                                         leg={leg}
                                         setVerticalTimeline={setVerticalTimeline}
                                         index={index}
+                                        offset={computeOffset(leg)}
                                     />
                                 )
                             ) : leg.mode === "bicycle" ? (
@@ -116,17 +161,20 @@ function Detail({
                                     index={index}
                                     displayUnlockTime={previousLegMode === "wait"}
                                     displayLockTime={nextLegMode === "wait"}
+                                    offset={computeOffset(leg)}
                                 />
                             ) : leg.mode === "wait" ? (
                                 <Waystop
                                     time={previousLegMode === "bicycle" ? endTime : time}
                                     name={leg.bikeStationInfo?.bikeStations[leg.bikeStationInfo.selectedBikeStationIndex].place.name}
+                                    updateHeight={(v) => setHeight(findIndex(pattern?.originalLegs[index + 1]), v)}
                                 />
                             ) : leg.mode === "transfer" ? (
                                 <Transfer
                                     leg={leg}
                                     setVerticalTimeline={setVerticalTimeline}
                                     index={index}
+                                    offset={computeOffset(leg)}
                                 />
                             ) : (
                                 <PublicTransportDetail
@@ -135,14 +183,18 @@ function Detail({
                                     index={index}
                                     moreDeparturesClick={() => setPublicLegIndex(index)}
                                     recalculatePattern={(selectedIndex: number) => recalculatePattern(selectedIndex, index)}
+                                    waystopHeightIndex={findIndex(leg)}
+                                    setHeight={setHeight}
+                                    offset={computeOffset(leg)}
                                 />
                             )}
 
                             {/* Destination waypoint */}
-                            {index === tripPattern.originalLegs.length - 1 && !leg.artificial && (
+                            {index === pattern.originalLegs.length - 1 && !leg.artificial && (
                                 <Waystop
                                     time={endTime}
                                     name={waypoints[waypointCount + 1]?.displayName}
+                                    updateHeight={(v) => setHeight(waystopHeights.length - 1, v)}
                                 />
                             )}
                         </Fragment>

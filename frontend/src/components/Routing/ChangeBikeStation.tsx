@@ -64,7 +64,6 @@ export function useChangeBikeStation() {
      */
     const changeBikeStation = async (originBikeStation: boolean, bikeStationIndex: number, bikeStations: BikeStation[], legIndex: number) => {
         // Extract current route structure
-        const legs = pattern.legs;
         const originalLegs = pattern?.originalLegs;
         const modes = pattern.modes;
         
@@ -119,7 +118,6 @@ export function useChangeBikeStation() {
                     origin_bike_station: originBikeStation,
                     new_index: bikeStationIndex,
                     bike_stations: bikeStations,
-                    legs: legs,
                     leg_index: legIndex,
                     modes: modes,
                     original_legs: originalLegs,

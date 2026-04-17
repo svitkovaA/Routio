@@ -18,7 +18,7 @@
     margin-left: -20px;
 }
 
-.no-results {
+.no-results, .routing-error {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -28,6 +28,10 @@
 
 .no-results > svg {
     color: var(--color-warning);
+}
+
+.routing-error > svg {
+    color: red;
 }
 
 /** End of file Results.css */

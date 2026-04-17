@@ -7,7 +7,7 @@
 .detail-switch {
     position: absolute;
     display: flex;
-    top: 100px;
+    top: 110px;
     justify-content: space-between;
     align-items: flex-start;
     width: 100%;
@@ -35,6 +35,12 @@
     height: 90px;
     border-top: 1px solid black;
     border-bottom: none;
+}
+
+@media screen and (min-width: 768px) {
+    .detail-switch {
+        top: 100px;
+    }
 }
 
 /** End of file DetailSwitch.css */

@@ -180,6 +180,7 @@ export type Leg = {
     nonContinuousDepartures?: boolean;      // Indicates that there are no further continuous departures available
     arrivalAfterDeparture?: boolean;        // Indicates data inconsistency where arrival time is after departure time
     artificial: boolean;                    // Indicates artificial leg
+    zeroBikesPredicted: boolean;            // Indicates zero bike prediction
 };
 
 /**

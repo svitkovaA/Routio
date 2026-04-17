@@ -4,7 +4,7 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import LandscapeIcon from '@mui/icons-material/Landscape';
@@ -15,6 +15,7 @@ import SouthEastIcon from '@mui/icons-material/SouthEast';
 import CustomTooltip from "../../../../CustomTooltip/CustomTooltip";
 import { useTranslation } from "react-i18next";
 import "./ElevationProfile.css"
+import type ApexCharts from "apexcharts";
 
 type ElevationProfileProps = {
     polyInfo?: PolyInfo;                        // Elevation and polyline data for the current leg
@@ -41,61 +42,50 @@ export default function ElevationProfile({
     // Controls visibility of the custom marker and fixed tooltip
     const [displayMarker, setDisplayMarker] = useState<boolean>(true);
 
+    // Pixel position
+    const [pointPos, setPointPos] = useState<{ x: number; y: number } | null>(null);
+
+    // Chart width
+    const [chartWidth, setChartWidth] = useState<number>(0);
+
     const ascent = polyInfo?.totalAscent;
     const descent = polyInfo?.totalDescent;
     const profile = polyInfo?.elevationProfile;
+
+    // Convert elevation profile into ApexCharts format
+    const seriesData = useMemo(() => {
+        return profile?.map(p => ({
+            x: p.distance / 1000,
+            y: p.elevation
+        })) ?? [];
+    }, [profile]);
 
     // Reference to chart element
     const chartRef = useRef<HTMLDivElement | null>(null);
 
     // Reference to chart context
-    const chartCtxRef = useRef<any>(null);
-
-    // Do not render component if elevation data are missing
-    if (!profile || ascent === undefined || descent === undefined) {
-        return null;
-    }
-
-    // Convert elevation profile into ApexCharts format
-    const seriesData = profile.map(p => ({
-        x: p.distance / 1000,
-        y: p.elevation
-    }));
-
-    const series = [
-        {
-            name: "Elevation",
-            data: seriesData
-        }
-    ];
-
-    // Calculate min and max elevation to configure Y axis
-    const elevations = profile.map(p => p.elevation);
-    const minElev = Math.min(...elevations);
-    const maxElev = Math.max(...elevations);
-
-    const range = maxElev - minElev;
-
-    // Dynamic Y axis step
-    let step = Math.ceil(range / 6);
-    step = Math.max(step, 60);
-
-    // Determine currently hovered point in the profile
-    const hoveredPoint =
-    elevationLegIndex === legIndex &&
-    hoveredProfileIndex !== null &&
-    hoveredProfileIndex >= 0 &&
-    hoveredProfileIndex < profile.length
-        ? profile[hoveredProfileIndex]
-        : null;
+    const chartCtxRef = useRef<ApexCharts | null>(null);
 
     /**
      * Converts data index into pixel position inside ApexCharts grid
      * 
      * @param index data index
      */
-    const getPointPosition = (index: number) => {
-        const ctx = chartCtxRef.current;
+    const getPointPosition = useCallback((index: number) => {
+        const ctx = chartCtxRef.current as unknown as {
+            w: {
+                globals: {
+                    translateX: number;
+                    translateY: number;
+                    gridWidth: number;
+                    gridHeight: number;
+                    minX: number;
+                    maxX: number;
+                    minY: number;
+                    maxY: number;
+                };
+            };
+        };
         // Chart is not initialized yet
         if (!ctx) {
             return null;
@@ -118,12 +108,64 @@ export default function ElevationProfile({
         const y = g.translateY + g.gridHeight - (g.gridHeight * (yVal - g.minY)) / (g.maxY - g.minY);
 
         return { x, y };
-    };
+    }, [seriesData]);
 
-    // Compute pixel position only when a valid point is hovered
-    const pointPos = hoveredProfileIndex !== null && hoveredProfileIndex >= 0 && hoveredProfileIndex < seriesData.length
-        ? getPointPosition(hoveredProfileIndex)
-        : null;
+    /**
+     * Compute pixel position only when a valid point is hovered
+     */
+    useEffect(() => {
+        if (
+            hoveredProfileIndex !== null &&
+            hoveredProfileIndex >= 0 &&
+            hoveredProfileIndex < seriesData.length
+        ) {
+            const pos = getPointPosition(hoveredProfileIndex);
+            setPointPos(pos);
+        } else {
+            setPointPos(null);
+        }
+    }, [hoveredProfileIndex, seriesData, getPointPosition]);
+
+    /**
+     * Sets initial chart width on mount
+     */
+    useEffect(() => {
+        if (chartRef.current) {
+            setChartWidth(chartRef.current.clientWidth);
+        }
+    }, []);
+
+    // Do not render component if elevation data are missing
+    if (!profile || ascent === undefined || descent === undefined) {
+        return null;
+    }
+
+    const series = [
+        {
+            name: "Elevation",
+            data: seriesData
+        }
+    ];
+
+    // Calculate min and max elevation to configure Y axis
+    const elevations = profile.map(p => p.elevation);
+    const minElev = Math.min(...elevations);
+    const maxElev = Math.max(...elevations);
+
+    const range = maxElev - minElev;
+
+    // Dynamic Y axis step
+    let step = Math.ceil(range / 6);
+    step = Math.max(step, 60);
+
+    // Determine currently hovered point in the profile
+    const hoveredPoint =
+        elevationLegIndex === legIndex &&
+        hoveredProfileIndex !== null &&
+        hoveredProfileIndex >= 0 &&
+        hoveredProfileIndex < profile.length
+            ? profile[hoveredProfileIndex]
+            : null;
 
     const options: ApexCharts.ApexOptions = {
         chart: {
@@ -301,33 +343,28 @@ export default function ElevationProfile({
                             />
 
                             {/* Fixed tooltip displayed when hovering profile from map */}
-                            {hoveredPoint && displayMarker && pointPos && (() => {
-                                const chartWidth = chartRef.current?.clientWidth ?? 0;
-
-                                const transform = pointPos.x > chartWidth / 2 + 20
-                                    ? "translate(-113%, -50%)"
-                                    : "translate(13%, -50%)";
-
-                                return (
-                                    <div
-                                        className="elevation-fixed-tooltip-wrapper"
-                                        style={{
-                                            left: pointPos.x,
-                                            top: pointPos.y,
-                                            transform: transform
-                                        }}
-                                    >
-                                        <div className="elevation-tooltip elevation-fixed-tooltip">
-                                            <div>
-                                                {(hoveredPoint.distance / 1000).toFixed(2)} km
-                                            </div>
-                                            <div>
-                                                {Math.round(hoveredPoint.elevation)} m
-                                            </div>
+                            {hoveredPoint && displayMarker && pointPos && (
+                                <div
+                                    className="elevation-fixed-tooltip-wrapper"
+                                    style={{
+                                        left: pointPos.x,
+                                        top: pointPos.y,
+                                        transform:
+                                            pointPos.x > chartWidth / 2 + 20
+                                                ? "translate(-113%, -50%)"
+                                                : "translate(13%, -50%)"
+                                    }}
+                                >
+                                    <div className="elevation-tooltip elevation-fixed-tooltip">
+                                        <div>
+                                            {(hoveredPoint.distance / 1000).toFixed(2)} km
+                                        </div>
+                                        <div>
+                                            {Math.round(hoveredPoint.elevation)} m
                                         </div>
                                     </div>
-                                );
-                            })()}
+                                </div>
+                            )}
                         </div>
                     </>
                 )}

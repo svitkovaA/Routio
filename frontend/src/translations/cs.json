@@ -133,13 +133,145 @@
         "resultsSection": "Zobrazí se dostupná spojení včetně času, přestupů a jednotlivých úseků trasy",
         "detail": "Detail",
         "detailSection": "Detail trasy poskytuje přesné informace o jednotlivých úsecích a zastávkách"
+      },
+      "step1": {
+        "title": "Vstupní formulář",
+        "desc": "Zadejte <strong>výchozí a cílový bod</strong>, případně mezibody, nastavte <strong>datum a čas</strong> a upravte preference plánování trasy.",
+        "routePoints": "Zadání bodů trasy:",
+        "routePointsList": {
+          "search": "vyhledáním názvu lokality,",
+          "map": "výběrem přímo z mapy,",
+          "coords": "zadáním souřadnic,",
+          "context": "pravým kliknutím na mapu,",
+          "current": "na základě aktuální polohy,",
+          "bikeStations": "výběrem stanic sdílených kol."
+        }
+      },
+      "step1Bike": {
+        "title": "Stanice sdílených kol",
+        "desc": "Stanice lze zobrazit po výběru <strong>sdíleného kola</strong> a povolení jejich zobrazení.",
+        "add": "Přidání stanice do trasy:",
+        "list": {
+          "click": "kliknutím na stanici na mapě,",
+          "type": "výběrem typu (počáteční/cílová),",
+          "position": "určením její pozice v rámci trasy,",
+          "insert": "nový bod se vloží před konec trasy."
+        }
+      },
+      "step2": {
+        "title": "Nastavení parametrů plánování trasy",
+        "transport": "Preference dopravy:",
+        "transportList": {
+          "transfers": "nastavení <strong>maximálního počtu přestupů</strong>,",
+          "modes": "výběr <strong>povolených druhů dopravy</strong> při plánování,",
+          "delays": "možnost zobrazení <strong>historických zpoždění spojů</strong> za posledních 7 dní (za cenu delší doby plánování)."
+        },
+
+        "bike": "Preference kola (sdíleného i vlastního):",
+        "bikeList": {
+          "distance": "nastavení <strong>maximální vzdálenosti</strong> pro jízdu na kole,",
+          "speed": "nastavení <strong>průměrné rychlosti</strong> jízdy,",
+          "lock": "nastavení <strong>času potřebného k uzamčení kola</strong> (u sdíleného kola se započítává dvakrát – pro odemknutí i uzamčení)."
+        },
+
+        "walk": "Preference chůze:",
+        "walkList": {
+          "distance": "nastavení <strong>maximální vzdálenosti</strong>,",
+          "speed": "nastavení <strong>průměrné rychlosti chůze</strong>."
+        }
+      },
+      "step3": {
+        "title": "Zobrazení výsledků plánování trasy",
+        "overview": "Přehled tras:",
+        "overviewList": {
+          "map": "zobrazení tras <strong>na mapě i v seznamu</strong>,",
+          "time": "každá trasa obsahuje čas odjezdu a příjezdu,",
+          "details": "zobrazení celkové doby trvání, vzdálenosti a počtu přestupů."
+        },
+        "visual": "Vizualizace trasy:",
+        "visualList": {
+          "colors": "barevné rozlišení úseků podle typu dopravy."
+        },
+        "detail": "Detail trasy:",
+        "detailList": {
+          "click": "výběrem trasy se zobrazí podrobné informace."
+        }
+      },
+      "step4": {
+        "public": {
+          "title": "Detail trasy – veřejná doprava",
+
+          "info": "Informace o spoji:",
+          "infoList": {
+            "line": "číslo linky a směr spoje,",
+            "zones": "zóny, kterými linka prochází,",
+            "length": "celková délka a trvání úseku trasy."
+          },
+
+          "departures": "Odjezdy a zastávky:",
+          "departuresList": {
+            "next": "přehled dalších odjezdů spojů stejné linky,",
+            "select": "možnost výběru dřívějšího nebo pozdějšího spoje,",
+            "stops": "zobrazení zastávek včetně indikace aktuální polohy spoje."
+          },
+
+          "delays": "Zpoždění a poloha:",
+          "delaysList": {
+            "current": "aktuální zpoždění spoje,",
+            "history": "historická zpoždění za posledních 7 dní (po zapnutí v preferencích),",
+            "position": "zobrazení aktuální polohy spoje na mapě."
+          }
+        },
+        "bikeWalk": {
+          "title": "Detail trasy – kolo a chůze",
+          "bike": "Kolo:",
+          "bikeList": {
+            "lock": "zobrazení času potřebného k odemknutí a uzamčení kola,",
+            "length": "celková délka a trvání úseku trasy,",
+            "elevation": "převýšení a výškový profil trasy."
+          },
+          "sharedBike": "Sdílená kola:",
+          "sharedBikeList": {
+            "current": "po kliknutí na stanici se zobrazí aktuální počet dostupných kol,",
+            "expected": "zobrazení očekávaného počtu kol v čase příjezdu (až 24 hodin dopředu)."
+          },
+          "walk": "Chůze:",
+          "walkList": {
+            "length": "celková délka a trvání úseku trasy,",
+            "elevation": "převýšení a výškový profil trasy."
+          }
+        }
       }
+    },
+    "stations": {
+      "title": "Výpočet trasy",
+      "desc": "Aplikace při multimodálním plánování vybírá nejvhodnější stanici sdílených kol. Výběr stanice je založen na hodnocení několika faktorů, které ovlivňují pravděpodobnost úspěšného převzetí nebo vrácení kola a komfort. Při výběru stanice jsou zohledňovány:",
+      "factors": {
+        "availability": {
+          "title": "Predikce dostupnosti sdílených kol.",
+          "desc": "Predikovaný počet dostupných kol v čase očekávaného příjezdu do stanice"
+        },
+        "angle": {
+          "title": "Úhel vůči plánované trase.",
+          "desc": "Úhel mezi směrem plánované trasy a směrem ke stanici, který vyjadřuje míru odchylky od původní trasy."
+        },
+        "distance": {
+          "title": "Vzdálenost od bodu trasy",
+          "desc": "Vzdálenost stanice od bodu trasy."
+        }
+      },
+      "evaluation": "Každému z těchto faktorů je přiřazena váha. Na základě jejich kombinace aplikace vypočítá hodnotu pro jednotlivé stanice a vybere tu, která je pro danou trasu nejvhodnější.",
+      "predictionTitle": "Predikce dostupnosti kola",
+      "predictionDesc": "Aplikace využívá model hlubokého učení pro predikci dostupnosti sdílených kol ve stanicích až na 24 hodin dopředu. Díky tomu může aplikace při plánování trasy vybrat stanici, u které je vyšší pravděpodobnost, že v ní bude kolo dostupné v čase příjezdu.",
+      "changeTitle": "Změna stanice sdíleného kola a stojanu pro vlastní kolo",
+      "changeDesc": "Jelikož aplikace vybírá jednu nejlépe ohodnocenou stanici/kolo, má uživatel možnost tuto stanici/stojan změnit. Po změně stanice/stojanu aplikace přepočítá upravenou část trasy a aktualizuje trasu."
     }
   },
   "results": "Výsledky",
   "resultsInfo": {
     "detail": "Detail",
     "noResults": "Nebyly nalezeny žádné výsledky",
+    "routingError": "Došlo k chybě při výpočtu trasy",
     "warningFoot": "Vzdálenost chůze překračuje maximální povolený limit",
     "warningBicycle": "Vzdálenost jízdy na kole překračuje maximální povolený limit",
     "warningFootBicycle": "Překročen limit vzdálenosti"
@@ -155,7 +287,9 @@
     "publicTransport": {
       "otherDepartures": "Další odjezdy",
       "moreDepartures": "Více odjezdů",
-      "stops": "Zastávky",
+      "stops1": "Zastávka",
+      "stopsMore": "Zastávky",
+      "stopsOther": "Zastávek",
       "historicalDelays": "Historická zpoždění",
       "historicalDelaysOnTime": "Včas",
       "arrivalAfterDeparture": "má odjezd dříve než je plánovaný příjezd předchozího spoje.",
@@ -196,11 +330,11 @@
       "swapWaypoints": "Vyměnit začátek a cíl",
       "addWaypoint": "Přidat další bod",
       "dragAndDrop": "Přetažením změnit pořadí bodů",
-      "modeTimePrefs": "Nastavit druh dopravy nebo dobu zastavení",
       "modePreferences": "Nastavit druh dopravy",
-      "timeInWaypoint": "Nastavit čas strávený v bodě",
       "closeLegPrefs": "Zavřít preference úseku trasy",
-      "preferencesButton": "Otevřít nastavení trasy"
+      "preferencesButton": "Otevřít nastavení trasy",
+      "blockedPreferences": "Úsek jízdy na kole nelze změnit z důvodu využití stanice",
+      "leaveNow": "Použít aktuální datum a čas"
     },
     "sidebar": {
       "closeSidebar": "Zavřít panel",
@@ -243,7 +377,8 @@
       },
       "bicycle": {
         "lockTime": "Čas na uzamčení kola",
-        "unlockTime": "Čas na odemknutí kola"
+        "unlockTime": "Čas na odemknutí kola",
+        "zeroWarning": "Ve stanici nemusí být dostupné kolo"
       }
     },
     "settings": {
@@ -271,7 +406,8 @@
       "alternativeDestinationBikeStation": "Alternativní cílová stanice",
       "marker": "Kliknutím zobrazíte informace o zastávce",
       "vehiclePosition": "Aktuální poloha vozidla",
-      "transfer": "Přestupní bod"
+      "transfer": "Přestupní bod",
+      "noPrediction": "Predikce není dostupná"
     },
     "info": {
       "bus": "Veřejná doprava",

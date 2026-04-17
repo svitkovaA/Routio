@@ -51,7 +51,7 @@ function LegPreferences({
     return (
         <div className="leg-preferences-wrapper">
             {!legPreferences[index].open ? (
-                <CustomTooltip title={t("tooltips.inputForm.modeTimePrefs")}>
+                <CustomTooltip title={legPreferences[index].fixed ? t("tooltips.inputForm.blockedPreferences") : t("tooltips.inputForm.modePreferences")}>
                     <div
                         className={
                             "leg-preferences-button " + 

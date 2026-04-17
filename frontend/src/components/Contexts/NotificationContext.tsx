@@ -31,9 +31,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
     // Displays a notification with given message and severity
     const showNotification = (msg: string, sev: Severity) => {
-        setMessage(msg);
-        setSeverity(sev);
-        setOpen(true);
+        setOpen(false);
+        setTimeout(() => {
+            setMessage(msg);
+            setSeverity(sev);
+            setOpen(true);
+        }, 50);
     };
 
     // Handles Snackbar close events

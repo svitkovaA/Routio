@@ -45,6 +45,8 @@ type ResultContextType = {
     showBikeStations: boolean[];
     setShowBikeStations: (value: boolean[] | ((prev: boolean[]) => boolean[])) => void;
     openElevation: (index: number, value: boolean) => void;
+    routingError: boolean;
+    setRoutingError: (value: boolean) => void;
 };
 
 const ResultContext = createContext<ResultContextType | undefined>(undefined);
@@ -86,9 +88,9 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
 
     // Stores previous vehicle positions for animation interpolation
     const prevPositionsRef = useRef<Record<number, VehiclePosition>>({});
-
+    
     // Interval reference for periodic data polling
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Reference to current animation frame request
     const animationRef = useRef<number | null>(null);
@@ -110,6 +112,9 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
 
     // State handling visibility flags for alternative bike stations
     const [showBikeStations, setShowBikeStations] = useState<boolean[]>([]);
+
+    // State handling routing error displaying
+    const [routingError, setRoutingError] = useState<boolean>(false);
 
     /**
      * Resets entire result state and stops all active processes
@@ -135,9 +140,9 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         prevPositionsRef.current = {};
 
         // Stop periodic polling
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
         }
         // Cancel active animation frame if running
         if (animationRef.current !== null) {
@@ -150,6 +155,9 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             abortRef.current.abort();
             abortRef.current = null;
         }
+
+        // Cancel routing error
+        setRoutingError(false);
     }, []);
 
     // Currently selected trip pattern
@@ -295,7 +303,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         hoveredProfileIndex, setHoveredProfileIndex,
         elevationLegIndex, setElevationLegIndex,
         showBikeStations, setShowBikeStations,
-        openElevation
+        openElevation,
+        routingError, setRoutingError
     }), [
         results,
         resultActiveIndex,
@@ -314,7 +323,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         hoveredProfileIndex,
         elevationLegIndex,
         showBikeStations,
-        pattern
+        pattern,
+        routingError
     ]);
 
     /**
@@ -403,68 +413,146 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             return;
         }
 
-        // Request with trip ids
-        const res = await fetch(`${API_BASE_URL}/vehicleRealtimeData`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(tripIds)
-        });
+        try {
+            // Request with trip ids
+            const res = await fetch(`${API_BASE_URL}/vehicleRealtimeData`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(tripIds)
+            });
 
-        const realtime: Record<string, { lat: number; lon: number, delay?: number, stopIndex?: number }> = await res.json();
-
-        // Build next position map
-        const nextMap: Record<string, VehiclePosition> = {};
-        for (const v of pattern.vehicleRealtimeData) {
-            const pos = realtime[v.tripId];
-
-            // Skip if no dat available for this trip
-            if (!pos) {
-                continue;
+            if (!res.ok) {
+                throw new Error("Realtime data fetch failed");
             }
 
-            nextMap[v.tripId] = {
-                ...v,
-                lat: pos.lat,
-                lon: pos.lon,
-                delay: pos?.delay,
-                stopIndex: pos?.stopIndex
-            };
-        }
-
-        // If this is the first fetch update vehicle positions immediately
-        if (Object.keys(prevPositionsRef.current).length === 0) {
-            setVehiclePositions(Object.values(nextMap));
-        }
-        // Animate new vehicle positions
-        else {
-            animatePositions(prevPositionsRef.current, nextMap);
-        }
-
-        if (resultActiveIndex >= 0 && selectedTripPatternIndex >= 0) {
-            setResults(prev => {
-                const newResults = [...prev];
-                for (const leg of newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex]?.originalLegs ?? []) {
-                    if (!leg.tripId) {
-                        continue;
-                    }
-
-                    const pos = realtime[leg.tripId];
-                    if (!pos) {
-                        continue;
-                    }
-
-                    leg.delay = pos.delay;
-                    if (leg.serviceJourney) {
-                        leg.serviceJourney.currentIndex = pos.stopIndex ?? null;
-                    }
+            const realtime: Record<string, { lat: number; lon: number, delay?: number, stopIndex?: number }> = await res.json();
+    
+            // Build next position map
+            const nextMap: Record<string, VehiclePosition> = {};
+            for (const v of pattern.vehicleRealtimeData) {
+                const pos = realtime[v.tripId];
+    
+                // Skip if no dat available for this trip
+                if (!pos) {
+                    continue;
                 }
-                return newResults;
-            });
+    
+                nextMap[v.tripId] = {
+                    ...v,
+                    lat: pos.lat,
+                    lon: pos.lon,
+                    delay: pos?.delay,
+                    stopIndex: pos?.stopIndex
+                };
+            }
+    
+            // If this is the first fetch update vehicle positions immediately
+            if (Object.keys(prevPositionsRef.current).length === 0) {
+                setVehiclePositions(Object.values(nextMap));
+            }
+            // Animate new vehicle positions
+            else {
+                animatePositions(prevPositionsRef.current, nextMap);
+            }
+    
+            // Update delays and stop indices in selected result
+            if (resultActiveIndex >= 0 && selectedTripPatternIndex >= 0) {
+                setResults(prev => {
+                    const newResults = [...prev];
+                    for (const leg of newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex]?.originalLegs ?? []) {
+                        // Skip legs without trip ID
+                        if (!leg.tripId) {
+                            continue;
+                        }
+    
+                        // Skip if no realtime data provided
+                        const pos = realtime[leg.tripId];
+                        if (!pos) {
+                            continue;
+                        }
+    
+                        // Update current stop index
+                        leg.delay = pos.delay;
+                        if (leg.serviceJourney) {
+                            leg.serviceJourney.currentIndex = pos.stopIndex ?? null;
+                        }
+                    }
+                    return newResults;
+                });
+            }
+    
+            // Store current positions for next animation cycle
+            prevPositionsRef.current = nextMap;
+        }
+        // Reset delays and indices
+        catch {
+            prevPositionsRef.current = {};
+            setVehiclePositions([]);
+            if (resultActiveIndex >= 0 && selectedTripPatternIndex >= 0) {
+                setResults(prev => {
+                    const newResults = [...prev];
+                    for (const leg of newResults[resultActiveIndex].tripPatterns[selectedTripPatternIndex]?.originalLegs ?? []) {
+                        // Skip legs without trip ID
+                        if (!leg.tripId) {
+                            continue;
+                        }
+
+                        // Clear delay
+                        leg.delay = undefined;
+                        if (leg.serviceJourney) {
+                            // Reset stop index
+                            leg.serviceJourney.currentIndex = null;
+                        }
+                    }
+                    return newResults;
+                });
+            }
         }
 
-        // Store current positions for next animation cycle
-        prevPositionsRef.current = nextMap;
     }, [pattern, tripIds, animatePositions, resultActiveIndex, selectedTripPatternIndex]);
+
+    /**
+     * Periodically calls function every 10s with offset
+     * 
+     * @param offset Offset in seconds
+     */
+    const scheduleNext = useCallback((offset: number = 3) => {
+        const run = () => {
+            const now = new Date();
+            const sec = now.getSeconds();
+    
+            // Compute next execution second aligned to 10 seconds interval
+            let nextSec = Math.floor(sec / 10) * 10 + offset;
+    
+            // Move to next interval
+            if (nextSec <= sec) {
+                nextSec += 10;
+            }
+    
+            // Wrap to next minute
+            if (nextSec >= 60) {
+                nextSec = offset;
+                now.setMinutes(now.getMinutes() + 1);
+            }
+    
+            // Create target execution time
+            const target = new Date(now);
+            target.setSeconds(nextSec);
+            target.setMilliseconds(0);
+    
+            // Calculate delay until next execution
+            const delay = target.getTime() - Date.now();
+    
+            // Schedule next execution
+            timeoutRef.current = setTimeout(async () => {
+                await fetchPositions();
+                run();
+            }, delay);
+        };
+
+        // Start scheduling loop
+        run();
+    }, [fetchPositions]);
 
     /**
      * Initializes and manages periodic polling of vehicle positions data
@@ -474,16 +562,16 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         setVehiclePositions([]);
         prevPositionsRef.current = {};
 
-        // Stop existing polling interval
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-
         // Cancel running animation frame
         if (animationRef.current !== null) {
             cancelAnimationFrame(animationRef.current);
             animationRef.current = null;
+        }
+        
+        // Stop existing polling interval
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
         }
 
         // Do not initialize polling if no valid pattern is selected
@@ -493,17 +581,17 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         // Fetch current vehicle positions
         fetchPositions();
 
-        // Start periodic polling of vehicle positions every 10 seconds
-        intervalRef.current = setInterval(fetchPositions, 10000);
+        // Start periodic polling of vehicle positions every 10 seconds with 3 second offsets
+        scheduleNext(3);
 
         // Ensures interval is properly cleared
         return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
             }
         };
-    }, [selectedTripPatternIndex, fetchPositions, pattern]);
+    }, [selectedTripPatternIndex, fetchPositions, pattern, scheduleNext]);
 
     /**
      * Toggles departure visibility when public transport leg is selected

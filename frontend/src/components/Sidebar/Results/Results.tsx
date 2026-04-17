@@ -31,7 +31,8 @@ function Results() {
         resultActiveIndex,
         pattern,
         publicLegIndex,
-        loading
+        loading,
+        routingError
     } = useResult();
 
     // Hook for recalculating trip pattern
@@ -88,6 +89,11 @@ function Results() {
             <div className="results-content">
                 {loading ? (
                     <ResultLoading />
+                ) : routingError ? (
+                    <div className="routing-error">
+                        <WarningAmberIcon />
+                        {t("resultsInfo.routingError")}
+                    </div>
                 ) : result?.tripPatterns?.length === 0 ? (
                     <div className="no-results">
                         <WarningAmberIcon />
@@ -107,7 +113,6 @@ function Results() {
                 ) : (
                     // Detailed view of the selected trip pattern
                     <Detail
-                        tripPattern={pattern}
                         recalculatePattern={recalculatePattern}
                     />
                 )}

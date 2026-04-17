@@ -7,25 +7,32 @@
 import TimelineIcon from '@mui/icons-material/Timeline';
 import ExploreIcon from '@mui/icons-material/Explore';
 import StraightenIcon from '@mui/icons-material/Straighten';
+import { useTranslation } from 'react-i18next';
+import { Trans } from "react-i18next";
 import "./Features.css"
 
 function Features() {
+    // Translation function
+    const { t } = useTranslation();
+
     return(
         <div className="about-wrapper">
             <div className="about-section">
-                <p className="about-header">Výpočet trasy</p>
+                <p className="about-header">
+                    {t("info.stations.title")}
+                </p>
                 <div>
-                    Aplikácia pri multimodálnom plánovaní vyberá najvhodnejšiu stanicu zdieľaných bicyklov. Výber stanice je založený na hodnotení viacerých faktorov, ktoré ovplyvňujú pravdepodobnosť úspešného prevzatia alebo vrátenia bicykla a komfort. Pri výbere stanice sú zohľadňované:
+                    <Trans i18nKey="info.stations.desc" />
                     <ul className="features-list">
                         <li className="features-item">
                             <TimelineIcon className="features-icon" />
 
                             <div className="feature-content">
                                 <strong className="feature-title">
-                                    Predikcia dostupnosti zdieľaných bicyklov.
+                                    {t("info.stations.factors.availability.title")}
                                 </strong>
                                 <div>
-                                    Predikovaný počet dostupných bicyklov v čase očakávaného príchodu do stanice
+                                    {t("info.stations.factors.availability.desc")}
                                 </div>
                             </div>
                         </li>
@@ -35,10 +42,10 @@ function Features() {
 
                             <div className="feature-content">
                                 <strong className="feature-title">
-                                    Uhol voči plánovanej trase.
+                                    {t("info.stations.factors.angle.title")}
                                 </strong>
                                 <div>
-                                    Uhol medzi smerom plánovanej trasy a smerom k stanici, ktorý vyjadruje mieru odchýlky od pôvodnej trasy.
+                                    {t("info.stations.factors.availability.desc")}
                                 </div>
                             </div>
                         </li>
@@ -48,42 +55,34 @@ function Features() {
 
                             <div className="feature-content">
                                 <strong className="feature-title">
-                                    Vzdialenosť od bodu trasy
+                                    {t("info.stations.factors.distance.title")}
                                 </strong>
                                 <div>
-                                    Vzdialenosť stanice od bodu trasy.
+                                    {t("info.stations.factors.distance.desc")}
                                 </div>
                             </div>
                         </li>
                     </ul>
-
-                    Každému z týchto faktorov je priradená váha. Na základe ich kombinácie aplikácia vypočíta hodnotu pre jednotlivé stanice a vyberie tú, ktorá je pre danú trasu najvhodnejšia.
+                <Trans i18nKey="info.stations.evaluation" />
                 </div>
             </div>
 
             <div className="about-section">
-                <p className="about-header">Predikcia dostupnosti bicykla</p>
+                <p className="about-header">
+                    {t("info.stations.predictionTitle")}
+                </p>
                 <p>
-                    Aplikácia využíva model hlbokého učenia na predikciu dostupnosti zdieľaných bicyklov v staniciach až na 24 hodín dopredu. Vďaka tomu môže aplikácia pri plánovaní trasy vybrať stanicu, pri ktorej je vyššia pravdepodobnosť, že v nej bude bicykel dostupný v čase príchodu.
+                    <Trans i18nKey="info.stations.predictionDesc" />
                 </p>
             </div>
 
             <div className="about-section">
-                <p className="about-header">Zmena stanice zdieľaného bicykla a stojanu na vlastný bicykel</p>
-                <p>
-                    Nakoľko aplikácia vyberá jednu najlepšie ohodnotenú stanicu/bicykel. Preto má užívateľ možnosť túto stanicu/stojan zmeniť. Po zmene stanice/stojana aplikácia prepočíta zmenenú časť trasy a aktualizuje trasu.
+                <p className="about-header">
+                    {t("info.stations.changeTitle")}
                 </p>
-                {/* <div className="feature-video">
-                    <video
-                        src="/changeBikeStation.mp4"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="video"
-                    />
-                </div> */}
-
+                <p>
+                    <Trans i18nKey="info.stations.changeDesc" />
+                </p>
             </div>
         </div>
     );

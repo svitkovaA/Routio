@@ -8,38 +8,46 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PUBLIC_URL } from "../../config/config";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import { Trans } from "react-i18next";
 import "./HowToUse.css";
 
-type MediaItem = {
-    type: "image" | "video";
-    src: string;
+type SliderProps = {
+    items: string[];                        // List of image URLS
+    onChange?: (index: number) => void;     // Callback when slide changes
 };
 
-function MediaSlider({ items }: { items: MediaItem[] }) {
+/**
+ * Image slider with navigation
+ */
+function Slider({
+    items,
+    onChange
+}: SliderProps) {
+    // Current slide index
     const [current, setCurrent] = useState(0);
 
-    const nextSlide = () => {
-        setCurrent((prev) => (prev + 1) % items.length);
+    // Update current slide
+    const update = (newIndex: number) => {
+        setCurrent(newIndex);
+        onChange?.(newIndex);
     };
 
+    // Move to next slide
+    const nextSlide = () => {
+        update((current + 1) % items.length);
+    };
+
+    // Move to previous slide
     const prevSlide = () => {
-        setCurrent((prev) => (prev - 1 + items.length) % items.length);
+        update((current - 1 + items.length) % items.length);
     };
 
     return (
         <div className="how-to-img-slider">
-            {items[current].type === "image" ? (
-                <img src={items[current].src} className="slider-media" />
-            ) : (
-                <video
-                    src={items[current].src}
-                    className="slider-media video"
-                    autoPlay
-                    muted
-                    loop
-                />
-            )}
+            {/* Display current image */}
+            <img src={items[current]} className="slider-media" />
 
+            {/* Show navigation if multiple images exist */}
             {items.length > 1 && (
                 <div className="arrows">
                     <button className="arrow left" onClick={prevSlide}>
@@ -50,6 +58,7 @@ function MediaSlider({ items }: { items: MediaItem[] }) {
                         {current + 1}/{items.length}
                     </div>
 
+                    {/* Slider counter */}
                     <button className="arrow right" onClick={nextSlide}>
                         <KeyboardArrowLeftIcon sx={{ transform: 'rotate(180deg)' }} />
                     </button>
@@ -60,10 +69,13 @@ function MediaSlider({ items }: { items: MediaItem[] }) {
 }
 
 type HowToUseProps = {
-    step: number;
-    setStep: (value: number) => void;
+    step: number;                       // Currently selected step
+    setStep: (value: number) => void;   // Setter for step navigation
 }
 
+/**
+ * Component rendering step by step instructions
+ */
 function HowToUse({
     step,
     setStep
@@ -71,36 +83,33 @@ function HowToUse({
     // Translation function
     const { t, i18n } = useTranslation();
 
+    // Current slide within step
+    const [currentSlide, setCurrentSlide] = useState(0);
+
+    // Mapping of steps to image filenames
     const MEDIA_MAP = {
         step1: [
-            { type: "image", src: "01a_input_form.png" },
-            { type: "video", src: "demo1.mp4" },
+            "01a_input_form.png",
+            "01b_input_form.png",
         ],
         step2: [
-            { type: "image", src: "02_pref.png" }
+            "02_preferences.png"
         ],
         step3: [
-            { type: "image", src: "03_res.png" }
+            "03_results.png"
         ],
         step4: [
-            { type: "image", src: "04_detail_b.png" },
-            { type: "image", src: "04_detail_bike.png" }
+            "04a_detail.png",
+            "04b_detail.png"
         ]
     } as const;
 
-    const getLang = (lang: string) => lang.split("-")[0];
+    // Construct image URL based on the used language
+    const getImg = (lang: string, name: string) => `${PUBLIC_URL}img/${lang}/${name}`;
 
-    const getImg = (lang: string, name: string) =>
-        `${PUBLIC_URL}img/${lang}/${name}`;
-
-    const lang = getLang(i18n.language);
-
+    // Resolve image paths for current step
     const items = MEDIA_MAP[`step${step}` as keyof typeof MEDIA_MAP]
-        .map(item => ({
-            ...item,
-            src: getImg(lang, item.src)
-        }));
-
+        .map(src => getImg(i18n.language, src));
 
     // Available instruction steps
     const steps = [
@@ -112,6 +121,7 @@ function HowToUse({
 
     return (
         <div className="about-section">
+            {/* Section title */}
             <div className="about-header">
                 {t("info.howToUse.howToPlan")}
             </div>
@@ -150,71 +160,239 @@ function HowToUse({
 
             {/* Step content */}
             <div className="howto-content">
+                {/* Step 1 content */}
                 {step === 1 && (
                     <>
-                        <MediaSlider items={items} />
-                        <p>
-                            Zadajte východiskový a cieľový bod, prípadne medzibody, nastavte dátum a čas a upravte preferencie plánovania trasy.
-                        </p>
-                        <div className="about-header">
-                            Výber bodov trasy
-                        </div>
-                        Body trasy je možné vybrať jedným z následujúcich spôsobov
-                        <ul className="how-to-points">
-                            <li>
-                                Zadaním <strong>názvu lokality</strong> do vstupného poľa.
-                            </li>
+                        <div className="how-to-flex">
+                            <Slider items={items} onChange={setCurrentSlide} />
 
-                            <li>
-                                Výberom polohy <strong>priamo z mapy</strong>, a to kliknutím na ikonu bodu a následným výberom miesta na mape.
-                            </li>
+                            <div className="how-to-right">
+                                {currentSlide === 0 && (
+                                    <>
+                                        <div className="how-to-bold">
+                                            {t("info.howToUse.step1.title")}
+                                        </div>
 
-                            <li>
-                                <strong>Zadaním geografických súradníc</strong> do vstupného poľa.
-                            </li>
+                                        <div>
+                                            <Trans i18nKey="info.howToUse.step1.desc" />
+                                        </div>
 
-                            <li>
-                                Výber bodu <strong>z kontextového menu mapy</strong>, a to prostredníctvom pravého kliknutia na mapový podklad a následným
-                                výberom o ktorý bod sa jedná.
-                            </li>
+                                        <div className="about-header small">
+                                            {t("info.howToUse.step1.routePoints")}
+                                        </div>
 
-                            <li>
-                                Na základe aktuálnej polohy.
-                            </li>
-                        </ul>
+                                        <ul className="how-to-list">
+                                            <li>{t("info.howToUse.step1.routePointsList.search")}</li>
+                                            <li>{t("info.howToUse.step1.routePointsList.map")}</li>
+                                            <li>{t("info.howToUse.step1.routePointsList.coords")}</li>
+                                            <li>{t("info.howToUse.step1.routePointsList.context")}</li>
+                                            <li>{t("info.howToUse.step1.routePointsList.current")}</li>
+                                            <li>{t("info.howToUse.step1.routePointsList.bikeStations")}</li>
+                                        </ul>
+                                    </>
+                                )}
 
-                        <div className="about-header">
-                            Výber stanice zdieľaných bicyklov (obrázok 2)
-                        </div>
-                        <div>
-                            Stanice zdieľaných bicyklov je možné nastaviť vybraním zdieľaného bicykla a následným povolením zobrazenia.<br/>
+                                {currentSlide === 1 && (
+                                    <>
+                                        <div className="how-to-bold">
+                                            {t("info.howToUse.step1Bike.title")}
+                                        </div>
 
-                            Pridanie stanice zdieľaného bicykla ako bodu trasy:
-                            Stanicu je možné použiť ako bod trasy, a to kliknutím na príslušnú stanicu, nastavením,či ide o počiatočnú alebo cieľovú stanicu a vybraním bodu, na ktorý sa stanica premietne. V prípade pridania ako nového bodu je stanica automaticky pridaná pred koniec trasy a je potrebné ju umiestniť na požadované miesto.
+                                        <div>
+                                            <Trans i18nKey="info.howToUse.step1Bike.desc" />
+                                        </div>
+
+                                        <div className="about-header small">
+                                            {t("info.howToUse.step1Bike.add")}
+                                        </div>
+
+                                        <ul className="how-to-list">
+                                            <li>{t("info.howToUse.step1Bike.list.click")}</li>
+                                            <li>{t("info.howToUse.step1Bike.list.type")}</li>
+                                            <li>{t("info.howToUse.step1Bike.list.position")}</li>
+                                            <li>{t("info.howToUse.step1Bike.list.insert")}</li>
+                                        </ul>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </>
                 )}
 
+                {/* Step 2 content */}
                 {step === 2 && (
                     <>
-                        <MediaSlider items={items} />
-                        <p>
-                            Nastavte preferencie plánovania, ako sú zohľadňované druhy dopravy alebo obmedzenia.
-                        </p>
+                        <div className="how-to-flex">
+                            <Slider items={items} />
+                            <div className="how-to-right">
+                                <div className="how-to-bold">
+                                   {t("info.howToUse.step2.title")}
+                                </div>
+                                <div>
+                                    <div className="about-header small">
+                                       {t("info.howToUse.step2.title")}
+                                    </div>
+                                    <ul className="how-to-list">
+                                        <li><Trans i18nKey="info.howToUse.step2.transportList.transfers" /></li>
+                                        <li><Trans i18nKey="info.howToUse.step2.transportList.modes" /></li>
+                                        <li><Trans i18nKey="info.howToUse.step2.transportList.delays" /></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <div className="about-header small">
+                                        {t("info.howToUse.step2.bike")}
+                                    </div>
+                                    <ul className="how-to-list">
+                                        <li><Trans i18nKey="info.howToUse.step2.bikeList.distance" /></li>
+                                        <li><Trans i18nKey="info.howToUse.step2.bikeList.speed" /></li>
+                                        <li><Trans i18nKey="info.howToUse.step2.bikeList.lock" /></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <div className="about-header small">
+                                        {t("info.howToUse.step2.walk")}
+                                    </div>
+                                    <ul className="how-to-list">
+                                        <li><Trans i18nKey="info.howToUse.step2.walkList.distance" /></li>
+                                        <li><Trans i18nKey="info.howToUse.step2.walkList.speed" /></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
                     </>
                 )}
 
+                {/* Step 3 content */}
                 {step === 3 && (
                     <>
-                        <MediaSlider items={items} />
-                        <p>
-                            Výsledky plánovania sú zobrazené na mape ako aj v textovej podobe.
-                        </p>
+                        <div className="how-to-flex">
+                            <Slider items={items} />
+                            <div className="how-to-right">
+                                <div className="how-to-bold">
+                                    {t("info.howToUse.step3.title")}
+                                </div>
+                                <div>
+                                    <div className="about-header small">
+                                       {t("info.howToUse.step3.overview")}
+                                    </div>
+                                    <ul className="how-to-list">
+                                        <li><Trans i18nKey="info.howToUse.step3.overviewList.map" /></li>
+                                        <li><Trans i18nKey="info.howToUse.step3.overviewList.time" /></li>
+                                        <li><Trans i18nKey="info.howToUse.step3.overviewList.details" /></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <div className="about-header small">
+                                        {t("info.howToUse.step3.visual")}
+                                    </div>
+                                    <ul className="how-to-list">
+                                        <li><Trans i18nKey="info.howToUse.step3.visualList.colors" /></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <div className="about-header small">
+                                        {t("info.howToUse.step3.detail")}
+                                    </div>
+                                    <ul className="how-to-list">
+                                        <li><Trans i18nKey="info.howToUse.step3.detailList.click" /></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </>
                 )}
 
+                {/* Step 4 content */}
                 {step === 4 && (
-                    <MediaSlider items={items} />
+                    <>
+                        <div className="how-to-flex">
+                            <Slider
+                                items={items}
+                                onChange={setCurrentSlide}
+                            />
+                            <div className="how-to-right">
+                                {currentSlide === 0 && (
+                                    <>
+                                        <div className="how-to-bold">
+                                           {t("info.howToUse.step4.public.title")}
+                                        </div>
+
+                                        <div>
+                                            <div className="about-header small">
+                                               {t("info.howToUse.step4.public.info")}
+                                            </div>
+                                            <ul className="how-to-list">
+                                                <li><Trans i18nKey="info.howToUse.step4.public.infoList.line" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.public.infoList.zones" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.public.infoList.length" /></li>
+                                            </ul>
+                                        </div>
+
+                                        <div>
+                                            <div className="about-header small">
+                                                {t("info.howToUse.step4.public.departures")}
+                                            </div>
+                                            <ul className="how-to-list">
+                                                <li><Trans i18nKey="info.howToUse.step4.public.departuresList.next" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.public.departuresList.select" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.public.departuresList.stops" /></li>
+                                            </ul>
+                                        </div>
+
+                                        <div>
+                                            <div className="about-header small">
+                                                {t("info.howToUse.step4.public.delays")}
+                                            </div>
+                                            <ul className="how-to-list">
+                                                <li><Trans i18nKey="info.howToUse.step4.public.delaysList.current" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.public.delaysList.history" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.public.delaysList.position" /></li>
+                                            </ul>
+                                        </div>
+                                    </>
+                                )}
+                                {currentSlide === 1 && (
+                                    <>
+                                        <div className="how-to-bold">
+                                            {t("info.howToUse.step4.bikeWalk.title")}
+                                        </div>
+
+                                        <div>
+                                            <div className="about-header small">
+                                                {t("info.howToUse.step4.bikeWalk.bike")}
+                                            </div>
+                                            <ul className="how-to-list">
+                                                <li><Trans i18nKey="info.howToUse.step4.bikeWalk.bikeList.lock" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.bikeWalk.bikeList.length" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.bikeWalk.bikeList.elevation" /></li>
+                                            </ul>
+                                        </div>
+
+                                        <div>
+                                            <div className="about-header small">
+                                                {t("info.howToUse.step4.bikeWalk.sharedBike")}
+                                            </div>
+                                            <ul className="how-to-list">
+                                                <li><Trans i18nKey="info.howToUse.step4.bikeWalk.sharedBikeList.current" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.bikeWalk.sharedBikeList.expected" /></li>
+                                            </ul>
+                                        </div>
+
+                                        <div>
+                                            <div className="about-header small">
+                                                {t("info.howToUse.step4.bikeWalk.walk")}
+                                            </div>
+                                            <ul className="how-to-list">
+                                                <li><Trans i18nKey="info.howToUse.step4.bikeWalk.walkList.length" /></li>
+                                                <li><Trans i18nKey="info.howToUse.step4.bikeWalk.walkList.elevation" /></li>
+                                            </ul>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </>
                 )}
             </div>
         </div>

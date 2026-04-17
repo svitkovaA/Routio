@@ -132,13 +132,145 @@
         "resultsSection": "Available connections will be displayed, including duration, transfers, and individual route segments.",
         "detail": "Detail",
         "detailSection": "The route detail provides detailed information about individual segments and stops."
+      },
+      "step1": {
+        "title": "Input Form",
+        "desc": "Enter the <strong>starting and destination points</strong>, optionally add intermediate points, set the <strong>date and time</strong>, and adjust route planning preferences.",
+        "routePoints": "Entering route points:",
+        "routePointsList": {
+          "search": "by searching for a location name,",
+          "map": "by selecting directly from the map,",
+          "coords": "by entering coordinates,",
+          "context": "by right-clicking on the map,",
+          "current": "based on your current location,",
+          "bikeStations": "by selecting shared bike stations."
+        }
+      },
+      "step1Bike": {
+        "title": "Shared Bike Stations",
+        "desc": "Stations can be displayed after selecting <strong>shared bike</strong> and enabling their visibility.",
+        "add": "Adding a station to the route:",
+        "list": {
+          "click": "by clicking on a station on the map,",
+          "type": "by selecting its type (start/end),",
+          "position": "by choosing its position within the route,",
+          "insert": "a new point is inserted before the end of the route."
+        }
+      },
+      "step2": {
+        "title": "Route Planning Parameters",
+        "transport": "Transport preferences:",
+        "transportList": {
+          "transfers": "setting the <strong>maximum number of transfers</strong>,",
+          "modes": "selecting <strong>allowed transport modes</strong> for planning,",
+          "delays": "option to display <strong>historical delays</strong> of connections over the last 7 days (at the cost of longer planning time)."
+        },
+
+        "bike": "Bike preferences (shared and personal):",
+        "bikeList": {
+          "distance": "setting the <strong>maximum cycling distance</strong>,",
+          "speed": "setting the <strong>average cycling speed</strong>,",
+          "lock": "setting the <strong>time required to lock the bike</strong> (for shared bikes counted twice, for unlocking and locking)."
+        },
+
+        "walk": "Walking preferences:",
+        "walkList": {
+          "distance": "setting the <strong>maximum walking distance</strong>,",
+          "speed": "setting the <strong>average walking speed</strong>."
+        }
+      },
+      "step3": {
+        "title": "Route Planning Results",
+        "overview": "Route overview:",
+        "overviewList": {
+          "map": "displaying routes <strong>on the map and in a list</strong>,",
+          "time": "each route includes departure and arrival times,",
+          "details": "showing total duration, distance, and number of transfers."
+        },
+        "visual": "Route visualization:",
+        "visualList": {
+          "colors": "color-coded segments based on transport mode."
+        },
+        "detail": "Route details:",
+        "detailList": {
+          "click": "selecting a route displays detailed information."
+        }
+      },
+      "step4": {
+        "public": {
+          "title": "Route Detail – Public Transport",
+
+          "info": "Connection information:",
+          "infoList": {
+            "line": "line number and direction,",
+            "zones": "zones the line passes through,",
+            "length": "total length and duration of the route segment."
+          },
+
+          "departures": "Departures and stops:",
+          "departuresList": {
+            "next": "overview of upcoming departures for the same line,",
+            "select": "option to choose an earlier or later connection,",
+            "stops": "display of stops including indication of the vehicle’s current position."
+          },
+
+          "delays": "Delays and position:",
+          "delaysList": {
+            "current": "current delay of the connection,",
+            "history": "historical delays over the last 7 days (if enabled in preferences),",
+            "position": "display of the vehicle’s current position on the map."
+          }
+        },
+        "bikeWalk": {
+          "title": "Route Detail – Bike and Walking",
+          "bike": "Bike:",
+          "bikeList": {
+            "lock": "display of time required to unlock and lock the bike,",
+            "length": "total length and duration of the route segment,",
+            "elevation": "elevation gain and route elevation profile."
+          },
+          "sharedBike": "Shared bikes:",
+          "sharedBikeList": {
+            "current": "clicking on a station shows the current number of available bikes,",
+            "expected": "display of the expected number of bikes at arrival time (up to 24 hours ahead)."
+          },
+          "walk": "Walking:",
+          "walkList": {
+            "length": "total length and duration of the route segment,",
+            "elevation": "elevation gain and route elevation profile."
+          }
+        }
       }
+    },
+    "stations": {
+      "title": "Route Calculation",
+      "desc": "During multimodal planning, the application selects the most suitable shared bike station. The selection is based on evaluating multiple factors that influence the probability of successfully picking up or returning a bike as well as overall comfort. The following factors are considered:",
+      "factors": {
+        "availability": {
+          "title": "Prediction of shared bike availability.",
+          "desc": "The predicted number of available bikes at the expected arrival time at the station"
+        },
+        "angle": {
+          "title": "Angle relative to the planned route.",
+          "desc": "The angle between the direction of the planned route and the direction to the station, representing the deviation from the original route."
+        },
+        "distance": {
+          "title": "Distance from the route point",
+          "desc": "The distance of the station from the route point."
+        }
+      },
+      "evaluation": "Each of these factors is assigned a weight. Based on their combination, the application calculates a score for individual stations and selects the one that is most suitable for the given route.",
+      "predictionTitle": "Bike availability prediction",
+      "predictionDesc": "The application uses a deep learning model to predict the availability of shared bikes at stations up to 24 hours in advance. This allows the application to select a station with a higher probability of having a bike available at the time of arrival.",
+      "changeTitle": "Changing shared bike station and personal bike stand",
+      "changeDesc": "Since the application selects one best-rated station/bike, the user has the option to change this station/stand. After the change, the application recalculates the affected part of the route and updates the route."
     }
   },
   "results": "Results",
   "resultsInfo": {
     "detail": "Detail",
     "noResults": "No results found",
+    "routingError": "An error occurred while calculating the route",
     "warningFoot": "Walking distance exceeds the maximum allowed limit",
     "warningBicycle": "Cycling distance exceeds the maximum allowed limit",
     "warningFootBicycle": "Distance limit exceeded"
@@ -154,7 +286,9 @@
     "publicTransport": {
       "otherDepartures": "Other departures",
       "moreDepartures": "More departures",
-      "stops": "Stops",
+      "stops1": "Stop",
+      "stopsMore": "Stops",
+      "stopsOther": "Stops",
       "historicalDelays": "Historical delays",
       "historicalDelaysOnTime": "On time",
       "arrivalAfterDeparture": "departure is before planned arrival.",
@@ -195,11 +329,11 @@
       "swapWaypoints": "Swap origin and destination",
       "addWaypoint": "Add another stop",
       "dragAndDrop": "Drag to change stop order",
-      "modeTimePrefs": "Set transport mode or stop duration",
-      "modePreferences": "Choose transport mode",
-      "timeInWaypoint": "Set stop duration",
+      "modePreferences": "Set transport mode",
       "closeLegPrefs": "Close segment settings",
-      "preferencesButton": "Open route preferences"
+      "preferencesButton": "Open route preferences",
+      "blockedPreferences": "Bike segment is fixed due to station usage constraint",
+      "leaveNow": "Use current date and time"
     },
     "sidebar": {
       "closeSidebar": "Close panel",
@@ -242,7 +376,8 @@
       },
       "bicycle": {
         "lockTime": "Time to lock the bike",
-        "unlockTime": "Time to unlock the bike"
+        "unlockTime": "Time to unlock the bike",
+        "zeroWarning": "A bike may not be available at the station"
       }
     },
     "settings": {
@@ -270,7 +405,8 @@
       "alternativeDestinationBikeStation": "Alternative destination station",
       "marker": "Click for stop information",
       "vehiclePosition": "Current vehicle position",
-      "transfer": "Transfer point"
+      "transfer": "Transfer point",
+      "noPrediction": "Prediction is not available"
     },
     "info": {
       "bus": "Public Transport",

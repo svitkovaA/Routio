@@ -15,12 +15,14 @@ type TransferProps = {
     leg: Leg;           // Transfer leg between two transport segments
     setVerticalTimeline: (value: VerticalTimeline[] | ((prev: VerticalTimeline[]) => VerticalTimeline[])) => void; // Setter used to update vertical timeline segments
     index: number;      // Index of the leg within the trip pattern
+    offset: number;     // Vertical timeline offset
 }
 
 function Transfer({
     leg,
     setVerticalTimeline,
     index,
+    offset
 } : TransferProps) {
     // Translation function
     const { t } = useTranslation();
@@ -34,7 +36,7 @@ function Transfer({
         leg,
         setVerticalTimeline,
         index,
-        30
+        offset
     );
 
     return (

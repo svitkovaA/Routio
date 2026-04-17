@@ -16,15 +16,17 @@ import ElevationProfile from "../Elevation/ElevationProfile";
 import { useResult } from "../../../../Contexts/ResultContext";
 
 type WalkDetailProps = {
-    leg: Leg;       // Walking leg
+    leg: Leg;           // Walking leg
     setVerticalTimeline: (value: VerticalTimeline[] | ((prev: VerticalTimeline[]) => VerticalTimeline[])) => void;  // Setter used to update the vertical timeline segments
-    index: number;  // Index of the leg within the trip pattern
-}
+    index: number;      // Index of the leg within the trip pattern
+    offset: number;     // Vertical timeline offset
+};
 
 function WalkDetail({
     leg,
     setVerticalTimeline,
-    index
+    index,
+    offset
 } : WalkDetailProps) {
     // Translation function
     const { t } = useTranslation();
@@ -38,7 +40,7 @@ function WalkDetail({
         leg,
         setVerticalTimeline,
         index,
-        30
+        offset
     );
 
     // Polyline elevation data

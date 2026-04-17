@@ -95,7 +95,7 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
 
     // Selected travel date and time
     const [date, setDate] = useState(() => dayjs());
-    const [time, setTime] = useState(() => dayjs());
+    const [time, setTime] = useState(() => dayjs().second(0).millisecond(0));
 
     // Index of the waypoint currently being assigned via map click
     const [mapSelectionIndex, setMapSelectionIndex] = useState<number>(-1);

@@ -6,7 +6,7 @@
 
 .back-button {
     background-color: var(--color-background);
-    height: 58px;
+    height: 68px;
     font-size: 20pt;
     padding-top: 7px;
 }
@@ -30,6 +30,12 @@
     position: relative;
     bottom: 8px;
     color: var(--color-text-primary);
+}
+
+@media screen and (min-width: 768px) {
+    .back-button {
+        height: 58px;
+    }
 }
 
 /** End of file Settings.css */

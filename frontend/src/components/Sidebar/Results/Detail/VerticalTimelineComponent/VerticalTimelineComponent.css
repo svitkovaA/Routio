@@ -8,7 +8,6 @@
     display: flex;
     width: 23px;
     flex-direction: column;
-    padding-top: 12px;
 }
 
 .vertical-timeline-item {

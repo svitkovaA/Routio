@@ -12,6 +12,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { csCZ, enUS, skSK } from '@mui/x-date-pickers/locales';
 import RestoreIcon from '@mui/icons-material/Restore';
 import IconButton from "@mui/material/IconButton";
+import CustomTooltip from '../../../CustomTooltip/CustomTooltip';
 import dayjs from "dayjs";
 import { useInput } from '../../../Contexts/InputContext';
 import { useTranslation } from "react-i18next";
@@ -123,7 +124,7 @@ function TimeDate(){
                     value={time}
                     ampm={isEnglish}
                     onChange={(newValue) => {
-                        if (newValue !== null) setTime(newValue)
+                        if (newValue !== null) setTime(newValue.second(0).millisecond(0))
                     }}
                     sx={{ 
                         '& .MuiSvgIcon-root': {
@@ -138,17 +139,19 @@ function TimeDate(){
                     }}
                 />
                 {!isNow && (
-                    <IconButton
-                        className="now-button"
-                        onClick={() => {
-                            setTime(dayjs());
-                            setDate(dayjs());
-                        }}
-                        size="small"
-                    >
-                        <RestoreIcon sx={{ fontSize: 15 }}/>
-                        <span>{t("planning.now")}</span>
-                    </IconButton>
+                    <CustomTooltip title={t("tooltips.inputForm.leaveNow")}>
+                        <IconButton
+                            className="now-button"
+                            onClick={() => {
+                                setTime(dayjs().second(0).millisecond(0));
+                                setDate(dayjs().second(0).millisecond(0));
+                            }}
+                            size="small"
+                        >
+                            <RestoreIcon sx={{ fontSize: 15 }}/>
+                            <span>{t("planning.now")}</span>
+                        </IconButton>
+                    </CustomTooltip>
                 )}
             </div>
         </LocalizationProvider>

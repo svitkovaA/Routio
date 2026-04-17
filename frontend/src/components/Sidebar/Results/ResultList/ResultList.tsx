@@ -58,7 +58,6 @@ function ResultList({
                 </div>
             )}
             <Detail
-                tripPattern={pattern}
                 recalculatePattern={recalculatePattern}
             />
         </>

@@ -133,13 +133,145 @@
         "resultsSection": "Nastavte preferencie plánovania, ako sú preferované druhy dopravy alebo obmedzenia",
         "detail": "Detail",
         "detailSection": "Detail trasy poskytuje presné informácie o jednotlivých úsekoch a zastávkach"
+      },
+      "step1": {
+        "title": "Vstupný formulár",
+        "desc": "Zadajte <strong>východiskový a cieľový bod</strong>, prípadne medzibody, nastavte <strong>dátum a čas</strong> a upravte preferencie plánovania trasy.",
+        "routePoints": "Zadanie bodov trasy:",
+        "routePointsList": {
+          "search": "vyhľadaním názvu lokality,",
+          "map": "výberom priamo z mapy,",
+          "coords": "zadaním súradníc,",
+          "context": "pravým kliknutím na mapu,",
+          "current": "na základe aktuálnej polohy,",
+          "bikeStations": "výberom staníc zdieľaných bicyklov."
+        }
+      },
+      "step1Bike": {
+        "title": "Stanice zdieľaných bicyklov",
+        "desc": "Stanice je možné zobraziť po výbere <strong>zdieľaného bicykla</strong> a povolení ich zobrazenia.",
+        "add": " Pridanie stanice do trasy:",
+        "list": {
+          "click": "kliknutím na stanicu na mape,",
+          "type": "výberom typu (počiatočná/cieľová),",
+          "position": "určením pozície v rámci trasy,",
+          "insert": "pri novom bode sa vloží pred koniec trasy."
+        }
+      },
+      "step2": {
+        "title": "Nastavenie parametrov plánovania trasy",
+        "transport": "Preferencie dopravy:",
+        "transportList": {
+          "transfers": "nastavenie <strong>maximálneho počtu prestupov</strong>,",
+          "modes": "výber <strong>povolených druhov dopravy</strong> pri plánovaní,",
+          "delays": "možnosť zobrazenia <strong>historických meškaní spojov</strong> na naplánovanej trase za posledných 7 dní (za cenu dlhšieho času plánovania)."
+        },
+
+        "bike": "Preferencie bicykla (zdieľaného aj vlastného):",
+        "bikeList": {
+          "distance": "nastavenie <strong>maximálnej vzdialenosti</strong>, ktorú je možné prejsť na bicykli,",
+          "speed": "nastavenie <strong>priemernej rýchlosti</strong> jazdy,",
+          "lock": "nastavenie <strong>času potrebného na uzamknutie bicykla</strong> (pri zdieľanom bicykli sa započítava dvojnásobne, pre odomknutie aj uzamknutie)."
+        },
+
+        "walk": "Preferencie chôdze:",
+        "walkList": {
+          "distance": "nastavenie <strong>maximálnej vzdialenosti</strong>,",
+          "speed": "nastavenie <strong>priemernej rýchlosti</strong> chôdze."
+        }
+      },
+      "step3": {
+        "title": "Zobrazenie výsledkov plánovania trasy",
+        "overview": "Prehľad trás:",
+        "overviewList": {
+          "map": "zobrazenie trás <strong>na mape aj v zozname</strong>,",
+          "time": "každá trasa obsahuje čas odchodu a príchodu,",
+          "details": "zobrazenie celkového trvania, vzdialenosti a počtu prestupov."
+        },
+        "visual": "Vizualizácia trasy:",
+        "visualList": {
+          "colors": "farebné rozlíšenie úsekov podľa typu dopravy."
+        },
+        "detail": "Detail trasy:",
+        "detailList": {
+          "click": "výberom trasy sa zobrazia podrobné informácie."
+        }
+      },
+      "step4": {
+        "public": {
+          "title": "Detail trasy – verejná doprava",
+
+          "info": "Informácie o spoji:",
+          "infoList": {
+            "line": "číslo linky a smer spoja,",
+            "zones": "zóny, ktorými linka prechádza,",
+            "length": "celková dĺžka a trvanie úseku trasy."
+          },
+
+          "departures": "Odchody a zastávky:",
+          "departuresList": {
+            "next": "prehľad ďalších odchodov spojov rovnakej linky,",
+            "select": "možnosť výberu skoršieho alebo neskoršieho spoja,",
+            "stops": "zobrazenie zastávok vrátane indikácie aktuálnej polohy spoja."
+          },
+
+          "delays": "Meškania a poloha:",
+          "delaysList": {
+            "current": "aktuálne meškanie spoja,",
+            "history": "historické meškania za posledných 7 dní (po zapnutí v preferenciách),",
+            "position": "zobrazenie aktuálnej polohy spoja na mape."
+          }
+        },
+        "bikeWalk": {
+          "title": "Detail trasy – bicykel a chôdza",
+          "bike": "Bicykel:",
+          "bikeList": {
+            "lock": "zobrazenie času potrebného na odomknutie a uzamknutie bicykla,",
+            "length": "celková dĺžka a trvanie úseku trasy,",
+            "elevation": "prevýšenie a výškový profil trasy."
+          },
+          "sharedBike": "Zdieľané bicykle:",
+          "sharedBikeList": {
+            "current": "po kliknutí na stanicu sa zobrazí aktuálny počet dostupných bicyklov,",
+            "expected": "zobrazenie očakávaného počtu bicyklov v čase príchodu do stanice (až 24 hodín dopredu)."
+          },
+          "walk": "Chôdza:",
+          "walkList": {
+            "length": "celková dĺžka a trvanie úseku trasy,",
+            "elevation": "prevýšenie a výškový profil trasy."
+          }
+        }
       }
+    },
+    "stations": {
+      "title": "Výpočet trasy",
+      "desc": "Aplikácia pri multimodálnom plánovaní vyberá najvhodnejšiu stanicu zdieľaných bicyklov. Výber stanice je založený na hodnotení viacerých faktorov, ktoré ovplyvňujú pravdepodobnosť úspešného prevzatia alebo vrátenia bicykla a komfort. Pri výbere stanice sú zohľadňované:",
+      "factors": {
+        "availability": {
+          "title": "Predikcia dostupnosti zdieľaných bicyklov.",
+          "desc": "Predikovaný počet dostupných bicyklov v čase očakávaného príchodu do stanice"
+        },
+        "angle": {
+          "title": "Uhol voči plánovanej trase.",
+          "desc": "Uhol medzi smerom plánovanej trasy a smerom k stanici, ktorý vyjadruje mieru odchýlky od pôvodnej trasy."
+        },
+        "distance": {
+          "title": "Vzdialenosť od bodu trasy",
+          "desc": "Vzdialenosť stanice od bodu trasy."
+        }
+      },
+      "evaluation": "Každému z týchto faktorov je priradená váha. Na základe ich kombinácie aplikácia vypočíta hodnotu pre jednotlivé stanice a vyberie tú, ktorá je pre danú trasu najvhodnejšia.",
+      "predictionTitle": "Predikcia dostupnosti bicykla",
+      "predictionDesc": "Aplikácia využíva model hlbokého učenia na predikciu dostupnosti zdieľaných bicyklov v staniciach až na 24 hodín dopredu. Vďaka tomu môže aplikácia pri plánovaní trasy vybrať stanicu, pri ktorej je vyššia pravdepodobnosť, že v nej bude bicykel dostupný v čase príchodu.",
+      "changeTitle": "Zmena stanice zdieľaného bicykla a stojanu na vlastný bicykel",
+      "changeDesc": "Nakoľko aplikácia vyberá jednu najlepšie ohodnotenú stanicu/bicykel. Preto má užívateľ možnosť túto stanicu/stojan zmeniť. Po zmene stanice/stojana aplikácia prepočíta zmenenú časť trasy a aktualizuje trasu."
     }
   },
   "results": "Výsledky",
   "resultsInfo": {
     "detail": "Detail",
     "noResults": "Nenašli sa žiadne výsledky",
+    "routingError": "Nastala chyba pri výpočte trasy",
     "warningFoot": "Vzdialenosť chôdze presahuje maximálny povolený limit",
     "warningBicycle": "Vzdialenosť jazdy na bicykli presahuje maximálny povolený limit",
     "warningFootBicycle": "Prekročený limit vzdialenosti"
@@ -155,7 +287,9 @@
     "publicTransport": {
       "otherDepartures": "Ďalšie odchody",
       "moreDepartures": "Viac odchodov",
-      "stops": "Zastávky",
+      "stops1": "Zastávka",
+      "stopsMore": "Zastávky",
+      "stopsOther": "Zastávok",
       "historicalDelays": "Historické meškania",
       "historicalDelaysOnTime": "Včas",
       "arrivalAfterDeparture": "má odchod skôr ako je plánovaný príchod predchádzajúceho spoja.",
@@ -196,11 +330,11 @@
       "swapWaypoints": "Vymeniť začiatok a cieľ",
       "addWaypoint": "Pridať ďalší bod",
       "dragAndDrop": "Potiahnutím zmeniť poradie bodov",
-      "modeTimePrefs": "Nastaviť druh dopravy alebo čas strávený v bode",
       "modePreferences": "Nastaviť druh dopravy",
-      "timeInWaypoint": "Nastaviť čas strávený v bode",
       "closeLegPrefs": "Zavrieť nastavenia úseku trasy",
-      "preferencesButton": "Otvoriť nastavenia trasy"
+      "preferencesButton": "Otvoriť nastavenia trasy",
+      "blockedPreferences": "Bicyklový úsek nie je možné zmeniť z dôvodu využitia stanice",
+      "leaveNow": "Použiť aktuálny dátum a čas"
     },
     "sidebar": {
       "closeSidebar": "Zavrieť panel",
@@ -243,7 +377,8 @@
       },
       "bicycle": {
         "lockTime": "Čas na zamknutie bicykla",
-        "unlockTime": "Čas na odomknutie bicykla"
+        "unlockTime": "Čas na odomknutie bicykla",
+        "zeroWarning": "V stanici nemusí byť dostupný bicykel"
       }
     },
     "settings": {
@@ -271,7 +406,8 @@
       "alternativeDestinationBikeStation": "Alternatívna cieľová stanica",
       "marker": "Kliknutím zobrazíte informácie o zastávke",
       "vehiclePosition": "Aktuálna poloha vozidla",
-      "transfer": "Prestupný bod"
+      "transfer": "Prestupný bod",
+      "noPrediction": "Predikcia je nedostupná"
     },
     "info": {
       "bus": "Verejná doprava",

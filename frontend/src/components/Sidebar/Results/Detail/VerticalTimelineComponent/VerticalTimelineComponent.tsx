@@ -9,14 +9,23 @@ import "./VerticalTimelineComponent.css";
 
 type VerticalTimelineComponentProps = {
     verticalTimeline: VerticalTimeline[];   // Array of timeline segments corresponding to trip legs
+    offset: number;                         // Initial component offset
 }
 
-function VerticalTimelineComponent({ verticalTimeline } : VerticalTimelineComponentProps) {
+function VerticalTimelineComponent({ 
+    verticalTimeline,
+    offset 
+} : VerticalTimelineComponentProps) {
     // Filter out waiting and artificial segments
     const nonWaitLegs = verticalTimeline.filter((i) => i.mode !== "wait" && !i.artificial);
     
     return (
-        <div className="vertical-timeline">
+        <div 
+            className="vertical-timeline"
+            style={{
+                paddingTop: offset - 2
+            }}
+        >
             {nonWaitLegs.map((item, index) => (
                 <div
                     key={`${index}`}

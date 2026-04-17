@@ -65,7 +65,7 @@ function Sidebar({
     const prevClosedOffset = useRef<number | null>(null);
 
     // Maximum vertical offset of the sidebar when fully opened
-    const closedOffset = Math.max(0, sheetHeight - 58);
+    const closedOffset = Math.max(0, sheetHeight - 68);
 
     // Stores previous loading state
     const prevLoadingRef = useRef(loading);

@@ -27,6 +27,9 @@ type PublicTransportDetailProps = {
     index: number;                                          // Index of the leg within the trip pattern
     moreDeparturesClick: () => void;                        // Opens extended departure options
     recalculatePattern: (selectedIndex: number) => void;    // Recalculates trip pattern for a selected departure
+    setHeight: (index: number, value: number) => void;      // Sets waystop height
+    waystopHeightIndex: number;                             // Index into waystop heights array
+    offset: number;                                         // Vertical timeline offset
 }
 
 function PublicTransportDetail({
@@ -34,7 +37,10 @@ function PublicTransportDetail({
     setVerticalTimeline,
     index,
     moreDeparturesClick,
-    recalculatePattern
+    recalculatePattern,
+    waystopHeightIndex,
+    setHeight,
+    offset
 } : PublicTransportDetailProps) {
     // Translation function
     const { t } = useTranslation();
@@ -53,7 +59,7 @@ function PublicTransportDetail({
         leg,
         setVerticalTimeline,
         index,
-        -30
+        -offset
     );
 
     // Settings context
@@ -77,6 +83,8 @@ function PublicTransportDetail({
         (currentIndex - 1 > 0 || currentIndex + 2 < departures.length - 1)
     );
 
+    const stopsCount = (leg.serviceJourney?.quays.length ?? 0) + 1;
+
     return (
         <div
             ref={publicTransportDetailRef} className="public-transport-detail"
@@ -84,6 +92,7 @@ function PublicTransportDetail({
             <Waystop
                 time={new Date(leg.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 name={leg.fromPlace?.name}
+                updateHeight={(v) => setHeight(waystopHeightIndex, v)}
             />
             {timelineIcons[leg.mode]}
             <div className="detail-trip-info">
@@ -209,7 +218,13 @@ function PublicTransportDetail({
                                 <div className="station-square">
                                 </div>
                             </span>
-                            {((leg.serviceJourney?.quays.length ?? 0) + 1)} {t("detailInfo.publicTransport.stops")}
+                            {stopsCount} {
+                                stopsCount === 1
+                                    ? t("detailInfo.publicTransport.stops1")
+                                    : stopsCount >= 2 && stopsCount <= 4
+                                        ? t("detailInfo.publicTransport.stopsMore")
+                                        : t("detailInfo.publicTransport.stopsOther")
+                            }
                         </div>
                         <div>
                             {stopsOpen && leg.serviceJourney?.quays.map((quay, index) => (
@@ -301,6 +316,7 @@ function PublicTransportDetail({
             <Waystop
                 time={new Date(leg.aimedEndTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 name={leg.toPlace?.name}
+                updateHeight={(v) => setHeight(waystopHeightIndex + 1, v)}
             />
         </div>
     );

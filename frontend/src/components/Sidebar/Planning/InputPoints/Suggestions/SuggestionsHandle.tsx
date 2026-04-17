@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../../../../config/config";
 import type { InputText, StoredWaypoint } from "../../../../types/types";
 import { useInput } from "../../../../Contexts/InputContext";
-import { loadDestination, loadMiddleWaypoints, loadOrigin } from "../WaypointStorage";
+import { loadEndWaypoints, loadMiddleWaypoints } from "../WaypointStorage";
 import { useNotification } from "../../../../Contexts/NotificationContext";
 
 /**
@@ -49,13 +49,9 @@ export function useSuggestionHandle(index: number) {
      * Loads suggestions from localStorage
      */
     const loadSuggestionsFromStorage = useCallback(() => {
-        if (index === 0) {
-            const origin = loadOrigin();
-            setSuggestions(transformStored(origin));
-        }
-        else if (index === waypoints.length - 1) {
-            const destination = loadDestination();
-            setSuggestions(transformStored(destination));
+        if (index === 0 || index === waypoints.length - 1) {
+            const endWaypoints = loadEndWaypoints();
+            setSuggestions(transformStored(endWaypoints));
         }
         else {
             const middle_waypoints = loadMiddleWaypoints();

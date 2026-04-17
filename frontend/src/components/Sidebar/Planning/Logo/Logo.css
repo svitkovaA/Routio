@@ -10,8 +10,8 @@
     justify-content: left;
     gap: 5px;
     flex-direction: row;
-    height: 58px;
-    padding-top: 15px;
+    height: 68px;
+    padding-top: 20px;
 }
 
 .logo img {
@@ -24,6 +24,13 @@
 .logo img:first-child {
     bottom: 8px;
     height: 45px;
+}
+
+@media screen and (min-width: 768px) {
+    .logo {
+        height: 58px;
+        padding-top: 15px;
+    }
 }
 
 /** End of file Logo.css */
