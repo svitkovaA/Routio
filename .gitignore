@@ -41,3 +41,4 @@ acceleration.py
 analysis.py
 *.txt 
 !requirements*
+tcn_test.py
