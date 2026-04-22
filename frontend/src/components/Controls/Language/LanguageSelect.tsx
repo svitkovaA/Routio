@@ -8,23 +8,24 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CustomTooltip from "../../CustomTooltip/CustomTooltip";
+import { PUBLIC_URL } from "../../config/config";
 
 // Language representation
 type Language = {
     code: string;       // Language code
-    flagCode: string;   // Unicode flag representation
+    flag: string;       // Flag source
 };
 
 // List of all supported  application languages
 const languages: Language[] = [{
         code: "en",
-        flagCode: "\uD83C\uDDEC\uD83C\uDDE7"
+        flag: `${PUBLIC_URL}img/gb.svg`
     }, {
         code: "cs",
-        flagCode: "\uD83C\uDDE8\uD83C\uDDFF"
+        flag: `${PUBLIC_URL}img/czechia.svg`
     }, {
         code: "sk",
-        flagCode: "\uD83C\uDDF8\uD83C\uDDF0"
+        flag: `${PUBLIC_URL}img/slovakia.svg`
     }
 ];
 
@@ -63,7 +64,7 @@ function LanguageSelect() {
                         setOpen(!open);
                     }}
                 >
-                    {selectedLang.flagCode}
+                    <img src={selectedLang.flag} alt={selectedLang.code} className="flag" />
                     <ExpandMoreIcon 
                         fontSize="small" 
                         className={open ? "rotate" : ""}
@@ -81,7 +82,7 @@ function LanguageSelect() {
                             className={"dropdown-item " + (lang.code === selectedLang.code ? "selected" : "")}
                             onMouseDown={() => handleSelect(lang)}
                         >
-                            {lang.flagCode}
+                            <img src={lang.flag} alt={lang.code} className="flag" />
                         </div>
                     ))}
                 </div>

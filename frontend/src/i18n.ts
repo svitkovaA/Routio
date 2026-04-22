@@ -10,6 +10,7 @@ i18n
     .use(initReactI18next)
     .init({
         fallbackLng: "en",
+        supportedLngs: ["cs", "en", "sk"],
         resources: {
             cs: { translation: cs },
             en: { translation: en },
@@ -22,6 +23,7 @@ i18n
         interpolation: {
             escapeValue: false,
         },
+        load: "languageOnly"
     });
 
 export default i18n;

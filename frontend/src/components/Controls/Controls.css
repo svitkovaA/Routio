@@ -76,6 +76,11 @@
     background: var(--color-item-selected);
 }
 
+.flag {
+    width: 24px;
+    height: 16px;
+}
+
 @media screen and (min-width: 768px) {
     .controls-left {
         position: static;
