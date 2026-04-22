@@ -157,7 +157,7 @@ Port v `docker-compose.local.yml` zvolit volný (ověřit co je obsazené).
 ## Import DB dumpu
 
 ```bash
-docker exec -i <projekt>-db bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < dump.sql
+docker compose -f docker-compose.prod.yml exec -T db bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < dump.sql
 ```
 
 Ověření:

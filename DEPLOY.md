@@ -128,7 +128,7 @@ Otevři v prohlížeči: **https://dexter.fit.vutbr.cz/routio**
 Pokud potřebuješ naimportovat data z dumpu (soubor `dump.sql` musí být na serveru):
 
 ```bash
-docker exec -i routio-db bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < dump.sql
+docker compose -f docker-compose.prod.yml exec -T db bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < dump.sql
 ```
 
 Ověření, že tabulky existují:
