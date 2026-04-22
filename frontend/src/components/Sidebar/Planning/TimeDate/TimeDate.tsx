@@ -39,10 +39,10 @@ function TimeDate(){
     };
 
     // Selects appropriate picker localization based on the language
-    const currentPickerLocale = pickerLocaleMap[i18n.language] || enUS;
+    const currentPickerLocale = pickerLocaleMap[i18n.language.split("-")[0]] || enUS;
 
     // English is selected
-    const isEnglish = i18n.language === "en";
+    const isEnglish = i18n.language.split("-")[0] === "en";
 
     // Determines whether the selected date and time correspond to real time
     const isNow = (() => {
@@ -91,7 +91,7 @@ function TimeDate(){
     return (
         <LocalizationProvider 
             dateAdapter={AdapterDayjs} 
-            adapterLocale={i18n.language || "cs"}
+            adapterLocale={i18n.language.split("-")[0] || "cs"}
             localeText={currentPickerLocale.components.MuiLocalizationProvider.defaultProps.localeText}
         >
             <div className="grid-wrapper time-date">

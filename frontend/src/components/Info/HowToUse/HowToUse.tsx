@@ -109,7 +109,7 @@ function HowToUse({
 
     // Resolve image paths for current step
     const items = MEDIA_MAP[`step${step}` as keyof typeof MEDIA_MAP]
-        .map(src => getImg(i18n.language, src));
+        .map(src => getImg(i18n.language.split("-")[0], src));
 
     // Available instruction steps
     const steps = [

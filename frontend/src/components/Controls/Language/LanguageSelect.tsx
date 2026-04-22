@@ -34,7 +34,7 @@ function LanguageSelect() {
     const { t, i18n } = useTranslation();
 
     // Currently active language
-    const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+    const currentLanguage = languages.find(lang => lang.code === i18n.language.split("-")[0]) || languages[0];
 
     // Stores the selected language
     const [selectedLang, setSelectedLang] = useState<Language>(currentLanguage);

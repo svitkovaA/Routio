@@ -120,7 +120,7 @@ function InputField({
     const isInvalidAddress = !isFocused && waypoint.displayName.trim() !== "" && (waypoint.lat === 0 || waypoint.lon === 0);
 
     // Stores the previously active language
-    const previousLanguage = useRef(i18n.language);
+    const previousLanguage = useRef(i18n.language.split("-")[0]);
 
     /**
      *  User location handle
@@ -147,8 +147,8 @@ function InputField({
         });
 
         // Store current language for the next change detection
-        previousLanguage.current = i18n.language;
-    }, [i18n.language, setWaypoints, t]);
+        previousLanguage.current = i18n.language.split("-")[0];
+    }, [i18n.language.split("-")[0], setWaypoints, t]);
 
     // Detects the users current geographic position
     const detectCurrentPosition = () => {
