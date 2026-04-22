@@ -468,6 +468,10 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                         // Skip if no realtime data provided
                         const pos = realtime[leg.tripId];
                         if (!pos) {
+                            leg.delay = undefined;
+                            if (leg.serviceJourney) {
+                                leg.serviceJourney.currentIndex = null;
+                            }
                             continue;
                         }
     
