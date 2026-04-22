@@ -162,11 +162,13 @@ After starting the application in docker or locally, there are two options to lo
 If `dump.sql` is provided this option is possible. To initialize database run:
 * Development docker
 ```bash
-docker compose -f docker-compose.dev.yml exec db psql -U $POSTGRES_USER -d $POSTGRES_DB < dump.sql
+docker compose -f docker-compose.dev.yml exec -T db \
+bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < dump.sql
 ```
 * Production docker
 ```bash
-docker compose -f docker-compose.prod.yml exec db psql -U $POSTGRES_USER -d $POSTGRES_DB < dump.sql
+docker compose -f docker-compose.prod.yml exec -T db \
+bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < dump.sql
 ```
 * Local development in project root directory run
 ```bash
