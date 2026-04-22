@@ -158,7 +158,7 @@ http://domain_name/routio
 ## Database initialization
 After starting the application in docker or locally, there are two options to load bike rack data into the database.
 
-### 1. SQL Dump
+### 1. SQL Dump
 If `dump.sql` is provided this option is possible. To initialize database run:
 * Development docker
 ```bash
@@ -187,7 +187,7 @@ docker compose -f docker-compose.prod.yml exec backend python -m database.osm
 ```bash
 python -m database.osm
 ```
-**Note:** Development requirements necessary.
+**Note:** Development requirements necessary.  
 **Note:** This takes a long time around 20 minutes according to machine.
 
 ## Environment variables
@@ -210,7 +210,7 @@ The following variables must be defined in `frontend/.env.production` for produc
 | `VITE_BASE_URL`    | Subdomain for production deployment   |
 | `VITE_API_URL`    | API base URL based on nginx.conf   |
 
-**Note:** Based on current nginx.conf `VITE_API_URL` must be `VITE_BASE_URL` + `api/`
+**Note:** Based on current nginx.conf `VITE_API_URL` must be `VITE_BASE_URL` + `api`
 
 ### 3. Root directory
 The following variables must be defined in `.env` for both development and production docker build:

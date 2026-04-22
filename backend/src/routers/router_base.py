@@ -97,28 +97,4 @@ class RouterBase(ABC):
             if leg.mode == "bicycle"
         )
 
-    @staticmethod
-    def _select_best_option(
-        options: List[Tuple[int, float, TripPattern | None]],
-        best_distance: float
-    ) -> Tuple[int, TripPattern] | None:
-        """
-        Selects the best bicycle routing option based on minimal distance.
-
-        Args:
-            options: List of options (leg_index, bike_distance, resulting_pattern)
-            best_distance: Current best known bicycle distance
-
-        Returns:
-            Tuple (index, pattern), or None if no improvement found
-        """
-        best_option: Tuple[int, TripPattern] | None = None
-
-        for index, distance, pattern in options:
-            if pattern and distance < best_distance:
-                best_distance = distance
-                best_option = (index, pattern)
-
-        return best_option
-
 # End of file router_base.py

@@ -7,7 +7,7 @@ handle multimodal route segments.
 
 import asyncio
 from copy import deepcopy
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any, Coroutine, List, Tuple
 from shared.pattern_utils import PatternUtils
 from routers.router import Router
@@ -426,16 +426,26 @@ class PublicBicycleRouter(RouterBase, Router):
 
         public_leg_indices = self.__find_public_leg_indices(pattern, leg_index)
 
-        best_distance = self._compute_bike_distance(pattern)
+        bicycle_router = BicycleRouter(
+            RoutingContext(
+                self._ctx.data.model_copy(
+                    update={
+                        "arrive_by": False
+                    }
+                ),
+                self._ctx.session
+            )
+        )
 
         bike_options = await self.__compute_bike_options(
             context,
             pattern,
             public_leg_indices,
-            waypoint_index
+            waypoint_index,
+            bicycle_router
         )
 
-        best_option = self._select_best_option(bike_options, best_distance)
+        best_option = self.__select_best_option(bike_options, pattern.aimedEndTime)
 
         if best_option:
             index, best_pattern = best_option
@@ -468,7 +478,7 @@ class PublicBicycleRouter(RouterBase, Router):
         """
         waypoint_index = len(context.waypoints) - 1
         leg_index = len(pattern.legs) - 2
-        bike_found = False
+        bike_found = pattern.legs[-1].mode == "bicycle"
         prev_mode = pattern.legs[-1].mode
         for leg in reversed(pattern.legs[:-1]):
             # Count consecutive legs with the same time-independent mode
@@ -522,13 +532,38 @@ class PublicBicycleRouter(RouterBase, Router):
 
         return public_leg_indices
 
+    @staticmethod
+    def __select_best_option(
+        options: List[Tuple[int, TripPattern | None]],
+        best_time: datetime
+    ) -> Tuple[int, TripPattern] | None:
+        """
+        Selects the best bicycle routing option based on arrival time.
+
+        Args:
+            options: List of options (leg_index, resulting_pattern)
+            best_time: Current best known arrival time
+
+        Returns:
+            Tuple (index, pattern), or None if no improvement found
+        """
+        best_option: Tuple[int, TripPattern] | None = None
+
+        for index, pattern in options:
+            if pattern and pattern.aimedEndTime < best_time:
+                best_time = pattern.aimedEndTime
+                best_option = (index, pattern)
+
+        return best_option
+
     async def __compute_bike_options(
         self,
         context: PlanningContext,
         pattern: TripPattern,
         public_leg_indices: List[int],
-        waypoint_index: int
-    ) -> List[Tuple[int, float, TripPattern | None]]:
+        waypoint_index: int,
+        bicycle_router: BicycleRouter
+    ) -> List[Tuple[int, TripPattern | None]]:
         """
         Computes alternative bicycle routes for selected public transport segments.
 
@@ -539,7 +574,7 @@ class PublicBicycleRouter(RouterBase, Router):
             waypoint_index: Index defining the prefix of waypoints to preserve
 
         Returns:
-            List of tuples (index of the evaluated leg, bicycle distance, bike pattern)
+            List of tuples (index of the evaluated leg, bike pattern)
         """
         tasks: List[Coroutine[Any, Any, List[TripPattern]]] = []
 
@@ -560,25 +595,27 @@ class PublicBicycleRouter(RouterBase, Router):
             )
 
             # Enqueue async bicycle routing request
-            tasks.append(self.__bicycle_router.route_group(ctx))
+            tasks.append(bicycle_router.route_group(ctx))
 
         results = await asyncio.gather(*tasks)
 
-        options: List[Tuple[int, float, TripPattern | None]] = []
+        options: List[Tuple[int, TripPattern | None]] = []
 
         for idx, result in zip(public_leg_indices, results):
             # No route was found
-            if not result:
-                options.append((idx, float("inf"), None))
+            if (
+                not result
+                or self._compute_bike_distance(result[0]) > self._ctx.max_bike_distance * 1000 + 50
+            ):
+                options.append((idx, None))
                 continue
 
             # Take best pattern
             bike_pattern = result[0]
 
-            # Store index, computed distance, and pattern
+            # Store index and pattern
             options.append((
                 idx,
-                self._compute_bike_distance(bike_pattern),
                 bike_pattern
             ))
 
