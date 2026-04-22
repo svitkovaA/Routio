@@ -1,0 +1,12 @@
+services:
+  backend:
+    image: dexter.fit.vutbr.cz/routio/routio-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+  frontend:
+    image: dexter.fit.vutbr.cz/routio/routio-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile

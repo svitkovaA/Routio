@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: routio-db
     restart: unless-stopped
     image: postgis/postgis:16-3.4
     environment:
@@ -13,14 +14,15 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+    networks:
+      - backend-db
 
   backend:
+    container_name: routio-backend
     restart: unless-stopped
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: dexter.fit.vutbr.cz/routio/routio-backend
     env_file:
-      - ./backend/.env
+      - .env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -32,18 +34,37 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    expose:
-      - "8000"
+    networks:
+      - routioNetwork
+      - backend-db
 
   frontend:
+    container_name: routio-frontend
     restart: unless-stopped
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
+    image: dexter.fit.vutbr.cz/routio/routio-frontend
     depends_on:
       - backend
+    networks:
+      - routioNetwork
+
+  proxy:
+    container_name: routio-proxy
+    image: nginx:1.19
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+    networks:
+      - routioNetwork
+      - network
+
+networks:
+  network:
+    name: kristyna-dev
+    external: true
+  routioNetwork:
+    name: routioNetwork
+  backend-db:
 
 volumes:
   pgdata:
