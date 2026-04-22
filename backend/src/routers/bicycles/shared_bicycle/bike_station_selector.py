@@ -115,7 +115,7 @@ class BikeStationSelector(SelectorBase):
         )
 
         # Get scoring weights for destination selection
-        angle_weight, availability_weight, distance_weight = self._destination_weights()
+        angle_weight, capacity_weight, distance_weight = self._destination_weights()
 
         # Rank the candidates
         return self.__score_and_rank(
@@ -126,7 +126,7 @@ class BikeStationSelector(SelectorBase):
             forward_vector,
             context,
             angle_weight,
-            availability_weight,
+            capacity_weight,
             distance_weight,
             "destination",
             bisector_vector

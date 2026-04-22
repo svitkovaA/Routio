@@ -5,13 +5,15 @@ Implements PublicBicycleRouter, the planning strategy designed to efficiently
 handle multimodal route segments.
 """
 
+import asyncio
+from copy import deepcopy
 from datetime import timedelta
-from typing import List, Tuple
+from typing import Any, Coroutine, List, Tuple
 from shared.pattern_utils import PatternUtils
 from routers.router import Router
 from shared.geo_math import GeoMath
 from routing_engine.routing_context import RoutingContext
-from models.route import TIME_DEPENDENT_MODES, TripPattern
+from models.route import TIME_DEPENDENT_MODES, Mode, TripPattern
 from models.planning_context import PlanningContext
 from routers.router_base import RouterBase
 from routers.public_transport.public_transport_router import PublicTransportRouter
@@ -332,11 +334,8 @@ class PublicBicycleRouter(RouterBase, Router):
             )
 
             if bike_trip_patterns:
-                bike_distance = 0
                 # Compute total bicycle distance
-                for leg in bike_trip_patterns[0].legs:
-                    if leg.mode == "bicycle":
-                        bike_distance += leg.distance
+                bike_distance = self._compute_bike_distance(bike_trip_patterns[0])
 
                 # Validate bicycle constraint
                 if bike_distance <= self._ctx.max_bike_distance * 1000 + 50:
@@ -348,11 +347,17 @@ class PublicBicycleRouter(RouterBase, Router):
             factor -= step
 
         # Combine with public transport prefix
-        return await self.__route_public_and_combine(
+        trip_patterns = await self.__route_public_and_combine(
             i,
             bike_trip_patterns,
             context
         )
+
+        # Return validated trip patterns
+        return await asyncio.gather(*[
+            self.__validate_pattern(context, pattern)
+            for pattern in trip_patterns
+        ])
     
     async def __route_public_and_combine(
         self,
@@ -400,7 +405,185 @@ class PublicBicycleRouter(RouterBase, Router):
             True,
             public_bicycle=True
         )
-    
+
+    async def __validate_pattern(
+        self,
+        context: PlanningContext,
+        pattern: TripPattern
+    ) -> TripPattern:
+        """
+        Validates and potentially improves a trip pattern by replacing
+        bicycle part of the route.
+
+        Args:
+            context: Planning context with waypoints and time
+            pattern: Original trip pattern
+
+        Returns:
+            Updated TripPattern or original
+        """
+        waypoint_index, leg_index = self.__find_indices(context, pattern)
+
+        public_leg_indices = self.__find_public_leg_indices(pattern, leg_index)
+
+        best_distance = self._compute_bike_distance(pattern)
+
+        bike_options = await self.__compute_bike_options(
+            context,
+            pattern,
+            public_leg_indices,
+            waypoint_index
+        )
+
+        best_option = self._select_best_option(bike_options, best_distance)
+
+        if best_option:
+            index, best_pattern = best_option
+
+            # Keep remaining legs before the replaced segment
+            public_legs = deepcopy(pattern.legs[:index + 1])
+
+            return TripPattern(
+                legs=public_legs + best_pattern.legs,
+                aimedEndTime=best_pattern.aimedEndTime
+            )
+
+        return pattern
+
+    @staticmethod
+    def __find_indices(
+        context: PlanningContext,
+        pattern: TripPattern
+    ) -> Tuple[int, int]:
+        """
+        Finds the split point in the trip pattern where bicycle segment ends
+        and a time-dependent segment begins.
+
+        Args:
+            pattern: TripPattern to analyze
+
+        Returns:
+            Tuple (index of the last continuous time-independent segment,
+            index of the wait leg after bicycle segment)
+        """
+        waypoint_index = len(context.waypoints) - 1
+        leg_index = len(pattern.legs) - 2
+        bike_found = False
+        prev_mode = pattern.legs[-1].mode
+        for leg in reversed(pattern.legs[:-1]):
+            # Count consecutive legs with the same time-independent mode
+            if prev_mode == leg.mode and prev_mode not in TIME_DEPENDENT_MODES:
+                waypoint_index -= 1
+
+            prev_mode = leg.mode
+
+            # Mark bicycle segment start
+            if leg.mode == "bicycle":
+                bike_found = True
+
+            leg_index -= 1
+
+            # Stop after first wait segment following bicycle one
+            if bike_found and leg.mode == "wait":
+                break
+        
+        return waypoint_index, leg_index
+
+    @staticmethod
+    def __find_public_leg_indices(
+        pattern: TripPattern,
+        leg_index: int
+    ) -> List[int]:
+        """
+        Finds indices of time-dependent legs following a given split point.
+
+        Args:
+            pattern: TripPattern to analyze
+            leg_index: Index from which to start searching
+
+        Returns:
+            List of indices corresponding to time-dependent legs
+        """
+        public_leg_indices: List[int] = []
+        index = leg_index - 1
+        prev_mode: Mode = "foot"
+        for leg in reversed(pattern.legs[:leg_index]):
+            # Collect indices of time-dependent legs
+            if leg.mode in TIME_DEPENDENT_MODES:
+                public_leg_indices.append(index)
+
+            # Iterate until waypoint
+            if prev_mode == leg.mode and prev_mode not in TIME_DEPENDENT_MODES:
+                break
+
+            prev_mode = leg.mode
+
+            index -= 1
+
+        return public_leg_indices
+
+    async def __compute_bike_options(
+        self,
+        context: PlanningContext,
+        pattern: TripPattern,
+        public_leg_indices: List[int],
+        waypoint_index: int
+    ) -> List[Tuple[int, float, TripPattern | None]]:
+        """
+        Computes alternative bicycle routes for selected public transport segments.
+
+        Args:
+            context: Planning context
+            pattern: Trip pattern
+            public_leg_indices: Indices of candidate legs for replacement
+            waypoint_index: Index defining the prefix of waypoints to preserve
+
+        Returns:
+            List of tuples (index of the evaluated leg, bicycle distance, bike pattern)
+        """
+        tasks: List[Coroutine[Any, Any, List[TripPattern]]] = []
+
+        for index in public_leg_indices:
+            # Candidate leg
+            leg = pattern.legs[index]
+
+            # Skip if destination location is missing
+            if not leg.toPlace:
+                continue
+
+            # Create new context starting at the end of the current leg
+            ctx = PlanningContext(
+                waypoints=[
+                    f"{leg.toPlace.latitude}, {leg.toPlace.longitude}"
+                ] + context.waypoints[waypoint_index:],
+                time_cursor=leg.aimedEndTime
+            )
+
+            # Enqueue async bicycle routing request
+            tasks.append(self.__bicycle_router.route_group(ctx))
+
+        results = await asyncio.gather(*tasks)
+
+        options: List[Tuple[int, float, TripPattern | None]] = []
+
+        for idx, result in zip(public_leg_indices, results):
+            # No route was found
+            if not result:
+                options.append((idx, float("inf"), None))
+                continue
+
+            # Take best pattern
+            bike_pattern = result[0]
+
+            # Store index, computed distance, and pattern
+            options.append((
+                idx,
+                self._compute_bike_distance(bike_pattern),
+                bike_pattern
+            ))
+
+        return options
+
     def _estimate_public_time_duration(self, waypoints: List[str]) -> timedelta:
         """
         Estimates public transport time waypoints in departure mode.

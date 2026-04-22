@@ -54,7 +54,7 @@ class BikeRackSelector(SelectorBase):
         )
 
         # Retrieve scoring weights
-        angle_weight, availability_weight, distance_weight = self._destination_weights()
+        angle_weight, capacity_weight, distance_weight = self._destination_weights()
 
         scored_racks: List[BikeRackNode] = []
         discarded_racks: List[BikeRackNode] = []
@@ -85,7 +85,7 @@ class BikeRackSelector(SelectorBase):
             # Compute final weighted score
             rack.score = (
                 angle_weight * normalized_angle +
-                availability_weight * (np.clip(rack.place.capacity, 0, 5) / 5) + 
+                capacity_weight * (np.clip(rack.place.capacity, 0, 5) / 5) + 
                 distance_weight * (self._max_distance - rack.distance) / self._max_distance
             )
         

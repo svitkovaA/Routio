@@ -162,7 +162,6 @@ class TripPattern(BaseModel):
     originalLegs: List[Leg] = []                # List of original legs
     tooLongWalkDistance: bool | None = None     # Constraint flag walking distance exceeding maximal allowed distance
     tooLongBikeDistance: bool | None = None     # Constraint flag cycling distance exceeding maximal allowed distance
-    bikeSegmentFound: bool | None = None        # Indicates cycling presence
     vehicleRealtimeData: List[VehicleRealtimeData] = []   # Real-time vehicle data
     totalTime: float = 0.0                      # Time from the start to end of the trip
 

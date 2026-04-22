@@ -7,6 +7,7 @@ Provides a shared base implementation for concrete router classes.
 from abc import ABC
 from datetime import timedelta
 from typing import List, Tuple, final
+from models.route import TripPattern
 from shared.geo_math import GeoMath
 from routing_engine.routing_context import RoutingContext
 
@@ -78,5 +79,46 @@ class RouterBase(ABC):
             Estimated speed in km/h
         """
         return min(50, 12 + 0.7 * distance_km)
+
+    @staticmethod
+    def _compute_bike_distance(pattern: TripPattern) -> float:
+        """
+        Computes total bicycle distance within a trip pattern.
+
+        Args:
+            pattern: TripPattern containing bike legs
+
+        Returns:
+            Sum of distances of all bike legs
+        """
+        return sum(
+            leg.distance
+            for leg in pattern.legs
+            if leg.mode == "bicycle"
+        )
+
+    @staticmethod
+    def _select_best_option(
+        options: List[Tuple[int, float, TripPattern | None]],
+        best_distance: float
+    ) -> Tuple[int, TripPattern] | None:
+        """
+        Selects the best bicycle routing option based on minimal distance.
+
+        Args:
+            options: List of options (leg_index, bike_distance, resulting_pattern)
+            best_distance: Current best known bicycle distance
+
+        Returns:
+            Tuple (index, pattern), or None if no improvement found
+        """
+        best_option: Tuple[int, TripPattern] | None = None
+
+        for index, distance, pattern in options:
+            if pattern and distance < best_distance:
+                best_distance = distance
+                best_option = (index, pattern)
+
+        return best_option
 
 # End of file router_base.py

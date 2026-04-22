@@ -32,7 +32,7 @@ class ModeExpander():
         )
 
         # Precompute borderline distance where bike becomes faster than walking
-        self.__borderline_distance = self.__get___borderline_distance()
+        self.__borderline_distance = self.__get_borderline_distance()
     
     def expand_multimodal_group(
         self, 
@@ -125,7 +125,7 @@ class ModeExpander():
                 
         return possible_groups
 
-    def __get___borderline_distance(self) -> float:
+    def __get_borderline_distance(self) -> float:
         """
         Computes distance where bicycle becomes faster than walking.
 

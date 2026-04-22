@@ -185,17 +185,17 @@ class SelectorBase(ABC):
         Returns:
             Tuple of three weight coefficients
         """
-        return 0.1, 0.4, 0.5
+        return 0.11, 0.52, 0.37
     
     @staticmethod
     def _destination_weights() -> Tuple[float, float, float]:
         """
         Returns scoring weights for destination station selection. Weights
-        correspond to: (angle_weight, availability_weight, distance_weight)
+        correspond to: (angle_weight, capacity_weight, distance_weight)
 
         Returns:
             Tuple of three weight coefficients
         """
-        return 0.3, 0.3, 0.4
+        return 0.29, 0.1, 0.61
 
 # End of file selector_base.py
