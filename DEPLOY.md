@@ -39,5 +39,5 @@ docker network rm kristyna-dev
 ## Import DB dumpu
 
 ```bash
-docker compose -f docker-compose.prod.yml exec -T db bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < dump.sql
+bash configure/configure.sh
 ```
