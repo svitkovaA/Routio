@@ -9,7 +9,7 @@ import { MapContainer, TileLayer, Marker, Popup, ScaleControl, Polyline, useMapE
 import L from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
-import { API_BASE_URL } from '../config/config';
+import { API_BASE_URL, PUBLIC_URL } from '../config/config';
 import type { InputText } from '../types/types';
 import { useLayers } from '../Controls/Layer/Layers';
 import ShowRoute from './ShowRoute/ShowRoute';
@@ -283,7 +283,7 @@ function Map({
      */
     useEffect(() => {
         // Determine cursor style based on selection state
-        const cursor = mapSelectionIndex !== -1 ? "crosshair" : "";
+        const cursor = mapSelectionIndex !== -1 ? `url(${PUBLIC_URL}img/marker.svg) 20 35, auto` : "";
 
         // Overwrite cursor style
         const elements = document.getElementsByClassName("leaflet-grab");
