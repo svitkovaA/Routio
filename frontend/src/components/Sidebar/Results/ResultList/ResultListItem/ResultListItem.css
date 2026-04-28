@@ -54,6 +54,10 @@
     padding-left: 2px;
 }
 
+.detail-header .pattern-info-wrapper {
+    margin-top: -3px;
+}
+
 .pattern-info-wrapper > span {
     display: flex;
     align-items: center;

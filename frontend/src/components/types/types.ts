@@ -10,12 +10,12 @@ import L from 'leaflet';
 /**
  * Represents structured location
  */
-export type InputText = {
+export type Suggestion = {
     name: string;                           // Place name
-    city: string;                           // City name
-    street: string;                         // Street name
     lat: number;                            // Location latitude coordinate
     lon: number;                            // Location longitude coordinate
+    isBus: boolean;                         // Bus stop
+    isTrain: boolean;                       // Train stop
 };
 
 /**
@@ -41,6 +41,8 @@ export type Waypoint = {
     id: string;                             // Internal identifier
     bikeStationId: string | null;           // Station identifier
     origin: boolean | null;                 // True if station is set as origin one, false otherwise
+    isBus: boolean;                         // Bus stop
+    isTrain: boolean;                       // Train stop
 };
 
 /**
@@ -50,6 +52,8 @@ export type StoredWaypoint = {
     lat: number;                            // Latitude coordinate
     lon: number;                            // Longitude coordinate
     name: string;                           // Stored display name
+    isBus: boolean;                         // Bus stop
+    isTrain: boolean;                       // Train stop
 };
 
 /**

@@ -8,6 +8,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 from typing import Any, Awaitable, Callable, Type
+from service.district_service import DistrictService
 from config.db import PRODUCTION
 from service.weather_service import WeatherService
 from service.prediction_service import PredictionService
@@ -33,6 +34,7 @@ async def load_initial_data():
     """
     Load all core services concurrently on application startup.
     """
+    await _safe_reload(DistrictService)
     await asyncio.gather(
         _safe_reload(GTFSService),
         _safe_reload(GBFSService),

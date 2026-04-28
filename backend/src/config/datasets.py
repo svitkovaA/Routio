@@ -7,6 +7,7 @@ Defines dataset sources and local storage paths, includes:
 - GBFS station information feeds
 - TIF population data
 - OpenWeather data
+- District boundaries data
 """
 
 import os
@@ -26,8 +27,11 @@ NW_LON = 15.5424248
 SE_LAT = 48.6165408
 SE_LON = 17.6469364
 
+# Path to dataset directory
+DATASET_DIR = Path("../dataset")
+
 # Local directory for storing GTFS dataset
-GTFS_DIR = Path("../dataset/gtfs")
+GTFS_DIR = DATASET_DIR / "gtfs"
 
 IDS_JMK_AGENCY_NAME = "IDS JMK (Data from: KORDIS JMK, DPMB)"
 
@@ -62,10 +66,10 @@ GTFS_DATASETS: List[GTFS_DATASET] = [
 OSM_PBF_URL = "https://download.geofabrik.de/europe/czech-republic-latest.osm.pbf"
 
 # Local storage path for OSM PBF file
-OSM_PBF_PATH = "../dataset/osm/czech-republic-latest.osm.pbf"
+OSM_PBF_PATH = DATASET_DIR / "osm/czech-republic-latest.osm.pbf"
 
 # Local storage path for Lissy historical delays
-LISSY_DELAY_CACHE_PATH = "../dataset/lissy_cache"
+LISSY_DELAY_CACHE_PATH = DATASET_DIR / "lissy_cache"
 
 # GBFS datasets
 GBFS_URLS = {
@@ -84,7 +88,7 @@ GBFS_URLS = {
 }
 
 # Directory where population density dataset is stored
-POPULATION_DIR = Path("../dataset/pop_density")
+POPULATION_DIR = DATASET_DIR / "pop_density"
 
 # Path to the population density raster file
 POPULATION_PATH = POPULATION_DIR / "JRC-ESTAT_Census_Population_2021_100m.tif"
@@ -94,6 +98,15 @@ POPULATION_URL = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/MAPS/JRC-ESTA
 
 # URL for the current weather data
 WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
+
+# URL for downloading district bounds
+DISTRICT_URL = "https://raw.githubusercontent.com/siwekm/czech-geojson/master/okresy.json"
+
+# Directory where district dataset is stored
+DISTRICT_DIR = DATASET_DIR / "districts"
+
+# Path to the district JSON file
+DISTRICT_PATH = DISTRICT_DIR / "districts.json"
 
 load_dotenv()
 WEATHER_API_KEY = os.environ.get("OPEN_WEATHER_API_KEY", "")

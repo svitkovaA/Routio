@@ -4,12 +4,13 @@
  * @author Andrea Svitkova (xsvitka00)
  */
 
-import type { InputText } from "../../../../types/types";
+import { PUBLIC_URL } from "../../../../config/config";
+import type { Suggestion } from "../../../../types/types";
 import './Suggestions.css'
 
 type SuggestionsProps = {
-    suggestions: InputText[];                               // Array of suggestions
-    handleSuggestionClick: (suggestion: InputText) => void; // Handler triggered when suggestion is selected
+    suggestions: Suggestion[];                              // Array of suggestions
+    handleSuggestionClick: (suggestion: Suggestion) => void;// Handler triggered when suggestion is selected
     highlightedIndex: number;                               // Handler triggered when suggestion is selected
     render: boolean;                                        // Controls conditional rendering of suggestion list
     style?: React.CSSProperties;                            // Optional styles
@@ -36,7 +37,14 @@ function Suggestions ({
                     onMouseDown={() => handleSuggestionClick(s)}
                     className={`suggestion-item ${i === highlightedIndex ? "selected" : ""}`}
                 >
-                    {[s.name, s.street, s.city].filter(Boolean).join(", ")}
+                    {s.name}
+                    {s.isBus && s.isTrain ? (
+                        <img src={`${PUBLIC_URL}img/bus_train_stop.svg`} alt="Bus and train stop" />
+                    ) : s.isBus ? (
+                        <img src={`${PUBLIC_URL}img/bus_stop.svg`} alt="Bus stop" />
+                    ) : s.isTrain ? (
+                        <img src={`${PUBLIC_URL}img/train_stop.svg`} alt="Train stop" />
+                    ) : null}
                 </li>
             ))}
         </ul>

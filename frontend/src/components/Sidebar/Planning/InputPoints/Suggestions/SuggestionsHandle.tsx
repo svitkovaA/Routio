@@ -7,7 +7,7 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../../../../config/config";
-import type { InputText, StoredWaypoint } from "../../../../types/types";
+import type { Suggestion } from "../../../../types/types";
 import { useInput } from "../../../../Contexts/InputContext";
 import { loadEndWaypoints, loadMiddleWaypoints } from "../WaypointStorage";
 import { useNotification } from "../../../../Contexts/NotificationContext";
@@ -22,7 +22,7 @@ export function useSuggestionHandle(index: number) {
     const { t } =useTranslation(); 
 
     // List of currently available suggestions
-    const [suggestions, setSuggestions] = useState<InputText[]>([]);
+    const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
     // Index of currently highlighted suggestion
     const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
@@ -36,26 +36,17 @@ export function useSuggestionHandle(index: number) {
         activeField
     } = useInput();
 
-    // Transforms stored waypoints into InputText format
-    const transformStored = (stored: StoredWaypoint[]) => {
-        return stored.map((s) => ({
-            ...s,
-            street: "",
-            city: ""
-        }));
-    }
-
     /**
      * Loads suggestions from localStorage
      */
     const loadSuggestionsFromStorage = useCallback(() => {
         if (index === 0 || index === waypoints.length - 1) {
             const endWaypoints = loadEndWaypoints();
-            setSuggestions(transformStored(endWaypoints));
+            setSuggestions(endWaypoints);
         }
         else {
             const middle_waypoints = loadMiddleWaypoints();
-            setSuggestions(transformStored(middle_waypoints));
+            setSuggestions(middle_waypoints);
         }
     }, [index, waypoints.length]);
 
@@ -71,7 +62,7 @@ export function useSuggestionHandle(index: number) {
                     return res.json();
                 }
             )
-            .then((data: InputText[]) => {
+            .then((data: Suggestion[]) => {
                 setSuggestions(data);
                 setHighlightedIndex(-1);
             })
@@ -86,24 +77,21 @@ export function useSuggestionHandle(index: number) {
      * 
      * @param suggestion The selected suggestion
      */
-    const handleSuggestionClick = (suggestion: InputText) => {
+    const handleSuggestionClick = (suggestion: Suggestion) => {
         if (activeField === index) {
             const newWaypoints = [...waypoints];
-            const parts = [
-                suggestion.name,
-                suggestion.street,
-                suggestion.city,
-            ].filter(Boolean);
 
             newWaypoints[index] = {
                 lat: suggestion.lat,
                 lon: suggestion.lon,
-                displayName: parts.join(", "),
+                displayName: suggestion.name,
                 isActive: true,
                 isPreview: false,
                 id: waypoints[index].id,
                 bikeStationId: null,
-                origin: null
+                origin: null,
+                isBus: suggestion.isBus,
+                isTrain: suggestion.isTrain
             };
             setWaypoints(newWaypoints);
             setSuggestions([]);

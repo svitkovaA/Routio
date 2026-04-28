@@ -64,7 +64,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         isPreview: false,
         id: Math.random().toString(36).substring(2,9),
         bikeStationId: null,
-        origin: null
+        origin: null,
+        isBus: false,
+        isTrain: false
     });
 
     // Waypoints initialization

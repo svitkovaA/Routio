@@ -5,6 +5,7 @@ Builds the full feature tensor used for bike availability prediction.
 """
 import asyncio
 from typing import Dict, Tuple
+from service.district_service import DistrictService
 from service.service_base import ServiceBase
 from service.gbfs_service import GBFSService
 import numpy as np
@@ -37,6 +38,7 @@ async def get_features() -> Tuple[
     # Load all necessary service states
     database_service = DatabaseService.get_instance()
 
+    await DistrictService.get_instance().reload()
     await asyncio.gather(
         GTFSService.get_instance().reload(),
         PopulationService.get_instance().reload(),

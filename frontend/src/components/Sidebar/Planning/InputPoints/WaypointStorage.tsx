@@ -163,7 +163,9 @@ export const storeWaypoints = (waypoints: Waypoint[], yourLocation: string) => {
         waypointsToStore.push({
             lat: waypoints[i].lat,
             lon: waypoints[i].lon,
-            name: waypoints[i].displayName
+            name: waypoints[i].displayName,
+            isBus: waypoints[i].isBus,
+            isTrain: waypoints[i].isTrain
         });
     }
 

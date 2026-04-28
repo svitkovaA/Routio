@@ -6,13 +6,13 @@ Geocoding API endpoints, including forward and reverse geocoding.
 
 from fastapi import Query, APIRouter
 from api.geocoding.nominatim_geocoder import NominatimGeocoder
-from api.geocoding.photon_geocoder import PhotonGeocoder
+from api.geocoding.search_engine import SearchEngine
 
 # Router instance for geocoding endpoints
 router = APIRouter(prefix="/geocode")
 
 # Geocoder service instances
-photon = PhotonGeocoder()
+search_engine = SearchEngine()
 nominatim = NominatimGeocoder()
 
 @router.get("/name")
@@ -30,7 +30,7 @@ async def geocode_name(
     Returns:
         List of suggestions
     """
-    return await photon.geocode(q, limit)
+    return await search_engine.search(q, limit)
 
 
 @router.get("/latLon")
