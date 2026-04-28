@@ -30,12 +30,22 @@ function ArrivalDeparture() {
                 <FormControlLabel 
                     value="false" 
                     control={<Radio />} 
-                    label={t("planning.departureArrival.departure")} 
+                    label={t("planning.departureArrival.departure")}
+                    sx={{
+                        "& .MuiTypography-root": {
+                            fontSize: "var(--font-size-input)"
+                        }
+                    }}
                 />
                 <FormControlLabel 
                     value="true" 
                     control={<Radio />} 
-                    label={t("planning.departureArrival.arrival")} 
+                    label={t("planning.departureArrival.arrival")}
+                    sx={{
+                        "& .MuiTypography-root": {
+                            fontSize: "var(--font-size-input)"
+                        }
+                    }}
                 />
             </RadioGroup>
         </FormControl>

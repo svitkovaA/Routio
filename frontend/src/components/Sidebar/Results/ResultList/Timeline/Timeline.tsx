@@ -68,7 +68,19 @@ function Timeline({
                             borderStyle: leg.mode === "foot" || leg.mode === "bicycle" ? "dashed" : "solid",
                         }}
                     >
-                        {timelineIcons[leg.mode]}
+                        <div 
+                            className="timeline-anchor"
+                        >
+                            {timelineIcons[leg.mode]}
+                            {leg.line && (
+                                <div 
+                                    className="leg-public-code" 
+                                    style={{ backgroundColor: leg.color }}
+                                >
+                                    {leg.line.publicCode}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 );
             })}

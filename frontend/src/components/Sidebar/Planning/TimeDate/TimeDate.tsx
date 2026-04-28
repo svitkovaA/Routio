@@ -103,8 +103,11 @@ function TimeDate(){
                         if (newValue !== null) setDate(newValue)
                     }}
                     sx={{ 
-                        '& .MuiSvgIcon-root': {
-                            color: 'var(--color-icons)',
+                        "& .MuiSvgIcon-root": {
+                            color: "var(--color-icons)",
+                        },
+                        "& .MuiPickersSectionList-section": {
+                            fontSize: "var(--font-size-input)"
                         }
                     }}
                     slotProps={{
@@ -127,8 +130,11 @@ function TimeDate(){
                         if (newValue !== null) setTime(newValue.second(0).millisecond(0))
                     }}
                     sx={{ 
-                        '& .MuiSvgIcon-root': {
-                            color: 'var(--color-icons)',
+                        "& .MuiSvgIcon-root": {
+                            color: "var(--color-icons)",
+                        },
+                        "& .MuiPickersSectionList-section": {
+                            fontSize: "var(--font-size-input)"
                         }
                     }}
                     slotProps={{

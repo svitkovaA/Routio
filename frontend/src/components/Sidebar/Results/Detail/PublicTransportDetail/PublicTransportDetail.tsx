@@ -154,53 +154,57 @@ function PublicTransportDetail({
                 ) : (<></>)}
 
                 {/* Toggle list of alternative departures */}
-                <div 
-                    onClick={() => setDeparturesOpen(!departuresOpen)}
-                    className="detail-departures"
-                >
-                    <CustomTooltip title={departuresOpen ? t("tooltips.detail.publicTransport.closeOtherDepartures") : t("tooltips.detail.publicTransport.otherDepartures")}>
-                        <KeyboardArrowDownIcon className={departuresOpen ? "" : "rotate90"}/>
-                    </CustomTooltip>
-
-                    <DepartureBoardIcon 
-                        className="departure-icon" 
-                        />
-                    {t("detailInfo.publicTransport.otherDepartures")}
-                </div>        
-                <div className={departuresOpen ? "departure-box" : ""}>
-                    {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => {
-                        if (currentIndex === undefined) {
-                            return null;
-                        } 
-
-                        if (currentIndex - 1 > index || currentIndex + 2 < index) {
-                            return null;
-                        }
-
-                        return (
-                            <div 
-                                key={`${index}`}
-                                className={"departure-row" + (currentIndex === index ? " selected" : "")} 
-                                onClick={() => recalculatePattern(index)}
-                            >
-                                <span className="departure-direction">
-                                    {departure.direction}
-                                </span>
-                                <span className="departure-time">
-                                    {new Date(departure.departureTime).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit",})}
-                                </span>
-                            </div>
-                        );
-                    })}
-                    {departuresOpen && moreResults && (
-                        <button
-                            className="departure-button"
-                            onClick={moreDeparturesClick}
+                {leg?.otherOptions?.departures?.length !== undefined && leg?.otherOptions?.departures?.length > 1 && (
+                    <>
+                        <div 
+                            onClick={() => setDeparturesOpen(!departuresOpen)}
+                            className="detail-departures"
                         >
-                            {t("detailInfo.publicTransport.moreDepartures")}
-                        </button>
-                    )}
-                </div>
+                            <CustomTooltip title={departuresOpen ? t("tooltips.detail.publicTransport.closeOtherDepartures") : t("tooltips.detail.publicTransport.otherDepartures")}>
+                                <KeyboardArrowDownIcon className={departuresOpen ? "" : "rotate90"}/>
+                            </CustomTooltip>
+
+                            <DepartureBoardIcon 
+                                className="departure-icon" 
+                                />
+                            {t("detailInfo.publicTransport.otherDepartures")}
+                        </div>        
+                        <div className={departuresOpen ? "departure-box" : ""}>
+                            {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => {
+                                if (currentIndex === undefined) {
+                                    return null;
+                                } 
+
+                                if (currentIndex - 1 > index || currentIndex + 2 < index) {
+                                    return null;
+                                }
+
+                                return (
+                                    <div 
+                                        key={`${index}`}
+                                        className={"departure-row" + (currentIndex === index ? " selected" : "")} 
+                                        onClick={() => recalculatePattern(index)}
+                                    >
+                                        <span className="departure-direction">
+                                            {departure.direction}
+                                        </span>
+                                        <span className="departure-time">
+                                            {new Date(departure.departureTime).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit",})}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                            {departuresOpen && moreResults && (
+                                <button
+                                    className="departure-button"
+                                    onClick={moreDeparturesClick}
+                                >
+                                    {t("detailInfo.publicTransport.moreDepartures")}
+                                </button>
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
             <div>
                 {(leg.serviceJourney?.quays.length ?? 0) >= 1 && (

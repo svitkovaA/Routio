@@ -66,6 +66,10 @@
     margin-top: 2px;
 }
 
+.public-pattern .detail-span {
+    margin-top: 17px;
+}
+
 .detail-span .detail-button {
     font-size: var(--font-size-detail);
     color: black;
@@ -122,6 +126,10 @@
 
 .hidden {
     display: none;
+}
+
+.pattern.public-pattern {
+    height: 95px;
 }
 
 /** End of file ResultListItem.css */

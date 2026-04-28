@@ -43,6 +43,8 @@ body {
     --font-size-text: 16px;
     --font-size-notes: 10px;
     --font-size-detail: 14px;
+
+    --font-size-input: 16px;
 }
 
 code {
@@ -75,6 +77,12 @@ button {
 @media (min-width: 300px) and (min-height: 400px) {
     html, body, #root {
         overflow: hidden;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    body {
+        --font-size-input: 14px;
     }
 }
 

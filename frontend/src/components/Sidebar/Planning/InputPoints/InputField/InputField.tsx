@@ -163,6 +163,14 @@ function InputField({
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
 
+                // Check location bounding box
+                const isInsideBoundingBox = lat <= NW_LAT && lat >= SE_LAT && lon >= NW_LON && lon <= SE_LON;
+
+                if (!isInsideBoundingBox) {
+                    showNotification(t("warnings.bbox"), "warning");
+                    return;
+                }
+
                 // Update the waypoint list
                 setWaypoints(prev => {
                     const updated = [...prev];
@@ -218,6 +226,9 @@ function InputField({
                     right: 0,
                     margin: 0
                 },
+                "& .MuiInputBase-input": {
+                    fontSize: "var(--font-size-input)"
+                }
             }}
             onChange={(e) => {
                 const value = e.target.value;

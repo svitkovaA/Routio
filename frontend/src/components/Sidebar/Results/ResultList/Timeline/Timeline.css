@@ -7,14 +7,28 @@
 .timeline {
     position: relative;
     border-bottom: 3px solid transparent;
-    height: 5px;
+    height: 7px;
     width: calc(100% - 20px);
     margin-left: 16px;
+}
+
+.public-pattern .timeline {
+    height: 20px;
+}
+
+.detail-header .timeline {
+    height: 7px;
 }
 
 .timeline-leg {
     position: absolute;
     border-width: 3px;
+}
+
+.timeline-anchor {
+    position: absolute;
+    top: -10px;
+    left: -15px;
 }
 
 .timeline-icon {
@@ -25,11 +39,29 @@
     background: white;
     color: black;
     border: 1px solid black;
-    top: -10px;
-    left: -15px;
     display: flex;
     justify-content: center;
+    top: -10px;
+    left: -15px;
     padding-top: 1px;
+}
+
+.timeline-anchor .timeline-icon {
+    position: unset;
+}
+
+.leg-public-code {
+    position: absolute;
+    justify-self: center;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 10px;
+    top: 26px;
+}
+
+.detail-header .leg-public-code {
+    display: none;
 }
 
 /** End of file Timeline.css */

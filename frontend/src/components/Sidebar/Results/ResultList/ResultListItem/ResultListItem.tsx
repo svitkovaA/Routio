@@ -30,10 +30,13 @@ function ResultListItem({
 } : ResultListItemProps) {
     // Translation function
     const { t } = useTranslation();
+    
+    // Pattern includes public transport leg
+    const publicPattern = pattern.legs.some(l => l.line !== null);
 
     return (
         <div 
-            className={"pattern " + (selected ? "selected" : "")}
+            className={"pattern " + (selected ? "selected " : "") + (publicPattern ? "public-pattern" : "")}
             onClick={selected ? onClickDetail : onClick}
         >
             {/* Footer displaying trip start time and potential warnings */}
