@@ -51,16 +51,17 @@ function DetailSwitch({
             <CustomTooltip title={t("tooltips.detail.detailPreview.otherRouteDots")}>
                 <div className="dots">
                     {Array.from({ length: numOfPatterns }, (_, i) => (
-                        <IconButton 
-                        key={i} 
-                        onClick={() => setSelectedTripPatternIndex(i)}
-                    >
-                        {i === selectedTripPatternIndex ? (
-                            <RadioButtonCheckedIcon className="dot"/>
-                        ) : (
-                            <RadioButtonUncheckedIcon className="dot"/>
-                        )}
-                    </IconButton>
+                        <IconButton
+                            className="dots-button"
+                            key={i} 
+                            onClick={() => setSelectedTripPatternIndex(i)}
+                        >
+                            {i === selectedTripPatternIndex ? (
+                                <RadioButtonCheckedIcon className="dot"/>
+                            ) : (
+                                <RadioButtonUncheckedIcon className="dot"/>
+                            )}
+                        </IconButton>
                     ))}
                 </div>
             </CustomTooltip>

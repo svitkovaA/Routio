@@ -37,6 +37,10 @@
     border-bottom: none;
 }
 
+.dots-button {
+    padding: 3px !important;
+}
+
 @media screen and (min-width: 768px) {
     .detail-switch {
         top: 100px;
