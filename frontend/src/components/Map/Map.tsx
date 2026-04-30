@@ -214,7 +214,7 @@ function Map({
          * 
          * @param displayName Address resolved from reverse geocoding
          */
-        const updateWaypoints = (displayName: string) => {
+        const updateWaypoints = (displayName: string, initial: boolean = false) => {
             // Update waypoint state
             setWaypoints(prev => {
                 if (targetIndex < 0 || targetIndex >= prev.length || !prev[targetIndex] || (target_waypoint_length !== undefined && target_waypoint_length !== prev.length)) {
@@ -234,17 +234,18 @@ function Map({
 
                 return updated;
             });
+            if (initial) {
+                // Automatically open sidebar on mobile devices
+                if (window.innerWidth < 768) {
+                    openSidebar();
+                }
 
-            // Automatically open sidebar on mobile devices
-            if (window.innerWidth < 768) {
-                openSidebar();
+                // Cancel map selection mode
+                setMapSelectionIndex(-1);
             }
-
-            // Cancel map selection mode
-            setMapSelectionIndex(-1);
         };
 
-        updateWaypoints(t("map.geocode"));
+        updateWaypoints(t("map.geocode"), true);
 
         // Reverse geocoding request to backend API
         fetch(`${API_BASE_URL}/geocode/latLon?lat=${lat}&lon=${lon}`)
