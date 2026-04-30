@@ -117,7 +117,7 @@ class LegUtils():
                 leg.tripId
                 and leg.line
                 and leg.otherOptions
-                and leg.otherOptions.currentIndex
+                and leg.otherOptions.currentIndex is not None
                 and leg.color
                 and leg.serviceJourney
                 and leg.serviceJourney.passingTimes

@@ -54,7 +54,12 @@ const ResultContext = createContext<ResultContextType | undefined>(undefined);
 export function ResultProvider({ children } : {children: React.ReactNode}) {
 
     // Array of result containers (one result for each result tab)
-    const [results, setResults] = useState<ResultsType[]>(Array(4).fill({tripPatterns: [], active: false}));
+    const [results, setResults] = useState<ResultsType[]>(
+        Array.from({ length: 4 }, () => ({
+            tripPatterns: [],
+            active: false
+        }))
+    );
     
     // Index of currently active result
     const [resultActiveIndex, setResultActiveIndex] = useState<number>(-1);
@@ -87,7 +92,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     const [mobileSidebarHeight, setMobileSidebarHeight] = useState(0);
 
     // Stores previous vehicle positions for animation interpolation
-    const prevPositionsRef = useRef<Record<number, VehiclePosition>>({});
+    const prevPositionsRef = useRef<Record<string, VehiclePosition>>({});
     
     // Interval reference for periodic data polling
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -97,6 +102,9 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
 
     // AbortController reference for cancelling ongoing API requests
     const abortRef = useRef<AbortController | null>(null);
+
+    // AbortController for vehicle realtime data
+    const abortRealTimeRef = useRef<AbortController | null>(null);
 
     // Forces rerendering of map polylines when route geometry changes
     const [polylineForceUpdate, setPolylineForceUpdate] = useState<number>(0);
@@ -116,10 +124,14 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     // State handling routing error displaying
     const [routingError, setRoutingError] = useState<boolean>(false);
 
+    // Reference to required tripIds
+    const activeTripIdsRef = useRef<typeof tripIds>([]);
+
     /**
      * Resets entire result state and stops all active processes
      */
     const closeResults = useCallback(() => {
+        activeTripIdsRef.current = [];
         setShowResults(false);
         setResults(prev =>
             prev.map(result => ({
@@ -154,6 +166,12 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
         if (abortRef.current) {
             abortRef.current.abort();
             abortRef.current = null;
+        }
+
+        // Abort ongoing Realtime data request
+        if (abortRealTimeRef.current) {
+            abortRealTimeRef.current.abort();
+            abortRealTimeRef.current = null;
         }
 
         // Cancel routing error
@@ -346,8 +364,8 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
      * @param duration Animation duration in milliseconds
      */
     const animatePositions = useCallback((
-        from: Record<number, VehiclePosition>,
-        to: Record<number, VehiclePosition>,
+        from: Record<string, VehiclePosition>,
+        to: Record<string, VehiclePosition>,
         duration = 2000
     ) => {
         const start = performance.now();
@@ -406,19 +424,39 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
     );
 
     /**
+     * Synchronize trip id
+     */
+    useEffect(() => {
+        activeTripIdsRef.current = tripIds;
+    }, [tripIds]);
+
+    /**
      * Fetches vehicle positions from backend API
      */
     const fetchPositions = useCallback(async () => {
-        if (!pattern || tripIds.length === 0) {
+        const ids = activeTripIdsRef.current;
+
+        if (ids.length === 0) {
             return;
         }
 
+        // Abort ongoing Realtime data request
+        if (abortRealTimeRef.current) {
+            abortRealTimeRef.current.abort();
+            abortRealTimeRef.current = null;
+        }
+
         try {
+            // Create new abort controller
+            const controller = new AbortController();
+            abortRealTimeRef.current = controller;
+
             // Request with trip ids
             const res = await fetch(`${API_BASE_URL}/vehicleRealtimeData`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(tripIds)
+                body: JSON.stringify(ids),
+                signal: controller.signal
             });
 
             if (!res.ok) {
@@ -426,6 +464,10 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             }
 
             const realtime: Record<string, { lat: number; lon: number, delay?: number, stopIndex?: number }> = await res.json();
+
+            if (ids.length === 0 || resultActiveIndex === - 1) {
+                return;
+            }
     
             // Build next position map
             const nextMap: Record<string, VehiclePosition> = {};
@@ -489,7 +531,11 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
             prevPositionsRef.current = nextMap;
         }
         // Reset delays and indices
-        catch {
+        catch (error: unknown) {
+            // Ignore abort errors
+            if (error instanceof Error && error.name === "AbortError") {
+                return;
+            }
             prevPositionsRef.current = {};
             setVehiclePositions([]);
             if (resultActiveIndex >= 0 && selectedTripPatternIndex >= 0) {
@@ -500,7 +546,7 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                         if (!leg.tripId) {
                             continue;
                         }
-
+    
                         // Clear delay
                         leg.delay = undefined;
                         if (leg.serviceJourney) {
@@ -512,8 +558,10 @@ export function ResultProvider({ children } : {children: React.ReactNode}) {
                 });
             }
         }
-
-    }, [pattern, tripIds, animatePositions, resultActiveIndex, selectedTripPatternIndex]);
+        finally {
+            abortRealTimeRef.current = null;
+        }
+    }, [animatePositions, resultActiveIndex, selectedTripPatternIndex, pattern]);
 
     /**
      * Periodically calls function every 10s with offset

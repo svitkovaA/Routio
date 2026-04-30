@@ -36,7 +36,8 @@
     "setAsDestinationRack": "Nastavit jako cílový stojan na kola",
     "addWaypoint": "Přidat jako nový bod",
     "useAsOrigin": "Použít jako výchozí stanici",
-    "useAsDestination": "Použít jako cílovou stanici"
+    "useAsDestination": "Použít jako cílovou stanici",
+    "geocode": "Vyhledávání adresy..."
   },
   "planning": {
     "position": "Vaše poloha",

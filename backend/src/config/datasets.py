@@ -99,14 +99,8 @@ POPULATION_URL = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/MAPS/JRC-ESTA
 # URL for the current weather data
 WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
 
-# URL for downloading district bounds
-DISTRICT_URL = "https://raw.githubusercontent.com/siwekm/czech-geojson/master/okresy.json"
-
-# Directory where district dataset is stored
-DISTRICT_DIR = DATASET_DIR / "districts"
-
 # Path to the district JSON file
-DISTRICT_PATH = DISTRICT_DIR / "districts.json"
+DISTRICT_PATH = Path("districts.geojson")
 
 load_dotenv()
 WEATHER_API_KEY = os.environ.get("OPEN_WEATHER_API_KEY", "")

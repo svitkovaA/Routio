@@ -409,7 +409,6 @@ class BicyclePublicRouter(RouterBase, Router):
 
         if best_option:
             index, best_pattern = best_option
-            print("improve: ", best_pattern.legs[0].aimedStartTime, pattern.legs[0].aimedStartTime, self._compute_bike_distance(best_pattern), self._compute_bike_distance(pattern))
 
             # Keep remaining legs after the replaced segment
             public_legs = deepcopy(pattern.legs[index:])

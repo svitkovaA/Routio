@@ -35,7 +35,8 @@
     "setAsDestinationRack": "Set as destination bike rack",
     "addWaypoint": "Add as new waypoint",
     "useAsOrigin": "Use as origin station",
-    "useAsDestination": "Use as destination station"
+    "useAsDestination": "Use as destination station",
+    "geocode": "Searching address..."
   },
   "planning": {
     "position": "Your position",

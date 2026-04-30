@@ -12,7 +12,7 @@ from service.service_base import ServiceBase
 import geopandas as gpd
 from geopandas.sindex import SpatialIndex
 from shapely.geometry import Point
-from config.datasets import DISTRICT_URL, DISTRICT_DIR, DISTRICT_PATH
+from config.datasets import DISTRICT_PATH
 
 @dataclass(frozen=True)
 class _DistrictState:
@@ -60,10 +60,6 @@ class DistrictService(ServiceBase[_DistrictState]):
         Returns:
             Loaded district dataset with spatial index
         """
-        # Download dataset if not present
-        if not DISTRICT_PATH.exists():
-            await self.__download_data()
-        
         # Load GeoJSON file
         with open(DISTRICT_PATH, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -84,19 +80,6 @@ class DistrictService(ServiceBase[_DistrictState]):
             district=gdf,
             sindex=gdf.sindex
         )
-
-    async def __download_data(self) -> None:
-        """
-        Downloads district GeoJSON dataset.
-        """
-        response = await self.__client.get(DISTRICT_URL)
-        response.raise_for_status()
-
-        # Ensure directory exists
-        DISTRICT_DIR.mkdir(parents=True, exist_ok=True)
-
-        with open(DISTRICT_PATH, "w", encoding="utf-8") as f:
-            json.dump(response.json(), f)
 
     def get_district(self, lat: float, lon: float) -> str | None:
         """

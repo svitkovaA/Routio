@@ -587,20 +587,48 @@ class GTFSService(ServiceBase[_GTFSState]):
         return departures
     
     @staticmethod
-    def __has_parent_stations(stops: pd.DataFrame) -> bool:
+    def __use_parent_stations(stops: pd.DataFrame) -> bool:
         """
-        Determines whether GTFS dataset uses parent stations.
+        Determines whether parent stations should be used based on their proportion
+        in the dataset.
         
         Args:
             stops: stops.txt DataFrame
             
         Returns:
-            True if dataset contains parent stations, False otherwise
+            True if parent stations are sufficiently present, False otherwise
         """
-        return bool(
-            "location_type" in stops.columns and
-            (stops["location_type"] == 1).any()
-        )
+        if "location_type" not in stops.columns:
+            return False
+
+        parent_count = (stops["location_type"] == 1).sum()
+        total = len(stops)
+
+        ratio = parent_count / total if total > 0 else 0
+
+        return ratio > 0.1
+    
+    @staticmethod
+    def __filter_unused_stops(
+        stops: pd.DataFrame,
+        stop_times: pd.DataFrame
+    ) -> pd.DataFrame:
+        """
+        Filters out stops that are not used in any trip.
+        
+        Args:
+            stops: stops.txt DataFrame
+            stop_times: stop_times.txt DataFrame
+            
+        Returns:
+            Filtered DataFrame containing only stops that are referenced in trips
+        """
+        # Collect all stop_ids that are actually used in trips
+        used_stop_ids = stop_times["stop_id"].unique()
+        
+        # Keep only stops that appear in stop_times
+        filtered = stops[stops["stop_id"].isin(used_stop_ids)]
+        return filtered
     
     @staticmethod
     def __get_stop_modes(
@@ -964,6 +992,9 @@ class GTFSService(ServiceBase[_GTFSState]):
         Returns:
             List of processed stops (name, lat, lon, is_train, is_bus)
         """
+        
+        if "location_type" in stops.columns:
+            stops = stops[stops["location_type"] != 1]
 
         # Keep only relevant columns
         stops = stops[["stop_id", "stop_name", "stop_lat", "stop_lon"]].copy()
@@ -1156,7 +1187,7 @@ class GTFSService(ServiceBase[_GTFSState]):
         tree = BallTree(coordinates_rad, metric="haversine")
         
         # Decide processing strategy based on GTFS structure
-        if self.__has_parent_stations(stops):
+        if self.__use_parent_stations(stops):
             processed_stops = self.__build_parent_stops(
                 stops,
                 stop_times,
@@ -1164,6 +1195,7 @@ class GTFSService(ServiceBase[_GTFSState]):
                 routes
             )
         else:
+            stops = self.__filter_unused_stops(stops, stop_times)
             processed_stops = self.__build_unique_stops(
                 stops,
                 stop_times,

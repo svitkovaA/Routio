@@ -256,7 +256,11 @@ class DepartureUpdater():
                 and leg.otherOptions
                 and leg.otherOptions.currentIndex is not None
                 and leg.serviceJourney
+                and leg.serviceJourney.passingTimes
             ):
+                # Clear old vehicle position
+                leg.serviceJourney.currentIndex = None
+
                 # Extract scheduled departure time from the first stop
                 time = datetime.strptime(leg.serviceJourney.passingTimes[0]["departure"].time, "%H:%M:%S").time()
                 

@@ -244,6 +244,8 @@ function Map({
             setMapSelectionIndex(-1);
         };
 
+        updateWaypoints(t("map.geocode"));
+
         // Reverse geocoding request to backend API
         fetch(`${API_BASE_URL}/geocode/latLon?lat=${lat}&lon=${lon}`)
             .then((res) => {
