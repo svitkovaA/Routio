@@ -122,6 +122,9 @@ function InputField({
     // Stores the previously active language
     const previousLanguage = useRef(i18n.language.split("-")[0]);
 
+    // Current language
+    const language = i18n.language.split("-")[0];
+
     /**
      *  User location handle
      */
@@ -147,8 +150,8 @@ function InputField({
         });
 
         // Store current language for the next change detection
-        previousLanguage.current = i18n.language.split("-")[0];
-    }, [i18n.language.split("-")[0], setWaypoints, t]);
+        previousLanguage.current = language;
+    }, [language, setWaypoints, t]);
 
     // Detects the users current geographic position
     const detectCurrentPosition = () => {

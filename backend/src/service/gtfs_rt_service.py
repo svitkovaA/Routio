@@ -352,12 +352,15 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
 
         if best_index_coords is None or next_coords is None:
             return best_index
+        
+        lat_a, lon_a = best_index_coords
+        lat_b, lon_b = next_coords
 
         # Vector from current stop to next stop
-        vector_best_next = self.vector(*best_index_coords, *next_coords)
+        vector_best_next = self.vector(lat_a, lon_a, lat_b, lon_b)
 
         # Vector from current stop to vehicle
-        vector_best_vehicle = self.vector(*best_index_coords, position_lat, position_lon)
+        vector_best_vehicle = self.vector(lat_a, lon_a, position_lat, position_lon)
 
         # Dot product determines if vehicle is ahead or behind the stop
         dot_next = self.dot(vector_best_next, vector_best_vehicle)

@@ -609,7 +609,7 @@ class BicyclePublicRouter(RouterBase, Router):
         
         i = 0
         bike_group: List[str] = []
-        distance = 0
+        distance: float = 0
 
         # Create waypoint group to not exceed maximal allowed bicycle distance
         while i + 1 < len(waypoints) and distance <= self._ctx.max_bike_distance:

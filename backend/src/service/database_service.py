@@ -7,7 +7,7 @@ data from the database.
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, cast
 import pandas as pd
 import time
 import numpy as np
@@ -422,8 +422,8 @@ class DatabaseService(ServiceBase[_DatabaseState]):
 
         else:
             # Compute normalization statistics
-            normalization_means = df[weather_cols].mean().to_dict()
-            normalization_stds = df[weather_cols].std().to_dict()
+            normalization_means = cast(Dict[str, float], df[weather_cols].mean().to_dict())
+            normalization_stds = cast(Dict[str, float], df[weather_cols].std().to_dict())
 
             # Normalize weather variables
             df[weather_cols] = (

@@ -6,7 +6,7 @@ Computation of spatial features for bike stations.
 
 import numpy as np
 import pandas as pd
-from sklearn.neighbors import BallTree
+from sklearn.neighbors import BallTree          # type: ignore[import-untyped]
 
 # Earth radius in meters
 EARTH_RADIUS = 6371000

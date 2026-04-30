@@ -8,7 +8,7 @@ from typing import Iterable
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
-import contextily as ctx
+import contextily as ctx            # type: ignore[import-untyped]
 import geopandas as gpd
 from matplotlib.colors import Normalize
 

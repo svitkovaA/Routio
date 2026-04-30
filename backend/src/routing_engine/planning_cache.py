@@ -16,7 +16,7 @@ class PlanningCache():
     """
     Asynchronous cache for route planning results.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         # Mapping cache key to asyncio task
         self.__cache: Dict[CacheKey, asyncio.Task[List[TripPattern]]] = {}
 

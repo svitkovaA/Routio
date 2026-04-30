@@ -4,11 +4,12 @@ file: dataset_builder.py
 Builds the full feature tensor used for bike availability prediction.
 """
 import asyncio
-from typing import Dict, Tuple
+from typing import Dict, Tuple, cast
 from service.district_service import DistrictService
 from service.service_base import ServiceBase
 from service.gbfs_service import GBFSService
 import numpy as np
+import pandas as pd
 from service.population_service import PopulationService
 from service.database_service import DatabaseService
 from service.gtfs_service import GTFSService
@@ -61,8 +62,10 @@ async def get_features() -> Tuple[
     # -----------------
     # Time features
     # -----------------
+    time_index = cast(pd.DatetimeIndex, dataset.index)
+
     # Loads time features in format (hour_sin, hour_cos, is_workday, weekday_sin, weekday_cos)
-    time_features = build_time_features(dataset.index)
+    time_features = build_time_features(time_index)
 
     # -----------------
     # Spatial features
@@ -84,7 +87,7 @@ async def get_features() -> Tuple[
     weather_array, normalization_means, normalization_stds = await get_weather_array(
         station_ids,
         weather_map,
-        dataset.index,
+        time_index,
         database_service.get_weather_timeseries
     )
 

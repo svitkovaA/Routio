@@ -52,7 +52,7 @@ class LissyService(ServiceBase[_LissyState]):
     # The number of past days to cache historical delays
     DELAYS_CACHE_DAYS = 7
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Asynchronous lock protecting LRU shape cache

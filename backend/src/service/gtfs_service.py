@@ -24,7 +24,7 @@ from service.district_service import DistrictService
 from config.datasets import GTFS_DATASETS, GTFS_DIR, GTFS_DATASET
 from models.route import TZ, Departure, OtherDeparture, OtherOptions
 from service.service_base import ServiceBase
-from sklearn.neighbors import BallTree
+from sklearn.neighbors import BallTree      # type: ignore[import-untyped]
 
 @dataclass(frozen=True)
 class StopRecord:
@@ -93,7 +93,7 @@ class GTFSService(ServiceBase[_GTFSState]):
     # Maximum clustering distance between stops
     MAX_DISTANCE_M = 200
     
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         # Ensures safe concurrent reload access
         self.__lock = asyncio.Lock()

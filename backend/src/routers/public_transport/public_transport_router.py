@@ -307,7 +307,7 @@ class PublicTransportRouter(RouterBase, Router):
 
         # Track whether the first segment of this group is being routed
         is_first_part = True
-        trip_patterns = []
+        trip_patterns: List[TripPattern] = []
 
         # Route each consecutive segment and extend partial patterns
         for index in indices:

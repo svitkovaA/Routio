@@ -17,11 +17,11 @@ class AddressHandler(osmium.SimpleHandler):
     """
     OSM handler that extracts address nodes.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.buffer: List[Tuple[int, str, str, float, float]] = []
 
-    def node(self, n):
+    def node(self, n) -> None:
         """
         Process OSM node and collect address information.
         """
@@ -74,7 +74,7 @@ class BicycleRackHandler(osmium.SimpleHandler):
         self.conn = conn
         self.buffer: List[Tuple[int, float, float, int | None]]= []
 
-    def node(self, n):
+    def node(self, n) -> None:
         """
         Process OSM node and collect bicycle rack information.
         """
@@ -109,7 +109,7 @@ async def bike_racks_empty(conn: asyncpg.Connection) -> bool:
     """)
     return not exists
 
-async def insert_batches(conn: asyncpg.Connection, rows, batch_size: int = 1000):
+async def insert_batches(conn: asyncpg.Connection, rows, batch_size: int = 1000) -> None:
     """
     Insert bicycle rack records in batches.
 
@@ -139,7 +139,7 @@ async def insert_batches(conn: asyncpg.Connection, rows, batch_size: int = 1000)
 
         print(f"Inserted {len(batch)} bicycle racks")
 
-async def resolve_rack_addresses(conn: asyncpg.Connection):
+async def resolve_rack_addresses(conn: asyncpg.Connection) -> None:
     """
     Assign names to bicycle racks.
     """
@@ -225,7 +225,7 @@ async def main() -> None:
     Executes bike rack loading to database.
     """
     await init_pool()
-    with create_conn() as conn:
+    async with create_conn() as conn:
         await load_bike_racks(conn)
 
     await close_pool()
