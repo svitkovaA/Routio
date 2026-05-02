@@ -43,7 +43,7 @@ function ResultListItem({
             <div className="pattern-footer">
                 {/* Trip start time */}
                 <span className="time">
-                    {new Date(pattern.legs[0]?.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(pattern.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
                 {/* Warning icon if walking or cycling distance is too long */}
                 {(pattern?.tooLongBikeDistance || pattern?.tooLongWalkDistance) && (

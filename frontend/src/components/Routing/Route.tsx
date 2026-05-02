@@ -197,7 +197,7 @@ export function useRoute() {
                 const newResult = await result.json();
     
                 // Save waypoints to LocalStorage
-                storeWaypoints(waypoints, t("planning.position"));
+                storeWaypoints(waypoints, [t("planning.position"), t("map.geocode")]);
     
                 // Store routing result
                 setResults(prev => 

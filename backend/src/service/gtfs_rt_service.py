@@ -207,7 +207,32 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
             # Find closest stop segment
             best_index = self.__find_closest_segment_index(dataset_name, trip_stops, lat, lon)
 
+            # Vehicle is near final stop
             if best_index >= len(trip_stops) - 1:
+                stop_id, time_str, _ = trip_stops[-1]
+
+                # Get stop coordinates
+                stop_coords = self.__gtfs_service.get_stop_coordinates(dataset_name, stop_id)
+                if not stop_coords:
+                    continue
+
+                td = pd.to_timedelta(time_str)
+                # Convert vehicle timestamp to datetime
+                vehicle_time = datetime.fromtimestamp(unix_timestamp)
+
+                # Build scheduled datetimes for stop
+                scheduled_time = datetime.combine(vehicle_time.date(), datetime.min.time()) + td
+
+                # Compute delay in minutes
+                delay_minutes = (vehicle_time - scheduled_time).total_seconds() / 60
+
+                # Store computed delay and stop index
+                trip_realtime_data[trip_id] = (
+                    (lat, lon),
+                    int(delay_minutes),
+                    len(trip_stops) - 1
+                )
+
                 continue
 
             # Get adjacent stops and their scheduled times
@@ -287,21 +312,21 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
             )
 
     @staticmethod
-    def vector(
+    def __vector(
         a_lat: float,
         a_lon: float,
         b_lat: float,
         b_lon: float
     ) -> Tuple[float, float]:
         """
-        Computes vector from point A to point B.
+        Computes __vector from point A to point B.
         """
         return (b_lat - a_lat, b_lon - a_lon)
     
     @staticmethod
-    def dot(a: Tuple[float, float], b: Tuple[float, float]) -> float:
+    def __dot(a: Tuple[float, float], b: Tuple[float, float]) -> float:
         """
-        Computes dot product of two vectors.
+        Computes __dot product of two __vectors.
         """
         return a[0] * b[0] + a[1] * b[1]
     
@@ -356,17 +381,17 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
         lat_a, lon_a = best_index_coords
         lat_b, lon_b = next_coords
 
-        # Vector from current stop to next stop
-        vector_best_next = self.vector(lat_a, lon_a, lat_b, lon_b)
+        # __vector from current stop to next stop
+        __vector_best_next = self.__vector(lat_a, lon_a, lat_b, lon_b)
 
-        # Vector from current stop to vehicle
-        vector_best_vehicle = self.vector(lat_a, lon_a, position_lat, position_lon)
+        # __vector from current stop to vehicle
+        __vector_best_vehicle = self.__vector(lat_a, lon_a, position_lat, position_lon)
 
-        # Dot product determines if vehicle is ahead or behind the stop
-        dot_next = self.dot(vector_best_next, vector_best_vehicle)
+        # __dot product determines if vehicle is ahead or behind the stop
+        __dot_next = self.__dot(__vector_best_next, __vector_best_vehicle)
 
         # If vehicle is in direction of next stop, use current segment
-        if dot_next > 0:
+        if __dot_next > 0:
             return best_index
         # Otherwise, vehicle is before current stop, use previous segment
         else:

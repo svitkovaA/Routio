@@ -11,7 +11,7 @@ import { createNextbikePin } from "../MapComponents";
 import { memo, useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { FormControl, FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import type { Station } from "../../types/types";
 import MarkerClusterGroup from "react-leaflet-cluster";
@@ -56,59 +56,93 @@ const StationPopup = memo(({
     return (
         <div className="shared-bike-popup-info">
             {/* Station basic information */}
-            <div><strong>{s.name}</strong></div>
-            <div>Lat: {s.lat}</div>
-            <div>Lon: {s.lon}</div>
+            <div className="bicycle-name"><strong>{s.name}</strong></div>
 
-            {/* Selection of station role */}
-            <FormControl>
-                <RadioGroup 
-                    className="shared-bike-radio-group"
+            <div className="coordinates">
+                Lat: {s.lat}<br/>
+                Lon: {s.lon}
+            </div>
+
+            <div className="bicycle-section">
+                <div className="bicycle-section-title">{t("map.station")}</div>
+                <ToggleButtonGroup
+                    className="bicycle-toggle-group"
                     value={selected}
-                    onChange={(e) => {
-                        const val = e.target.value as "origin" | "destination";
+                    exclusive
+                    onChange={(_, val) => {
+                        if (!val){
+                            return;
+                        }
                         originRef.current = val;
                         setSelected(val);
                     }}
                 >
-                    <FormControlLabel 
+                    <ToggleButton
+                        className="bicycle-toggle-button"
                         value="origin"
-                        control={<Radio />}
-                        label={t("map.useAsOrigin")}
-                    />
-                    <FormControlLabel
+                        sx={{
+                            "&.Mui-selected": {
+                                backgroundColor: "var(--color-info)",
+                                color: "white",
+                            },
+
+                            "&.Mui-selected:hover": {
+                                backgroundColor: "var(--color-info)",
+                                opacity: 0.9
+                            }
+                        }}
+                    >
+                        {t("map.pickUp")}
+                    </ToggleButton>
+
+                    <ToggleButton
+                        className="bicycle-toggle-button"
                         value="destination"
-                        control={<Radio />}
-                        label={t("map.useAsDestination")}
-                    />
-                </RadioGroup>
-            </FormControl>
+                        sx={{
+                            "&.Mui-selected": {
+                                backgroundColor: "var(--color-info)",
+                                color: "white",
+                            },
 
-            {/* Assign station to existing waypoint */}
-            {waypoints.map((w, i) => (
-                <button
-                    className="popup-button context-menu"
-                    key={i}
-                    onClick={(e) => handleSetWaypoint(s, i, e)}
-                >
-                    {i === 0
-                        ? t("map.setAsOrigin")
-                        : i === waypoints.length - 1
-                        ? t("map.setAsDestination")
-                        : `${t("map.setAsWaypoint")} ${i}`}
-                    {w.isActive && <LocationOnIcon sx={{ fontSize: 15 }} />}
-                </button>
-            ))}
+                            "&.Mui-selected:hover": {
+                                backgroundColor: "var(--color-info)",
+                                opacity: 0.9
+                            }
+                        }}
+                    >
+                        {t("map.dropOff")}
+                    </ToggleButton>
+                </ToggleButtonGroup>
+            </div>
 
-            {/* Add new waypoint if limit not reached */}
-            {waypoints.length < 10 && (
-                <button 
-                    className="popup-button context-menu"
-                    onClick={(e) => handleAddWaypoint(s, e)}
-                >
-                    {t("map.addWaypoint")}
-                </button>
-            )}
+            <div className="bicycle-section">
+                <div className="bicycle-section-title">{t("map.routePosition")}</div>
+                {/* Assign station to existing waypoint */}
+                {waypoints.map((w, i) => (
+                    <button
+                        className="popup-button context-menu"
+                        key={i}
+                        onClick={(e) => handleSetWaypoint(s, i, e)}
+                    >
+                        {i === 0
+                            ? t("map.setAsOrigin")
+                            : i === waypoints.length - 1
+                            ? t("map.setAsDestination")
+                            : `${t("map.setAsWaypoint")} ${i}`}
+                        {w.isActive && <LocationOnIcon sx={{ fontSize: 15 }} />}
+                    </button>
+                ))}
+
+                {/* Add new waypoint if limit not reached */}
+                {waypoints.length < 10 && (
+                    <button 
+                        className="popup-button context-menu"
+                        onClick={(e) => handleAddWaypoint(s, e)}
+                    >
+                        {t("map.addWaypoint")}
+                    </button>
+                )}
+            </div>
         </div>
     );
 });

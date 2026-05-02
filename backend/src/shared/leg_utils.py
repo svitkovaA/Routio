@@ -443,6 +443,7 @@ class LegUtils():
         pattern.totalTime = (
             pattern.aimedEndTime - pattern.legs[0].aimedStartTime   # Total trip time in seconds
         ).total_seconds()
+        pattern.aimedStartTime = pattern.legs[0].aimedStartTime
 
         if stats.number_of_transfers:
             pattern.numOfTransfers = stats.number_of_transfers - 1

@@ -87,9 +87,9 @@ function save(key: string, data: StoredWaypoint[]) {
  * Stores intermediate waypoints
  * 
  * @param waypoints Intermediate waypoints
- * @param yourLocation String representing the detected location
+ * @param ignoredLabels List of label to ignore
  */
-function storeMiddleWaypoints(waypoints: StoredWaypoint[], yourLocation: string) {
+function storeMiddleWaypoints(waypoints: StoredWaypoint[], ignoredLabels: string[]) {
     // Do not store empty input
     if (waypoints.length === 0) {
         return;
@@ -105,7 +105,7 @@ function storeMiddleWaypoints(waypoints: StoredWaypoint[], yourLocation: string)
     // Remove duplicities
     for (const waypoint of merged) {
         // Skip your location
-        if (waypoint.name === yourLocation) {
+        if (ignoredLabels.includes(waypoint.name)) {
             continue;
         }
 
@@ -125,11 +125,11 @@ function storeMiddleWaypoints(waypoints: StoredWaypoint[], yourLocation: string)
  * 
  * @param waypoint The waypoint to be stored
  * @param key Key to local storage
- * @param yourLocation String representing the detected location
+ * @param ignoredLabels List of label to ignore
  */
-function storeWaypoint(waypoint: StoredWaypoint, yourLocation: string) {
+function storeWaypoint(waypoint: StoredWaypoint, ignoredLabels: string[]) {
     // Skip your location
-    if (waypoint.name === yourLocation) {
+    if (ignoredLabels.includes(waypoint.name)) {
         return;
     }
 
@@ -153,9 +153,9 @@ function storeWaypoint(waypoint: StoredWaypoint, yourLocation: string) {
  * Stores route waypoints 
  * 
  * @param waypoints Waypoints to be stored
- * @param yourLocation String representing the detected location
+ * @param ignoredLabels List of label to ignore
  */
-export const storeWaypoints = (waypoints: Waypoint[], yourLocation: string) => {    
+export const storeWaypoints = (waypoints: Waypoint[], ignoredLabels: string[]) => {    
     const waypointsToStore: StoredWaypoint[] = [];
 
     // Convert Waypoint to StoredWaypoint format
@@ -170,13 +170,13 @@ export const storeWaypoints = (waypoints: Waypoint[], yourLocation: string) => {
     }
 
     // Store origin
-    storeWaypoint(waypointsToStore[0], yourLocation);
+    storeWaypoint(waypointsToStore[0], ignoredLabels);
 
     // Store destination
-    storeWaypoint(waypointsToStore[waypointsToStore.length - 1], yourLocation);
+    storeWaypoint(waypointsToStore[waypointsToStore.length - 1], ignoredLabels);
     
     // Store intermediate waypoints
-    storeMiddleWaypoints(waypointsToStore.slice(1, -1), yourLocation);
+    storeMiddleWaypoints(waypointsToStore.slice(1, -1), ignoredLabels);
 };
 
 /**

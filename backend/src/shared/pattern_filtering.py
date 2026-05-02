@@ -6,9 +6,10 @@ according to constraints defined by user.
 """
 
 from datetime import datetime
-from typing import List, Literal
+from typing import Dict, List, Literal
 from routing_engine.routing_context import RoutingContext
-from models.route import TZ, TripPattern
+from models.route import TIME_INDEPENDENT_MODES, TZ, TripPattern
+from service.service_base import ServiceBase
 
 class PatternFiltering():
     """
@@ -55,7 +56,9 @@ class PatternFiltering():
 
             filtered_patterns.append(pattern)
 
-        sorted_patterns = self.__sort_patterns(filtered_patterns)
+        unique_patterns = self.__deduplicate_patterns(filtered_patterns)
+
+        sorted_patterns = self.__sort_patterns(unique_patterns)
         
         # Return at most 10 best patterns
         return sorted_patterns[:10]
@@ -134,6 +137,60 @@ class PatternFiltering():
             return False
     
         return True
+
+    def __deduplicate_patterns(self, patterns: List[TripPattern]) -> List[TripPattern]:
+        """
+        Selects a reduced set of trip patterns by signature.
+
+        Args:
+            trip_patterns: Trip patterns to deduplicate
+
+        Returns:
+            Reduced list of selected trip patterns
+        """
+        # Group patterns by line/mode signature to eliminate results differentiated only in time
+        patterns_map: Dict[str, List[TripPattern]] = {}
+
+        for pattern in patterns:
+            # Build signature describing the used modes/lines
+            key = ""
+            for leg in pattern.legs:
+                if leg.mode in TIME_INDEPENDENT_MODES + ["transfer"]:
+                    key += f"-{leg.mode}"
+                if leg.mode == "wait":
+                    if leg.bikeStationInfo:
+                        key += f"-wait-{leg.bikeStationInfo.latitude:.5}-{leg.bikeStationInfo.longitude:.5}"
+                    else:
+                        key += "-wait" 
+                else:
+                    if leg.line and leg.fromPlace and leg.toPlace:
+                        start_stop = leg.fromPlace.name or ""
+                        end_stop = leg.toPlace.name or ""
+                        key += (
+                            f"-{leg.mode}"
+                            f"-{ServiceBase.hash_label(start_stop)}"
+                            f"-{ServiceBase.hash_label(end_stop)}"
+                            f"-{leg.line.publicCode}"
+                        )
+                    else:
+                        key += f"-{leg.mode}"
+
+            # Append pattern under its signature
+            patterns_map.setdefault(key, []).append(pattern)
+
+        # Select best pattern per signature based on routing direction
+        new_trip_patterns: List[TripPattern] = []
+        for item in patterns_map.values():
+            if self.__ctx.data.arrive_by:
+                # Prefer latest departure while still arriving by the target time
+                best = max(item, key=lambda p: p.legs[0].aimedStartTime)
+            else:
+                # Prefer earliest arrival in departure planning
+                best = min(item, key=lambda p: p.aimedEndTime)
+
+            new_trip_patterns.append(best)
+
+        return new_trip_patterns
 
     def __sort_patterns(self, patterns: List[TripPattern]) -> List[TripPattern]:
         """

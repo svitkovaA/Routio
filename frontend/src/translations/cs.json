@@ -37,7 +37,11 @@
     "addWaypoint": "Přidat jako nový bod",
     "useAsOrigin": "Použít jako výchozí stanici",
     "useAsDestination": "Použít jako cílovou stanici",
-    "geocode": "Vyhledávání adresy..."
+    "geocode": "Vyhledávání adresy...",
+    "pickUp": "Vyzvednout",
+    "dropOff": "Vrátit",
+    "station": "Stanice:",
+    "routePosition": "Pozice na trase:"
   },
   "planning": {
     "position": "Vaše poloha",
@@ -140,7 +144,7 @@
         "desc": "Zadejte <strong>výchozí a cílový bod</strong>, případně mezibody, nastavte <strong>datum a čas</strong> a upravte preference plánování trasy.",
         "routePoints": "Zadání bodů trasy:",
         "routePointsList": {
-          "search": "vyhledáním názvu lokality,",
+          "search": "vyhledáním názvu lokality (ulice, zastávky veřejné dopravy) nebo výběrem z posledních vyhledávání",
           "map": "výběrem přímo z mapy,",
           "coords": "zadáním souřadnic,",
           "context": "pravým kliknutím na mapu,",
@@ -250,14 +254,14 @@
       "factors": {
         "availability": {
           "title": "Predikce dostupnosti sdílených kol.",
-          "desc": "Predikovaný počet dostupných kol v čase očekávaného příjezdu do stanice"
+          "desc": "Predikovaný počet dostupných kol v čase očekávaného příjezdu do stanice."
         },
         "angle": {
           "title": "Úhel vůči plánované trase.",
           "desc": "Úhel mezi směrem plánované trasy a směrem ke stanici, který vyjadřuje míru odchylky od původní trasy."
         },
         "distance": {
-          "title": "Vzdálenost od bodu trasy",
+          "title": "Vzdálenost od bodu trasy.",
           "desc": "Vzdálenost stanice od bodu trasy."
         }
       },
@@ -265,7 +269,7 @@
       "predictionTitle": "Predikce dostupnosti kola",
       "predictionDesc": "Aplikace využívá model hlubokého učení pro predikci dostupnosti sdílených kol ve stanicích až na 24 hodin dopředu. Díky tomu může aplikace při plánování trasy vybrat stanici, u které je vyšší pravděpodobnost, že v ní bude kolo dostupné v čase příjezdu.",
       "changeTitle": "Změna stanice sdíleného kola a stojanu pro vlastní kolo",
-      "changeDesc": "Jelikož aplikace vybírá jednu nejlépe ohodnocenou stanici/kolo, má uživatel možnost tuto stanici/stojan změnit. Po změně stanice/stojanu aplikace přepočítá upravenou část trasy a aktualizuje trasu."
+      "changeDesc": "Aplikace automaticky vybírá nejlépe hodnocenou stanici nebo stojan. Tuto volbu je však možné změnit. Po změně se přepočítá příslušná část trasy a výsledná trasa se aktualizuje."
     }
   },
   "results": "Výsledky",

@@ -42,6 +42,7 @@ class DepartureUpdater():
 
         # Save original trip time
         original_total_time = data.trip_pattern.totalTime
+        original_start_time = data.trip_pattern.aimedStartTime
 
         # Postprocess trip pattern
         data.trip_pattern.legs = legs
@@ -49,6 +50,7 @@ class DepartureUpdater():
 
         # Preserve original trip time
         data.trip_pattern.totalTime = original_total_time
+        data.trip_pattern.aimedStartTime = original_start_time
 
         return data.trip_pattern
 

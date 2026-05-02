@@ -1086,7 +1086,7 @@ class GTFSService(ServiceBase[_GTFSState]):
             Initialized _GTFSState instance
         """
 
-        path = GTFS_DIR / self._hash_label(dataset["name"])
+        path = GTFS_DIR / self.hash_label(dataset["name"])
 
         # Recreate GTFS directory
         if path.exists():

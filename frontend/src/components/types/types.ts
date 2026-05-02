@@ -214,6 +214,7 @@ export type VehiclePosition = {
  */
 export type TripPattern = {
     aimedEndTime: string;                   // Planned arrival time of the whole trip in ISO string format
+    aimedStartTime: string;                 // Planned departure time of the whole trip in ISO string format
     totalDuration: number;                  // Total travel duration in seconds
     totalDistance: number;                  // Total travel distance in meters
     totalTime: number;                      // Total trip time from start to the end

@@ -61,7 +61,7 @@ class ServiceBase(ABC, Generic[S]):
 
     @final
     @staticmethod
-    def _hash_label(value: str) -> str:
+    def hash_label(value: str) -> str:
         """
         Compute short deterministic hash for filesystem naming.
 

@@ -111,7 +111,7 @@ function BicycleDetail({
                                         <div className="item">
                                             <div className="label">{t("map.now")}:</div>
                                             <div className="value current">
-                                                {selectedStation.place.bikesAvailable}
+                                                {selectedStation.place.bikesAvailable < 10 ? selectedStation.place.bikesAvailable : "10+"}
                                             </div>
                                         </div>
 
@@ -121,7 +121,9 @@ function BicycleDetail({
                                                 <div className="value-warning">
                                                     <span>
                                                         {selectedStation.place.predictedBikes !== null ? (
-                                                                selectedStation.place.predictedBikes
+                                                            <>
+                                                                {selectedStation.place.predictedBikes !== undefined && selectedStation.place.predictedBikes < 10 ? selectedStation.place.predictedBikes : "10+"}
+                                                            </>
                                                         ) : (
                                                             <CustomTooltip title={t("tooltips.map.noPrediction")}>
                                                                 <span>
