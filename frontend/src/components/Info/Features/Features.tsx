@@ -45,7 +45,7 @@ function Features() {
                                     {t("info.stations.factors.angle.title")}
                                 </strong>
                                 <div>
-                                    {t("info.stations.factors.availability.desc")}
+                                    {t("info.stations.factors.angle.desc")}
                                 </div>
                             </div>
                         </li>

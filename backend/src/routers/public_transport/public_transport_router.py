@@ -12,7 +12,7 @@ from routers.public_transport.enrichers.gtfs_enricher import GTFSEnricher
 from routers.public_transport.enrichers.lissy_enricher import LissyEnricher
 from routers.public_transport.enrichers.enricher_base import EnricherBase
 from routers.router_base import RouterBase
-from models.route import TripPattern
+from models.route import Leg, Place, PointOnLink, TripPattern
 from models.planning_context import PlanningContext
 from otp.public_transport import OTPPublicTransport
 from routing_engine.routing_context import RoutingContext
@@ -307,7 +307,7 @@ class PublicTransportRouter(RouterBase, Router):
 
         # Track whether the first segment of this group is being routed
         is_first_part = True
-        trip_patterns = []
+        trip_patterns: List[TripPattern] = []
 
         # Route each consecutive segment and extend partial patterns
         for index in indices:
@@ -388,6 +388,32 @@ class PublicTransportRouter(RouterBase, Router):
             for trip_patterns in results
         ]
 
+        # Insert artificial foot legs
+        for patterns in selected_patterns:
+            for pattern in patterns:
+                # Insert first leg
+                if pattern.legs[0].mode != "foot":
+                    from_place = pattern.legs[0].fromPlace
+                    if from_place:
+                        pattern.legs.insert(
+                            0,
+                            self.__prepare_artificial_leg(
+                                from_place,
+                                pattern.legs[0].aimedStartTime
+                            )
+                        )
+                
+                # Insert last leg
+                if pattern.legs[-1].mode != "foot":
+                    to_place = pattern.legs[-1].toPlace
+                    if to_place:
+                        pattern.legs.append(
+                            self.__prepare_artificial_leg(
+                                to_place,
+                                pattern.legs[-1].aimedEndTime
+                            )
+                        )
+
         # First segment produces patterns directly without combining
         if not partial_patterns and is_first_part:
             return selected_patterns[0]
@@ -462,5 +488,33 @@ class PublicTransportRouter(RouterBase, Router):
             return pt_number_th[-1]
         
         return pt_number_th[count]
+
+    @staticmethod
+    def __prepare_artificial_leg(place: Place, time: datetime) -> Leg:
+        """
+        Prepares artificial leg.
+
+        Args:
+            node: Bike station node
+
+        Returns:
+            Leg as artificial segment
+        """
+        return Leg(
+            mode="foot",
+            duration=0,
+            pointsOnLink=PointOnLink(points=[]),
+            fromPlace=Place(
+                latitude=place.latitude,
+                longitude=place.longitude
+            ),
+            toPlace=Place(
+                latitude=place.latitude,
+                longitude=place.longitude
+            ),
+            artificial=True,
+            aimedStartTime=time,
+            aimedEndTime=time
+        )
 
 # End of file public_transport_router.py

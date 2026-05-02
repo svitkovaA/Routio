@@ -113,7 +113,9 @@ function BikeStations({
                                                 <div className="count-header">{t("map.predicted")}</div>
                                                 <div className="count">
                                                     {selectedStation.place.predictedBikes !== null ? (
-                                                        selectedStation.place.predictedBikes
+                                                        <>
+                                                        {selectedStation.place.predictedBikes !== undefined && selectedStation.place.predictedBikes < 10 ? selectedStation.place.predictedBikes : "10+"}
+                                                        </>
                                                     ) : (
                                                         <CustomTooltip title={t("tooltips.map.noPrediction")}>
                                                             <span>--</span>
@@ -178,7 +180,9 @@ function BikeStations({
                                                         <div className="count-header">{t("map.predicted")}</div>
                                                         <div className="count">
                                                             {station.place.predictedBikes !== null ? (
-                                                                station.place.predictedBikes
+                                                                <>
+                                                                    {station.place.predictedBikes !== undefined && station.place.predictedBikes < 10 ? station.place.predictedBikes : "10+"}
+                                                                </>
                                                             ) : (
                                                                 <CustomTooltip title={t("tooltips.map.noPrediction")}>
                                                                     <span>--</span>

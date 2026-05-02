@@ -14,7 +14,7 @@ from torch.utils.data import Dataset
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import torch.optim as optim
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score        # type: ignore[import-untyped]
 from torch.nn.utils.parametrizations import weight_norm
 from prediction.dataset.dataset_builder import get_features
 
@@ -387,7 +387,7 @@ def train_model(features: np.ndarray) -> Tuple[nn.Module, float, float]:
 
         # Switch the model to evaluation mode
         model.eval()
-        test_loss = 0
+        test_loss: float = 0
 
         # Iterates over all validation data
         with torch.no_grad():

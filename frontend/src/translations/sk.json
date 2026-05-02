@@ -36,7 +36,12 @@
     "setAsDestinationRack": "Nastaviť ako cieľový stojan na bicykel",
     "addWaypoint": "Pridať ako nový bod",
     "useAsOrigin": "Použiť ako počiatočnú stanicu",
-    "useAsDestination": "Použiť ako cieľovú stanicu"
+    "useAsDestination": "Použiť ako cieľovú stanicu",
+    "geocode": "Vyhľadávanie adresy...",
+    "pickUp": "Vyzdvihnúť",
+    "dropOff": "Vrátiť",
+    "station": "Stanica:",
+    "routePosition": "Pozícia na trase:"
   },
   "planning": {
     "position": "Vaša poloha",
@@ -139,7 +144,7 @@
         "desc": "Zadajte <strong>východiskový a cieľový bod</strong>, prípadne medzibody, nastavte <strong>dátum a čas</strong> a upravte preferencie plánovania trasy.",
         "routePoints": "Zadanie bodov trasy:",
         "routePointsList": {
-          "search": "vyhľadaním názvu lokality,",
+          "search": "vyhľadaním názvu lokality (ulice, zastávky verejnej dopravy) alebo výberom z posledných vyhľadávaní,",
           "map": "výberom priamo z mapy,",
           "coords": "zadaním súradníc,",
           "context": "pravým kliknutím na mapu,",
@@ -245,26 +250,26 @@
     },
     "stations": {
       "title": "Výpočet trasy",
-      "desc": "Aplikácia pri multimodálnom plánovaní vyberá najvhodnejšiu stanicu zdieľaných bicyklov. Výber stanice je založený na hodnotení viacerých faktorov, ktoré ovplyvňujú pravdepodobnosť úspešného prevzatia alebo vrátenia bicykla a komfort. Pri výbere stanice sú zohľadňované:",
+      "desc": "Aplikácia pri multimodálnom plánovaní vyberá najvhodnejšiu stanicu zdieľaných bicyklov. Výber stanice je založený na hodnotení viacerých faktorov, ktoré ovplyvňujú pravdepodobnosť úspešného prevzatia alebo vrátenia bicykla a celkový komfort. Pri výbere stanice sa zohľadňujú:",
       "factors": {
         "availability": {
           "title": "Predikcia dostupnosti zdieľaných bicyklov.",
-          "desc": "Predikovaný počet dostupných bicyklov v čase očakávaného príchodu do stanice"
+          "desc": "Predikovaný počet dostupných bicyklov v čase očakávaného príchodu do stanice."
         },
         "angle": {
           "title": "Uhol voči plánovanej trase.",
           "desc": "Uhol medzi smerom plánovanej trasy a smerom k stanici, ktorý vyjadruje mieru odchýlky od pôvodnej trasy."
         },
         "distance": {
-          "title": "Vzdialenosť od bodu trasy",
-          "desc": "Vzdialenosť stanice od bodu trasy."
+          "title": "Vzdialenosť od bodu trasy.",
+          "desc": "Pešia vzdialenosť stanice od bodu trasy."
         }
       },
-      "evaluation": "Každému z týchto faktorov je priradená váha. Na základe ich kombinácie aplikácia vypočíta hodnotu pre jednotlivé stanice a vyberie tú, ktorá je pre danú trasu najvhodnejšia.",
+      "evaluation": "Každému z týchto faktorov je priradená váha. Na základe ich kombinácie sa pre jednotlivé stanice vypočíta výsledné hodnotenie a vyberie sa tá, ktorá je pre danú trasu najvhodnejšia.",
       "predictionTitle": "Predikcia dostupnosti bicykla",
-      "predictionDesc": "Aplikácia využíva model hlbokého učenia na predikciu dostupnosti zdieľaných bicyklov v staniciach až na 24 hodín dopredu. Vďaka tomu môže aplikácia pri plánovaní trasy vybrať stanicu, pri ktorej je vyššia pravdepodobnosť, že v nej bude bicykel dostupný v čase príchodu.",
+      "predictionDesc": "Aplikácia využíva model hlbokého učenia na predikciu dostupnosti zdieľaných bicyklov v staniciach až na 24 hodín vopred. Vďaka tomu môže pri plánovaní trasy vybrať stanicu, pri ktorej je vyššia pravdepodobnosť dostupnosti bicykla v čase príchodu.",
       "changeTitle": "Zmena stanice zdieľaného bicykla a stojanu na vlastný bicykel",
-      "changeDesc": "Nakoľko aplikácia vyberá jednu najlepšie ohodnotenú stanicu/bicykel. Preto má užívateľ možnosť túto stanicu/stojan zmeniť. Po zmene stanice/stojana aplikácia prepočíta zmenenú časť trasy a aktualizuje trasu."
+      "changeDesc": "Aplikácia automaticky vyberá najlepšie ohodnotenú stanicu alebo stojan. Túto voľbu je však možné zmeniť. Po zmene sa prepočíta príslušná časť trasy a výsledná trasa sa aktualizuje."
     }
   },
   "results": "Výsledky",
@@ -426,6 +431,7 @@
     "serverOffline": "Server momentálne nie je dostupný. Skúste to prosím neskôr.",
     "routingFailed": "Nastala chyba pri výpočte trasy. Skúste to znovu, prosím.",
     "positionDetectionFailed": "Nepodarilo sa zistiť aktuálnu polohu.",
-    "changeBikeStationFailed": "Zmena stanice bicyklov zlyhala."
+    "changeBikeStationFailed": "Zmena stanice bicyklov zlyhala.",
+    "stations": "Nepodarilo sa načítať stanice zdieľaných bicyklov. Skúste to prosím neskôr."
   }
 }

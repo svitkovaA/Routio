@@ -5,7 +5,7 @@ Provides logic for grouping consecutive legs into segments based on the
 defined leg preferences.
 """
 
-from typing import List
+from typing import List, cast
 from models.route_data import LegPreferences, Station
 from models.route import RoutingMode, WaypointGroup
 
@@ -71,7 +71,7 @@ class WaypointGrouper():
             groups.append(
                 WaypointGroup(
                     waypoints=group,
-                    mode=mode,
+                    mode=cast(RoutingMode, mode),
                     origin_station_id=origin_station_id,
                     destination_station_id=destination_station_id
                 )

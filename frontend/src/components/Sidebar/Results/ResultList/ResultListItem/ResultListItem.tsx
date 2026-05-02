@@ -30,17 +30,20 @@ function ResultListItem({
 } : ResultListItemProps) {
     // Translation function
     const { t } = useTranslation();
+    
+    // Pattern includes public transport leg
+    const publicPattern = pattern.legs.some(l => l.line !== null);
 
     return (
         <div 
-            className={"pattern " + (selected ? "selected" : "")}
+            className={"pattern " + (selected ? "selected " : "") + (publicPattern ? "public-pattern" : "")}
             onClick={selected ? onClickDetail : onClick}
         >
             {/* Footer displaying trip start time and potential warnings */}
             <div className="pattern-footer">
                 {/* Trip start time */}
                 <span className="time">
-                    {new Date(pattern.legs[0]?.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(pattern.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
                 {/* Warning icon if walking or cycling distance is too long */}
                 {(pattern?.tooLongBikeDistance || pattern?.tooLongWalkDistance) && (

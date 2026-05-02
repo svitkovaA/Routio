@@ -409,7 +409,6 @@ class BicyclePublicRouter(RouterBase, Router):
 
         if best_option:
             index, best_pattern = best_option
-            print("improve: ", best_pattern.legs[0].aimedStartTime, pattern.legs[0].aimedStartTime, self._compute_bike_distance(best_pattern), self._compute_bike_distance(pattern))
 
             # Keep remaining legs after the replaced segment
             public_legs = deepcopy(pattern.legs[index:])
@@ -610,7 +609,7 @@ class BicyclePublicRouter(RouterBase, Router):
         
         i = 0
         bike_group: List[str] = []
-        distance = 0
+        distance: float = 0
 
         # Create waypoint group to not exceed maximal allowed bicycle distance
         while i + 1 < len(waypoints) and distance <= self._ctx.max_bike_distance:

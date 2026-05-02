@@ -17,6 +17,8 @@
 
 .pattern:last-child {
     border: none;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
 }
 
 .time {
@@ -54,6 +56,10 @@
     padding-left: 2px;
 }
 
+.detail-header .pattern-info-wrapper {
+    margin-top: -3px;
+}
+
 .pattern-info-wrapper > span {
     display: flex;
     align-items: center;
@@ -64,6 +70,10 @@
     display: inline;
     margin: 0 auto;
     margin-top: 2px;
+}
+
+.public-pattern .detail-span {
+    margin-top: 17px;
 }
 
 .detail-span .detail-button {
@@ -122,6 +132,10 @@
 
 .hidden {
     display: none;
+}
+
+.pattern.public-pattern {
+    height: 95px;
 }
 
 /** End of file ResultListItem.css */

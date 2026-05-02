@@ -12,7 +12,7 @@ from service.database_service import DatabaseService
 from prediction.dataset.dataset_builder import get_features
 from prediction.plots import plot_rmse_map, plot_station_time_series_tcn
 from prediction.tcn import TCN
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score   # type: ignore[import-untyped]
 
 device = torch.device(
     "mps" if torch.backends.mps.is_available()
@@ -80,12 +80,12 @@ def evaluate_horizon(
 
     # Compute evaluation metrics
     mae = mean_absolute_error(y_h, pred_h)
-    rmse = np.sqrt(mean_squared_error(y_h, pred_h))
+    rmse = float(np.sqrt(mean_squared_error(y_h, pred_h)))
     r2 = r2_score(y_h, pred_h)
 
     return mae, rmse, r2
 
-async def general():
+async def general() -> None:
     """
     Evaluate the trained TCN model on validation data.
     """
@@ -168,7 +168,7 @@ async def general():
     pred = pred * bike_std + bike_mean
 
     # Retrieve RMSEs per station
-    rmse = compute_rmse_per_station(y, pred, step=143)
+    rmse_per_station = compute_rmse_per_station(y, pred, step=143)
 
     _, station_coordinates, _ = DatabaseService.get_instance().get_station_info()
 
@@ -176,7 +176,7 @@ async def general():
     lons = station_coordinates[:, 1]
 
     # Plot the RMSE per station on map tiles
-    plot_rmse_map(lats, lons, rmse)
+    plot_rmse_map(lats, lons, rmse_per_station)
 
     print("pred shape:", pred.shape)
     print("y shape:", y.shape)

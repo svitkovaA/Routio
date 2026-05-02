@@ -52,7 +52,7 @@ class LissyService(ServiceBase[_LissyState]):
     # The number of past days to cache historical delays
     DELAYS_CACHE_DAYS = 7
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         # Asynchronous lock protecting LRU shape cache
@@ -237,7 +237,7 @@ class LissyService(ServiceBase[_LissyState]):
                     trips_by_time[dep_time] = trip_id
             
             # Store the delay route representation
-            file_path = dir_path / f"{self._hash_label(stops_label)}.json"
+            file_path = dir_path / f"{self.hash_label(stops_label)}.json"
             with open(file_path, "w") as f:
                 json.dump(
                     LissyDelayRoutes(
@@ -429,7 +429,7 @@ class LissyService(ServiceBase[_LissyState]):
             # Build path to cached delay file
             delay_route_dir = self.__cache_dir / date
             route_dir = delay_route_dir / route_short_name
-            stops_file = route_dir / f"{self._hash_label(stops_label)}.json"
+            stops_file = route_dir / f"{self.hash_label(stops_label)}.json"
 
             # Skip if cache file does not exist
             if not stops_file.exists():

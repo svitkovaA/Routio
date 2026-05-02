@@ -7,9 +7,7 @@ LightGBM based bicycle availability prediction.
 import asyncio
 import time
 from typing import Any, Iterable
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import root_mean_squared_error
-from sklearn.metrics import r2_score
+from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_score  # type: ignore[import-untyped]
 from prediction.dataset.dataset_builder import get_features
 import matplotlib.pyplot as plt
 from prediction.load_plot import horizons

@@ -35,7 +35,12 @@
     "setAsDestinationRack": "Set as destination bike rack",
     "addWaypoint": "Add as new waypoint",
     "useAsOrigin": "Use as origin station",
-    "useAsDestination": "Use as destination station"
+    "useAsDestination": "Use as destination station",
+    "geocode": "Searching address...",
+    "pickUp": "Pick up",
+    "dropOff": "Drop off",
+    "station": "Station:",
+    "routePosition": "Position on route:"
   },
   "planning": {
     "position": "Your position",
@@ -138,7 +143,7 @@
         "desc": "Enter the <strong>starting and destination points</strong>, optionally add intermediate points, set the <strong>date and time</strong>, and adjust route planning preferences.",
         "routePoints": "Entering route points:",
         "routePointsList": {
-          "search": "by searching for a location name,",
+          "search": "by searching for a location name (streets, public transport stops) or selecting from recent searches,",
           "map": "by selecting directly from the map,",
           "coords": "by entering coordinates,",
           "context": "by right-clicking on the map,",
@@ -248,22 +253,22 @@
       "factors": {
         "availability": {
           "title": "Prediction of shared bike availability.",
-          "desc": "The predicted number of available bikes at the expected arrival time at the station"
+          "desc": "The predicted number of available bikes at the expected arrival time at the station."
         },
         "angle": {
           "title": "Angle relative to the planned route.",
           "desc": "The angle between the direction of the planned route and the direction to the station, representing the deviation from the original route."
         },
         "distance": {
-          "title": "Distance from the route point",
-          "desc": "The distance of the station from the route point."
+          "title": "Distance from the route point.",
+          "desc": "The walk distance to the station from the route point."
         }
       },
       "evaluation": "Each of these factors is assigned a weight. Based on their combination, the application calculates a score for individual stations and selects the one that is most suitable for the given route.",
       "predictionTitle": "Bike availability prediction",
       "predictionDesc": "The application uses a deep learning model to predict the availability of shared bikes at stations up to 24 hours in advance. This allows the application to select a station with a higher probability of having a bike available at the time of arrival.",
       "changeTitle": "Changing shared bike station and personal bike stand",
-      "changeDesc": "Since the application selects one best-rated station/bike, the user has the option to change this station/stand. After the change, the application recalculates the affected part of the route and updates the route."
+      "changeDesc": "The application automatically selects the highest-rated station or rack. However, this choice can be changed. After the change, the affected part of the route is recalculated and the resulting route is updated."
     }
   },
   "results": "Results",
@@ -425,6 +430,7 @@
     "serverOffline": "The server is currently unavailable. Please try again later.",
     "routingFailed": "An error occurred while calculating the route. Please try again.",
     "positionDetectionFailed": "Unable to detect current position.",
-    "changeBikeStationFailed": "Change bicycle station failed." 
+    "changeBikeStationFailed": "Change bicycle station failed.",
+    "stations": "Failed to load shared bike stations. Please try again later."
   }
 }

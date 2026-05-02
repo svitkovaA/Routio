@@ -9,8 +9,8 @@ import { MapContainer, TileLayer, Marker, Popup, ScaleControl, Polyline, useMapE
 import L from 'leaflet';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
-import { API_BASE_URL } from '../config/config';
-import type { InputText } from '../types/types';
+import { API_BASE_URL, PUBLIC_URL } from '../config/config';
+import type { Suggestion } from '../types/types';
 import { useLayers } from '../Controls/Layer/Layers';
 import ShowRoute from './ShowRoute/ShowRoute';
 import FitBound from './FitBound/FitBound';
@@ -214,7 +214,7 @@ function Map({
          * 
          * @param displayName Address resolved from reverse geocoding
          */
-        const updateWaypoints = (displayName: string) => {
+        const updateWaypoints = (displayName: string, initial: boolean = false) => {
             // Update waypoint state
             setWaypoints(prev => {
                 if (targetIndex < 0 || targetIndex >= prev.length || !prev[targetIndex] || (target_waypoint_length !== undefined && target_waypoint_length !== prev.length)) {
@@ -234,15 +234,18 @@ function Map({
 
                 return updated;
             });
+            if (initial) {
+                // Automatically open sidebar on mobile devices
+                if (window.innerWidth < 768) {
+                    openSidebar();
+                }
 
-            // Automatically open sidebar on mobile devices
-            if (window.innerWidth < 768) {
-                openSidebar();
+                // Cancel map selection mode
+                setMapSelectionIndex(-1);
             }
-
-            // Cancel map selection mode
-            setMapSelectionIndex(-1);
         };
+
+        updateWaypoints(t("map.geocode"), true);
 
         // Reverse geocoding request to backend API
         fetch(`${API_BASE_URL}/geocode/latLon?lat=${lat}&lon=${lon}`)
@@ -252,9 +255,9 @@ function Map({
                 }
                 return res.json();
             })
-            .then((data: InputText) => {
+            .then((data: Suggestion) => {
                 // Build display name from street and city information
-                let displayName = [data.street, data.city].filter(Boolean).join(", ");
+                let displayName = data.name;
                 // Prevent empty fields
                 if (displayName.length === 0) {
                     displayName = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
@@ -283,10 +286,10 @@ function Map({
      */
     useEffect(() => {
         // Determine cursor style based on selection state
-        const cursor = mapSelectionIndex !== -1 ? "crosshair" : "";
+        const cursor = mapSelectionIndex !== -1 ? `url(${PUBLIC_URL}img/marker.svg) 20 35, auto` : "";
 
         // Overwrite cursor style
-        const elements = document.getElementsByClassName("leaflet-grab");
+        const elements = document.querySelectorAll(".leaflet-grab, .map-overlay");
         for (let i = 0; i < elements.length; i++) {
             (elements[i] as HTMLElement).style.cursor = cursor;
         }
@@ -397,6 +400,7 @@ function Map({
 
             {/* Border around JMK region */}
             <Polyline
+                className="map-overlay"
                 key="JMKBounds"
                 positions={JMKBounds}
                 color="var(--color-info)"
@@ -405,6 +409,7 @@ function Map({
 
             {/* Grey overlay outside JMK */}
             <Polygon
+                className="map-overlay"
                 positions={[worldBounds, JMKBounds]}
                 pathOptions={{
                     color: "none",

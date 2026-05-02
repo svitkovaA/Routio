@@ -184,17 +184,20 @@ function Section({
                     },
                     input: {
                         sx: {
-                            '& input[type=number]': {
-                                MozAppearance: 'textfield', // Firefox
+                            "& input[type=number]": {
+                                MozAppearance: "textfield", // Firefox
                             },
-                            '& input[type=number]::-webkit-outer-spin-button': {
-                                WebkitAppearance: 'none',
+                            "& input[type=number]::-webkit-outer-spin-button": {
+                                WebkitAppearance: "none",
                                 margin: 0,
                             },
-                            '& input[type=number]::-webkit-inner-spin-button': {
-                                WebkitAppearance: 'none',
+                            "& input[type=number]::-webkit-inner-spin-button": {
+                                WebkitAppearance: "none",
                                 margin: 0,
                             },
+                            "& .MuiInputBase-input": {
+                                fontSize: "var(--font-size-input)"
+                            }
                         },
                         endAdornment: (
                             <InputAdornment 

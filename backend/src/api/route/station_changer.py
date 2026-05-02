@@ -362,13 +362,15 @@ class StationChanger():
             new_legs.insert(0, deepcopy(legs[reconnect_leg_index]))
         # Add artificial waypoint when waypoint was not reached
         else:
-            to_place = legs[reconnect_leg_index].toPlace
-            if not to_place:
+            to_place_reconnect = legs[reconnect_leg_index].toPlace
+            if not to_place_reconnect:
                 raise HTTPException(
                     status_code = 400,
                     detail = "FromPlace missing in data"
                 )
-            waypoint_group.append(f"{to_place.latitude}, {to_place.longitude}")
+            waypoint_group.append(
+                f"{to_place_reconnect.latitude}, {to_place_reconnect.longitude}"
+            )
             routing_modes.append("walk_transit")
 
         return waypoint_group, routing_modes
@@ -598,15 +600,18 @@ class StationChanger():
             new_legs.append(deepcopy(legs[reconnect_leg_index]))
         # Insert artificial waypoint when waypoint was not reached
         else:
-            from_place = legs[reconnect_leg_index].fromPlace
+            from_place_reconnect = legs[reconnect_leg_index].fromPlace
 
-            if not from_place:
+            if not from_place_reconnect:
                 raise HTTPException(
                     status_code = 400,
                     detail = "ToPlace missing in data"
                 )
 
-            waypoint_group.insert(0, f"{from_place.latitude}, {from_place.longitude}")
+            waypoint_group.insert(
+                0,
+                f"{from_place_reconnect.latitude}, {from_place_reconnect.longitude}"
+            )
             routing_modes.insert(0, "walk_transit")
 
         return waypoint_group, routing_modes

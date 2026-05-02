@@ -8,7 +8,7 @@ route segments.
 
 from copy import deepcopy
 from datetime import datetime, timedelta
-from typing import List
+from typing import Iterable, List
 from models.route import TIME_DEPENDENT_MODES, Leg, TripPattern
 
 class PatternUtils():
@@ -144,7 +144,7 @@ class PatternUtils():
 
         # Determine iteration direction based on planning mode
         if arrive_by:
-            leg_indices = reversed(range(len(legs)))
+            leg_indices: Iterable[int] = reversed(range(len(legs)))
             # Set final arrival time
             pattern.aimedEndTime = time_cursor
         else:

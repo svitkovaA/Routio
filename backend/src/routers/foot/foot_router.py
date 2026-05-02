@@ -51,7 +51,7 @@ class FootRouter(RouterBase, Router):
 
         results = await asyncio.gather(*tasks)
 
-        trip_patterns = []
+        trip_patterns: List[TripPattern] = []
 
         # Merge segment results into a single pattern chain
         for result in results:

@@ -106,6 +106,7 @@ function Detail({
                 {pattern?.originalLegs.map((leg, index) => {
                     /** Mode of the previous and next legs */
                     const previousLegMode = index > 0 ? pattern.originalLegs[index - 1].mode : null;
+                    const isPreviousArtificial = index > 0 ? pattern.originalLegs[index - 1].artificial : false;
                     const nextLegMode = index < pattern.originalLegs.length - 1 ? pattern.originalLegs[index + 1].mode : null;
                    
                     // Determines whether an intermediate waypoint should be displayed
@@ -114,10 +115,7 @@ function Detail({
                     // Consecutive walking or cycling legs share waypoints
                     if (previousLegMode !== null && ["foot", "bicycle"].includes(previousLegMode) && ["foot", "bicycle"].includes(leg.mode)) {
                         waypointCount++;
-                        displayWaypoint = index !== pattern.originalLegs.length - 1 || leg.mode == "foot";
-                        if (displayWaypoint) {
-                            console.log(index);
-                        }
+                        displayWaypoint = (index !== pattern.originalLegs.length - 1 || leg.mode == "foot") && !isPreviousArtificial;
                     }
 
                     // Start and end times
@@ -185,6 +183,7 @@ function Detail({
                                     recalculatePattern={(selectedIndex: number) => recalculatePattern(selectedIndex, index)}
                                     waystopHeightIndex={findIndex(leg)}
                                     setHeight={setHeight}
+                                    waystopHeights={waystopHeights}
                                     offset={computeOffset(leg)}
                                 />
                             )}

@@ -68,7 +68,7 @@ function WalkDetail({
                             const totalMinutes = Math.round(leg.duration / 60);
                             const h = Math.floor(totalMinutes / 60);
                             const m = totalMinutes % 60;
-                            return h > 0 ? `${h}:${m.toString().padStart(2, "0")}` : `${m} min`;
+                            return h > 0 ? `${h}:${m.toString().padStart(2, "0")}` : m > 0 ? `${m} min` : `${leg.duration} s`;
                         })()}
                     </div>
                 </CustomTooltip>
@@ -77,7 +77,10 @@ function WalkDetail({
                 <CustomTooltip title={t("tooltips.detail.segment.distance")}>
                     <div className="detail-distance">
                         <RouteIcon />
-                        {(leg.distance / 1000).toFixed(1)} km
+                        {(() => {
+                            const distance = (leg.distance / 1000).toFixed(1);
+                            return leg.distance < 1000 ? `${leg.distance.toFixed(0)} m` : `${distance} km`
+                        })()}
                     </div>
                 </CustomTooltip>
             </div>

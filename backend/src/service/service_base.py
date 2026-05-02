@@ -23,7 +23,7 @@ class ServiceBase(ABC, Generic[S]):
     # Stores singleton instances per concrete service class
     __instances: ClassVar[Dict[Type["ServiceBase[Any]"], object]] = {}
 
-    def __init__(self):
+    def __init__(self) -> None:
         cls = type(self)
         if cls in ServiceBase.__instances:
             raise RuntimeError("Use get_instance()")
@@ -61,7 +61,7 @@ class ServiceBase(ABC, Generic[S]):
 
     @final
     @staticmethod
-    def _hash_label(value: str) -> str:
+    def hash_label(value: str) -> str:
         """
         Compute short deterministic hash for filesystem naming.
 

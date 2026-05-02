@@ -20,6 +20,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CustomTooltip from '../../../../CustomTooltip/CustomTooltip';
 import { useSettings } from "../../../../Contexts/SettingsContext";
 import "./PublicTransportDetail.css";
+import { useResult } from "../../../../Contexts/ResultContext";
 
 type PublicTransportDetailProps = {
     leg: Leg;                                               // Public transport leg displayed in the detail
@@ -29,6 +30,7 @@ type PublicTransportDetailProps = {
     recalculatePattern: (selectedIndex: number) => void;    // Recalculates trip pattern for a selected departure
     setHeight: (index: number, value: number) => void;      // Sets waystop height
     waystopHeightIndex: number;                             // Index into waystop heights array
+    waystopHeights: number[];                               // List of waystop heights
     offset: number;                                         // Vertical timeline offset
 }
 
@@ -38,12 +40,16 @@ function PublicTransportDetail({
     index,
     moreDeparturesClick,
     recalculatePattern,
-    waystopHeightIndex,
     setHeight,
+    waystopHeightIndex,
+    waystopHeights,
     offset
 } : PublicTransportDetailProps) {
     // Translation function
     const { t } = useTranslation();
+
+    // Result context
+    const { pattern } = useResult();
 
     // State controlling collapsible sections
     const [stopsOpen, setStopsOpen] = useState<boolean>(false);
@@ -83,17 +89,29 @@ function PublicTransportDetail({
         (currentIndex - 1 > 0 || currentIndex + 2 < departures.length - 1)
     );
 
+    // Number of stops
     const stopsCount = (leg.serviceJourney?.quays.length ?? 0) + 1;
+
+    // Two consecutive artificial legs
+    const doubleArtificial = (index > 1 && pattern?.originalLegs)
+        ? (pattern?.originalLegs[index - 1].artificial && pattern?.originalLegs[index - 2].artificial)
+        : false;
+
+    if (doubleArtificial) {
+        setHeight(waystopHeightIndex, -waystopHeights[waystopHeightIndex - 1]);
+    }
 
     return (
         <div
             ref={publicTransportDetailRef} className="public-transport-detail"
         >
-            <Waystop
-                time={new Date(leg.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                name={leg.fromPlace?.name}
-                updateHeight={(v) => setHeight(waystopHeightIndex, v)}
-            />
+            {!doubleArtificial && (
+                <Waystop
+                    time={new Date(leg.aimedStartTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    name={leg.fromPlace?.name}
+                    updateHeight={(v) => setHeight(waystopHeightIndex, v)}
+                />
+            )}
             {timelineIcons[leg.mode]}
             <div className="detail-trip-info">
 
@@ -154,53 +172,57 @@ function PublicTransportDetail({
                 ) : (<></>)}
 
                 {/* Toggle list of alternative departures */}
-                <div 
-                    onClick={() => setDeparturesOpen(!departuresOpen)}
-                    className="detail-departures"
-                >
-                    <CustomTooltip title={departuresOpen ? t("tooltips.detail.publicTransport.closeOtherDepartures") : t("tooltips.detail.publicTransport.otherDepartures")}>
-                        <KeyboardArrowDownIcon className={departuresOpen ? "" : "rotate90"}/>
-                    </CustomTooltip>
-
-                    <DepartureBoardIcon 
-                        className="departure-icon" 
-                        />
-                    {t("detailInfo.publicTransport.otherDepartures")}
-                </div>        
-                <div className={departuresOpen ? "departure-box" : ""}>
-                    {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => {
-                        if (currentIndex === undefined) {
-                            return null;
-                        } 
-
-                        if (currentIndex - 1 > index || currentIndex + 2 < index) {
-                            return null;
-                        }
-
-                        return (
-                            <div 
-                                key={`${index}`}
-                                className={"departure-row" + (currentIndex === index ? " selected" : "")} 
-                                onClick={() => recalculatePattern(index)}
-                            >
-                                <span className="departure-direction">
-                                    {departure.direction}
-                                </span>
-                                <span className="departure-time">
-                                    {new Date(departure.departureTime).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit",})}
-                                </span>
-                            </div>
-                        );
-                    })}
-                    {departuresOpen && moreResults && (
-                        <button
-                            className="departure-button"
-                            onClick={moreDeparturesClick}
+                {leg?.otherOptions?.departures?.length !== undefined && leg?.otherOptions?.departures?.length > 1 && (
+                    <>
+                        <div 
+                            onClick={() => setDeparturesOpen(!departuresOpen)}
+                            className="detail-departures"
                         >
-                            {t("detailInfo.publicTransport.moreDepartures")}
-                        </button>
-                    )}
-                </div>
+                            <CustomTooltip title={departuresOpen ? t("tooltips.detail.publicTransport.closeOtherDepartures") : t("tooltips.detail.publicTransport.otherDepartures")}>
+                                <KeyboardArrowDownIcon className={departuresOpen ? "" : "rotate90"}/>
+                            </CustomTooltip>
+
+                            <DepartureBoardIcon 
+                                className="departure-icon" 
+                                />
+                            {t("detailInfo.publicTransport.otherDepartures")}
+                        </div>        
+                        <div className={departuresOpen ? "departure-box" : ""}>
+                            {departuresOpen && leg?.otherOptions?.departures.map((departure, index) => {
+                                if (currentIndex === undefined) {
+                                    return null;
+                                } 
+
+                                if (currentIndex - 1 > index || currentIndex + 2 < index) {
+                                    return null;
+                                }
+
+                                return (
+                                    <div 
+                                        key={`${index}`}
+                                        className={"departure-row" + (currentIndex === index ? " selected" : "")} 
+                                        onClick={() => recalculatePattern(index)}
+                                    >
+                                        <span className="departure-direction">
+                                            {departure.direction}
+                                        </span>
+                                        <span className="departure-time">
+                                            {new Date(departure.departureTime).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit",})}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                            {departuresOpen && moreResults && (
+                                <button
+                                    className="departure-button"
+                                    onClick={moreDeparturesClick}
+                                >
+                                    {t("detailInfo.publicTransport.moreDepartures")}
+                                </button>
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
             <div>
                 {(leg.serviceJourney?.quays.length ?? 0) >= 1 && (

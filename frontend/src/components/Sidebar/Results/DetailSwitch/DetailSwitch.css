@@ -23,7 +23,7 @@
     margin-top: 26px;
 }
 
-.css-53g0n7-MuiButtonBase-root-MuiIconButton-root {
+.detail-span .MuiButtonBase-root {
     padding: 2px !important;
 }
 
@@ -35,6 +35,10 @@
     height: 90px;
     border-top: 1px solid black;
     border-bottom: none;
+}
+
+.dots-button {
+    padding: 3px !important;
 }
 
 @media screen and (min-width: 768px) {

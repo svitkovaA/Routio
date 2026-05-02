@@ -117,7 +117,7 @@ class LegUtils():
                 leg.tripId
                 and leg.line
                 and leg.otherOptions
-                and leg.otherOptions.currentIndex
+                and leg.otherOptions.currentIndex is not None
                 and leg.color
                 and leg.serviceJourney
                 and leg.serviceJourney.passingTimes
@@ -306,11 +306,11 @@ class LegUtils():
         """
         merged_legs: List[Leg] = []
 
-        duration = 0
-        distance = 0
-        bike_distance = 0
-        walk_distance = 0
-        number_of_transfers = None
+        duration: int = 0
+        distance: float = 0
+        bike_distance: float = 0
+        walk_distance: float = 0
+        number_of_transfers: int | None = None
 
         # Initialize first active leg
         current = deepcopy(legs[0])
@@ -409,11 +409,11 @@ class LegUtils():
 
         # Append new polyline
         if leg.pointsOnLink:
-            points = leg.pointsOnLink.points
-            if isinstance(points, str):
-                current.pointsOnLink.points.append(points)
+            new_points = leg.pointsOnLink.points
+            if isinstance(new_points, str):
+                current.pointsOnLink.points.append(new_points)
             else:
-                current.pointsOnLink.points.extend(points)
+                current.pointsOnLink.points.extend(new_points)
 
     @staticmethod
     def __store_results(
@@ -443,6 +443,7 @@ class LegUtils():
         pattern.totalTime = (
             pattern.aimedEndTime - pattern.legs[0].aimedStartTime   # Total trip time in seconds
         ).total_seconds()
+        pattern.aimedStartTime = pattern.legs[0].aimedStartTime
 
         if stats.number_of_transfers:
             pattern.numOfTransfers = stats.number_of_transfers - 1

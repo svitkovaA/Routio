@@ -225,7 +225,7 @@ class ModeExpander():
         Returns:
             Total distance in kilometers
         """
-        total_distance = 0
+        total_distance: float = 0
         i = 0
 
         # Sum distances between consecutive waypoints

@@ -7,7 +7,7 @@
 import { memo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import TextField from "@mui/material/TextField";
-import type { InputText, Waypoint } from "../../../../types/types";
+import type { Suggestion, Waypoint } from "../../../../types/types";
 import LocationDot from "./LocationDot";
 import ClearInputField from "./ClearInputField";
 import RemoveInputField from "./RemoveInputField";
@@ -30,8 +30,8 @@ type InputFieldProps = {
         e: React.KeyboardEvent<HTMLDivElement>,
         index: number
     ) => void;                                      // Keyboard navigation handler
-    suggestions: InputText[];                       // Current suggestion list
-    setSuggestions: (value: InputText[]) => void;   // Setter for suggestions
+    suggestions: Suggestion[];                      // Current suggestion list
+    setSuggestions: (value: Suggestion[]) => void;  // Setter for suggestions
     highlightedIndex: number;                       // Currently highlighted suggestion index
     resetHighlightedIndex: () => void;              // Reset highlight state
     closeSidebar: () => void;                       // Closes sidebar
@@ -122,6 +122,9 @@ function InputField({
     // Stores the previously active language
     const previousLanguage = useRef(i18n.language.split("-")[0]);
 
+    // Current language
+    const language = i18n.language.split("-")[0];
+
     /**
      *  User location handle
      */
@@ -147,8 +150,8 @@ function InputField({
         });
 
         // Store current language for the next change detection
-        previousLanguage.current = i18n.language.split("-")[0];
-    }, [i18n.language.split("-")[0], setWaypoints, t]);
+        previousLanguage.current = language;
+    }, [language, setWaypoints, t]);
 
     // Detects the users current geographic position
     const detectCurrentPosition = () => {
@@ -162,6 +165,14 @@ function InputField({
                 // Extract latitude and longitude from the detected position
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
+
+                // Check location bounding box
+                const isInsideBoundingBox = lat <= NW_LAT && lat >= SE_LAT && lon >= NW_LON && lon <= SE_LON;
+
+                if (!isInsideBoundingBox) {
+                    showNotification(t("warnings.bbox"), "warning");
+                    return;
+                }
 
                 // Update the waypoint list
                 setWaypoints(prev => {
@@ -218,6 +229,9 @@ function InputField({
                     right: 0,
                     margin: 0
                 },
+                "& .MuiInputBase-input": {
+                    fontSize: "var(--font-size-input)"
+                }
             }}
             onChange={(e) => {
                 const value = e.target.value;
@@ -292,7 +306,7 @@ function InputField({
                                 ...prev[index],
                                 isPreview: false,
                                 isActive: true,
-                                displayName: [suggestion.name, suggestion.street, suggestion.city].filter(Boolean).join(", "),
+                                displayName: suggestion.name,
                                 lat: suggestion.lat,
                                 lon: suggestion.lon,
                                 bikeStationId: null,

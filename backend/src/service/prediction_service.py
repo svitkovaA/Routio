@@ -6,6 +6,7 @@ Service for retrieving and predicting bike availability.
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import cast
 import numpy as np
 import torch
 import pandas as pd
@@ -105,8 +106,10 @@ class PredictionService(ServiceBase[_PredictionState]):
         # Ensure consistent station column order
         dataset = dataset.reindex(columns=station_ids)
 
+        time_index = cast(pd.DatetimeIndex, dataset.index)
+
         # Build time base features
-        time_features = build_time_features(dataset.index)
+        time_features = build_time_features(time_index)
 
         # Compute weighted bike counts from nearby stations
         neighbor_array = compute_neighbor_features(dataset, station_coordinates)
@@ -118,7 +121,7 @@ class PredictionService(ServiceBase[_PredictionState]):
         weather_array, _, _ = await get_weather_array(
             station_ids,
             weather_map,
-            dataset.index,
+            time_index,
             lambda id, means, stds: self.__db_service.get_weather_timeseries(
                 id,
                 normalization_means=means,

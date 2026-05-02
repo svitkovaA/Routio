@@ -4,7 +4,7 @@ file: weather_features.py
 Utilities for processing and aligning weather data with bike station time series.
 """
 
-from typing import Any, Callable, Coroutine, Dict, List, Tuple
+from typing import Any, Callable, Coroutine, Dict, List, Tuple, cast
 import numpy as np
 import pandas as pd
 
@@ -96,6 +96,10 @@ async def get_weather_array(
     # Stack arrays to shape (time, stations, features)
     weather_tensor: np.ndarray = np.stack(weather_arrays, axis=1)
     
-    return weather_tensor, normalization_means, normalization_stds
+    return (
+        weather_tensor,
+        cast(Dict[str, float], normalization_means),
+        cast(Dict[str, float], normalization_stds)
+    )
 
 # End of file weather_features.py

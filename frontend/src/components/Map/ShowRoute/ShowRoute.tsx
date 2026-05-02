@@ -115,6 +115,19 @@ function ShowRoute() {
             }
         }
     });
+
+    useEffect(() => {
+        if (!map.getPane("routeInactivePane")) {
+            const pane = map.createPane("routeInactivePane");
+            pane.style.zIndex = "200";
+        }
+
+        if (!map.getPane("routeActivePane")) {
+            const pane = map.createPane("routeActivePane");
+            pane.style.zIndex = "400";
+        }
+    }, [map]);
+
     
     // Do not render if there are no results
     if (!showResults || polyInfo.length === 0) {
@@ -156,30 +169,10 @@ function ShowRoute() {
                 
                 return (
                     <React.Fragment key={`route-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${polylineForceUpdate}`} >
-                        {/* White outline polyline for active coordinates */}
-                        <Polyline
-                            key={`outline-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${polylineForceUpdate}-${info.color}`}
-                            positions={info.coords}
-                            color={"rgba(255,255,255,0.7)"}
-                            pathOptions={{
-                                ...info.pathOptions,
-                                weight: info.pathOptions?.dashArray === "5px, 5px" ? 2 : 6
-                            }}
-                        />
-                        {/* Main polyline for active coordinates */}
-                        <Polyline
-                            key={`main-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${polylineForceUpdate}-${info.color}`}
-                            positions={info.coords}
-                            color={info.color}
-                            pathOptions={{
-                                ...info.pathOptions,
-                                weight: 4
-                            }}
-                        />
-
                         {/* Render inactive route segments when realtime vehicle position is available */}
                         {displayInactiveCoords && info.inactiveCoords.map((c, i) => (
                             <Polyline
+                                pane="routeInactivePane"
                                 key={`${resultActiveIndex}-${selectedTripPatternIndex}-${index}-inactive-${i}-${polylineForceUpdate}`}
                                 positions={c}
                                 color={info.color}
@@ -190,6 +183,29 @@ function ShowRoute() {
                                 }}
                             />
                         ))}
+
+                        {/* White outline polyline for active coordinates */}
+                        <Polyline
+                            pane="routeActivePane"
+                            key={`outline-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${polylineForceUpdate}-${info.color}`}
+                            positions={info.coords}
+                            color={"rgba(255,255,255,0.7)"}
+                            pathOptions={{
+                                ...info.pathOptions,
+                                weight: info.pathOptions?.dashArray === "5px, 5px" ? 2 : 6
+                            }}
+                        />
+                        {/* Main polyline for active coordinates */}
+                        <Polyline
+                            pane="routeActivePane"
+                            key={`main-${resultActiveIndex}-${selectedTripPatternIndex}-${index}-${polylineForceUpdate}-${info.color}`}
+                            positions={info.coords}
+                            color={info.color}
+                            pathOptions={{
+                                ...info.pathOptions,
+                                weight: 4
+                            }}
+                        />
                     </React.Fragment>
                 );
             })}
@@ -197,6 +213,7 @@ function ShowRoute() {
             {/* Marker showing the hovered elevation point on the map */}
             {markerPosition && (
                 <CircleMarker
+                    pane="markerTopPane"
                     center={markerPosition as [number, number]}
                     radius={6}
                     pathOptions={{ color: "var(--color-info)", fillColor: "white", fillOpacity: 1 }}

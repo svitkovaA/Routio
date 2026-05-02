@@ -31,25 +31,38 @@ function Planning({
     const route = useRoute();
 
     // User input context
-    const { waypoints, setFieldErrors } = useInput();
+    const { 
+        waypoints,
+        setFieldErrors,
+    } = useInput();
 
     // Form submit handler
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
         // Prevent default form submission behavior
         event.preventDefault();
 
         const invalidIndexes: number[] = [];
+        let invalidWaypointFound: boolean = false;
 
         // Validate waypoints
         waypoints.forEach((wp, index) => {
             if (wp.displayName.trim() === "" && wp.lat === 0 && wp.lon === 0) {
                 invalidIndexes.push(index);
             }
+
+            if (wp.displayName.trim() !== "" && (wp.lat === 0 || wp.lon === 0)) {
+                invalidWaypointFound = true;
+            }
         });
 
         // If there are invalid fields, store their indices and stop submission
         if (invalidIndexes.length > 0) {
             setFieldErrors(invalidIndexes);
+            return;
+        }
+
+        // Invalid address in waypoint found
+        if (invalidWaypointFound) {
             return;
         }
 

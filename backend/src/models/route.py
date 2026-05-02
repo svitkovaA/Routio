@@ -153,6 +153,7 @@ class TripPattern(BaseModel):
     """ Represents a complete trip consisting of multiple legs """
     legs: List[Leg]                             # Ordered list of legs
     aimedEndTime: datetime = datetime.min       # Scheduled end time
+    aimedStartTime: datetime = datetime.min     # Scheduled start time
     modes: List[RoutingMode] = []               # Modes used in trip
     totalDuration: float | None = None          # Total duration
     totalDistance: float | None = None          # Total distance

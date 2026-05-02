@@ -44,7 +44,7 @@ export function useRecalculatePattern() {
         const newTripPattern = await apiResult.json();
 
         // Create a copy of the active result
-        const newResult = JSON.parse(JSON.stringify(result))
+        const newResult = JSON.parse(JSON.stringify(result));
         newResult.tripPatterns[selectedTripPatternIndex] = newTripPattern;
 
         // Replace the active result with the recalculated one

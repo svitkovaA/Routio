@@ -45,17 +45,20 @@ class NominatimGeocoder(GeocoderBase):
         # Extract structured address
         address = data.get("address", {})
 
+        city = str(address.get("city") or address.get("town") or address.get("village"))
+        street = str(address.get("road", "") + (
+            (" " + address.get("house_number"))
+            if not address.get("road") and address.get("house_number")
+            else ""
+        ))
+        name = ", ".join([item for item in [street, city] if item])
+        
+        if not name:
+            name = data.get("display_name")
+
         # Build formatted response dictionary
         return {
-            "name": data.get("display_name"),
-            "city": address.get("city")
-                    or address.get("town")
-                    or address.get("village"),
-            "street": address.get("road", "") + (
-                (" " + address.get("house_number"))
-                if not address.get("road") and address.get("house_number")
-                else ""
-            ),
+            "name": name,
             "lat": float(data.get("lat")),
             "lon": float(data.get("lon"))
         }
