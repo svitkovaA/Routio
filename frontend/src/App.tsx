@@ -13,7 +13,6 @@ import Controls from './components/Controls/Controls';
 import Info from './components/Info/Info';
 import { useInput } from './components/Contexts/InputContext';
 import { useResult } from './components/Contexts/ResultContext';
-import { NotificationProvider } from './components/Contexts/NotificationContext';
 import './App.css';
 
 function App() {
@@ -68,7 +67,6 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
-            <NotificationProvider>
                 <div className="app">
                     {/* Control panel with layer and language selection */}
                     <Controls 
@@ -91,7 +89,6 @@ function App() {
                         <Info closeInfo={() => setShowInfo(false)} />
                     )}
                 </div>
-            </NotificationProvider>
         </ThemeProvider>
     );
 }

@@ -431,6 +431,7 @@
     "serverOffline": "Server je momentálně nedostupný. Zkuste to prosím později.",
     "routingFailed": "Došlo k chybě při výpočtu trasy. Zkuste to prosím znovu.",
     "positionDetectionFailed": "Nepodařilo se zjistit aktuální polohu.",
-    "changeBikeStationFailed": "Změna stanice kol selhala."
+    "changeBikeStationFailed": "Změna stanice kol selhala.",
+    "stations": "Nepovedlo se načíst stanice sdílených kol. Zkuste to prosím později."
   }
 }

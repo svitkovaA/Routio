@@ -14,6 +14,8 @@ import type { LegPreference, RoutePreference, Station, Waypoint } from "../types
 import { useResult } from "./ResultContext";
 import { useSettingsFromLocalStorage } from "./SettingsContext";
 import { API_BASE_URL } from "../config/config";
+import { useNotification } from "./NotificationContext";
+import { useTranslation } from "react-i18next";
 
 type InputContextType = {
     waypoints: Waypoint[];
@@ -49,6 +51,9 @@ type InputContextType = {
 const InputContext = createContext<InputContextType | undefined>(undefined);
 
 export function InputProvider({ children } : {children: React.ReactNode}) {
+    // Translation function
+    const { t } = useTranslation();
+
     // Currently active result index
     const {
         resultActiveIndex,
@@ -74,6 +79,9 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
         createWaypoint(),
         createWaypoint()
     ]);
+
+    // Notification context
+    const { showNotification } = useNotification();
 
     // Determines whether the selected time represents arrival time, or departure time
     const [arriveBy, setArriveBy] = useState<boolean>(false);
@@ -116,12 +124,20 @@ export function InputProvider({ children } : {children: React.ReactNode}) {
      */
     useEffect(() => {
         const loadStations = async () => {
-            const apiResult = await fetch(`${API_BASE_URL}/bicycleStations`);
-            const data = await apiResult.json();
-
-            setBikeStations(data);
+            try {
+                const apiResult = await fetch(`${API_BASE_URL}/bicycleStations`);
+                if (!apiResult.ok) {
+                    throw new Error("Failed to fetch stations.");
+                }
+                const data = await apiResult.json();
+    
+                setBikeStations(data);
+            }
+            catch {
+                showNotification(t("errors.stations"), "error");
+            }
         }
-        if (bikeStations.length === 0) {
+        if (showBikeStations && bikeStations.length === 0) {
             loadStations();
         }
     }, [showBikeStations, bikeStations]);

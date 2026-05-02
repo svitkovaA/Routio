@@ -430,6 +430,7 @@
     "serverOffline": "The server is currently unavailable. Please try again later.",
     "routingFailed": "An error occurred while calculating the route. Please try again.",
     "positionDetectionFailed": "Unable to detect current position.",
-    "changeBikeStationFailed": "Change bicycle station failed." 
+    "changeBikeStationFailed": "Change bicycle station failed.",
+    "stations": "Failed to load shared bike stations. Please try again later."
   }
 }

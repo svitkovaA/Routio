@@ -431,6 +431,7 @@
     "serverOffline": "Server momentálne nie je dostupný. Skúste to prosím neskôr.",
     "routingFailed": "Nastala chyba pri výpočte trasy. Skúste to znovu, prosím.",
     "positionDetectionFailed": "Nepodarilo sa zistiť aktuálnu polohu.",
-    "changeBikeStationFailed": "Zmena stanice bicyklov zlyhala."
+    "changeBikeStationFailed": "Zmena stanice bicyklov zlyhala.",
+    "stations": "Nepodarilo sa načítať stanice zdieľaných bicyklov. Skúste to prosím neskôr."
   }
 }
