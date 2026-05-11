@@ -4,6 +4,7 @@ file: gtfs_service.py
 This file implements an asynchronous GTFS data service used by the routing
 engine. It is responsible for downloading, extracting and processing static
 GTFS dataset.
+Small parts of this file were created with the assistance of ChatGPT.
 """
 
 import asyncio

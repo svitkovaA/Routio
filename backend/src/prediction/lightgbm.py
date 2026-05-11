@@ -2,6 +2,7 @@
 file: lightgbm.py
 
 LightGBM based bicycle availability prediction.
+Code in this file was created with the assistance of ChatGPT and manually reviewed and modified.
 """
 
 import asyncio

@@ -2,6 +2,7 @@
 file: population_service.py
 
 Service for downloading, loading, and caching population density raster data.
+Code in this file was created with the assistance of ChatGPT and manually reviewed and modified.
 """
 
 from dataclasses import dataclass
@@ -9,7 +10,10 @@ from typing import Any
 import requests
 import zipfile
 import shutil
-from config.datasets import POPULATION_DIR, POPULATION_PATH, POPULATION_URL
+from config.datasets import (
+    NW_LAT, NW_LON, SE_LAT, SE_LON,
+    POPULATION_DIR, POPULATION_PATH, POPULATION_URL
+)
 from service.service_base import ServiceBase
 import numpy as np
 from pyproj import Transformer
@@ -82,8 +86,8 @@ class PopulationService(ServiceBase[_PopulationState]):
         )
 
         # JMK bounding box
-        minx, miny = transformer.transform(15.5, 48.6)
-        maxx, maxy = transformer.transform(17.6, 49.65)
+        minx, miny = transformer.transform(NW_LON, SE_LAT)
+        maxx, maxy = transformer.transform(SE_LON, NW_LAT)
 
         window = from_bounds(
             minx, miny, maxx, maxy,

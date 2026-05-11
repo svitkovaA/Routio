@@ -2,6 +2,7 @@
 file: load_plot.py
 
 Evaluation script for the trained TCN bicycle demand forecasting model.
+Code in this file was created with the assistance of ChatGPT and manually reviewed and modified.
 """
 
 import asyncio

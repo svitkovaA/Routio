@@ -1,7 +1,8 @@
 """
 file: geo_math.py
 
-Provides helper functions for geographic calculations
+Provides helper functions for geographic calculations.
+Small parts of this file were created with the assistance of ChatGPT.
 """
 
 from math import radians, sin, cos, sqrt, atan2, acos, degrees

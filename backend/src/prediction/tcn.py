@@ -3,6 +3,7 @@ file: tcn.py
 
 This module implements a deep learning model TCN for forecasting the number
 of bicycles at multiple stations.
+Code in this file was created with the assistance of ChatGPT and manually reviewed and modified.
 """
 
 import asyncio

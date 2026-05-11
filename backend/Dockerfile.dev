@@ -1,3 +1,5 @@
+# Code in this file was created with the assistance of ChatGPT and manually reviewed and modified.
+
 FROM python:3.12-slim
 WORKDIR /app
 

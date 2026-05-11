@@ -2,6 +2,7 @@
 file: plots.py
 
 Visualization utilities for evaluating bicycle demand predictions.
+Code in this file was created with the assistance of ChatGPT and manually reviewed and modified.
 """
 
 from typing import Iterable

@@ -2,6 +2,7 @@
 file: osm.py
 
 OSM data loader.
+Code in this file was created with the assistance of ChatGPT and manually reviewed and modified.
 """
 
 import asyncio
