@@ -14,10 +14,6 @@ class BikeRackSelector(SelectorBase):
     """
     Selects and ranks bicycle parking racks near destination.
     """
-    def __init__(self):
-        super().__init__()
-        self.__database_service = DatabaseService.get_instance()
-
     async def select_racks(
         self,
         bicycle_public: bool,
@@ -130,7 +126,8 @@ class BikeRackSelector(SelectorBase):
             List of nearby bicycle racks
         """
         # Execute async database query
-        rows = await self.__database_service.find_bike_racks(lat, lon, self._max_distance)
+        database_service = DatabaseService.get_instance()
+        rows = await database_service.find_bike_racks(lat, lon, self._max_distance)
 
         racks: List[BikeRackNode] = []
 

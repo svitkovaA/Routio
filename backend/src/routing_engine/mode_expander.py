@@ -171,8 +171,8 @@ class ModeExpander():
             return False
     
         # Filter logically invalid consecutive combinations
-        if (ModeExpander.__contains_mode_sequence(groups, ["bicycle_public", "walk_transit"]) or 
-            ModeExpander.__contains_mode_sequence(groups, ["walk_transit", "public_bicycle"])):
+        if (self.__contains_mode_sequence(groups, ["bicycle_public", "walk_transit"]) or 
+            self.__contains_mode_sequence(groups, ["walk_transit", "public_bicycle"])):
             return False
 
         # Ensure own bike is only at the start of the route

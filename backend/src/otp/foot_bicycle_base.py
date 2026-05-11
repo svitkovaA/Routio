@@ -100,7 +100,16 @@ class OTPFootBicycleBase(OTPBase, ABC):
         mode_speed: float
     ) -> Dict[str, Any]:
         """
-        
+        Prepares variables for a query.
+
+        Args:
+            origin: Origin coordinates
+            destination: Destination coordinates
+            mode: Used transport mode
+            mode_speed: Average transport mode speed
+
+        Returns:
+            Prepared variables
         """
         return {
             "from": {

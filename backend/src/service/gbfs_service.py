@@ -51,10 +51,10 @@ class GBFSService(ServiceBase[_GBFSState]):
         """
         print("Loading GBFS cache")
 
-        new_state = await self.__load_state()
+        new_state = await self.__load_new_state()
         self._set_state(new_state)
 
-    async def __load_state(self) -> _GBFSState:
+    async def __load_new_state(self) -> _GBFSState:
         """
         Downloads GBFS feeds and extracts information.
 

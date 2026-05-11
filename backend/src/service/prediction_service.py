@@ -58,25 +58,25 @@ class PredictionService(ServiceBase[_PredictionState]):
         )
 
         # Load normalization parameters and model configuration
-        self.bike_mean = checkpoint["bike_mean"]
-        self.bike_std = checkpoint["bike_std"]
-        self.past_steps = checkpoint["past_steps"]
+        self.__bike_mean = checkpoint["bike_mean"]
+        self.__bike_std = checkpoint["bike_std"]
+        self.__past_steps = checkpoint["past_steps"]
         horizon = checkpoint["horizon"]
         num_features = checkpoint["num_features"]
-        self.weather_means = checkpoint["weather_means"]
-        self.weather_stds = checkpoint["weather_stds"]
+        self.__weather_means = checkpoint["weather_means"]
+        self.__weather_stds = checkpoint["weather_stds"]
 
         # Initialize the prediction model
-        self.model = TCN(
+        self.__model = TCN(
             num_features=num_features,
             horizon=horizon
         )
 
         # Load trained weights
-        self.model.load_state_dict(checkpoint["model_state"])
+        self.__model.load_state_dict(checkpoint["model_state"])
 
         # Set model to inference mode
-        self.model.eval()
+        self.__model.eval()
 
     async def reload(self) -> None:
         """
@@ -128,12 +128,12 @@ class PredictionService(ServiceBase[_PredictionState]):
                 normalization_stds=stds,
                 last_hours=24 * PRODUCTION_WINDOW_DAYS
             ),
-            self.weather_means,
-            self.weather_stds
+            self.__weather_means,
+            self.__weather_stds
         )
 
         # Normalize bike counts
-        bike_array = (dataset.values[..., None] - self.bike_mean) / (self.bike_std + 1e-6)
+        bike_array = (dataset.values[..., None] - self.__bike_mean) / (self.__bike_std + 1e-6)
 
         # Expand time features to match station dimension
         time_array = time_features.values[:, None, :]
@@ -148,17 +148,17 @@ class PredictionService(ServiceBase[_PredictionState]):
         )
 
         # Select past window used as model input
-        x = features_tensor[-self.past_steps:]
+        x = features_tensor[-self.__past_steps:]
 
         # Convert features to tensor
         x_tensor = torch.from_numpy(x).float().unsqueeze(0)
 
         # Run model inference
         with torch.no_grad():
-            pred = self.model(x_tensor).cpu().numpy()[0]
+            pred = self.__model(x_tensor).cpu().numpy()[0]
 
         # Denormalize predicted bike counts
-        pred = pred * self.bike_std + self.bike_mean
+        pred = pred * self.__bike_std + self.__bike_mean
 
         # Prevent negative predictions
         pred = np.maximum(pred, 0)

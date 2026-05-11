@@ -60,7 +60,7 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
         ]
 
         states = await asyncio.gather(*[
-            self.__build_realtime_state(dataset)
+            self.__load_new_state(dataset)
             for dataset in datasets_with_rt
         ])
 
@@ -126,7 +126,7 @@ class GTFSRTService(ServiceBase[Dict[str, _GTFSRTState]]):
 
         return trip_id_to_position
 
-    async def __build_realtime_state(self, dataset: GTFS_DATASET) -> _GTFSRTState:
+    async def __load_new_state(self, dataset: GTFS_DATASET) -> _GTFSRTState:
         """
         Downloads and processes the GTFS-Realtime feed.
 

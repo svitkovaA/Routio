@@ -83,11 +83,11 @@ class LissyService(ServiceBase[_LissyState]):
         """
         print("Loading Lissy cache")
         
-        new_state = await self.__load_and_cache_state()
+        new_state = await self.__load_new_state()
         self._set_state(new_state)
         
     # Caching data methods
-    async def __load_and_cache_state(self) -> _LissyState:
+    async def __load_new_state(self) -> _LissyState:
         """
         Builds a Lissy service state including shape and historical delays data.
 
