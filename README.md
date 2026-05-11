@@ -1,199 +1,83 @@
 # Routio
 
 ## Table of contents
-- [Application overview](#application-overview)
-- [Architecture](#architecture)
-- [Project structure](#project-structure)
-- [Running the app](#running-the-app)
-- [Environment variables](#environment-variables)
-
-## Application overview
-Application Routio was developed as part of the bachelor's thesis at the Faculty of Information Technology, Brno University of Technology, under the supervision of Ing. Jiří Hynek, Ph.D. The application supports both unimodal routing, where only one transport mode is used, and multimodal routing, combining multiple modes within a single journey. Application supports routing for public transport, walking and both private bicycles and shared bicycles.
-
-## Architecture
-Application Routio follows a client-server architecture:
-
-The **frontend** is implemented in React and TypeScript. The Material UI components are used as a part of the application. For the map visualization the Leaflet library is used. The application provides support for 3 languages with the i18next support.
-
-The **backend** is implemented in Python and the FastAPI is used.
-
-The architecture is enriched with **data layer**, consisting of open data standards and external services. The used open data standards includes:
-- GTFS for public transport,
-- GTFS-RT for actual vehicle positions,
-- GBFS for information about shared bicycles.
-
-External services includes:
-- OpenTripPlanner for routing public transport, walk, bicycle and retrieving information about shared bicycle stations locations,
-- Lissy API for retrieving information about route shapes and historical delays of public transport connections,
-- Geofabrik for retrieving information about the bicycle racks,
-- OpenWeather API for retrieving information about weather,
-- Photon for retrieving location suggestions via geocoding,
-- Nominatim for reverse geocoding.
+- [Application Structure](#application-structure)
+- [Application Startup](#application-startup)
+- [Environment Variables](#environment-variables)
+    - [Backend](#1-backend)
+    - [Frontend](#2-frontend)
+    - [Root Directory](#3-root-directory)
+- [Running Application](#running-application)
+    - [Running the Application Locally](#1-running-the-application-locally)
+    - [Running the Application with Docker – Development](#2-running-the-application-with-docker---development)
+    - [Running the Application with Docker – Production](#3-running-the-application-with-docker---production)
+- [Database Initialization](#database-initialization)
+    - [SQL Dump](#1-sql-dump)
+    - [Python Script](#2-python-script)
+- [Changing Ports](#changing-ports)
+    - [Running the Application locally](#running-the-application-locally)
+    - [Running the Application with Docker – Development](#running-the-application-with-docker--development)
 
 ---
 
-## Project structure
-The application is divided into logically separated folders and files. The basic app structure is shon below:
+## Application Structure
+The application is divided into logically separated folders and files. The basic app structure is shown below:
 
 ```
 .
-|-- backend/
-|   |-- src/
-|   |-- Dockerfile
-|   |-- Dockerfile.dev
-|   |-- requirements.txt
-|   |-- requirements.dev.txt
-|-- frontend/
-|   |-- public/
-|   |-- src/
-|   |-- Dockerfile
-|   |-- Dockerfile.dev
-|   |-- eslint.config.js
-|   |-- index.html
-|   |-- nginx.conf
-|   |-- package-lock.json
-|   |-- package.json
-|   |-- tsconfig.app.json
-|   |-- tsconfig.json
-|   |-- tsconfig.node.json
-|   |-- vite.config.ts
-|-- .gitignore
-|-- docker-compose.dev.yml
-|-- docker-compose.prod.yml
-|-- LICENSE
-|-- Readme.md
+├── backend/
+│   ├── src/
+│   │   ├── api/                    # API interfaces
+│   │   ├── config/                 # Server configuration files
+│   │   ├── database/               # Database layer
+│   │   ├── models/                 # Python type annotations
+│   │   ├── otp/                    # Communication with OTP 2
+│   │   ├── prediction/             # Model training scripts
+│   │   ├── routers/                # Transport mode implementations
+│   │   ├── routing_engine/         # Route planning system
+│   │   ├── service/                # Dataset processing services
+│   │   ├── shared/                 # Shared utility classes
+│   │   ├── districts.geojson       # Czech district boundaries
+│   │   ├── main.py                 # Main backend entrypoint
+│   │   └── tcn_model.pt            # Trained TCN model
+│   ├── requirements.dev.txt        # Development Python dependencies
+│   ├── requirements.txt            # Python dependencies
+│   ├── Dockerfile                  # Production backend build
+│   ├── Dockerfile.dev              # Development backend build
+│   └── dump.sql                    # Database initialization script
+│
+├── frontend/
+│   ├── public/                     # Static files and images
+│   ├── src/                        # Frontend source code
+│   ├── Dockerfile                  # Production frontend build
+│   ├── Dockerfile.dev              # Development frontend build
+│   ├── index.html                  # Main HTML file
+│   ├── nginx.conf                  # Web server configuration
+│   ├── package.json                # Frontend dependencies
+│   └── vite.config.ts              # Vite configuration
+│
+├── docker-compose.dev.yml          # Development configuration
+├── docker-compose.prod.yml         # Production configuration
+├── LICENSE                         # Project license
+└── README.md                       # Documentation and setup guide
 ```
 ---
 
-## Running the app
-There are 3 possibilities how to run the application.
+## Application Startup
+There are 3 ways to run the application.
 
-### 1. Running the Application Locally
-The local running consists of starting backend and frontend. The backend can be run as follows:
+**Each one consists of 3 steps**:
+1. [Environment variables](#environment-variables)
+2. [Running application](#running-application)
+3. [Database initialization](#database-initialization)
 
-1. Go to the backend directory
+**Note:** The server startup can take up to 10 minutes.
+**Note:** If the ports used locally or in development Docker are already used on your machine, [click here](#changing-ports) to find out which files to edit.
 
-```bash
-cd backend
-```
+---
 
-2. Create and activate virtual environment
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-
-3. Install requirements
-```bash
-pip install -r requirements.txt
-```
-
-4. Optionally install development requirements which are necessary for model training and database initialization.
-```bash
-pip install -r requirements.dev.txt
-```
-
-4. Run the FastAPI server from src/
-```bash
-cd src
-python main.py
-```
-
-5. The server is running on
-```
-http://localhost:8000
-```
-
-The frontend can be run from root directory as follows:
-1. Go to the frontend directory
-```bash
-cd frontend
-```
-
-2. Install dependencies
-```bash
-npm install
-```
-
-3. Run the application frontend
-```bash
-npm run dev
-```
-
-4. The client is running on
-```bash
-http://localhost:5173
-```
-
-### 2. Running the Application with Docker - Development
-
-1. Build and start containers
-```bash
-docker compose -f docker-compose.dev.yml up --build
-```
-
-2. Access application
-- frontend
-```bash
-http://localhost:5173
-```
-- backend
-```bash
-http://localhost:8000
-```
-
-### 3. Running the Application with Docker - Production
-
-1. Build and start containers
-```bash
-docker compose -f docker-compose.prod.yml up --build -d
-```
-
-2. Access application at address
-
-```bash
-http://domain_name/routio
-```
-
-## Database initialization
-After starting the application in docker or locally, there are two options to load bike rack data into the database.
-
-### 1. SQL Dump
-If `dump.sql` is provided this option is possible. To initialize database run:
-* Development docker
-```bash
-docker compose -f docker-compose.dev.yml exec -T db \
-bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < dump.sql
-```
-* Production docker
-```bash
-docker compose -f docker-compose.prod.yml exec -T db \
-bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < dump.sql
-```
-* Local development in project root directory run
-```bash
-psql -U $POSTGRES_USER -d $POSTGRES_DB < dump.sql
-```
-
-### 2. Python script
-Initialize database using OSM data, run:
-* Development docker
-```bash
-docker compose -f docker-compose.dev.yml exec backend python -m database.osm
-```
-* Production docker
-```bash
-docker compose -f docker-compose.prod.yml exec backend python -m database.osm
-```
-* Local development
-```bash
-python -m database.osm
-```
-**Note:** Development requirements necessary.  
-**Note:** This takes a long time around 20 minutes according to machine.
-
-## Environment variables
-The application uses environment variables for configuration. The `.env` files have to be created before running the application.
+## Environment Variables
+The application uses environment variables for configuration. The `.env` files must be created before running the application.
 
 ### 1. Backend
 The following variables must be defined in `backend/.env` to run the application:
@@ -205,20 +89,176 @@ The following variables must be defined in `backend/.env` to run the application
 | `OPEN_WEATHER_API_KEY`   | Secret key for OpenWeather API    |
 
 ### 2. Frontend
-The following variables must be defined in `frontend/.env.production` for production docker build:
+The following variables must be defined in `frontend/.env.production` for production Docker build:
 
-| Variable        | Description               |
-|-----------------|---------------------------|
-| `VITE_BASE_URL`    | Subdomain for production deployment   |
-| `VITE_API_URL`    | API base URL based on nginx.conf   |
+| Variable        | Value | Description               |
+|-----------------|------- | ---------------------------|
+| `VITE_BASE_URL`    | `/routio/`| Subdomain for production deployment   |
+| `VITE_API_URL`    | `/routio/api` | API base URL based on nginx.conf   |
 
 **Note:** Based on current nginx.conf `VITE_API_URL` must be `VITE_BASE_URL` + `api`
 
-### 3. Root directory
-The following variables must be defined in `.env` for both development and production docker build:
+### 3. Root Directory
+The following variables must be defined in `.env` for both development and production Docker build:
 
 | Variable              | Description                                   |
 |-----------------------|-----------------------------------------------|
 | `POSTGRES_DB`         | Name of the PostgreSQL database               |
 | `POSTGRES_USER`       | Username for database authentication          |
 | `POSTGRES_PASSWORD`   | Password for the user                         |
+
+---
+
+## Running Application
+- [Locally](#1-running-the-application-locally)
+- [Development Docker](#2-running-the-application-with-docker---development)
+- [Production Docker](#3-running-the-application-with-docker---production)
+
+### 1. Running the Application Locally
+Running the application locally consists of starting the backend and frontend. The backend can be run as follows:
+
+1. Go to the backend directory.
+
+```bash
+cd backend
+```
+
+2. Create and activate virtual environment.
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+3. Install development requirements.
+```bash
+pip install -r requirements.dev.txt
+```
+
+4. Run the FastAPI server from `src/`.
+```bash
+cd src
+python main.py
+```
+
+5. The server is running on:
+```
+http://localhost:8000
+```
+
+The frontend can be run from the root directory as follows:
+1. Go to the frontend directory.
+```bash
+cd frontend
+```
+
+2. Install dependencies.
+```bash
+npm install
+```
+
+3. Run the application frontend.
+```bash
+npm run dev
+```
+
+4. The client is running on:
+```bash
+http://localhost:5173
+```
+
+### 2. Running the Application with Docker - Development
+
+1. Build and start containers.
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+
+2. Access the application:
+- frontend
+```bash
+http://localhost:5173
+```
+- backend
+```bash
+http://localhost:8000
+```
+
+### 3. Running the Application with Docker - Production
+
+1. Build and start containers.
+```bash
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+2. Access the application:
+
+```bash
+http://domain_name/routio
+```
+
+---
+
+## Database Initialization
+After starting the application in Docker or locally, there are two options to load bike rack data into the database.
+
+### 1. SQL Dump
+If `dump.sql` is provided, this option can be used. To initialize database, run:
+* Development Docker
+```bash
+docker compose -f docker-compose.dev.yml exec -T db \
+bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < backend/dump.sql
+```
+* Production Docker
+```bash
+docker compose -f docker-compose.prod.yml exec -T db \
+bash -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < backend/dump.sql
+```
+* Local development in project root directory run
+```bash
+source .env
+psql -U $POSTGRES_USER -d $POSTGRES_DB < backend/dump.sql
+```
+
+### 2. Python Script
+Initialize database using OSM data, run:
+* Development Docker
+```bash
+docker compose -f docker-compose.dev.yml exec backend python -m database.osm
+```
+* Production Docker
+```bash
+docker compose -f docker-compose.prod.yml exec backend python -m database.osm
+```
+* Local development in `backend/src/` directory, run:
+```bash
+python -m database.osm
+```
+**Note:** Development requirements are necessary.  
+**Note:** This process may take around 20 minutes depending on the machine.
+
+---
+
+## Changing Ports
+
+### Running the Application Locally
+
+Changing frontend port:
+
+```bash
+cd frontend/
+npm run dev -- --port port
+```
+
+Changing backend port:
+```bash
+cd backend/
+uvicorn main:app --host 127.0.0.1 --port port --reload
+```
+When changing the backend port, also update the URL in `frontend/src/components/config/config.ts`
+
+
+### Running the Application with Docker – Development
+If there is a need to change port numbers in development Docker, apply changes in `docker-compose.dev.yml`.
+When changing the backend port, also update the URL in `frontend/src/components/config/config.ts`.
+
+---
