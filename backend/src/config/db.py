@@ -5,6 +5,18 @@ Database configuration module.
 """
 
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+CONFIG_DIR = Path(__file__).resolve().parent
+
+for env_file in (
+    CONFIG_DIR / ".env",
+    CONFIG_DIR.parent / ".env",
+    CONFIG_DIR.parent.parent / ".env",
+    CONFIG_DIR.parent.parent.parent / ".env",
+):
+    load_dotenv(env_file)
 
 # DB configuration
 DB_HOST = os.getenv("POSTGRES_HOST", "localhost")

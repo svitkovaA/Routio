@@ -7,7 +7,7 @@ Database connection management and initialization utilities.
 import asyncpg                  # type: ignore[import-untyped]
 from contextlib import asynccontextmanager
 from config.db import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_DATABASE
-from database.create_db import create_tables
+from database.create_db import create_database, create_tables
 from database.load_bicycles import load_bicycles
 from database.load_weather import load_weather
 
@@ -21,6 +21,9 @@ async def init_pool():
 
     global pool
 
+    # Ensure the target database exists before connecting the application pool.
+    await create_database()
+
     # Create connection pool
     pool = await asyncpg.create_pool(
         host=DB_HOST,
@@ -30,15 +33,9 @@ async def init_pool():
         database=DB_DATABASE,
     )
 
-    # If no password is configured, ensure database exists
-    if DB_PASSWORD == "":
-        from .create_db import create_database
-        await create_database()
-
     # Create tables
     async with create_conn() as conn:
         await create_tables(conn)
-
 
 async def close_pool():
     """
