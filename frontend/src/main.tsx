@@ -24,6 +24,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js")
+        // The worker must live under the app prefix (BASE_URL, e.g. "/routio/").
+        navigator.serviceWorker.register(`${import.meta.env.BASE_URL}service-worker.js`);
     });
 }
