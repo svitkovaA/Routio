@@ -2,7 +2,7 @@ services:
   db:
     container_name: routio-db
     restart: unless-stopped
-    image: postgis/postgis:16-3.4
+    image: postgis/postgis:16-3.6
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
